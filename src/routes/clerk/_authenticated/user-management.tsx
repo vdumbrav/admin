@@ -7,7 +7,6 @@ import {
 } from '@tanstack/react-router'
 import { IconArrowUpRight, IconLoader2 } from '@tabler/icons-react'
 import { SignedIn, useAuth, UserButton } from '@clerk/clerk-react'
-import { ClerkLogo } from '@/assets/clerk-logo'
 import { Button } from '@/components/ui/button'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
