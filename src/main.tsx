@@ -8,8 +8,8 @@ import {
 } from '@tanstack/react-query'
 import { RouterProvider, createRouter } from '@tanstack/react-router'
 import { toast } from 'sonner'
-import { useAuthStore } from '@/stores/authStore'
 import { handleServerError } from '@/utils/handle-server-error'
+import { AuthMockProvider } from '@/lib/auth-mock'
 import { FontProvider } from './context/font-context'
 import { ThemeProvider } from './context/theme-context'
 import './index.css'
@@ -46,25 +46,7 @@ const queryClient = new QueryClient({
       },
     },
   },
-  queryCache: new QueryCache({
-    onError: (error) => {
-      if (error instanceof AxiosError) {
-        if (error.response?.status === 401) {
-          toast.error('Session expired!')
-          useAuthStore.getState().auth.reset()
-          const redirect = `${router.history.location.href}`
-          router.navigate({ to: '/sign-in', search: { redirect } })
-        }
-        if (error.response?.status === 500) {
-          toast.error('Internal Server Error!')
-          router.navigate({ to: '/500' })
-        }
-        if (error.response?.status === 403) {
-          // router.navigate("/forbidden", { replace: true });
-        }
-      }
-    },
-  }),
+  queryCache: new QueryCache(),
 })
 
 // Create a new router instance
@@ -89,11 +71,13 @@ if (!rootElement.innerHTML) {
   root.render(
     <StrictMode>
       <QueryClientProvider client={queryClient}>
-        <ThemeProvider defaultTheme='light' storageKey='vite-ui-theme'>
-          <FontProvider>
-            <RouterProvider router={router} />
-          </FontProvider>
-        </ThemeProvider>
+        <AuthMockProvider>
+          <ThemeProvider defaultTheme='light' storageKey='vite-ui-theme'>
+            <FontProvider>
+              <RouterProvider router={router} />
+            </FontProvider>
+          </ThemeProvider>
+        </AuthMockProvider>
       </QueryClientProvider>
     </StrictMode>
   )

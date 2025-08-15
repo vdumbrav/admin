@@ -1,9 +1,11 @@
-import { useQuests, useToggleVisibility, useDeleteQuest } from './api'
+import { useQuests, useToggleVisibility, useDeleteQuest } from './hooks'
+import { useAuthMock } from '@/lib/auth-mock'
 import { Switch } from '@/components/ui/switch'
 import { Button } from '@/components/ui/button'
 import type { Task } from '@/types/tasks'
 
 export function QuestsTable() {
+  const { user } = useAuthMock()
   const { data, isLoading } = useQuests({ page: 1, size: 50 })
   const toggle = useToggleVisibility()
   const del = useDeleteQuest()
@@ -34,18 +36,21 @@ export function QuestsTable() {
             <td>
               <Switch
                 checked={t.visible ?? true}
+                disabled={user?.role !== 'admin'}
                 onCheckedChange={v => toggle.mutate({ id: t.id, visible: v })}
               />
             </td>
             <td>
-              <div className="flex gap-2">
-                <Button asChild size="sm" variant="secondary">
-                  <a href={`/quests/${t.id}`}>Edit</a>
-                </Button>
-                <Button size="sm" variant="destructive" onClick={() => del.mutate(t.id)}>
-                  Delete
-                </Button>
-              </div>
+              {user?.role === 'admin' && (
+                <div className='flex gap-2'>
+                  <Button asChild size='sm' variant='secondary'>
+                    <a href={`/quests/${t.id}`}>Edit</a>
+                  </Button>
+                  <Button size='sm' variant='destructive' onClick={() => del.mutate(t.id)}>
+                    Delete
+                  </Button>
+                </div>
+              )}
             </td>
           </tr>
         ))}
