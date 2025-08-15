@@ -1,7 +1,7 @@
-import { useCreateQuest, useQuest, useUpdateQuest } from "../api";
-import { QuestForm } from "../QuestForm";
+import { useCreateQuest, useQuest, useUpdateQuest } from "./api";
+import { QuestForm } from "./QuestForm";
 import { useParams, useNavigate } from "@tanstack/react-router";
-import { QuestsTable } from "../QuestsTable";
+import { QuestsTable } from "./QuestsTable";
 
 export function QuestsListPage() {
   return <QuestsTable />;
@@ -9,31 +9,32 @@ export function QuestsListPage() {
 
 export function QuestCreatePage() {
   const create = useCreateQuest();
-  const nav = useNavigate();
+  const nav = useNavigate({});
   return (
     <QuestForm
-      onSubmit={async (v) => {
+      onSubmit={async (v: any) => {
         await create.mutateAsync(v);
-        nav({ to: "/quests" });
+        nav({ to: "/quests" as any });
       }}
     />
   );
 }
 
 export function QuestEditPage() {
+  // @ts-ignore
   const { id } = useParams({ from: "/quests/$id" });
   const { data } = useQuest(Number(id));
-  const update = useUpdateQuest();
-  const nav = useNavigate();
+  const update = useUpdateQuest(Number(id));
+  const nav = useNavigate({});
 
   if (!data) return null;
   return (
-    <QuestForm
-      initial={data}
-      onSubmit={async (v) => {
-        await update.mutateAsync({ id: data.id, data: v });
-        nav({ to: "/quests" });
-      }}
-    />
+      <QuestForm
+        initial={data}
+        onSubmit={async (v: any) => {
+          await update.mutateAsync(v);
+          nav({ to: "/quests" as any });
+        }}
+      />
   );
 }

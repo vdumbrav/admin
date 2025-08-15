@@ -1,8 +1,8 @@
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useUploadMedia } from "./api";
-import type { Task } from "@/types/tasks";
+import { useForm } from "react-hook-form"
+import { z } from "zod"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { uploadMedia } from "./api"
+import type { Task } from "@/types/tasks"
 
 const schema = z
   .object({
@@ -42,32 +42,38 @@ const schema = z
         ui: z
           .object({
             button: z.string().optional(),
-            "pop-up": z.any().optional(),
+            "pop-up": z
+              .object({
+                name: z.string().optional(),
+                button: z.string().optional(),
+                description: z.string().optional(),
+                static: z.boolean().optional(),
+                "additional-title": z.string().optional(),
+                "additional-description": z.string().optional(),
+              })
+              .partial()
+              .optional(),
           })
           .partial()
           .optional(),
+        adsgram: z.object({ block_id: z.string().optional() }).partial().optional(),
       })
       .partial()
       .optional(),
+    visible: z.boolean().optional(),
   })
-  .passthrough();
+  .passthrough()
 
-
-type FormValues = z.infer<typeof schema>;
+type FormValues = z.infer<typeof schema>
 
 export function QuestForm({
   initial,
   onSubmit,
 }: {
-  initial?: Partial<Task>;
-  onSubmit: (v: FormValues) => void;
+  initial?: Partial<Task>
+  onSubmit: (v: FormValues) => void
 }) {
-  const {
-    register,
-    handleSubmit,
-    setValue,
-    watch,
-  } = useForm<FormValues>({
+  const { register, handleSubmit, setValue, watch } = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
       title: initial?.title ?? "",
@@ -79,11 +85,11 @@ export function QuestForm({
       uri: initial?.uri ?? "",
       reward: initial?.reward ?? 0,
       resources: initial?.resources ?? {},
+      visible: initial?.visible ?? true,
     },
-  });
+  })
 
-  const upload = useUploadMedia();
-  const icon = watch("resources?.icon");
+  const icon = watch("resources.icon")
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
@@ -129,19 +135,52 @@ export function QuestForm({
           <label>Reward</label>
           <input type="number" className="input" {...register("reward", { valueAsNumber: true })} />
         </div>
+        <div>
+          <label className="flex items-center gap-2">
+            <input type="checkbox" {...register("visible")} /> Visible
+          </label>
+        </div>
+        <div>
+          <label>UI Button</label>
+          <input className="input" {...register("resources.ui.button")} />
+        </div>
+        <div className="sm:col-span-2 space-y-2">
+          <label className="block">Pop-up</label>
+          <input className="input" placeholder="name" {...register("resources.ui['pop-up'].name")} />
+          <input className="input" placeholder="button" {...register("resources.ui['pop-up'].button")} />
+          <textarea className="input" placeholder="description" {...register("resources.ui['pop-up'].description")} />
+          <label className="flex items-center gap-2">
+            <input type="checkbox" {...register("resources.ui['pop-up'].static")} /> static
+          </label>
+          <input
+            className="input"
+            placeholder="additional title"
+            {...register("resources.ui['pop-up']['additional-title']")}
+          />
+          <input
+            className="input"
+            placeholder="additional description"
+            {...register("resources.ui['pop-up']['additional-description']")}
+          />
+        </div>
+        <div>
+          <label>AdsGram Block ID</label>
+          <input className="input" {...register("resources.adsgram.block_id")} />
+        </div>
       </div>
 
       <div className="space-y-2">
-        <label className="block text-sm font-medium">Icon</label>
+        <label htmlFor="icon-upload" className="block text-sm font-medium">Icon</label>
         {icon ? <img src={icon} className="h-16 w-16 rounded border object-contain" /> : null}
         <input
+          id="icon-upload"
           type="file"
           accept="image/*"
-          onChange={async (e) => {
-            const f = e.target.files?.[0];
-            if (!f) return;
-            const { url } = await upload.mutateAsync(f);
-            setValue("resources.icon", url, { shouldDirty: true });
+          onChange={async e => {
+            const f = e.target.files?.[0]
+            if (!f) return
+            const { url } = await uploadMedia(f)
+            setValue("resources.icon", url, { shouldDirty: true })
           }}
         />
       </div>
@@ -150,5 +189,5 @@ export function QuestForm({
         Save
       </button>
     </form>
-  );
+  )
 }

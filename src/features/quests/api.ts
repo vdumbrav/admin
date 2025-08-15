@@ -1,85 +1,85 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useApiFetch } from "@/lib/apiFetch";
-import type { Task } from "@/types/tasks";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { api } from '@/lib/axios'
+import type { Task, TaskGroup } from '@/types/tasks'
 
-export type QuestsQuery = { search?: string; group?: string; page?: number; size?: number };
+const FAKE = import.meta.env.VITE_USE_FAKE_API === 'true'
+const fx = FAKE ? await import('@/faker') : null
 
-export function useQuests(params: QuestsQuery) {
-  const api = useApiFetch();
+export function useQuests(params: { search?: string; group?: TaskGroup | 'all'; page?: number; size?: number; sort?: string }) {
   return useQuery({
-    queryKey: ["quests", params],
-    queryFn: () =>
-      api<{ items: Task[]; total: number }>(
-        `/admin/quests?search=${params.search ?? ""}&group=${params.group ?? ""}&page=${params.page ?? 1}&size=${params.size ?? 20}`
-      ),
-  });
-}
-
-export function useCreateQuest() {
-  const api = useApiFetch();
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: (payload: Partial<Task>) =>
-      api<Task>("/admin/quests", { method: "POST", body: JSON.stringify(payload) }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["quests"] }),
-  });
-}
-
-export function useUpdateQuest() {
-  const api = useApiFetch();
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: ({ id, data }: { id: number; data: Partial<Task> }) =>
-      api<Task>(`/admin/quests/${id}`, { method: "PATCH", body: JSON.stringify(data) }),
-    onSuccess: (_, v) => {
-      qc.invalidateQueries({ queryKey: ["quests"] });
-      qc.invalidateQueries({ queryKey: ["quest", v.id] });
-    },
-  });
-}
-
-export function useDeleteQuest() {
-  const api = useApiFetch();
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: (id: number) => api<void>(`/admin/quests/${id}`, { method: "DELETE" }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["quests"] }),
-  });
+    queryKey: ['quests', params],
+    queryFn: async () => (FAKE ? fx!.getQuests(params) : (await api.get('/admin/quests', { params })).data),
+  })
 }
 
 export function useQuest(id: number) {
-  const api = useApiFetch();
   return useQuery({
-    queryKey: ["quest", id],
-    queryFn: () => api<Task>(`/admin/quests/${id}`),
+    queryKey: ['quest', id],
+    queryFn: async () => (FAKE ? fx!.getQuest(id) : (await api.get(`/admin/quests/${id}`)).data),
     enabled: !!id,
-  });
+  })
+}
+
+export function useCreateQuest() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (payload: Partial<Task>) =>
+      FAKE ? fx!.postQuest(payload) : (await api.post('/admin/quests', payload)).data,
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['quests'] }),
+  })
+}
+
+export function useUpdateQuest(id: number) {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (payload: Partial<Task>) =>
+      FAKE ? fx!.patchQuest(id, payload) : (await api.patch(`/admin/quests/${id}`, payload)).data,
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['quests'] })
+      qc.invalidateQueries({ queryKey: ['quest', id] })
+    },
+  })
+}
+
+export function useDeleteQuest() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (id: number) => {
+      if (FAKE) return fx!.deleteQuest(id)
+      return api.delete(`/admin/quests/${id}`)
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['quests'] }),
+  })
 }
 
 export function useToggleVisibility() {
-  const api = useApiFetch();
-  const qc = useQueryClient();
+  const qc = useQueryClient()
   return useMutation({
-    mutationFn: ({ id, visible }: { id: number; visible: boolean }) =>
-      api<Task>(`/admin/quests/${id}/visibility`, {
-        method: "PATCH",
-        body: JSON.stringify({ visible }),
-      }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["quests"] }),
-  });
+    mutationFn: async ({ id, visible }: { id: number; visible: boolean }) =>
+      FAKE
+        ? fx!.patchVisibility(id, visible)
+        : (await api.patch(`/admin/quests/${id}/visibility`, { visible })).data,
+    onMutate: async ({ id, visible }) => {
+      await qc.cancelQueries({ queryKey: ['quests'] })
+      const prev = qc.getQueryData<any>(['quests'])
+      qc.setQueryData<any>(['quests'], (d: any) => ({
+        ...d,
+        items: d.items.map((t: Task) => (t.id === id ? { ...t, visible } : t)),
+      }))
+      return { prev }
+    },
+    onError: (_e, _v, ctx) => ctx?.prev && qc.setQueryData(['quests'], ctx.prev),
+    onSettled: () => qc.invalidateQueries({ queryKey: ['quests'] }),
+  })
 }
 
-export function useUploadMedia() {
-  const api = useApiFetch();
-  return useMutation({
-    mutationFn: async (file: File) => {
-      const fd = new FormData();
-      fd.append("file", file);
-      return api<{ url: string }>("/admin/media", {
-        method: "POST",
-        body: fd,
-        asFormData: true,
-      });
-    },
-  });
+export async function uploadMedia(file: File) {
+  if (FAKE) return fx!.postMedia(file)
+  const fd = new FormData()
+  fd.append('file', file)
+  const res = await api.post('/admin/media', fd, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  })
+  return res.data as { url: string }
 }

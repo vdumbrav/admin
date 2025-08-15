@@ -1,0 +1,26 @@
+[
+  {
+    "id": 1,
+    "title": "Join Telegram",
+    "type": "join",
+    "description": "Join our telegram group",
+    "group": "social",
+    "order_by": 1,
+    "provider": "telegram",
+    "uri": "https://t.me/example",
+    "reward": 100,
+    "resources": { "icon": "https://example.com/icon1.png" }
+  },
+  {
+    "id": 2,
+    "title": "Follow Twitter",
+    "type": "connect",
+    "description": "Follow us on Twitter",
+    "group": "social",
+    "order_by": 2,
+    "provider": "twitter",
+    "uri": "https://twitter.com/example",
+    "reward": 50,
+    "resources": { "icon": "https://example.com/icon2.png" }
+  }
+]
