@@ -1,7 +1,6 @@
-// @ts-nocheck
-import { createFileRoute, Outlet } from "@tanstack/react-router"
-import { RoleGuard } from "@/components/RoleGuard"
-import { QuestsListPage, QuestCreatePage, QuestEditPage } from "@/features/quests/pages"
+import { createFileRoute, Outlet } from '@tanstack/react-router'
+import { RoleGuard } from '@/components/RoleGuard'
+import { QuestsListPage, QuestCreatePage, QuestEditPage } from '@/features/quests/pages'
 
 export const Route = createFileRoute("/quests/routes")({
   component: () => (

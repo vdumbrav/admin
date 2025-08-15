@@ -7,7 +7,7 @@ export const Route = createFileRoute('/login')({
 
 function LoginPage() {
   const auth = useAuth()
-  if (auth.isAuthenticated) return <Navigate to={"/quests" as any} />
+  if (auth.isAuthenticated) return <Navigate to='/quests' />
   return (
     <div className="p-4">
       <button className="btn-primary" onClick={() => auth.signinRedirect()}>

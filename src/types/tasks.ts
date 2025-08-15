@@ -74,7 +74,7 @@ export interface Task {
   resources?: Resources
   child?: Task[]
   iterator?: IteratorDaily
-  visible?: boolean // если отсутствует — трактуем как true
+  visible?: boolean; // если отсутствует — трактуем как true
 }
 
 export const defaultPartnerTask: Task = {
