@@ -11,7 +11,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as LoginRouteImport } from './routes/login'
+import { Route as IndexRouteImport } from './routes/index'
 import { Route as QuestsIndexRouteImport } from './routes/quests/index'
 import { Route as QuestsNewRouteImport } from './routes/quests/new'
 import { Route as Quests_layoutRouteImport } from './routes/quests/__layout'
@@ -24,9 +24,9 @@ const QuestsRoute = QuestsRouteImport.update({
   path: '/quests',
   getParentRoute: () => rootRouteImport,
 } as any)
-const LoginRoute = LoginRouteImport.update({
-  id: '/login',
-  path: '/login',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const QuestsIndexRoute = QuestsIndexRouteImport.update({
@@ -50,21 +50,21 @@ const QuestsIdRoute = QuestsIdRouteImport.update({
 } as any)
 
 export interface FileRoutesByFullPath {
-  '/login': typeof LoginRoute
+  '/': typeof IndexRoute
   '/quests/$id': typeof QuestsIdRoute
   '/quests': typeof Quests_layoutRoute
   '/quests/new': typeof QuestsNewRoute
   '/quests/': typeof QuestsIndexRoute
 }
 export interface FileRoutesByTo {
-  '/login': typeof LoginRoute
+  '/': typeof IndexRoute
   '/quests/$id': typeof QuestsIdRoute
   '/quests': typeof QuestsIndexRoute
   '/quests/new': typeof QuestsNewRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/login': typeof LoginRoute
+  '/': typeof IndexRoute
   '/quests/$id': typeof QuestsIdRoute
   '/quests': typeof QuestsRouteWithChildren
   '/quests/__layout': typeof Quests_layoutRoute
@@ -73,12 +73,12 @@ export interface FileRoutesById {
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/login' | '/quests/$id' | '/quests' | '/quests/new' | '/quests/'
+  fullPaths: '/' | '/quests/$id' | '/quests' | '/quests/new' | '/quests/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/login' | '/quests/$id' | '/quests' | '/quests/new'
+  to: '/' | '/quests/$id' | '/quests' | '/quests/new'
   id:
     | '__root__'
-    | '/login'
+    | '/'
     | '/quests/$id'
     | '/quests'
     | '/quests/__layout'
@@ -87,7 +87,7 @@ export interface FileRouteTypes {
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  LoginRoute: typeof LoginRoute
+  IndexRoute: typeof IndexRoute
   QuestsIdRoute: typeof QuestsIdRoute
   QuestsRoute: typeof QuestsRouteWithChildren
 }
@@ -101,11 +101,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof QuestsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/login': {
-      id: '/login'
-      path: '/login'
-      fullPath: '/login'
-      preLoaderRoute: typeof LoginRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/quests/': {
@@ -155,7 +155,7 @@ const QuestsRouteWithChildren =
   QuestsRoute._addFileChildren(QuestsRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
-  LoginRoute: LoginRoute,
+  IndexRoute: IndexRoute,
   QuestsIdRoute: QuestsIdRoute,
   QuestsRoute: QuestsRouteWithChildren,
 }

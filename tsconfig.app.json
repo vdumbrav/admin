@@ -35,8 +35,6 @@
     "src/components/RoleGuard.tsx",
     "src/components/ui/**/*",
     "src/features/quests/**/*",
-    "src/routes/login.tsx",
-    "src/routes/quests.routes.tsx",
     "src/types/**/*",
     "src/styles/**/*"
   ],

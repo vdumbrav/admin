@@ -1,4 +1,4 @@
-import { useCreateQuest, useQuest, useUpdateQuest } from './api'
+import { useCreateQuest, useQuest, useUpdateQuest } from './api.mock'
 import { QuestForm } from './QuestForm'
 import { useParams, useNavigate } from '@tanstack/react-router'
 import { QuestsTable } from './QuestsTable'
