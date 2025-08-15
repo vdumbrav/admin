@@ -39,6 +39,13 @@ import { Route as AuthenticatedSettingsDisplayRouteImport } from './routes/_auth
 import { Route as AuthenticatedSettingsAppearanceRouteImport } from './routes/_authenticated/settings/appearance'
 import { Route as AuthenticatedSettingsAccountRouteImport } from './routes/_authenticated/settings/account'
 
+// --- NEW: quests route imports ---
+import { Route as QuestsIndexRouteImport } from './routes/quests/index'
+import { Route as QuestsNewRouteImport } from './routes/quests/new'
+import { Route as Quests_layoutRouteImport } from './routes/quests/__layout'
+import { Route as QuestsIdRouteImport } from './routes/quests/$id'
+
+// existing routes
 const ClerkRouteRoute = ClerkRouteRouteImport.update({
   id: '/clerk',
   path: '/clerk',
@@ -190,6 +197,27 @@ const AuthenticatedSettingsAccountRoute =
     getParentRoute: () => AuthenticatedSettingsRouteRoute,
   } as any)
 
+// --- NEW: quests route tree (added without changing existing structure) ---
+const QuestsRoute = QuestsRouteImport.update({
+  id: '/quests',
+  path: '/quests',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const QuestsNewRoute = QuestsNewRouteImport.update({
+  id: '/new',
+  path: '/new',
+  getParentRoute: () => QuestsRoute,
+} as any)
+const Quests_layoutRoute = Quests_layoutRouteImport.update({
+  id: '/__layout',
+  getParentRoute: () => QuestsRoute,
+} as any)
+const QuestsIdRoute = QuestsIdRouteImport.update({
+  id: '/quests/$id',
+  path: '/quests/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+
 export interface FileRoutesByFullPath {
   '/clerk': typeof ClerkAuthenticatedRouteRouteWithChildren
   '/settings': typeof AuthenticatedSettingsRouteRouteWithChildren
@@ -218,6 +246,13 @@ export interface FileRoutesByFullPath {
   '/settings/': typeof AuthenticatedSettingsIndexRoute
   '/tasks': typeof AuthenticatedTasksIndexRoute
   '/users': typeof AuthenticatedUsersIndexRoute
+
+  // --- NEW: quests full paths ---
+  '/quests/$id': typeof QuestsIdRoute
+  '/quests': typeof Quests_layoutRoute
+  '/quests/__layout': typeof Quests_layoutRoute
+  '/quests/new': typeof QuestsNewRoute
+  '/quests/': typeof QuestsIndexRoute
 }
 export interface FileRoutesByTo {
   '/clerk': typeof ClerkAuthenticatedRouteRouteWithChildren
@@ -245,6 +280,11 @@ export interface FileRoutesByTo {
   '/settings': typeof AuthenticatedSettingsIndexRoute
   '/tasks': typeof AuthenticatedTasksIndexRoute
   '/users': typeof AuthenticatedUsersIndexRoute
+
+  // --- NEW: quests tos ---
+  '/quests/$id': typeof QuestsIdRoute
+  '/quests': typeof QuestsIndexRoute
+  '/quests/new': typeof QuestsNewRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -277,6 +317,13 @@ export interface FileRoutesById {
   '/_authenticated/settings/': typeof AuthenticatedSettingsIndexRoute
   '/_authenticated/tasks/': typeof AuthenticatedTasksIndexRoute
   '/_authenticated/users/': typeof AuthenticatedUsersIndexRoute
+
+  // --- NEW: quests ids ---
+  '/quests': typeof QuestsRouteWithChildren
+  '/quests/__layout': typeof Quests_layoutRoute
+  '/quests/new': typeof QuestsNewRoute
+  '/quests/': typeof QuestsIndexRoute
+  '/quests/$id': typeof QuestsIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -308,6 +355,12 @@ export interface FileRouteTypes {
     | '/settings/'
     | '/tasks'
     | '/users'
+    // --- NEW: quests fullPaths ---
+    | '/quests/$id'
+    | '/quests'
+    | '/quests/__layout'
+    | '/quests/new'
+    | '/quests/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/clerk'
@@ -335,6 +388,10 @@ export interface FileRouteTypes {
     | '/settings'
     | '/tasks'
     | '/users'
+    // --- NEW: quests tos ---
+    | '/quests/$id'
+    | '/quests'
+    | '/quests/new'
   id:
     | '__root__'
     | '/_authenticated'
@@ -366,6 +423,12 @@ export interface FileRouteTypes {
     | '/_authenticated/settings/'
     | '/_authenticated/tasks/'
     | '/_authenticated/users/'
+    // --- NEW: quests ids ---
+    | '/quests'
+    | '/quests/__layout'
+    | '/quests/new'
+    | '/quests/'
+    | '/quests/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -381,6 +444,10 @@ export interface RootRouteChildren {
   errors404Route: typeof errors404Route
   errors500Route: typeof errors500Route
   errors503Route: typeof errors503Route
+
+  // --- NEW: quests on root ---
+  QuestsRoute: typeof QuestsRouteWithChildren
+  QuestsIdRoute: typeof QuestsIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -588,6 +655,36 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSettingsAccountRouteImport
       parentRoute: typeof AuthenticatedSettingsRouteRoute
     }
+
+    // --- NEW: quests mappings ---
+    '/quests': {
+      id: '/quests'
+      path: '/quests'
+      fullPath: '/quests'
+      preLoaderRoute: typeof QuestsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/quests/new': {
+      id: '/quests/new'
+      path: '/new'
+      fullPath: '/quests/new'
+      preLoaderRoute: typeof QuestsNewRouteImport
+      parentRoute: typeof QuestsRoute
+    }
+    '/quests/__layout': {
+      id: '/quests/__layout'
+      path: '/quests'
+      fullPath: '/quests'
+      preLoaderRoute: typeof Quests_layoutRouteImport
+      parentRoute: typeof QuestsRoute
+    }
+    '/quests/$id': {
+      id: '/quests/$id'
+      path: '/quests/$id'
+      fullPath: '/quests/$id'
+      preLoaderRoute: typeof QuestsIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -680,6 +777,22 @@ const ClerkRouteRouteWithChildren = ClerkRouteRoute._addFileChildren(
   ClerkRouteRouteChildren,
 )
 
+// --- NEW: quests children wiring ---
+interface QuestsRouteChildren {
+  Quests_layoutRoute: typeof Quests_layoutRoute
+  QuestsNewRoute: typeof QuestsNewRoute
+  QuestsIndexRoute: typeof QuestsIndexRoute
+}
+
+const QuestsRouteChildren: QuestsRouteChildren = {
+  Quests_layoutRoute: Quests_layoutRoute,
+  QuestsNewRoute: QuestsNewRoute,
+  QuestsIndexRoute: QuestsIndexRoute,
+}
+
+const QuestsRouteWithChildren =
+  QuestsRoute._addFileChildren(QuestsRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   ClerkRouteRoute: ClerkRouteRouteWithChildren,
@@ -693,6 +806,10 @@ const rootRouteChildren: RootRouteChildren = {
   errors404Route: errors404Route,
   errors500Route: errors500Route,
   errors503Route: errors503Route,
+
+  // --- NEW: quests children on root ---
+  QuestsRoute: QuestsRouteWithChildren,
+  QuestsIdRoute: QuestsIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
