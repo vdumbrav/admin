@@ -40,5 +40,5 @@
     "src/types/**/*",
     "src/styles/**/*"
   ],
-  "exclude": ["src/**/*.test.*", "src/test"]
+  "exclude": ["src/**/*.test.*"]
 }
