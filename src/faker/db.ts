@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import data from './quests.fixture.json'
+import data from './data/tasks.json'
 import type { Task } from '@/types/tasks'
 
 let seq = 100000

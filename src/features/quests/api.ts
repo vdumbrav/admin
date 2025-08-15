@@ -1,104 +1,63 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import api from '@/lib/axios'
 import type { Task, TaskGroup } from '@/types/tasks'
+import * as fakerApi from '@/faker/api'
 
-type QuestsResponse = { items: Task[]; total: number }
+const useFake = import.meta.env.VITE_USE_FAKE_API === 'true'
 
-const BASE_URL = import.meta.env.VITE_API_URL
-
-async function request<T>(path: string, options?: RequestInit): Promise<T> {
-  const res = await fetch(`${BASE_URL}${path}`, options)
-  if (!res.ok) throw new Error('Request failed')
-  return res.json() as Promise<T>
+export type ListParams = {
+  search?: string
+  group?: TaskGroup | 'all'
+  page?: number
+  size?: number
+  sort?: string
 }
 
-export function useQuests(params: { search?: string; group?: TaskGroup | 'all'; page?: number; size?: number; sort?: string }) {
-  return useQuery<QuestsResponse>({
-    queryKey: ['quests', params],
-    queryFn: () =>
-      request<QuestsResponse>(`/admin/quests?${new URLSearchParams({
-        search: params.search ?? '',
-        group: params.group ?? '',
-        page: String(params.page ?? 1),
-        size: String(params.size ?? 20),
-        sort: params.sort ?? 'order_by:asc',
-      })}`),
-  })
+export type ListResponse = { items: Task[]; total: number }
+
+export const listQuests = async (params: ListParams = {}): Promise<ListResponse> => {
+  if (useFake) return fakerApi.getQuests(params)
+  const res = await api.get<ListResponse>('/quests', { params })
+  return res.data
 }
 
-export function useQuest(id: number) {
-  return useQuery<Task>({
-    queryKey: ['quest', id],
-    queryFn: () => request<Task>(`/admin/quests/${id}`),
-    enabled: !!id,
-  })
+export const getQuest = async (id: number): Promise<Task> => {
+  if (useFake) return fakerApi.getQuest(id)
+  const res = await api.get<Task>(`/quests/${id}`)
+  return res.data
 }
 
-export function useCreateQuest() {
-  const qc = useQueryClient()
-  return useMutation({
-    mutationFn: (payload: Partial<Task>) =>
-      request<Task>('/admin/quests', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['quests'] }),
-  })
+export const createQuest = async (payload: Task): Promise<Task> => {
+  if (useFake) return fakerApi.postQuest(payload)
+  const res = await api.post<Task>('/quests', payload)
+  return res.data
 }
 
-export function useUpdateQuest(id: number) {
-  const qc = useQueryClient()
-  return useMutation({
-    mutationFn: (payload: Partial<Task>) =>
-      request<Task>(`/admin/quests/${id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      }),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['quests'] })
-      qc.invalidateQueries({ queryKey: ['quest', id] })
-    },
-  })
+export const updateQuest = async (id: number, payload: Partial<Task>): Promise<Task> => {
+  if (useFake) return fakerApi.patchQuest(id, payload)
+  const res = await api.patch<Task>(`/quests/${id}`, payload)
+  return res.data
 }
 
-export function useDeleteQuest() {
-  const qc = useQueryClient()
-  return useMutation({
-    mutationFn: (id: number) => request<unknown>(`/admin/quests/${id}`, { method: 'DELETE' }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['quests'] }),
-  })
+export const deleteQuest = async (id: number): Promise<void> => {
+  if (useFake) {
+    await fakerApi.deleteQuest(id)
+    return
+  }
+  await api.delete(`/quests/${id}`)
 }
 
-export function useToggleVisibility() {
-  const qc = useQueryClient()
-  return useMutation({
-    mutationFn: ({ id, visible }: { id: number; visible: boolean }) =>
-      request<Task>(`/admin/quests/${id}/visibility`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ visible }),
-      }),
-    onMutate: async ({ id, visible }) => {
-      await qc.cancelQueries({ queryKey: ['quests'] })
-      const prev = qc.getQueryData<QuestsResponse>(['quests'])
-      qc.setQueryData<QuestsResponse>(['quests'], (d) =>
-        d ? { ...d, items: d.items.map((t: Task) => (t.id === id ? { ...t, visible } : t)) } : d,
-      )
-      return { prev }
-    },
-    onError: (_e, _v, ctx) => ctx?.prev && qc.setQueryData(['quests'], ctx.prev),
-    onSettled: () => qc.invalidateQueries({ queryKey: ['quests'] }),
-  })
+export const toggleVisibility = async (id: number, visible: boolean): Promise<Task> => {
+  if (useFake) return fakerApi.patchVisibility(id, visible)
+  const res = await api.patch<Task>(`/quests/${id}/visibility`, { visible })
+  return res.data
 }
 
-export async function uploadMedia(file: File) {
+export const uploadMedia = async (file: File): Promise<{ url: string }> => {
+  if (useFake) return fakerApi.postMedia(file)
   const fd = new FormData()
   fd.append('file', file)
-  const res = await fetch(`${BASE_URL}/admin/media`, {
-    method: 'POST',
-    body: fd,
+  const res = await api.post<{ url: string }>(import.meta.env.VITE_UPLOAD_URL, fd, {
+    headers: { 'Content-Type': 'multipart/form-data' },
   })
-  if (!res.ok) throw new Error('Request failed')
-  return (await res.json()) as { url: string }
+  return res.data
 }

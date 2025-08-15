@@ -1,4 +1,4 @@
-import { useCreateQuest, useQuest, useUpdateQuest } from './api.mock'
+import { useCreateQuest, useQuest, useUpdateQuest } from './hooks'
 import { QuestForm } from './QuestForm'
 import { useParams, useNavigate } from '@tanstack/react-router'
 import { QuestsTable } from './QuestsTable'
@@ -10,35 +10,32 @@ export function QuestsListPage() {
 
 export function QuestCreatePage() {
   const create = useCreateQuest()
-  const nav = useNavigate({})
+  const nav = useNavigate({ from: '/quests/new' })
   return (
-      <QuestForm
-        onSubmit={async (v: Partial<Task>) => {
-          await create.mutateAsync(v)
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          nav({ to: '/quests' as any })
-        }}
-      />
-  );
+    <QuestForm
+      onSubmit={async (v: Partial<Task>) => {
+        await create.mutateAsync(v)
+        nav({ to: '/quests' })
+      }}
+    />
+  )
 }
 
 export function QuestEditPage() {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const params = useParams({ from: '/quests/$id' as any })
+  const params = useParams({ from: '/quests/$id' })
   const id = Number(params.id)
   const { data } = useQuest(id)
   const update = useUpdateQuest(id)
-  const nav = useNavigate({})
+  const nav = useNavigate({ from: '/quests/$id' })
 
-  if (!data) return null;
+  if (!data) return null
   return (
-      <QuestForm
-        initial={data}
-        onSubmit={async (v: Partial<Task>) => {
-          await update.mutateAsync(v)
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          nav({ to: '/quests' as any })
-        }}
-      />
-  );
+    <QuestForm
+      initial={data}
+      onSubmit={async (v: Partial<Task>) => {
+        await update.mutateAsync(v)
+        nav({ to: '/quests' })
+      }}
+    />
+  )
 }

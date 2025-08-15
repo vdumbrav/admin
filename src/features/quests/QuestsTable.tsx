@@ -1,4 +1,4 @@
-import { useQuests, useToggleVisibility, useDeleteQuest } from './api'
+import { useDeleteQuest, useQuests, useToggleVisibility } from './hooks'
 import { Switch } from '@/components/ui/switch'
 import { Button } from '@/components/ui/button'
 import type { Task } from '@/types/tasks'

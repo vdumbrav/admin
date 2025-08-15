@@ -14,7 +14,7 @@
     "moduleDetection": "force",
     "noEmit": true,
     "jsx": "react-jsx",
-    "types": ["vite/client"],
+    "types": ["vite/client", "@tanstack/router-plugin"],
 
     /* Alias */
     "baseUrl": ".",
@@ -30,4 +30,16 @@
     "noUncheckedSideEffectImports": true
   },
   "include": ["src"]
+  ,
+  "exclude": [
+    "src/components/layout",
+    "src/components/profile-dropdown.tsx",
+    "src/components/command-menu.tsx",
+    "src/features/apps",
+    "src/features/users",
+    "src/features/chats",
+    "src/features/dashboard",
+    "src/features/settings",
+    "src/features/tasks"
+  ]
 }

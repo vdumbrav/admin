@@ -3,7 +3,7 @@ import { RoleGuard } from '@/components/RoleGuard'
 
 export const Route = createFileRoute('/quests/__layout')({
   component: () => (
-    <RoleGuard role="admin">
+    <RoleGuard role="user">
       <Outlet />
     </RoleGuard>
   ),
