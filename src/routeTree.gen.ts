@@ -8,49 +8,99 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
+import { createFileRoute } from '@tanstack/react-router'
+
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as LoginRouteImport } from './routes/login'
-import { Route as QuestsRoutesRouteImport } from './routes/quests.routes'
+import { Route as QuestsIndexRouteImport } from './routes/quests/index'
+import { Route as QuestsNewRouteImport } from './routes/quests/new'
+import { Route as Quests_layoutRouteImport } from './routes/quests/__layout'
+import { Route as QuestsIdRouteImport } from './routes/quests/$id'
 
+const QuestsRouteImport = createFileRoute('/quests')()
+
+const QuestsRoute = QuestsRouteImport.update({
+  id: '/quests',
+  path: '/quests',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
-const QuestsRoutesRoute = QuestsRoutesRouteImport.update({
-  id: '/quests/routes',
-  path: '/quests/routes',
+const QuestsIndexRoute = QuestsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => QuestsRoute,
+} as any)
+const QuestsNewRoute = QuestsNewRouteImport.update({
+  id: '/new',
+  path: '/new',
+  getParentRoute: () => QuestsRoute,
+} as any)
+const Quests_layoutRoute = Quests_layoutRouteImport.update({
+  id: '/__layout',
+  getParentRoute: () => QuestsRoute,
+} as any)
+const QuestsIdRoute = QuestsIdRouteImport.update({
+  id: '/quests/$id',
+  path: '/quests/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
-  '/quests/routes': typeof QuestsRoutesRoute
+  '/quests/$id': typeof QuestsIdRoute
+  '/quests': typeof Quests_layoutRoute
+  '/quests/new': typeof QuestsNewRoute
+  '/quests/': typeof QuestsIndexRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
-  '/quests/routes': typeof QuestsRoutesRoute
+  '/quests/$id': typeof QuestsIdRoute
+  '/quests': typeof QuestsIndexRoute
+  '/quests/new': typeof QuestsNewRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/login': typeof LoginRoute
-  '/quests/routes': typeof QuestsRoutesRoute
+  '/quests/$id': typeof QuestsIdRoute
+  '/quests': typeof QuestsRouteWithChildren
+  '/quests/__layout': typeof Quests_layoutRoute
+  '/quests/new': typeof QuestsNewRoute
+  '/quests/': typeof QuestsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/login' | '/quests/routes'
+  fullPaths: '/login' | '/quests/$id' | '/quests' | '/quests/new' | '/quests/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/login' | '/quests/routes'
-  id: '__root__' | '/login' | '/quests/routes'
+  to: '/login' | '/quests/$id' | '/quests' | '/quests/new'
+  id:
+    | '__root__'
+    | '/login'
+    | '/quests/$id'
+    | '/quests'
+    | '/quests/__layout'
+    | '/quests/new'
+    | '/quests/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
-  QuestsRoutesRoute: typeof QuestsRoutesRoute
+  QuestsIdRoute: typeof QuestsIdRoute
+  QuestsRoute: typeof QuestsRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/quests': {
+      id: '/quests'
+      path: '/quests'
+      fullPath: '/quests'
+      preLoaderRoute: typeof QuestsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
       id: '/login'
       path: '/login'
@@ -58,19 +108,56 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/quests/routes': {
-      id: '/quests/routes'
-      path: '/quests/routes'
-      fullPath: '/quests/routes'
-      preLoaderRoute: typeof QuestsRoutesRouteImport
+    '/quests/': {
+      id: '/quests/'
+      path: '/'
+      fullPath: '/quests/'
+      preLoaderRoute: typeof QuestsIndexRouteImport
+      parentRoute: typeof QuestsRoute
+    }
+    '/quests/new': {
+      id: '/quests/new'
+      path: '/new'
+      fullPath: '/quests/new'
+      preLoaderRoute: typeof QuestsNewRouteImport
+      parentRoute: typeof QuestsRoute
+    }
+    '/quests/__layout': {
+      id: '/quests/__layout'
+      path: '/quests'
+      fullPath: '/quests'
+      preLoaderRoute: typeof Quests_layoutRouteImport
+      parentRoute: typeof QuestsRoute
+    }
+    '/quests/$id': {
+      id: '/quests/$id'
+      path: '/quests/$id'
+      fullPath: '/quests/$id'
+      preLoaderRoute: typeof QuestsIdRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
 }
 
+interface QuestsRouteChildren {
+  Quests_layoutRoute: typeof Quests_layoutRoute
+  QuestsNewRoute: typeof QuestsNewRoute
+  QuestsIndexRoute: typeof QuestsIndexRoute
+}
+
+const QuestsRouteChildren: QuestsRouteChildren = {
+  Quests_layoutRoute: Quests_layoutRoute,
+  QuestsNewRoute: QuestsNewRoute,
+  QuestsIndexRoute: QuestsIndexRoute,
+}
+
+const QuestsRouteWithChildren =
+  QuestsRoute._addFileChildren(QuestsRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
-  QuestsRoutesRoute: QuestsRoutesRoute,
+  QuestsIdRoute: QuestsIdRoute,
+  QuestsRoute: QuestsRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

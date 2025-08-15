@@ -15,14 +15,16 @@ export function QuestCreatePage() {
       <QuestForm
         onSubmit={async (v: Partial<Task>) => {
           await create.mutateAsync(v)
-          nav({ to: '/quests' })
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          nav({ to: '/quests' as any })
         }}
       />
   );
 }
 
 export function QuestEditPage() {
-  const params = useParams({ from: '/quests/$id' })
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const params = useParams({ from: '/quests/$id' as any })
   const id = Number(params.id)
   const { data } = useQuest(id)
   const update = useUpdateQuest(id)
@@ -34,7 +36,8 @@ export function QuestEditPage() {
         initial={data}
         onSubmit={async (v: Partial<Task>) => {
           await update.mutateAsync(v)
-          nav({ to: '/quests' })
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          nav({ to: '/quests' as any })
         }}
       />
   );

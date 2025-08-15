@@ -1,36 +1,39 @@
 export interface PopUp {
-  name?: string
-  button?: string
-  description?: string
-  static?: boolean
+  name: string
+  button: string
+  description: string
+  static?: string
   'additional-title'?: string
   'additional-description'?: string
 }
 
 export interface UIResources {
-  button?: string
   'pop-up'?: PopUp
+  button: string
 }
 
 export interface AdsGramResource {
-  block_id?: string
+  type: 'task' | 'reward'
+  subtype?: 'video-ad' | 'post-style-image'
 }
 
 export interface Resources {
-  icon?: string
   ui?: UIResources
+  icon?: string
   tweetId?: string
   username?: string
   isNew?: boolean
+  block_id?: string
   adsgram?: AdsGramResource
 }
 
 export interface IteratorDaily {
+  day: number
   days: number
   reward_map: number[]
   reward_max: number
-  day?: number
-  reward?: number
+  reward: number
+  tick?: number
 }
 
 export type TaskType =
@@ -59,34 +62,41 @@ export type TaskProvider =
 
 export interface Task {
   id: number
-  title: string
   type: TaskType
+  title: string
   description: string | null
+  blocking_task?: number | null
+  reward?: number
+  level?: number
   group: TaskGroup
   order_by: number
   provider?: TaskProvider
-  uri?: string
-  reward?: number
-  level?: number
-  blocking_task?: number | null
-  iterable?: boolean
+  uri?: string | null
   status?: 'new' | 'started' | 'completed' | 'failed' | 'locked'
-  resources?: Resources
-  child?: Task[]
-  iterator?: IteratorDaily
-  visible?: boolean; // если отсутствует — трактуем как true
+  error?: string | null
+  started_at?: string | null
+  completed_at?: string | null
+  next_tick?: string | null
+  resources?: Resources | null
+  child?: Array<Task> | null
+  iterable?: boolean | null
+  iterator?: IteratorDaily | null
+  providerCapitalized?: string
+  visible?: boolean // если отсутствует — трактуем как true
 }
 
 export const defaultPartnerTask: Task = {
-  id: 0,
-  title: '',
+  id: 99999,
   type: 'partner_invite',
-  description: null,
+  title: 'Would you like to become a partner?',
+  description:
+    'Fill out the partnership request form. <br />Our team will review it and get in touch.',
   group: 'partner',
-  order_by: 0,
-  provider: undefined,
-  uri: undefined,
-  reward: undefined,
-  resources: {},
-  visible: true,
+  order_by: 9999,
+  uri: 'https://partners.walme.io/',
+  resources: {
+    ui: {
+      button: 'Fill out the form',
+    },
+  },
 }
