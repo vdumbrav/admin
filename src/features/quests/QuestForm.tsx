@@ -1,8 +1,10 @@
+import { useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { uploadMedia } from "./api"
 import type { Task } from "@/types/tasks"
+import { defaultPartnerTask } from "@/types/tasks"
 
 const schema = z
   .object({
@@ -39,26 +41,43 @@ const schema = z
     resources: z
       .object({
         icon: z.string().url().optional(),
-        ui: z
+        tweetId: z.string().optional(),
+        username: z.string().optional(),
+        isNew: z.boolean().optional(),
+        block_id: z.string().optional(),
+        ui: z.object({
+          button: z.string(),
+          "pop-up": z
+            .object({
+              name: z.string(),
+              button: z.string(),
+              description: z.string(),
+              static: z
+                .string()
+                .url()
+                .optional()
+                .or(z.literal("").transform(() => undefined)),
+              "additional-title": z.string().optional(),
+              "additional-description": z.string().optional(),
+            })
+            .optional(),
+        }),
+        adsgram: z
           .object({
-            button: z.string().optional(),
-            "pop-up": z
-              .object({
-                name: z.string().optional(),
-                button: z.string().optional(),
-                description: z.string().optional(),
-                static: z.boolean().optional(),
-                "additional-title": z.string().optional(),
-                "additional-description": z.string().optional(),
-              })
-              .partial()
-              .optional(),
+            type: z.enum(["task", "reward"]),
+            subtype: z.enum(["video-ad", "post-style-image"]).optional(),
           })
-          .partial()
-          .optional(),
-        adsgram: z.object({ block_id: z.string().optional() }).partial().optional(),
+          .optional()
+          .superRefine((val, ctx) => {
+            if (val && val.type !== "task" && val.subtype) {
+              ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: "subtype allowed only when type is 'task'",
+                path: ["subtype"],
+              })
+            }
+          }),
       })
-      .partial()
       .optional(),
     visible: z.boolean().optional(),
   })
@@ -84,12 +103,26 @@ export function QuestForm({
       provider: initial?.provider as Task["provider"],
       uri: initial?.uri ?? "",
       reward: initial?.reward ?? 0,
-      resources: initial?.resources ?? {},
+      resources: initial?.resources ?? { ui: { button: "" } },
       visible: initial?.visible ?? true,
     },
   })
 
   const icon = watch("resources.icon")
+  const typeValue = watch("type")
+  const provider = watch("provider")
+
+  useEffect(() => {
+    if (typeValue === "partner_invite") {
+      setValue("title", defaultPartnerTask.title, { shouldDirty: true })
+      setValue("description", defaultPartnerTask.description ?? "", { shouldDirty: true })
+      setValue("group", defaultPartnerTask.group, { shouldDirty: true })
+      setValue("order_by", defaultPartnerTask.order_by, { shouldDirty: true })
+      setValue("uri", defaultPartnerTask.uri ?? "", { shouldDirty: true })
+      const btn = defaultPartnerTask.resources?.ui?.button ?? ""
+      setValue("resources.ui.button", btn, { shouldDirty: true })
+    }
+  }, [typeValue, setValue])
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
@@ -101,15 +134,27 @@ export function QuestForm({
         <div>
           <label>Type</label>
           <select className="input" {...register("type")}>
-            <option value="external">external</option>
+            <option value="referral">referral</option>
+            <option value="connect">connect</option>
+            <option value="join">join</option>
+            <option value="share">share</option>
+            <option value="like">like</option>
+            <option value="comment">comment</option>
+            <option value="multiple">multiple</option>
+            <option value="repeatable">repeatable</option>
+            <option value="dummy">dummy</option>
             <option value="partner_invite">partner_invite</option>
+            <option value="external">external</option>
           </select>
         </div>
         <div>
           <label>Group</label>
           <select className="input" {...register("group")}>
-            <option value="all">all</option>
             <option value="social">social</option>
+            <option value="daily">daily</option>
+            <option value="referral">referral</option>
+            <option value="partner">partner</option>
+            <option value="all">all</option>
           </select>
         </div>
         <div>
@@ -125,8 +170,26 @@ export function QuestForm({
           <select className="input" {...register("provider")}>
             <option value="">—</option>
             <option value="twitter">twitter</option>
+            <option value="telegram">telegram</option>
+            <option value="discord">discord</option>
+            <option value="matrix">matrix</option>
+            <option value="walme">walme</option>
+            <option value="monetag">monetag</option>
+            <option value="adsgram">adsgram</option>
           </select>
         </div>
+        {provider === "twitter" && (
+          <>
+            <div>
+              <label>Tweet ID</label>
+              <input className="input" {...register("resources.tweetId")} />
+            </div>
+            <div>
+              <label>Username</label>
+              <input className="input" {...register("resources.username")} />
+            </div>
+          </>
+        )}
         <div>
           <label>URI</label>
           <input className="input" {...register("uri")} />
@@ -141,6 +204,11 @@ export function QuestForm({
           </label>
         </div>
         <div>
+          <label className="flex items-center gap-2">
+            <input type="checkbox" {...register("resources.isNew")} /> New badge
+          </label>
+        </div>
+        <div>
           <label>UI Button</label>
           <input className="input" {...register("resources.ui.button")} />
         </div>
@@ -149,9 +217,11 @@ export function QuestForm({
           <input className="input" placeholder="name" {...register("resources.ui['pop-up'].name")} />
           <input className="input" placeholder="button" {...register("resources.ui['pop-up'].button")} />
           <textarea className="input" placeholder="description" {...register("resources.ui['pop-up'].description")} />
-          <label className="flex items-center gap-2">
-            <input type="checkbox" {...register("resources.ui['pop-up'].static")} /> static
-          </label>
+          <input
+            className="input"
+            placeholder="static"
+            {...register("resources.ui['pop-up'].static")}
+          />
           <input
             className="input"
             placeholder="additional title"
@@ -165,7 +235,25 @@ export function QuestForm({
         </div>
         <div>
           <label>AdsGram Block ID</label>
-          <input className="input" {...register("resources.adsgram.block_id")} />
+          <input className="input" {...register("resources.block_id")} />
+        </div>
+        <div>
+          <label>AdsGram Type</label>
+          <select className="input" {...register("resources.adsgram.type")}
+          >
+            <option value="">—</option>
+            <option value="task">task</option>
+            <option value="reward">reward</option>
+          </select>
+        </div>
+        <div>
+          <label>AdsGram Subtype</label>
+          <select className="input" {...register("resources.adsgram.subtype")}
+          >
+            <option value="">—</option>
+            <option value="video-ad">video-ad</option>
+            <option value="post-style-image">post-style-image</option>
+          </select>
         </div>
       </div>
 
