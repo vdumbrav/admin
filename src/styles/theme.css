@@ -1,0 +1,11 @@
+:root {
+  --primary: 220 90% 56%;
+  --background: 0 0% 100%;
+  --foreground: 224 71% 4%;
+}
+
+.dark {
+  --primary: 220 90% 66%;
+  --background: 224 71% 4%;
+  --foreground: 0 0% 100%;
+}
