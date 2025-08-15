@@ -1,26 +1,124 @@
 [
   {
-    "id": 1,
-    "title": "Join Telegram",
-    "type": "join",
-    "description": "Join our telegram group",
-    "group": "social",
-    "order_by": 1,
-    "provider": "telegram",
-    "uri": "https://t.me/example",
-    "reward": 100,
-    "resources": { "icon": "https://example.com/icon1.png" }
-  },
-  {
-    "id": 2,
-    "title": "Follow Twitter",
-    "type": "connect",
-    "description": "Follow us on Twitter",
-    "group": "social",
-    "order_by": 2,
+    "id": 80,
+    "type": "multiple",
     "provider": "twitter",
-    "uri": "https://twitter.com/example",
-    "reward": 50,
-    "resources": { "icon": "https://example.com/icon2.png" }
+    "iterable": false,
+    "title": "Actions with X post \"Expect Quests from our partners with extra XP\"",
+    "description": "Like, comment, re-tweet post to earn XP",
+    "child": [
+      {
+        "id": 83,
+        "type": "comment",
+        "provider": "twitter",
+        "iterable": false,
+        "title": "Comment Walme Tweet",
+        "description": "Comment Walme's Tweet to earn XP",
+        "child": [],
+        "blocking_task": null,
+        "reward": 50,
+        "level": 1,
+        "group": "social",
+        "order_by": 2,
+        "resources": {
+          "ui": {
+            "button": "Comment",
+            "pop-up": {
+              "name": "Social Quests",
+              "button": "Comment",
+              "static": "https://cdn.walme.io/waitlist/x/1894388272928792578.png",
+              "description": "Comment Walme's Tweet to earn XP",
+              "additional-title": "Connect your X",
+              "additional-description": "Before starting the quest, ensure you connected X account"
+            }
+          },
+          "tweetId": "1894388272928792578",
+          "username": "walme_io"
+        },
+        "iterator": {}
+      },
+      {
+        "id": 82,
+        "type": "share",
+        "provider": "twitter",
+        "iterable": false,
+        "title": "Retweet Walme Tweet",
+        "description": "Retweet Walme's Tweet to earn XP",
+        "child": [],
+        "blocking_task": null,
+        "reward": 50,
+        "level": 1,
+        "group": "social",
+        "order_by": 1,
+        "resources": {
+          "ui": {
+            "button": "Retweet",
+            "pop-up": {
+              "name": "Social Quests",
+              "button": "Retweet",
+              "static": "https://cdn.walme.io/waitlist/x/1894388272928792578.png",
+              "description": "Retweet Walme's Tweet to earn XP",
+              "additional-title": "Connect your X",
+              "additional-description": "Before starting the quest, ensure you connected X account"
+            }
+          },
+          "tweetId": "1894388272928792578",
+          "username": "walme_io"
+        },
+        "iterator": {}
+      },
+      {
+        "id": 81,
+        "type": "like",
+        "provider": "twitter",
+        "iterable": false,
+        "title": "Like Walme Tweet",
+        "description": "Like Walme's Tweet to earn XP",
+        "child": [],
+        "blocking_task": null,
+        "reward": 50,
+        "level": 1,
+        "group": "social",
+        "order_by": 0,
+        "resources": {
+          "ui": {
+            "button": "Like",
+            "pop-up": {
+              "name": "Social Quests",
+              "button": "Like",
+              "static": "https://cdn.walme.io/waitlist/x/1894388272928792578.png",
+              "description": "Like Walme's Tweet to earn XP",
+              "additional-title": "Connect your X",
+              "additional-description": "Before starting the quest, ensure you connected X account"
+            }
+          },
+          "tweetId": "1894388272928792578",
+          "username": "walme_io"
+        },
+        "iterator": {}
+      }
+    ],
+    "blocking_task": 4,
+    "reward": 150,
+    "level": 1,
+    "group": "social",
+    "order_by": 27,
+    "resources": {
+      "ui": {
+        "button": "Engage",
+        "pop-up": {
+          "name": "Social Quests",
+          "button": "Engage",
+          "static": "https://cdn.walme.io/waitlist/x/1894388272928792578.png",
+          "description": "Engage with Walme`s Tweet to earn XP",
+          "additional-title": "Connect your X",
+          "additional-description": "Before starting the quest, ensure you connected X account"
+        }
+      },
+      "isNew": true,
+      "tweetId": "1894388272928792578",
+      "username": "walme_io"
+    },
+    "iterator": {}
   }
 ]
