@@ -1,10 +1,27 @@
-import { useEffect } from 'react'
+'use client'
+
+import { useEffect, useRef } from 'react'
 import { z } from 'zod'
-import { useForm } from 'react-hook-form'
+import { useForm, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import type { Task } from '@/types/tasks'
-import { defaultPartnerTask } from '@/types/tasks'
+import { useNavigate } from '@tanstack/react-router'
+import { defaultPartnerTask, type Task } from '@/types/tasks'
+import { toast } from 'sonner'
+import { Button } from '@/components/ui/button'
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form'
+import { Input } from '@/components/ui/input'
+import { Switch } from '@/components/ui/switch'
+import { Textarea } from '@/components/ui/textarea'
+import { SelectDropdown } from '@/components/select-dropdown'
 import { uploadMedia } from './api'
+import { groups, types, providers } from './data/data'
 
 const schema = z
   .object({
@@ -89,14 +106,17 @@ const schema = z
 
 type FormValues = z.infer<typeof schema>
 
-export function QuestForm({
+export const QuestForm = ({
   initial,
   onSubmit,
 }: {
   initial?: Partial<Task>
   onSubmit: (v: FormValues) => void
-}) {
-  const { register, handleSubmit, setValue, watch } = useForm<FormValues>({
+}) => {
+  const nav = useNavigate({})
+  const fileRef = useRef<HTMLInputElement | null>(null)
+
+  const form = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
       title: initial?.title ?? '',
@@ -112,198 +132,430 @@ export function QuestForm({
     },
   })
 
-  const icon = watch('resources.icon')
-  const typeValue = watch('type')
-  const provider = watch('provider')
+  const type = useWatch({ control: form.control, name: 'type' })
+  const provider = useWatch({ control: form.control, name: 'provider' })
+  const icon = useWatch({ control: form.control, name: 'resources.icon' })
+  const adsgramType = useWatch({
+    control: form.control,
+    name: 'resources.adsgram.type',
+  })
+
+  const popupField = (key: string) => `resources.ui['pop-up'].${key}` as const
 
   useEffect(() => {
-    if (typeValue === 'partner_invite') {
-      setValue('title', defaultPartnerTask.title, { shouldDirty: true })
-      setValue('description', defaultPartnerTask.description ?? '', {
+    if (type !== 'partner_invite') return
+    const values = form.getValues()
+    if (!values.title) {
+      form.setValue('title', defaultPartnerTask.title, { shouldDirty: true })
+    }
+    if (!values.description) {
+      form.setValue('description', defaultPartnerTask.description ?? '', {
         shouldDirty: true,
       })
-      setValue('group', defaultPartnerTask.group, { shouldDirty: true })
-      setValue('order_by', defaultPartnerTask.order_by, { shouldDirty: true })
-      setValue('uri', defaultPartnerTask.uri ?? '', { shouldDirty: true })
-      const btn = defaultPartnerTask.resources?.ui?.button ?? ''
-      setValue('resources.ui.button', btn, { shouldDirty: true })
     }
-  }, [typeValue, setValue])
+    if (values.group === 'all') {
+      form.setValue('group', defaultPartnerTask.group, { shouldDirty: true })
+    }
+    if (values.order_by === 0) {
+      form.setValue('order_by', defaultPartnerTask.order_by, {
+        shouldDirty: true,
+      })
+    }
+    if (!values.uri) {
+      form.setValue('uri', defaultPartnerTask.uri ?? '', { shouldDirty: true })
+    }
+    if (!values.resources?.ui?.button) {
+      form.setValue(
+        'resources.ui.button',
+        defaultPartnerTask.resources?.ui?.button ?? '',
+        { shouldDirty: true }
+      )
+    }
+  }, [type, form])
+
+  const handleUpload = async (file: File) => {
+    try {
+      const { url } = await uploadMedia(file)
+      form.setValue('resources.icon', url, { shouldDirty: true })
+    } catch {
+      toast.error('Failed to upload icon')
+    }
+  }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className='space-y-6'>
-      <div className='grid gap-4 sm:grid-cols-2'>
-        <div>
-          <label>Title</label>
-          <input className='input' {...register('title')} />
-        </div>
-        <div>
-          <label>Type</label>
-          <select className='input' {...register('type')}>
-            <option value='referral'>referral</option>
-            <option value='connect'>connect</option>
-            <option value='join'>join</option>
-            <option value='share'>share</option>
-            <option value='like'>like</option>
-            <option value='comment'>comment</option>
-            <option value='multiple'>multiple</option>
-            <option value='repeatable'>repeatable</option>
-            <option value='dummy'>dummy</option>
-            <option value='partner_invite'>partner_invite</option>
-            <option value='external'>external</option>
-          </select>
-        </div>
-        <div>
-          <label>Group</label>
-          <select className='input' {...register('group')}>
-            <option value='social'>social</option>
-            <option value='daily'>daily</option>
-            <option value='referral'>referral</option>
-            <option value='partner'>partner</option>
-            <option value='all'>all</option>
-          </select>
-        </div>
-        <div>
-          <label>Order</label>
-          <input
-            type='number'
-            className='input'
-            {...register('order_by', { valueAsNumber: true })}
+    <Form {...form}>
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className='mx-auto max-w-5xl space-y-6'
+      >
+        <div className='grid gap-4 sm:grid-cols-2'>
+          <FormField
+            control={form.control}
+            name='title'
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Title</FormLabel>
+                <FormControl>
+                  <Input {...field} placeholder='Enter a title' />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
-        </div>
-        <div className='sm:col-span-2'>
-          <label>Description</label>
-          <textarea className='input' rows={4} {...register('description')} />
-        </div>
-        <div>
-          <label>Provider</label>
-          <select className='input' {...register('provider')}>
-            <option value=''>—</option>
-            <option value='twitter'>twitter</option>
-            <option value='telegram'>telegram</option>
-            <option value='discord'>discord</option>
-            <option value='matrix'>matrix</option>
-            <option value='walme'>walme</option>
-            <option value='monetag'>monetag</option>
-            <option value='adsgram'>adsgram</option>
-          </select>
-        </div>
-        {provider === 'twitter' && (
-          <>
-            <div>
-              <label>Tweet ID</label>
-              <input className='input' {...register('resources.tweetId')} />
-            </div>
-            <div>
-              <label>Username</label>
-              <input className='input' {...register('resources.username')} />
-            </div>
-          </>
-        )}
-        <div>
-          <label>URI</label>
-          <input className='input' {...register('uri')} />
-        </div>
-        <div>
-          <label>Reward</label>
-          <input
-            type='number'
-            className='input'
-            {...register('reward', { valueAsNumber: true })}
+          <FormField
+            control={form.control}
+            name='type'
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Type</FormLabel>
+                <SelectDropdown
+                  defaultValue={field.value as string}
+                  onValueChange={field.onChange}
+                  placeholder='Select type'
+                  items={types.map(({ label, value }) => ({ label, value }))}
+                />
+                <FormMessage />
+              </FormItem>
+            )}
           />
-        </div>
-        <div>
-          <label className='flex items-center gap-2'>
-            <input type='checkbox' {...register('visible')} /> Visible
-          </label>
-        </div>
-        <div>
-          <label className='flex items-center gap-2'>
-            <input type='checkbox' {...register('resources.isNew')} /> New badge
-          </label>
-        </div>
-        <div>
-          <label>UI Button</label>
-          <input className='input' {...register('resources.ui.button')} />
-        </div>
-        <div className='space-y-2 sm:col-span-2'>
-          <label className='block'>Pop-up</label>
-          <input
-            className='input'
-            placeholder='name'
-            {...register("resources.ui['pop-up'].name")}
+          <FormField
+            control={form.control}
+            name='group'
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Group</FormLabel>
+                <SelectDropdown
+                  defaultValue={field.value as string}
+                  onValueChange={field.onChange}
+                  placeholder='Select group'
+                  items={groups.map(({ label, value }) => ({ label, value }))}
+                />
+                <FormMessage />
+              </FormItem>
+            )}
           />
-          <input
-            className='input'
-            placeholder='button'
-            {...register("resources.ui['pop-up'].button")}
+          <FormField
+            control={form.control}
+            name='order_by'
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Order</FormLabel>
+                <FormControl>
+                  <Input type='number' {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
-          <textarea
-            className='input'
-            placeholder='description'
-            {...register("resources.ui['pop-up'].description")}
+          <FormField
+            control={form.control}
+            name='description'
+            render={({ field }) => (
+              <FormItem className='sm:col-span-2'>
+                <FormLabel>Description</FormLabel>
+                <FormControl>
+                  <Textarea rows={4} {...field} value={field.value ?? ''} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
-          <input
-            className='input'
-            placeholder='static'
-            {...register("resources.ui['pop-up'].static")}
+          <FormField
+            control={form.control}
+            name='provider'
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Provider</FormLabel>
+                <SelectDropdown
+                  defaultValue={field.value as string}
+                  onValueChange={(v) => field.onChange(v || undefined)}
+                  placeholder='Select provider'
+                  items={providers.map(({ label, value }) => ({
+                    label,
+                    value,
+                  }))}
+                />
+                <FormMessage />
+              </FormItem>
+            )}
           />
-          <input
-            className='input'
-            placeholder='additional title'
-            {...register("resources.ui['pop-up']['additional-title']")}
+          {provider === 'twitter' && (
+            <>
+              <FormField
+                control={form.control}
+                name='resources.tweetId'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Tweet ID</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name='resources.username'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Username</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </>
+          )}
+          <FormField
+            control={form.control}
+            name='uri'
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>URI</FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
-          <input
-            className='input'
-            placeholder='additional description'
-            {...register("resources.ui['pop-up']['additional-description']")}
+          <FormField
+            control={form.control}
+            name='reward'
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Reward</FormLabel>
+                <FormControl>
+                  <Input type='number' {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
+          <FormField
+            control={form.control}
+            name='visible'
+            render={({ field }) => (
+              <FormItem className='flex items-center justify-between rounded-md border p-3'>
+                <FormLabel className='m-0'>Visible</FormLabel>
+                <FormControl>
+                  <Switch
+                    checked={!!field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name='resources.isNew'
+            render={({ field }) => (
+              <FormItem className='flex items-center justify-between rounded-md border p-3'>
+                <FormLabel className='m-0'>New badge</FormLabel>
+                <FormControl>
+                  <Switch
+                    checked={!!field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name='resources.ui.button'
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>UI Button</FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <div className='space-y-2 sm:col-span-2'>
+            <div className='text-sm font-medium'>Pop-up</div>
+            <FormField
+              control={form.control}
+              name={popupField('name')}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Name</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name={popupField('button')}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Button</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name={popupField('description')}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Description</FormLabel>
+                  <FormControl>
+                    <Textarea rows={4} {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name={popupField('static')}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Static</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name={popupField('additional-title')}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Additional title</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name={popupField('additional-description')}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Additional description</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+          <FormField
+            control={form.control}
+            name='resources.block_id'
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>AdsGram Block ID</FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name='resources.adsgram.type'
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>AdsGram Type</FormLabel>
+                <SelectDropdown
+                  defaultValue={field.value || 'none'}
+                  onValueChange={(v) => field.onChange(v === 'none' ? '' : v)}
+                  placeholder='Select type'
+                  items={[
+                    { label: '—', value: 'none' },
+                    { label: 'task', value: 'task' },
+                    { label: 'reward', value: 'reward' },
+                  ]}
+                />
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          {adsgramType === 'task' && (
+            <FormField
+              control={form.control}
+              name='resources.adsgram.subtype'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>AdsGram Subtype</FormLabel>
+                  <SelectDropdown
+                    defaultValue={field.value || 'none'}
+                    onValueChange={(v) => field.onChange(v === 'none' ? '' : v)}
+                    placeholder='Select subtype'
+                    items={[
+                      { label: '—', value: 'none' },
+                      { label: 'video-ad', value: 'video-ad' },
+                      { label: 'post-style-image', value: 'post-style-image' },
+                    ]}
+                  />
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
         </div>
-        <div>
-          <label>AdsGram Block ID</label>
-          <input className='input' {...register('resources.block_id')} />
-        </div>
-        <div>
-          <label>AdsGram Type</label>
-          <select className='input' {...register('resources.adsgram.type')}>
-            <option value=''>—</option>
-            <option value='task'>task</option>
-            <option value='reward'>reward</option>
-          </select>
-        </div>
-        <div>
-          <label>AdsGram Subtype</label>
-          <select className='input' {...register('resources.adsgram.subtype')}>
-            <option value=''>—</option>
-            <option value='video-ad'>video-ad</option>
-            <option value='post-style-image'>post-style-image</option>
-          </select>
-        </div>
-      </div>
 
-      <div className='space-y-2'>
-        <label htmlFor='icon-upload' className='block text-sm font-medium'>
-          Icon
-        </label>
-        {icon ? (
-          <img src={icon} className='h-16 w-16 rounded border object-contain' />
-        ) : null}
-        <input
-          id='icon-upload'
-          type='file'
-          accept='image/*'
-          onChange={async (e) => {
-            const f = e.target.files?.[0]
-            if (!f) return
-            const { url } = await uploadMedia(f)
-            setValue('resources.icon', url, { shouldDirty: true })
-          }}
-        />
-      </div>
+        <div className='space-y-2'>
+          <FormLabel>Icon</FormLabel>
+          {icon ? (
+            <img
+              src={icon}
+              className='h-16 w-16 rounded border object-contain'
+            />
+          ) : null}
+          <input
+            ref={fileRef}
+            type='file'
+            accept='image/*'
+            className='hidden'
+            onChange={async (e) => {
+              const f = e.target.files?.[0]
+              if (f) await handleUpload(f)
+            }}
+          />
+          <Button
+            type='button'
+            variant='outline'
+            onClick={() => fileRef.current?.click()}
+          >
+            Upload Icon
+          </Button>
+        </div>
 
-      <button className='btn-primary' type='submit'>
-        Save
-      </button>
-    </form>
+        <div className='flex gap-2'>
+          <Button
+            variant='outline'
+            type='button'
+            onClick={() => nav({ to: '/quests' })}
+          >
+            Cancel
+          </Button>
+          <Button type='submit'>Save</Button>
+        </div>
+      </form>
+    </Form>
   )
 }

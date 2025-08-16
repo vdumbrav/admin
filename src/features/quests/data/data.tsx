@@ -18,7 +18,10 @@ export const providers = [
   { value: 'twitter', label: 'Twitter' },
   { value: 'telegram', label: 'Telegram' },
   { value: 'discord', label: 'Discord' },
+  { value: 'matrix', label: 'Matrix' },
   { value: 'walme', label: 'Walme' },
+  { value: 'monetag', label: 'Monetag' },
+  { value: 'adsgram', label: 'AdsGram' },
 ]
 
 export const visibilities = [
