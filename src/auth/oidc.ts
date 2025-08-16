@@ -1,9 +1,14 @@
 import { WebStorageStateStore } from 'oidc-client-ts'
 import type { AuthProviderProps } from 'react-oidc-context'
 
-const rawBase = import.meta.env.VITE_APP_BASE_URL as string
+const rawBaseEnv = import.meta.env.VITE_APP_BASE_URL as string | undefined
+const rawBase = rawBaseEnv ?? window.location.origin
 const baseUrl = rawBase.endsWith('/') ? rawBase : `${rawBase}/`
-const rawIssuer = import.meta.env.VITE_OIDC_AUTHORITY as string
+
+const rawIssuer = import.meta.env.VITE_OIDC_AUTHORITY as string | undefined
+if (!rawIssuer) {
+  throw new Error('VITE_OIDC_AUTHORITY is not defined')
+}
 const authority = rawIssuer.endsWith('/') ? rawIssuer.slice(0, -1) : rawIssuer
 
 export const oidcConfig: AuthProviderProps = {

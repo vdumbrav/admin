@@ -30,15 +30,18 @@ export function useAppAuth(): AuthResult {
   const roles = useFake
     ? (a as ReturnType<typeof useMockAuth>).roles
     : extractRoles((a as ReturnType<typeof useRealAuth>).user)
+  const getAccessToken = React.useCallback(() => {
+    return useFake
+      ? (a as ReturnType<typeof useMockAuth>).getAccessToken()
+      : (a as ReturnType<typeof useRealAuth>).user?.access_token
+  }, [a])
   return {
     isAuthenticated: a.isAuthenticated,
     isLoading: a.isLoading,
     user: a.user,
     signinRedirect: a.signinRedirect,
     signoutRedirect: a.signoutRedirect,
-    getAccessToken: useFake
-      ? (a as ReturnType<typeof useMockAuth>).getAccessToken
-      : () => (a as ReturnType<typeof useRealAuth>).user?.access_token,
+    getAccessToken,
     roles,
     hasRole: (role) => roles.includes(role),
     error: (a as { error?: unknown }).error,

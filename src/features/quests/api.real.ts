@@ -1,38 +1,17 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useAppAuth } from '@/auth/provider'
 import type { Task, TaskGroup } from '@/types/tasks'
 import type { QuestPayload } from './types'
 
 type QuestsResponse = { items: Task[]; total: number }
 
-const BASE_URL = import.meta.env.VITE_API_URL
+const BASE_URL = import.meta.env.VITE_API_URL as string
 
-function tokenKey(): string {
-  const rawIssuer = import.meta.env.VITE_OIDC_AUTHORITY as string
-  const authority = rawIssuer.endsWith('/')
-    ? rawIssuer.slice(0, -1)
-    : rawIssuer
-  return `oidc.user:${authority}:mobile_app`
-}
-
-function getAccessToken(): string | undefined {
-  try {
-    const raw = window.localStorage.getItem(tokenKey())
-    return raw ? JSON.parse(raw)?.access_token : undefined
-  } catch {
-    return undefined
-  }
-}
-
-function removeAccessToken(): void {
-  try {
-    window.localStorage.removeItem(tokenKey())
-  } catch {
-    /* empty */
-  }
-}
-
-async function request<T>(path: string, options?: RequestInit): Promise<T> {
-  const token = getAccessToken()
+async function request<T>(
+  path: string,
+  token: string | undefined,
+  options?: RequestInit,
+): Promise<T> {
   const res = await fetch(`${BASE_URL}${path}`, {
     ...options,
     headers: {
@@ -45,7 +24,6 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
     // eslint-disable-next-line no-console
     console.error('Request failed', res.status, text)
     if (res.status === 401) {
-      removeAccessToken()
       window.location.href = '/sign-in'
     }
     throw new Error(`Request failed with ${res.status}`)
@@ -62,87 +40,110 @@ export function useQuests(query: {
   page?: number
   limit?: number
   sort?: string
-}) {
-  const params = {
-    ...query,
-    visible: query.visible === '' ? undefined : query.visible === 'true',
+  }) {
+    const params = {
+      ...query,
+      visible: query.visible === '' ? undefined : query.visible === 'true',
+    }
+    const { getAccessToken } = useAppAuth()
+    return useQuery<QuestsResponse>({
+      queryKey: ['quests', params],
+      queryFn: () =>
+        request<QuestsResponse>(
+          `/admin/quests?${new URLSearchParams({
+            search: params.search ?? '',
+            group: params.group ?? '',
+            type: params.type ?? '',
+            provider: params.provider ?? '',
+            visible: params.visible === undefined ? '' : String(params.visible),
+            page: String(params.page ?? 1),
+            limit: String(params.limit ?? 20),
+            sort: params.sort ?? 'order_by:asc',
+          })}`,
+          getAccessToken(),
+        ),
+    })
   }
-  return useQuery<QuestsResponse>({
-    queryKey: ['quests', params],
-    queryFn: () =>
-      request<QuestsResponse>(
-        `/admin/quests?${new URLSearchParams({
-          search: params.search ?? '',
-          group: params.group ?? '',
-          type: params.type ?? '',
-          provider: params.provider ?? '',
-          visible: params.visible === undefined ? '' : String(params.visible),
-          page: String(params.page ?? 1),
-          limit: String(params.limit ?? 20),
-          sort: params.sort ?? 'order_by:asc',
-        })}`
-      ),
-  })
-}
 
-export function useQuest(id: number) {
-  return useQuery<Task>({
-    queryKey: ['quest', id],
-    queryFn: () => request<Task>(`/admin/quests/${id}`),
-    enabled: !!id,
-  })
-}
+  export function useQuest(id: number) {
+    const { getAccessToken } = useAppAuth()
+    return useQuery<Task>({
+      queryKey: ['quest', id],
+      queryFn: () => request<Task>(`/admin/quests/${id}`, getAccessToken()),
+      enabled: !!id,
+    })
+  }
 
-export function useCreateQuest() {
-  const qc = useQueryClient()
-  return useMutation({
-    mutationFn: (payload: QuestPayload) =>
-      request<Task>('/admin/quests', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['quests'] }),
-  })
-}
+  export function useCreateQuest() {
+    const qc = useQueryClient()
+    const { getAccessToken } = useAppAuth()
+    return useMutation({
+      mutationFn: (payload: QuestPayload) =>
+        request<Task>(
+          '/admin/quests',
+          getAccessToken(),
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+          },
+        ),
+      onSuccess: () => qc.invalidateQueries({ queryKey: ['quests'] }),
+    })
+  }
 
-export function useUpdateQuest(id: number) {
-  const qc = useQueryClient()
-  return useMutation({
-    mutationFn: (payload: QuestPayload) =>
-      request<Task>(`/admin/quests/${id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      }),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['quests'] })
-      qc.invalidateQueries({ queryKey: ['quest', id] })
-    },
-  })
-}
+  export function useUpdateQuest(id: number) {
+    const qc = useQueryClient()
+    const { getAccessToken } = useAppAuth()
+    return useMutation({
+      mutationFn: (payload: QuestPayload) =>
+        request<Task>(
+          `/admin/quests/${id}`,
+          getAccessToken(),
+          {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+          },
+        ),
+      onSuccess: () => {
+        qc.invalidateQueries({ queryKey: ['quests'] })
+        qc.invalidateQueries({ queryKey: ['quest', id] })
+      },
+    })
+  }
 
-export function useDeleteQuest() {
-  const qc = useQueryClient()
-  return useMutation({
-    mutationFn: (id: number) =>
-      request<unknown>(`/admin/quests/${id}`, { method: 'DELETE' }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['quests'] }),
-  })
-}
+  export function useDeleteQuest() {
+    const qc = useQueryClient()
+    const { getAccessToken } = useAppAuth()
+    return useMutation({
+      mutationFn: (id: number) =>
+        request<unknown>(
+          `/admin/quests/${id}`,
+          getAccessToken(),
+          { method: 'DELETE' },
+        ),
+      onSuccess: () => qc.invalidateQueries({ queryKey: ['quests'] }),
+    })
+  }
 
-export function useToggleVisibility() {
-  const qc = useQueryClient()
-  return useMutation({
-    mutationFn: ({ id, visible }: { id: number; visible: boolean }) =>
-      request<Task>(`/admin/quests/${id}/visibility`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ visible }),
-      }),
-    onMutate: async ({ id, visible }) => {
-      await qc.cancelQueries({ queryKey: ['quests'] })
-      const prev = qc.getQueryData<QuestsResponse>(['quests'])
+  export function useToggleVisibility() {
+    const qc = useQueryClient()
+    const { getAccessToken } = useAppAuth()
+    return useMutation({
+      mutationFn: ({ id, visible }: { id: number; visible: boolean }) =>
+        request<Task>(
+          `/admin/quests/${id}/visibility`,
+          getAccessToken(),
+          {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ visible }),
+          },
+        ),
+      onMutate: async ({ id, visible }) => {
+        await qc.cancelQueries({ queryKey: ['quests'] })
+        const prev = qc.getQueryData<QuestsResponse>(['quests'])
       qc.setQueryData<QuestsResponse>(['quests'], (d) =>
         d
           ? {
@@ -161,24 +162,29 @@ export function useToggleVisibility() {
   })
 }
 
-export function useBulkAction() {
-  const qc = useQueryClient()
-  return useMutation({
-    mutationFn: ({
-      ids,
-      action,
-    }: {
-      ids: number[]
-      action: 'hide' | 'show' | 'delete'
-    }) =>
-      request<unknown>(`/admin/quests/bulk`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ids, action }),
-      }),
-    onMutate: async ({ ids, action }) => {
-      await qc.cancelQueries({ queryKey: ['quests'] })
-      const prev = qc.getQueryData<QuestsResponse>(['quests'])
+  export function useBulkAction() {
+    const qc = useQueryClient()
+    const { getAccessToken } = useAppAuth()
+    return useMutation({
+      mutationFn: ({
+        ids,
+        action,
+      }: {
+        ids: number[]
+        action: 'hide' | 'show' | 'delete'
+      }) =>
+        request<unknown>(
+          `/admin/quests/bulk`,
+          getAccessToken(),
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ids, action }),
+          },
+        ),
+      onMutate: async ({ ids, action }) => {
+        await qc.cancelQueries({ queryKey: ['quests'] })
+        const prev = qc.getQueryData<QuestsResponse>(['quests'])
       qc.setQueryData<QuestsResponse>(['quests'], (d) => {
         if (!d) return d
         if (action === 'delete') {
@@ -200,24 +206,29 @@ export function useBulkAction() {
   })
 }
 
-export async function uploadMedia(file: File) {
+export async function uploadMedia(file: File, token: string | undefined) {
   const fd = new FormData()
   fd.append('file', file)
-  return request<{ url: string }>(`/admin/media`, {
+  return request<{ url: string }>(`/admin/media`, token, {
     method: 'POST',
     body: fd,
   })
 }
 
-export function useReorderQuests() {
-  const qc = useQueryClient()
-  return useMutation({
-    mutationFn: ({ rows }: { rows: Array<{ id: number; order_by: number }> }) =>
-      request<{ ok: boolean }>(`/admin/quests/reorder`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ rows }),
-      }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['quests'] }),
-  })
-}
+  export function useReorderQuests() {
+    const qc = useQueryClient()
+    const { getAccessToken } = useAppAuth()
+    return useMutation({
+      mutationFn: ({ rows }: { rows: Array<{ id: number; order_by: number }> }) =>
+        request<{ ok: boolean }>(
+          `/admin/quests/reorder`,
+          getAccessToken(),
+          {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ rows }),
+          },
+        ),
+      onSuccess: () => qc.invalidateQueries({ queryKey: ['quests'] }),
+    })
+  }

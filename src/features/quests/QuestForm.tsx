@@ -26,6 +26,7 @@ import { Switch } from '@/components/ui/switch'
 import { Textarea } from '@/components/ui/textarea'
 import { SelectDropdown } from '@/components/select-dropdown'
 import { uploadMedia } from './api'
+import { useAppAuth } from '@/auth/provider'
 import { ChildrenEditor } from './components/children-editor'
 import type { Child } from './components/children-editor'
 import { groups, types, providers } from './data/data'
@@ -144,13 +145,14 @@ const schema = baseSchema.extend({ child: z.array(childSchema).optional() })
 
 type FormValues = z.infer<typeof schema>
 
-export const QuestForm = ({
+  export const QuestForm = ({
   initial,
   onSubmit,
 }: {
   initial?: Partial<Task>
   onSubmit: (v: FormValues) => void
 }) => {
+  const auth = useAppAuth()
   const nav = useNavigate({})
   const fileRef = useRef<HTMLInputElement | null>(null)
 
@@ -252,14 +254,14 @@ export const QuestForm = ({
     return () => window.removeEventListener('beforeunload', handler)
   }, [form.formState.isDirty])
 
-  const handleUpload = async (file: File) => {
-    try {
-      const { url } = await uploadMedia(file)
-      form.setValue('resources.icon', url, { shouldDirty: true })
-    } catch {
-      toast.error('Failed to upload icon')
+    const handleUpload = async (file: File) => {
+      try {
+        const { url } = await uploadMedia(file, auth.getAccessToken())
+        form.setValue('resources.icon', url, { shouldDirty: true })
+      } catch {
+        toast.error('Failed to upload icon')
+      }
     }
-  }
 
   return (
     <Form {...form}>
