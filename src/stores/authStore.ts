@@ -19,6 +19,8 @@ interface AuthState {
     resetAccessToken: () => void
     reset: () => void
   }
+  role: 'admin' | 'user'
+  setRole: (role: 'admin' | 'user') => void
 }
 
 export const useAuthStore = create<AuthState>()((set) => {
@@ -49,6 +51,8 @@ export const useAuthStore = create<AuthState>()((set) => {
           }
         }),
     },
+    role: 'admin',
+    setRole: (role) => set((state) => ({ ...state, role })),
   }
 })
 

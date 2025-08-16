@@ -8,16 +8,10 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-import { createFileRoute } from '@tanstack/react-router'
-
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthRouteRouteImport } from './routes/auth/route'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as QuestsIndexRouteImport } from './routes/quests/index'
-import { Route as QuestsNewRouteImport } from './routes/quests/new'
-import { Route as Quests_layoutRouteImport } from './routes/quests/__layout'
-import { Route as QuestsIdRouteImport } from './routes/quests/$id'
 import { Route as errors503RouteImport } from './routes/(errors)/503'
 import { Route as errors500RouteImport } from './routes/(errors)/500'
 import { Route as errors404RouteImport } from './routes/(errors)/404'
@@ -32,6 +26,7 @@ import { Route as AuthenticatedSettingsRouteRouteImport } from './routes/_authen
 import { Route as AuthenticatedUsersIndexRouteImport } from './routes/_authenticated/users/index'
 import { Route as AuthenticatedTasksIndexRouteImport } from './routes/_authenticated/tasks/index'
 import { Route as AuthenticatedSettingsIndexRouteImport } from './routes/_authenticated/settings/index'
+import { Route as AuthenticatedQuestsIndexRouteImport } from './routes/_authenticated/quests/index'
 import { Route as AuthenticatedHelpCenterIndexRouteImport } from './routes/_authenticated/help-center/index'
 import { Route as AuthenticatedChatsIndexRouteImport } from './routes/_authenticated/chats/index'
 import { Route as AuthenticatedAppsIndexRouteImport } from './routes/_authenticated/apps/index'
@@ -39,14 +34,9 @@ import { Route as AuthenticatedSettingsNotificationsRouteImport } from './routes
 import { Route as AuthenticatedSettingsDisplayRouteImport } from './routes/_authenticated/settings/display'
 import { Route as AuthenticatedSettingsAppearanceRouteImport } from './routes/_authenticated/settings/appearance'
 import { Route as AuthenticatedSettingsAccountRouteImport } from './routes/_authenticated/settings/account'
+import { Route as AuthenticatedQuestsNewRouteImport } from './routes/_authenticated/quests/new'
+import { Route as AuthenticatedQuestsIdRouteImport } from './routes/_authenticated/quests/$id'
 
-const QuestsRouteImport = createFileRoute('/quests')()
-
-const QuestsRoute = QuestsRouteImport.update({
-  id: '/quests',
-  path: '/quests',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AuthRouteRoute = AuthRouteRouteImport.update({
   id: '/auth',
   path: '/auth',
@@ -59,25 +49,6 @@ const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const QuestsIndexRoute = QuestsIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => QuestsRoute,
-} as any)
-const QuestsNewRoute = QuestsNewRouteImport.update({
-  id: '/new',
-  path: '/new',
-  getParentRoute: () => QuestsRoute,
-} as any)
-const Quests_layoutRoute = Quests_layoutRouteImport.update({
-  id: '/__layout',
-  getParentRoute: () => QuestsRoute,
-} as any)
-const QuestsIdRoute = QuestsIdRouteImport.update({
-  id: '/quests/$id',
-  path: '/quests/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 const errors503Route = errors503RouteImport.update({
@@ -152,6 +123,12 @@ const AuthenticatedSettingsIndexRoute =
     path: '/',
     getParentRoute: () => AuthenticatedSettingsRouteRoute,
   } as any)
+const AuthenticatedQuestsIndexRoute =
+  AuthenticatedQuestsIndexRouteImport.update({
+    id: '/quests/',
+    path: '/quests/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedHelpCenterIndexRoute =
   AuthenticatedHelpCenterIndexRouteImport.update({
     id: '/help-center/',
@@ -192,6 +169,16 @@ const AuthenticatedSettingsAccountRoute =
     path: '/account',
     getParentRoute: () => AuthenticatedSettingsRouteRoute,
   } as any)
+const AuthenticatedQuestsNewRoute = AuthenticatedQuestsNewRouteImport.update({
+  id: '/quests/new',
+  path: '/quests/new',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedQuestsIdRoute = AuthenticatedQuestsIdRouteImport.update({
+  id: '/quests/$id',
+  path: '/quests/$id',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -207,10 +194,8 @@ export interface FileRoutesByFullPath {
   '/404': typeof errors404Route
   '/500': typeof errors500Route
   '/503': typeof errors503Route
-  '/quests/$id': typeof QuestsIdRoute
-  '/quests': typeof Quests_layoutRoute
-  '/quests/new': typeof QuestsNewRoute
-  '/quests/': typeof QuestsIndexRoute
+  '/quests/$id': typeof AuthenticatedQuestsIdRoute
+  '/quests/new': typeof AuthenticatedQuestsNewRoute
   '/settings/account': typeof AuthenticatedSettingsAccountRoute
   '/settings/appearance': typeof AuthenticatedSettingsAppearanceRoute
   '/settings/display': typeof AuthenticatedSettingsDisplayRoute
@@ -218,6 +203,7 @@ export interface FileRoutesByFullPath {
   '/apps': typeof AuthenticatedAppsIndexRoute
   '/chats': typeof AuthenticatedChatsIndexRoute
   '/help-center': typeof AuthenticatedHelpCenterIndexRoute
+  '/quests': typeof AuthenticatedQuestsIndexRoute
   '/settings/': typeof AuthenticatedSettingsIndexRoute
   '/tasks': typeof AuthenticatedTasksIndexRoute
   '/users': typeof AuthenticatedUsersIndexRoute
@@ -235,9 +221,8 @@ export interface FileRoutesByTo {
   '/404': typeof errors404Route
   '/500': typeof errors500Route
   '/503': typeof errors503Route
-  '/quests/$id': typeof QuestsIdRoute
-  '/quests': typeof QuestsIndexRoute
-  '/quests/new': typeof QuestsNewRoute
+  '/quests/$id': typeof AuthenticatedQuestsIdRoute
+  '/quests/new': typeof AuthenticatedQuestsNewRoute
   '/settings/account': typeof AuthenticatedSettingsAccountRoute
   '/settings/appearance': typeof AuthenticatedSettingsAppearanceRoute
   '/settings/display': typeof AuthenticatedSettingsDisplayRoute
@@ -245,6 +230,7 @@ export interface FileRoutesByTo {
   '/apps': typeof AuthenticatedAppsIndexRoute
   '/chats': typeof AuthenticatedChatsIndexRoute
   '/help-center': typeof AuthenticatedHelpCenterIndexRoute
+  '/quests': typeof AuthenticatedQuestsIndexRoute
   '/settings': typeof AuthenticatedSettingsIndexRoute
   '/tasks': typeof AuthenticatedTasksIndexRoute
   '/users': typeof AuthenticatedUsersIndexRoute
@@ -265,11 +251,8 @@ export interface FileRoutesById {
   '/(errors)/404': typeof errors404Route
   '/(errors)/500': typeof errors500Route
   '/(errors)/503': typeof errors503Route
-  '/quests/$id': typeof QuestsIdRoute
-  '/quests': typeof QuestsRouteWithChildren
-  '/quests/__layout': typeof Quests_layoutRoute
-  '/quests/new': typeof QuestsNewRoute
-  '/quests/': typeof QuestsIndexRoute
+  '/_authenticated/quests/$id': typeof AuthenticatedQuestsIdRoute
+  '/_authenticated/quests/new': typeof AuthenticatedQuestsNewRoute
   '/_authenticated/settings/account': typeof AuthenticatedSettingsAccountRoute
   '/_authenticated/settings/appearance': typeof AuthenticatedSettingsAppearanceRoute
   '/_authenticated/settings/display': typeof AuthenticatedSettingsDisplayRoute
@@ -277,6 +260,7 @@ export interface FileRoutesById {
   '/_authenticated/apps/': typeof AuthenticatedAppsIndexRoute
   '/_authenticated/chats/': typeof AuthenticatedChatsIndexRoute
   '/_authenticated/help-center/': typeof AuthenticatedHelpCenterIndexRoute
+  '/_authenticated/quests/': typeof AuthenticatedQuestsIndexRoute
   '/_authenticated/settings/': typeof AuthenticatedSettingsIndexRoute
   '/_authenticated/tasks/': typeof AuthenticatedTasksIndexRoute
   '/_authenticated/users/': typeof AuthenticatedUsersIndexRoute
@@ -298,9 +282,7 @@ export interface FileRouteTypes {
     | '/500'
     | '/503'
     | '/quests/$id'
-    | '/quests'
     | '/quests/new'
-    | '/quests/'
     | '/settings/account'
     | '/settings/appearance'
     | '/settings/display'
@@ -308,6 +290,7 @@ export interface FileRouteTypes {
     | '/apps'
     | '/chats'
     | '/help-center'
+    | '/quests'
     | '/settings/'
     | '/tasks'
     | '/users'
@@ -326,7 +309,6 @@ export interface FileRouteTypes {
     | '/500'
     | '/503'
     | '/quests/$id'
-    | '/quests'
     | '/quests/new'
     | '/settings/account'
     | '/settings/appearance'
@@ -335,6 +317,7 @@ export interface FileRouteTypes {
     | '/apps'
     | '/chats'
     | '/help-center'
+    | '/quests'
     | '/settings'
     | '/tasks'
     | '/users'
@@ -354,11 +337,8 @@ export interface FileRouteTypes {
     | '/(errors)/404'
     | '/(errors)/500'
     | '/(errors)/503'
-    | '/quests/$id'
-    | '/quests'
-    | '/quests/__layout'
-    | '/quests/new'
-    | '/quests/'
+    | '/_authenticated/quests/$id'
+    | '/_authenticated/quests/new'
     | '/_authenticated/settings/account'
     | '/_authenticated/settings/appearance'
     | '/_authenticated/settings/display'
@@ -366,6 +346,7 @@ export interface FileRouteTypes {
     | '/_authenticated/apps/'
     | '/_authenticated/chats/'
     | '/_authenticated/help-center/'
+    | '/_authenticated/quests/'
     | '/_authenticated/settings/'
     | '/_authenticated/tasks/'
     | '/_authenticated/users/'
@@ -385,19 +366,10 @@ export interface RootRouteChildren {
   errors404Route: typeof errors404Route
   errors500Route: typeof errors500Route
   errors503Route: typeof errors503Route
-  QuestsIdRoute: typeof QuestsIdRoute
-  QuestsRoute: typeof QuestsRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/quests': {
-      id: '/quests'
-      path: '/quests'
-      fullPath: '/quests'
-      preLoaderRoute: typeof QuestsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/auth': {
       id: '/auth'
       path: '/auth'
@@ -417,34 +389,6 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/quests/': {
-      id: '/quests/'
-      path: '/'
-      fullPath: '/quests/'
-      preLoaderRoute: typeof QuestsIndexRouteImport
-      parentRoute: typeof QuestsRoute
-    }
-    '/quests/new': {
-      id: '/quests/new'
-      path: '/new'
-      fullPath: '/quests/new'
-      preLoaderRoute: typeof QuestsNewRouteImport
-      parentRoute: typeof QuestsRoute
-    }
-    '/quests/__layout': {
-      id: '/quests/__layout'
-      path: '/quests'
-      fullPath: '/quests'
-      preLoaderRoute: typeof Quests_layoutRouteImport
-      parentRoute: typeof QuestsRoute
-    }
-    '/quests/$id': {
-      id: '/quests/$id'
-      path: '/quests/$id'
-      fullPath: '/quests/$id'
-      preLoaderRoute: typeof QuestsIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/(errors)/503': {
@@ -545,6 +489,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSettingsIndexRouteImport
       parentRoute: typeof AuthenticatedSettingsRouteRoute
     }
+    '/_authenticated/quests/': {
+      id: '/_authenticated/quests/'
+      path: '/quests'
+      fullPath: '/quests'
+      preLoaderRoute: typeof AuthenticatedQuestsIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/help-center/': {
       id: '/_authenticated/help-center/'
       path: '/help-center'
@@ -594,6 +545,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSettingsAccountRouteImport
       parentRoute: typeof AuthenticatedSettingsRouteRoute
     }
+    '/_authenticated/quests/new': {
+      id: '/_authenticated/quests/new'
+      path: '/quests/new'
+      fullPath: '/quests/new'
+      preLoaderRoute: typeof AuthenticatedQuestsNewRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/quests/$id': {
+      id: '/_authenticated/quests/$id'
+      path: '/quests/$id'
+      fullPath: '/quests/$id'
+      preLoaderRoute: typeof AuthenticatedQuestsIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
@@ -622,39 +587,30 @@ const AuthenticatedSettingsRouteRouteWithChildren =
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedSettingsRouteRoute: typeof AuthenticatedSettingsRouteRouteWithChildren
+  AuthenticatedQuestsIdRoute: typeof AuthenticatedQuestsIdRoute
+  AuthenticatedQuestsNewRoute: typeof AuthenticatedQuestsNewRoute
   AuthenticatedAppsIndexRoute: typeof AuthenticatedAppsIndexRoute
   AuthenticatedChatsIndexRoute: typeof AuthenticatedChatsIndexRoute
   AuthenticatedHelpCenterIndexRoute: typeof AuthenticatedHelpCenterIndexRoute
+  AuthenticatedQuestsIndexRoute: typeof AuthenticatedQuestsIndexRoute
   AuthenticatedTasksIndexRoute: typeof AuthenticatedTasksIndexRoute
   AuthenticatedUsersIndexRoute: typeof AuthenticatedUsersIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedSettingsRouteRoute: AuthenticatedSettingsRouteRouteWithChildren,
+  AuthenticatedQuestsIdRoute: AuthenticatedQuestsIdRoute,
+  AuthenticatedQuestsNewRoute: AuthenticatedQuestsNewRoute,
   AuthenticatedAppsIndexRoute: AuthenticatedAppsIndexRoute,
   AuthenticatedChatsIndexRoute: AuthenticatedChatsIndexRoute,
   AuthenticatedHelpCenterIndexRoute: AuthenticatedHelpCenterIndexRoute,
+  AuthenticatedQuestsIndexRoute: AuthenticatedQuestsIndexRoute,
   AuthenticatedTasksIndexRoute: AuthenticatedTasksIndexRoute,
   AuthenticatedUsersIndexRoute: AuthenticatedUsersIndexRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
   AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
-
-interface QuestsRouteChildren {
-  Quests_layoutRoute: typeof Quests_layoutRoute
-  QuestsNewRoute: typeof QuestsNewRoute
-  QuestsIndexRoute: typeof QuestsIndexRoute
-}
-
-const QuestsRouteChildren: QuestsRouteChildren = {
-  Quests_layoutRoute: Quests_layoutRoute,
-  QuestsNewRoute: QuestsNewRoute,
-  QuestsIndexRoute: QuestsIndexRoute,
-}
-
-const QuestsRouteWithChildren =
-  QuestsRoute._addFileChildren(QuestsRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
@@ -670,8 +626,6 @@ const rootRouteChildren: RootRouteChildren = {
   errors404Route: errors404Route,
   errors500Route: errors500Route,
   errors503Route: errors503Route,
-  QuestsIdRoute: QuestsIdRoute,
-  QuestsRoute: QuestsRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

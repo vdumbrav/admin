@@ -1,8 +1,15 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import type { Task, TaskGroup } from '@/types/tasks'
-import * as fx from '@/faker'
 
 type QuestsResponse = { items: Task[]; total: number }
+
+const BASE_URL = import.meta.env.VITE_API_URL
+
+async function request<T>(path: string, options?: RequestInit): Promise<T> {
+  const res = await fetch(`${BASE_URL}${path}`, options)
+  if (!res.ok) throw new Error('Request failed')
+  return res.json() as Promise<T>
+}
 
 export function useQuests(params: {
   search?: string
@@ -16,14 +23,26 @@ export function useQuests(params: {
 }) {
   return useQuery<QuestsResponse>({
     queryKey: ['quests', params],
-    queryFn: () => fx.getQuests(params),
+    queryFn: () =>
+      request<QuestsResponse>(
+        `/admin/quests?${new URLSearchParams({
+          search: params.search ?? '',
+          group: params.group ?? '',
+          type: params.type ?? '',
+          provider: params.provider ?? '',
+          visible: params.visible ?? '',
+          page: String(params.page ?? 1),
+          limit: String(params.limit ?? 20),
+          sort: params.sort ?? 'order_by:asc',
+        })}`,
+      ),
   })
 }
 
 export function useQuest(id: number) {
   return useQuery<Task>({
     queryKey: ['quest', id],
-    queryFn: () => fx.getQuest(id),
+    queryFn: () => request<Task>(`/admin/quests/${id}`),
     enabled: !!id,
   })
 }
@@ -31,7 +50,12 @@ export function useQuest(id: number) {
 export function useCreateQuest() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: (payload: Partial<Task>) => fx.postQuest(payload),
+    mutationFn: (payload: Partial<Task>) =>
+      request<Task>('/admin/quests', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['quests'] }),
   })
 }
@@ -39,7 +63,12 @@ export function useCreateQuest() {
 export function useUpdateQuest(id: number) {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: (payload: Partial<Task>) => fx.patchQuest(id, payload),
+    mutationFn: (payload: Partial<Task>) =>
+      request<Task>(`/admin/quests/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['quests'] })
       qc.invalidateQueries({ queryKey: ['quest', id] })
@@ -50,7 +79,7 @@ export function useUpdateQuest(id: number) {
 export function useDeleteQuest() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: (id: number) => fx.deleteQuest(id),
+    mutationFn: (id: number) => request<unknown>(`/admin/quests/${id}`, { method: 'DELETE' }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['quests'] }),
   })
 }
@@ -58,7 +87,12 @@ export function useDeleteQuest() {
 export function useToggleVisibility() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: ({ id, visible }: { id: number; visible: boolean }) => fx.patchVisibility(id, visible),
+    mutationFn: ({ id, visible }: { id: number; visible: boolean }) =>
+      request<Task>(`/admin/quests/${id}/visibility`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ visible }),
+      }),
     onMutate: async ({ id, visible }) => {
       await qc.cancelQueries({ queryKey: ['quests'] })
       const prev = qc.getQueryData<QuestsResponse>(['quests'])
@@ -76,7 +110,11 @@ export function useBulkAction() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: ({ ids, action }: { ids: number[]; action: 'hide' | 'show' | 'delete' }) =>
-      fx.bulkAction(ids, action),
+      request<unknown>(`/admin/quests/bulk`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ids, action }),
+      }),
     onMutate: async ({ ids, action }) => {
       await qc.cancelQueries({ queryKey: ['quests'] })
       const prev = qc.getQueryData<QuestsResponse>(['quests'])
@@ -96,5 +134,12 @@ export function useBulkAction() {
 }
 
 export async function uploadMedia(file: File) {
-  return fx.postMedia(file)
+  const fd = new FormData()
+  fd.append('file', file)
+  const res = await fetch(`${BASE_URL}/admin/media`, {
+    method: 'POST',
+    body: fd,
+  })
+  if (!res.ok) throw new Error('Request failed')
+  return (await res.json()) as { url: string }
 }

@@ -5,15 +5,39 @@ import type { Task } from '@/types/tasks'
 let seq = 100000
 let items: Task[] = (data as Task[]).map(t => ({ visible: true, ...t }))
 
-export function list({ search = '', group = 'all', page = 1, size = 20, sort = 'order_by:asc' }) {
+export function list({
+  search = '',
+  group = 'all',
+  type = '',
+  provider = '',
+  visible = '',
+  page = 1,
+  limit = 20,
+  sort = 'order_by:asc',
+}) {
   let res = [...items]
   if (group && group !== 'all') res = res.filter(i => i.group === group)
-  if (search) res = res.filter(i => i.title.toLowerCase().includes(search.toLowerCase()))
+  if (type) res = res.filter(i => i.type === type)
+  if (provider) res = res.filter(i => i.provider === provider)
+  if (visible) res = res.filter(i => String(i.visible ?? true) === visible)
+  if (search) {
+    const s = search.toLowerCase()
+    res = res.filter(i =>
+      [
+        i.title,
+        i.provider,
+        i.resources?.username,
+        i.resources?.tweetId,
+      ]
+        .map(v => (v ? String(v).toLowerCase() : ''))
+        .some(v => v.includes(s)),
+    )
+  }
   const [f, dir] = sort.split(':')
   res.sort((a: any, b: any) => ((a[f] ?? '') > (b[f] ?? '') ? (dir === 'asc' ? 1 : -1) : (dir === 'asc' ? -1 : 1)))
   const total = res.length
-  const start = (page - 1) * size
-  return { items: res.slice(start, start + size), total }
+  const start = (page - 1) * limit
+  return { items: res.slice(start, start + limit), total }
 }
 export const get = (id: number) => items.find(i => i.id === id)
 export function create(payload: Partial<Task>): Task {
@@ -39,6 +63,14 @@ export function remove(id: number) {
 }
 export function toggle(id: number, visible: boolean) {
   return update(id, { visible })
+}
+export function bulk(ids: number[], action: 'hide' | 'show' | 'delete') {
+  if (action === 'delete') {
+    items = items.filter(i => !ids.includes(i.id))
+  } else {
+    const v = action === 'show'
+    items = items.map(i => (ids.includes(i.id) ? { ...i, visible: v } : i))
+  }
 }
 export function fakeUrl(name = 'image.png') {
   return `blob:/fake/${Date.now()}-${name}`

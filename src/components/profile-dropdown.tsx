@@ -11,8 +11,13 @@ import {
   DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { useAuthStore } from '@/stores/authStore'
 
 export function ProfileDropdown() {
+  const role = useAuthStore(s => s.role)
+  const setRole = useAuthStore(s => s.setRole)
+  const nextRole = role === 'admin' ? 'user' : 'admin'
+
   return (
     <DropdownMenu modal={false}>
       <DropdownMenuTrigger asChild>
@@ -55,9 +60,8 @@ export function ProfileDropdown() {
           <DropdownMenuItem>New Team</DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem>
-          Log out
-          <DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut>
+        <DropdownMenuItem onClick={() => setRole(nextRole)}>
+          Switch to {nextRole}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
