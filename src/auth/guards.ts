@@ -6,14 +6,16 @@ import { logError } from '@/utils/log'
 
 export const requireAdminBeforeLoad = async () => {
   if (import.meta.env.VITE_USE_FAKE_AUTH === 'true') return
+  let user
   try {
-    const user = await userManager.getUser()
-    if (!user?.profile || !hasAdminRole(user.profile)) {
-      logError('Admin role required', user?.profile)
-      throw redirect({ to: '/quests', replace: true, search: defaultQuestSearch })
-    }
+    user = await userManager.getUser()
   } catch (e) {
-    logError('Admin guard failed', e)
+    logError('Admin guard failed to get user', e)
+    throw redirect({ to: '/quests', replace: true, search: defaultQuestSearch })
+  }
+
+  if (!user?.profile || !hasAdminRole(user.profile)) {
+    logError('Admin role required', user?.profile)
     throw redirect({ to: '/quests', replace: true, search: defaultQuestSearch })
   }
 }

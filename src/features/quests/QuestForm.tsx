@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { z } from 'zod'
 import { useForm, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useNavigate, useBlocker, useSearch } from '@tanstack/react-router'
+import { useBlocker } from '@tanstack/react-router'
 import { useAppAuth } from '@/auth/provider'
 import { defaultPartnerTask, type Task } from '@/types/tasks'
 import { toast } from 'sonner'
@@ -148,13 +148,13 @@ type FormValues = z.infer<typeof schema>
 export const QuestForm = ({
   initial,
   onSubmit,
+  onCancel,
 }: {
   initial?: Partial<Task>
   onSubmit: (v: FormValues) => void
+  onCancel: () => void
 }) => {
   const auth = useAppAuth()
-  const nav = useNavigate({})
-  const search = useSearch({ from: '/_authenticated/quests/' })
   const fileRef = useRef<HTMLInputElement | null>(null)
   const [iconPreview, setIconPreview] = useState<string>()
 
@@ -274,13 +274,17 @@ export const QuestForm = ({
   }
 
   useEffect(() => {
-    let preview: string | undefined
     const controller = new AbortController()
+
+    if (!icon) {
+      setIconPreview((oldUrl) => {
+        if (oldUrl) URL.revokeObjectURL(oldUrl)
+        return undefined
+      })
+      return () => controller.abort()
+    }
+
     const load = async () => {
-      if (!icon) {
-        setIconPreview(undefined)
-        return
-      }
       try {
         const token = auth.getAccessToken()
         const res = await fetch(icon, {
@@ -288,8 +292,11 @@ export const QuestForm = ({
           signal: controller.signal,
         })
         const blob = await res.blob()
-        preview = URL.createObjectURL(blob)
-        setIconPreview(preview)
+        const newUrl = URL.createObjectURL(blob)
+        setIconPreview((oldUrl) => {
+          if (oldUrl) URL.revokeObjectURL(oldUrl)
+          return newUrl
+        })
       } catch (e) {
         if (!(e instanceof DOMException && e.name === 'AbortError')) {
           toast.error('Failed to load icon')
@@ -297,9 +304,9 @@ export const QuestForm = ({
       }
     }
     load()
+
     return () => {
       controller.abort()
-      if (preview) URL.revokeObjectURL(preview)
     }
   }, [icon, auth])
 
@@ -726,11 +733,7 @@ export const QuestForm = ({
         </div>
 
         <div className='flex gap-2'>
-          <Button
-            variant='outline'
-            type='button'
-            onClick={() => nav({ to: '/quests', search })}
-          >
+          <Button variant='outline' type='button' onClick={onCancel}>
             Cancel
           </Button>
           <Button type='submit' disabled={form.formState.isSubmitting}>

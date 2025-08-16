@@ -13,7 +13,7 @@ import { useCreateQuest, useQuest, useUpdateQuest } from './api'
 export const QuestCreatePage = () => {
   const create = useCreateQuest()
   const nav = useNavigate({})
-  const search = useSearch({ from: '/_authenticated/quests/' })
+  const search = useSearch({ from: '/_authenticated/quests/new' })
   return (
     <>
       <Header fixed>
@@ -36,7 +36,6 @@ export const QuestCreatePage = () => {
         <QuestForm
           onSubmit={async (v) => {
             try {
-              // backend accepts partial Task shape for children
               await create.mutateAsync(v as Partial<Task>)
               toast.success('Saved')
               nav({ to: '/quests', search })
@@ -44,6 +43,7 @@ export const QuestCreatePage = () => {
               toast.error(e instanceof Error ? e.message : 'Failed to save')
             }
           }}
+          onCancel={() => nav({ to: '/quests', search })}
         />
       </Main>
     </>
@@ -56,7 +56,7 @@ export const QuestEditPage = () => {
   const { data } = useQuest(questId)
   const update = useUpdateQuest(questId)
   const nav = useNavigate({})
-  const search = useSearch({ from: '/_authenticated/quests/' })
+  const search = useSearch({ from: '/_authenticated/quests/$id' })
 
   if (!data) {
     return (
@@ -103,7 +103,6 @@ export const QuestEditPage = () => {
           initial={data}
           onSubmit={async (v) => {
             try {
-              // backend accepts partial Task shape for children
               await update.mutateAsync(v as unknown as Partial<Task>)
               toast.success('Saved')
               nav({ to: '/quests', search })
@@ -111,6 +110,7 @@ export const QuestEditPage = () => {
               toast.error(e instanceof Error ? e.message : 'Failed to save')
             }
           }}
+          onCancel={() => nav({ to: '/quests', search })}
         />
       </Main>
     </>

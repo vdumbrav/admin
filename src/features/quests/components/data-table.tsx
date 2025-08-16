@@ -44,9 +44,9 @@ interface DataTableProps {
   isAdmin: boolean
 }
 
-  export const QuestsDataTable = ({ columns, isAdmin }: DataTableProps) => {
-    const router = useRouter()
-    const searchParams = useSearch({ from: '/_authenticated/quests/' as const })
+export const QuestsDataTable = ({ columns, isAdmin }: DataTableProps) => {
+  const router = useRouter()
+  const searchParams = useSearch({ from: '/_authenticated/quests/' as const })
   const [rowSelection, setRowSelection] = React.useState({})
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({})
