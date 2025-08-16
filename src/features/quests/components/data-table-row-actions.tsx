@@ -1,5 +1,5 @@
 import { DotsHorizontalIcon } from '@radix-ui/react-icons'
-import { Link } from '@tanstack/react-router'
+import { Link, useSearch } from '@tanstack/react-router'
 import { Row } from '@tanstack/react-table'
 import { IconTrash } from '@tabler/icons-react'
 import { Button } from '@/components/ui/button'
@@ -23,6 +23,7 @@ export const DataTableRowActions = <TData,>({
 }: DataTableRowActionsProps<TData>) => {
   const quest = questSchema.parse(row.original) as Quest
   const { setOpen, setCurrentRow } = useQuestsContext()
+  const search = useSearch({ from: '/_authenticated/quests/' as const })
   return (
     <DropdownMenu modal={false}>
       <DropdownMenuTrigger asChild>
@@ -36,7 +37,11 @@ export const DataTableRowActions = <TData,>({
       </DropdownMenuTrigger>
       <DropdownMenuContent align='end' className='w-[160px]'>
         <DropdownMenuItem asChild>
-          <Link to='/quests/$id' params={{ id: String(quest.id) }}>
+          <Link
+            to='/quests/$id'
+            params={{ id: String(quest.id) }}
+            search={search}
+          >
             Edit
           </Link>
         </DropdownMenuItem>

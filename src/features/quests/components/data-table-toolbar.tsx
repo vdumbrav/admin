@@ -1,3 +1,4 @@
+import * as React from 'react'
 import { Cross2Icon } from '@radix-ui/react-icons'
 import { Table } from '@tanstack/react-table'
 import { Button } from '@/components/ui/button'
@@ -26,6 +27,20 @@ export const DataTableToolbar = <TData,>({
   const selected = table
     .getFilteredSelectedRowModel()
     .rows.map((r) => (r.original as Quest).id)
+  const filterValue =
+    (table.getColumn('title')?.getFilterValue() as string) ?? ''
+  const [search, setSearch] = React.useState(filterValue)
+
+  React.useEffect(() => {
+    setSearch(filterValue)
+  }, [filterValue])
+
+  React.useEffect(() => {
+    const id = setTimeout(() => {
+      table.getColumn('title')?.setFilterValue(search)
+    }, 250)
+    return () => clearTimeout(id)
+  }, [search, table])
 
   return (
     <div className='flex items-center justify-between'>
@@ -69,10 +84,8 @@ export const DataTableToolbar = <TData,>({
         )}
         <Input
           placeholder='Search quests...'
-          value={(table.getColumn('title')?.getFilterValue() as string) ?? ''}
-          onChange={(event) =>
-            table.getColumn('title')?.setFilterValue(event.target.value)
-          }
+          value={search}
+          onChange={(event) => setSearch(event.target.value)}
           className='h-8 w-[150px] lg:w-[250px]'
         />
         <div className='flex gap-x-2'>

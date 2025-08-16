@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { requireAdminBeforeLoad } from '@/auth/guards'
 import { useAppAuth } from '@/auth/provider'
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout'
 
@@ -20,5 +21,6 @@ function AuthenticatedRoute() {
 }
 
 export const Route = createFileRoute('/_authenticated')({
+  beforeLoad: requireAdminBeforeLoad,
   component: AuthenticatedRoute,
 })

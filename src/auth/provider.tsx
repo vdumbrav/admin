@@ -1,5 +1,7 @@
 import React from 'react'
 import { AuthProvider, useAuth as useRealAuth } from 'react-oidc-context'
+import { toast } from 'sonner'
+import { logError } from '@/utils/log'
 import { MockAuthProvider, useMockAuth } from './mock'
 import { oidcConfig } from './oidc'
 import { extractRoles } from './roles'
@@ -31,17 +33,22 @@ export function useAppAuth(): AuthResult {
   const roles = useFake
     ? (a as ReturnType<typeof useMockAuth>).roles
     : extractRoles((a as ReturnType<typeof useRealAuth>).user?.profile)
-  const getAccessToken = React.useCallback(() => {
-    return useFake
-      ? (a as ReturnType<typeof useMockAuth>).getAccessToken()
-      : (a as ReturnType<typeof useRealAuth>).user?.access_token
+  const token = useFake
+    ? (a as ReturnType<typeof useMockAuth>).getAccessToken()
+    : (a as ReturnType<typeof useRealAuth>).user?.access_token
+  const getAccessToken = React.useCallback(() => token, [token])
+  const signoutRedirect = React.useCallback(() => {
+    Promise.resolve(a.signoutRedirect()).catch((e: unknown) => {
+      logError(e)
+      toast.error('Failed to sign out')
+    })
   }, [a])
   return {
     isAuthenticated: a.isAuthenticated,
     isLoading: a.isLoading,
     user: a.user,
     signinRedirect: a.signinRedirect,
-    signoutRedirect: a.signoutRedirect,
+    signoutRedirect,
     getAccessToken,
     roles,
     hasRole: (role) => roles.includes(role),

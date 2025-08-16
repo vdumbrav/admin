@@ -1,4 +1,4 @@
-import { useParams, useNavigate } from '@tanstack/react-router'
+import { useParams, useNavigate, useSearch } from '@tanstack/react-router'
 import type { Task } from '@/types/tasks'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
@@ -13,6 +13,7 @@ import { useCreateQuest, useQuest, useUpdateQuest } from './api'
 export const QuestCreatePage = () => {
   const create = useCreateQuest()
   const nav = useNavigate({})
+  const search = useSearch({ from: '/_authenticated/quests/new' })
   return (
     <>
       <Header fixed>
@@ -28,21 +29,24 @@ export const QuestCreatePage = () => {
             <h2 className='text-2xl font-bold tracking-tight'>New Quest</h2>
             <p className='text-muted-foreground'>Create a new quest.</p>
           </div>
-          <Button variant='outline' onClick={() => nav({ to: '/quests' })}>
+          <Button
+            variant='outline'
+            onClick={() => nav({ to: '/quests', search })}
+          >
             Back to list
           </Button>
         </div>
         <QuestForm
           onSubmit={async (v) => {
             try {
-              // backend accepts partial Task shape for children
               await create.mutateAsync(v as Partial<Task>)
               toast.success('Saved')
-              nav({ to: '/quests' })
+              nav({ to: '/quests', search })
             } catch (e) {
               toast.error(e instanceof Error ? e.message : 'Failed to save')
             }
           }}
+          onCancel={() => nav({ to: '/quests', search })}
         />
       </Main>
     </>
@@ -55,6 +59,7 @@ export const QuestEditPage = () => {
   const { data } = useQuest(questId)
   const update = useUpdateQuest(questId)
   const nav = useNavigate({})
+  const search = useSearch({ from: '/_authenticated/quests/$id' })
 
   if (!data) {
     return (
@@ -93,7 +98,10 @@ export const QuestEditPage = () => {
             </h2>
             <p className='text-muted-foreground'>Update quest properties.</p>
           </div>
-          <Button variant='outline' onClick={() => nav({ to: '/quests' })}>
+          <Button
+            variant='outline'
+            onClick={() => nav({ to: '/quests', search })}
+          >
             Back to list
           </Button>
         </div>
@@ -101,14 +109,14 @@ export const QuestEditPage = () => {
           initial={data}
           onSubmit={async (v) => {
             try {
-              // backend accepts partial Task shape for children
               await update.mutateAsync(v as unknown as Partial<Task>)
               toast.success('Saved')
-              nav({ to: '/quests' })
+              nav({ to: '/quests', search })
             } catch (e) {
               toast.error(e instanceof Error ? e.message : 'Failed to save')
             }
           }}
+          onCancel={() => nav({ to: '/quests', search })}
         />
       </Main>
     </>

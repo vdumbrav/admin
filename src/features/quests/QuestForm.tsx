@@ -1,10 +1,10 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { z } from 'zod'
 import { useForm, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useNavigate, useBlocker } from '@tanstack/react-router'
+import { useBlocker } from '@tanstack/react-router'
 import { useAppAuth } from '@/auth/provider'
 import { defaultPartnerTask, type Task } from '@/types/tasks'
 import { toast } from 'sonner'
@@ -47,7 +47,7 @@ const childSchema = withTwitterValidation(
         'adsgram',
       ])
       .optional(),
-    reward: z.coerce.number().int().optional(),
+    reward: z.coerce.number().int().nonnegative().optional(),
     order_by: z.coerce.number().int().nonnegative(),
     resources: z
       .object({
@@ -90,14 +90,13 @@ const baseSchema = withTwitterValidation(
         ])
         .optional(),
       uri: z
-        .string()
-        .url()
+        .union([z.url(), z.literal('')])
         .optional()
-        .or(z.literal('').transform(() => undefined)),
-      reward: z.coerce.number().int().optional(),
+        .transform((val) => (val === '' ? undefined : val)),
+      reward: z.coerce.number().int().nonnegative().optional(),
       resources: z
         .object({
-          icon: z.string().url().optional(),
+          icon: z.url().optional(),
           tweetId: z.string().optional(),
           username: z.string().optional(),
           isNew: z.boolean().optional(),
@@ -110,10 +109,9 @@ const baseSchema = withTwitterValidation(
                 button: z.string(),
                 description: z.string(),
                 static: z
-                  .string()
-                  .url()
+                  .union([z.url(), z.literal('')])
                   .optional()
-                  .or(z.literal('').transform(() => undefined)),
+                  .transform((val) => (val === '' ? undefined : val)),
                 'additional-title': z.string().optional(),
                 'additional-description': z.string().optional(),
               })
@@ -128,7 +126,7 @@ const baseSchema = withTwitterValidation(
             .superRefine((val, ctx) => {
               if (val && val.type !== 'task' && val.subtype) {
                 ctx.addIssue({
-                  code: z.ZodIssueCode.custom,
+                  code: 'custom',
                   message: "subtype allowed only when type is 'task'",
                   path: ['subtype'],
                 })
@@ -138,7 +136,7 @@ const baseSchema = withTwitterValidation(
         .optional(),
       visible: z.boolean().optional(),
     })
-    .passthrough()
+    .loose()
 )
 
 const schema = baseSchema.extend({ child: z.array(childSchema).optional() })
@@ -148,13 +146,15 @@ type FormValues = z.infer<typeof schema>
 export const QuestForm = ({
   initial,
   onSubmit,
+  onCancel,
 }: {
   initial?: Partial<Task>
   onSubmit: (v: FormValues) => void
+  onCancel: () => void
 }) => {
   const auth = useAppAuth()
-  const nav = useNavigate({})
   const fileRef = useRef<HTMLInputElement | null>(null)
+  const [iconPreview, setIconPreview] = useState<string>()
 
   const form = useForm({
     resolver: zodResolver(schema),
@@ -255,6 +255,14 @@ export const QuestForm = ({
   }, [form.formState.isDirty])
 
   const handleUpload = async (file: File) => {
+    if (!file.type.startsWith('image/')) {
+      toast.error('Only image files allowed')
+      return
+    }
+    if (file.size > 1024 * 1024) {
+      toast.error('File too large (max 1MB)')
+      return
+    }
     try {
       const { url } = await uploadMedia(file, auth.getAccessToken())
       form.setValue('resources.icon', url, { shouldDirty: true })
@@ -262,6 +270,45 @@ export const QuestForm = ({
       toast.error('Failed to upload icon')
     }
   }
+
+  useEffect(() => {
+    const controller = new AbortController()
+    let localUrl: string | undefined
+
+    if (!icon) {
+      setIconPreview((oldUrl) => {
+        if (oldUrl) URL.revokeObjectURL(oldUrl)
+        return undefined
+      })
+      return () => controller.abort()
+    }
+
+    const load = async () => {
+      try {
+        const token = auth.getAccessToken()
+        const res = await fetch(icon, {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+          signal: controller.signal,
+        })
+        const blob = await res.blob()
+        localUrl = URL.createObjectURL(blob)
+        setIconPreview((oldUrl) => {
+          if (oldUrl) URL.revokeObjectURL(oldUrl)
+          return localUrl
+        })
+      } catch (e) {
+        if (!(e instanceof DOMException && e.name === 'AbortError')) {
+          toast.error('Failed to load icon')
+        }
+      }
+    }
+    load()
+
+    return () => {
+      controller.abort()
+      if (localUrl) URL.revokeObjectURL(localUrl)
+    }
+  }, [icon, auth])
 
   return (
     <Form {...form}>
@@ -295,7 +342,7 @@ export const QuestForm = ({
               <FormItem>
                 <FormLabel>Type</FormLabel>
                 <SelectDropdown
-                  defaultValue={field.value}
+                  value={field.value}
                   onValueChange={field.onChange}
                   placeholder='Select type'
                   items={types.map(({ label, value }) => ({ label, value }))}
@@ -311,7 +358,7 @@ export const QuestForm = ({
               <FormItem>
                 <FormLabel>Group</FormLabel>
                 <SelectDropdown
-                  defaultValue={field.value}
+                  value={field.value}
                   onValueChange={field.onChange}
                   placeholder='Select group'
                   items={groups.map(({ label, value }) => ({ label, value }))}
@@ -333,7 +380,9 @@ export const QuestForm = ({
                     value={field.value as number}
                     onChange={(e) =>
                       field.onChange(
-                        e.target.value === '' ? 0 : Number(e.target.value)
+                        Number.isNaN(e.target.valueAsNumber)
+                          ? 0
+                          : e.target.valueAsNumber
                       )
                     }
                   />
@@ -362,7 +411,7 @@ export const QuestForm = ({
               <FormItem>
                 <FormLabel>Provider</FormLabel>
                 <SelectDropdown
-                  defaultValue={field.value}
+                  value={field.value}
                   onValueChange={(v) => field.onChange(v || undefined)}
                   placeholder='Select provider'
                   items={providers.map(({ label, value }) => ({
@@ -374,36 +423,37 @@ export const QuestForm = ({
               </FormItem>
             )}
           />
-          {provider === 'twitter' && (
-            <>
-              <FormField
-                control={form.control}
-                name='resources.tweetId'
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Tweet ID</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name='resources.username'
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Username</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </>
-          )}
+          {provider === 'twitter' &&
+            ['like', 'share', 'comment'].includes(type) && (
+              <>
+                <FormField
+                  control={form.control}
+                  name='resources.tweetId'
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Tweet ID</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name='resources.username'
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Username</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </>
+            )}
           <FormField
             control={form.control}
             name='uri'
@@ -430,9 +480,9 @@ export const QuestForm = ({
                     value={(field.value as number | undefined) ?? ''}
                     onChange={(e) =>
                       field.onChange(
-                        e.target.value === ''
+                        Number.isNaN(e.target.valueAsNumber)
                           ? undefined
-                          : Number(e.target.value)
+                          : e.target.valueAsNumber
                       )
                     }
                   />
@@ -594,6 +644,7 @@ export const QuestForm = ({
                     </FormItem>
                   )}
                 />
+                // AdsGram Type
                 <FormField
                   control={form.control}
                   name='resources.adsgram.type'
@@ -601,15 +652,18 @@ export const QuestForm = ({
                     <FormItem>
                       <FormLabel>AdsGram Type</FormLabel>
                       <SelectDropdown
-                        defaultValue={field.value || 'none'}
+                        value={field.value ?? 'none'}
                         onValueChange={(v) => {
-                          const next = v === 'none' ? '' : v
+                          const next =
+                            v === 'none' ? undefined : (v as 'task' | 'reward')
                           field.onChange(next)
                           if (next !== 'task') {
                             form.setValue(
                               'resources.adsgram.subtype',
                               undefined,
-                              { shouldDirty: true }
+                              {
+                                shouldDirty: true,
+                              }
                             )
                           }
                         }}
@@ -624,6 +678,7 @@ export const QuestForm = ({
                     </FormItem>
                   )}
                 />
+                // AdsGram Subtype (only when type === 'task')
                 {adsgramType === 'task' && (
                   <FormField
                     control={form.control}
@@ -632,9 +687,9 @@ export const QuestForm = ({
                       <FormItem>
                         <FormLabel>AdsGram Subtype</FormLabel>
                         <SelectDropdown
-                          defaultValue={field.value || 'none'}
+                          value={field.value ?? 'none'}
                           onValueChange={(v) =>
-                            field.onChange(v === 'none' ? '' : v)
+                            field.onChange(v === 'none' ? undefined : v)
                           }
                           placeholder='Select subtype'
                           items={[
@@ -658,9 +713,9 @@ export const QuestForm = ({
 
         <div className='space-y-2'>
           <FormLabel>Icon</FormLabel>
-          {icon ? (
+          {iconPreview ? (
             <img
-              src={icon}
+              src={iconPreview}
               className='h-16 w-16 rounded border object-contain'
             />
           ) : null}
@@ -684,11 +739,7 @@ export const QuestForm = ({
         </div>
 
         <div className='flex gap-2'>
-          <Button
-            variant='outline'
-            type='button'
-            onClick={() => nav({ to: '/quests' })}
-          >
+          <Button variant='outline' type='button' onClick={onCancel}>
             Cancel
           </Button>
           <Button type='submit' disabled={form.formState.isSubmitting}>
