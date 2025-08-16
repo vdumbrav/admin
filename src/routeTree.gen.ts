@@ -12,18 +12,8 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthRouteRouteImport } from './routes/auth/route'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as authSignUpRouteImport } from './routes/(auth)/sign-up'
-import { Route as authSignIn2RouteImport } from './routes/(auth)/sign-in-2'
 import { Route as authSignInRouteImport } from './routes/(auth)/sign-in'
-import { Route as authOtpRouteImport } from './routes/(auth)/otp'
-import { Route as authForgotPasswordRouteImport } from './routes/(auth)/forgot-password'
-import { Route as AuthenticatedSettingsRouteRouteImport } from './routes/_authenticated/settings/route'
-import { Route as AuthenticatedSettingsIndexRouteImport } from './routes/_authenticated/settings/index'
 import { Route as AuthenticatedQuestsIndexRouteImport } from './routes/_authenticated/quests/index'
-import { Route as AuthenticatedSettingsNotificationsRouteImport } from './routes/_authenticated/settings/notifications'
-import { Route as AuthenticatedSettingsDisplayRouteImport } from './routes/_authenticated/settings/display'
-import { Route as AuthenticatedSettingsAppearanceRouteImport } from './routes/_authenticated/settings/appearance'
-import { Route as AuthenticatedSettingsAccountRouteImport } from './routes/_authenticated/settings/account'
 import { Route as AuthenticatedQuestsNewRouteImport } from './routes/_authenticated/quests/new'
 import { Route as AuthenticatedQuestsIdRouteImport } from './routes/_authenticated/quests/$id'
 
@@ -41,72 +31,16 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const authSignUpRoute = authSignUpRouteImport.update({
-  id: '/(auth)/sign-up',
-  path: '/sign-up',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const authSignIn2Route = authSignIn2RouteImport.update({
-  id: '/(auth)/sign-in-2',
-  path: '/sign-in-2',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const authSignInRoute = authSignInRouteImport.update({
   id: '/(auth)/sign-in',
   path: '/sign-in',
   getParentRoute: () => rootRouteImport,
 } as any)
-const authOtpRoute = authOtpRouteImport.update({
-  id: '/(auth)/otp',
-  path: '/otp',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const authForgotPasswordRoute = authForgotPasswordRouteImport.update({
-  id: '/(auth)/forgot-password',
-  path: '/forgot-password',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthenticatedSettingsRouteRoute =
-  AuthenticatedSettingsRouteRouteImport.update({
-    id: '/settings',
-    path: '/settings',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedSettingsIndexRoute =
-  AuthenticatedSettingsIndexRouteImport.update({
-    id: '/',
-    path: '/',
-    getParentRoute: () => AuthenticatedSettingsRouteRoute,
-  } as any)
 const AuthenticatedQuestsIndexRoute =
   AuthenticatedQuestsIndexRouteImport.update({
     id: '/quests/',
     path: '/quests/',
     getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedSettingsNotificationsRoute =
-  AuthenticatedSettingsNotificationsRouteImport.update({
-    id: '/notifications',
-    path: '/notifications',
-    getParentRoute: () => AuthenticatedSettingsRouteRoute,
-  } as any)
-const AuthenticatedSettingsDisplayRoute =
-  AuthenticatedSettingsDisplayRouteImport.update({
-    id: '/display',
-    path: '/display',
-    getParentRoute: () => AuthenticatedSettingsRouteRoute,
-  } as any)
-const AuthenticatedSettingsAppearanceRoute =
-  AuthenticatedSettingsAppearanceRouteImport.update({
-    id: '/appearance',
-    path: '/appearance',
-    getParentRoute: () => AuthenticatedSettingsRouteRoute,
-  } as any)
-const AuthenticatedSettingsAccountRoute =
-  AuthenticatedSettingsAccountRouteImport.update({
-    id: '/account',
-    path: '/account',
-    getParentRoute: () => AuthenticatedSettingsRouteRoute,
   } as any)
 const AuthenticatedQuestsNewRoute = AuthenticatedQuestsNewRouteImport.update({
   id: '/quests/new',
@@ -122,124 +56,56 @@ const AuthenticatedQuestsIdRoute = AuthenticatedQuestsIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRouteRoute
-  '/settings': typeof AuthenticatedSettingsRouteRouteWithChildren
-  '/forgot-password': typeof authForgotPasswordRoute
-  '/otp': typeof authOtpRoute
   '/sign-in': typeof authSignInRoute
-  '/sign-in-2': typeof authSignIn2Route
-  '/sign-up': typeof authSignUpRoute
   '/quests/$id': typeof AuthenticatedQuestsIdRoute
   '/quests/new': typeof AuthenticatedQuestsNewRoute
-  '/settings/account': typeof AuthenticatedSettingsAccountRoute
-  '/settings/appearance': typeof AuthenticatedSettingsAppearanceRoute
-  '/settings/display': typeof AuthenticatedSettingsDisplayRoute
-  '/settings/notifications': typeof AuthenticatedSettingsNotificationsRoute
   '/quests': typeof AuthenticatedQuestsIndexRoute
-  '/settings/': typeof AuthenticatedSettingsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRouteRoute
-  '/forgot-password': typeof authForgotPasswordRoute
-  '/otp': typeof authOtpRoute
   '/sign-in': typeof authSignInRoute
-  '/sign-in-2': typeof authSignIn2Route
-  '/sign-up': typeof authSignUpRoute
   '/quests/$id': typeof AuthenticatedQuestsIdRoute
   '/quests/new': typeof AuthenticatedQuestsNewRoute
-  '/settings/account': typeof AuthenticatedSettingsAccountRoute
-  '/settings/appearance': typeof AuthenticatedSettingsAppearanceRoute
-  '/settings/display': typeof AuthenticatedSettingsDisplayRoute
-  '/settings/notifications': typeof AuthenticatedSettingsNotificationsRoute
   '/quests': typeof AuthenticatedQuestsIndexRoute
-  '/settings': typeof AuthenticatedSettingsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRouteRoute
-  '/_authenticated/settings': typeof AuthenticatedSettingsRouteRouteWithChildren
-  '/(auth)/forgot-password': typeof authForgotPasswordRoute
-  '/(auth)/otp': typeof authOtpRoute
   '/(auth)/sign-in': typeof authSignInRoute
-  '/(auth)/sign-in-2': typeof authSignIn2Route
-  '/(auth)/sign-up': typeof authSignUpRoute
   '/_authenticated/quests/$id': typeof AuthenticatedQuestsIdRoute
   '/_authenticated/quests/new': typeof AuthenticatedQuestsNewRoute
-  '/_authenticated/settings/account': typeof AuthenticatedSettingsAccountRoute
-  '/_authenticated/settings/appearance': typeof AuthenticatedSettingsAppearanceRoute
-  '/_authenticated/settings/display': typeof AuthenticatedSettingsDisplayRoute
-  '/_authenticated/settings/notifications': typeof AuthenticatedSettingsNotificationsRoute
   '/_authenticated/quests/': typeof AuthenticatedQuestsIndexRoute
-  '/_authenticated/settings/': typeof AuthenticatedSettingsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/auth'
-    | '/settings'
-    | '/forgot-password'
-    | '/otp'
     | '/sign-in'
-    | '/sign-in-2'
-    | '/sign-up'
     | '/quests/$id'
     | '/quests/new'
-    | '/settings/account'
-    | '/settings/appearance'
-    | '/settings/display'
-    | '/settings/notifications'
     | '/quests'
-    | '/settings/'
   fileRoutesByTo: FileRoutesByTo
-  to:
-    | '/'
-    | '/auth'
-    | '/forgot-password'
-    | '/otp'
-    | '/sign-in'
-    | '/sign-in-2'
-    | '/sign-up'
-    | '/quests/$id'
-    | '/quests/new'
-    | '/settings/account'
-    | '/settings/appearance'
-    | '/settings/display'
-    | '/settings/notifications'
-    | '/quests'
-    | '/settings'
+  to: '/' | '/auth' | '/sign-in' | '/quests/$id' | '/quests/new' | '/quests'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
     | '/auth'
-    | '/_authenticated/settings'
-    | '/(auth)/forgot-password'
-    | '/(auth)/otp'
     | '/(auth)/sign-in'
-    | '/(auth)/sign-in-2'
-    | '/(auth)/sign-up'
     | '/_authenticated/quests/$id'
     | '/_authenticated/quests/new'
-    | '/_authenticated/settings/account'
-    | '/_authenticated/settings/appearance'
-    | '/_authenticated/settings/display'
-    | '/_authenticated/settings/notifications'
     | '/_authenticated/quests/'
-    | '/_authenticated/settings/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRouteRoute: typeof AuthRouteRoute
-  authForgotPasswordRoute: typeof authForgotPasswordRoute
-  authOtpRoute: typeof authOtpRoute
   authSignInRoute: typeof authSignInRoute
-  authSignIn2Route: typeof authSignIn2Route
-  authSignUpRoute: typeof authSignUpRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -265,20 +131,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/(auth)/sign-up': {
-      id: '/(auth)/sign-up'
-      path: '/sign-up'
-      fullPath: '/sign-up'
-      preLoaderRoute: typeof authSignUpRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/(auth)/sign-in-2': {
-      id: '/(auth)/sign-in-2'
-      path: '/sign-in-2'
-      fullPath: '/sign-in-2'
-      preLoaderRoute: typeof authSignIn2RouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/(auth)/sign-in': {
       id: '/(auth)/sign-in'
       path: '/sign-in'
@@ -286,68 +138,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof authSignInRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/(auth)/otp': {
-      id: '/(auth)/otp'
-      path: '/otp'
-      fullPath: '/otp'
-      preLoaderRoute: typeof authOtpRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/(auth)/forgot-password': {
-      id: '/(auth)/forgot-password'
-      path: '/forgot-password'
-      fullPath: '/forgot-password'
-      preLoaderRoute: typeof authForgotPasswordRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_authenticated/settings': {
-      id: '/_authenticated/settings'
-      path: '/settings'
-      fullPath: '/settings'
-      preLoaderRoute: typeof AuthenticatedSettingsRouteRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/settings/': {
-      id: '/_authenticated/settings/'
-      path: '/'
-      fullPath: '/settings/'
-      preLoaderRoute: typeof AuthenticatedSettingsIndexRouteImport
-      parentRoute: typeof AuthenticatedSettingsRouteRoute
-    }
     '/_authenticated/quests/': {
       id: '/_authenticated/quests/'
       path: '/quests'
       fullPath: '/quests'
       preLoaderRoute: typeof AuthenticatedQuestsIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/settings/notifications': {
-      id: '/_authenticated/settings/notifications'
-      path: '/notifications'
-      fullPath: '/settings/notifications'
-      preLoaderRoute: typeof AuthenticatedSettingsNotificationsRouteImport
-      parentRoute: typeof AuthenticatedSettingsRouteRoute
-    }
-    '/_authenticated/settings/display': {
-      id: '/_authenticated/settings/display'
-      path: '/display'
-      fullPath: '/settings/display'
-      preLoaderRoute: typeof AuthenticatedSettingsDisplayRouteImport
-      parentRoute: typeof AuthenticatedSettingsRouteRoute
-    }
-    '/_authenticated/settings/appearance': {
-      id: '/_authenticated/settings/appearance'
-      path: '/appearance'
-      fullPath: '/settings/appearance'
-      preLoaderRoute: typeof AuthenticatedSettingsAppearanceRouteImport
-      parentRoute: typeof AuthenticatedSettingsRouteRoute
-    }
-    '/_authenticated/settings/account': {
-      id: '/_authenticated/settings/account'
-      path: '/account'
-      fullPath: '/settings/account'
-      preLoaderRoute: typeof AuthenticatedSettingsAccountRouteImport
-      parentRoute: typeof AuthenticatedSettingsRouteRoute
     }
     '/_authenticated/quests/new': {
       id: '/_authenticated/quests/new'
@@ -366,38 +162,13 @@ declare module '@tanstack/react-router' {
   }
 }
 
-interface AuthenticatedSettingsRouteRouteChildren {
-  AuthenticatedSettingsAccountRoute: typeof AuthenticatedSettingsAccountRoute
-  AuthenticatedSettingsAppearanceRoute: typeof AuthenticatedSettingsAppearanceRoute
-  AuthenticatedSettingsDisplayRoute: typeof AuthenticatedSettingsDisplayRoute
-  AuthenticatedSettingsNotificationsRoute: typeof AuthenticatedSettingsNotificationsRoute
-  AuthenticatedSettingsIndexRoute: typeof AuthenticatedSettingsIndexRoute
-}
-
-const AuthenticatedSettingsRouteRouteChildren: AuthenticatedSettingsRouteRouteChildren =
-  {
-    AuthenticatedSettingsAccountRoute: AuthenticatedSettingsAccountRoute,
-    AuthenticatedSettingsAppearanceRoute: AuthenticatedSettingsAppearanceRoute,
-    AuthenticatedSettingsDisplayRoute: AuthenticatedSettingsDisplayRoute,
-    AuthenticatedSettingsNotificationsRoute:
-      AuthenticatedSettingsNotificationsRoute,
-    AuthenticatedSettingsIndexRoute: AuthenticatedSettingsIndexRoute,
-  }
-
-const AuthenticatedSettingsRouteRouteWithChildren =
-  AuthenticatedSettingsRouteRoute._addFileChildren(
-    AuthenticatedSettingsRouteRouteChildren,
-  )
-
 interface AuthenticatedRouteRouteChildren {
-  AuthenticatedSettingsRouteRoute: typeof AuthenticatedSettingsRouteRouteWithChildren
   AuthenticatedQuestsIdRoute: typeof AuthenticatedQuestsIdRoute
   AuthenticatedQuestsNewRoute: typeof AuthenticatedQuestsNewRoute
   AuthenticatedQuestsIndexRoute: typeof AuthenticatedQuestsIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
-  AuthenticatedSettingsRouteRoute: AuthenticatedSettingsRouteRouteWithChildren,
   AuthenticatedQuestsIdRoute: AuthenticatedQuestsIdRoute,
   AuthenticatedQuestsNewRoute: AuthenticatedQuestsNewRoute,
   AuthenticatedQuestsIndexRoute: AuthenticatedQuestsIndexRoute,
@@ -410,11 +181,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRouteRoute: AuthRouteRoute,
-  authForgotPasswordRoute: authForgotPasswordRoute,
-  authOtpRoute: authOtpRoute,
   authSignInRoute: authSignInRoute,
-  authSignIn2Route: authSignIn2Route,
-  authSignUpRoute: authSignUpRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

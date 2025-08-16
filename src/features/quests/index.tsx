@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { useAuth } from '@/hooks/use-auth'
+import { useAppAuth } from '@/auth/provider'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
 import { ProfileDropdown } from '@/components/profile-dropdown'
@@ -12,8 +12,8 @@ import { QuestsPrimaryButtons } from './components/quests-primary-buttons'
 import { QuestsProvider } from './context/quests-context'
 
 export const Quests = () => {
-  const { user } = useAuth()
-  const isAdmin = !!user?.roles.includes('admin')
+  useAppAuth()
+  const isAdmin = true
   const columns = React.useMemo(() => getColumns(isAdmin), [isAdmin])
   return (
     <QuestsProvider>

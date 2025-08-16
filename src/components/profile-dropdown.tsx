@@ -1,22 +1,20 @@
-import { Link } from '@tanstack/react-router'
-import { useAuthStore } from '@/stores/authStore'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { useAppAuth } from '@/auth/provider'
 
 export function ProfileDropdown() {
-  const role = useAuthStore((s) => s.role)
-  const setRole = useAuthStore((s) => s.setRole)
-  const nextRole = role === 'admin' ? 'user' : 'admin'
+  const auth = useAppAuth()
+  const user = auth.user as
+    | { profile?: { preferred_username?: string; email?: string } }
+    | undefined
 
   return (
     <DropdownMenu modal={false}>
@@ -31,37 +29,17 @@ export function ProfileDropdown() {
       <DropdownMenuContent className='w-56' align='end' forceMount>
         <DropdownMenuLabel className='font-normal'>
           <div className='flex flex-col space-y-1'>
-            <p className='text-sm leading-none font-medium'>satnaing</p>
+            <p className='text-sm leading-none font-medium'>
+              {user?.profile?.preferred_username}
+            </p>
             <p className='text-muted-foreground text-xs leading-none'>
-              satnaingdev@gmail.com
+              {user?.profile?.email}
             </p>
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuGroup>
-          <DropdownMenuItem asChild>
-            <Link to='/settings'>
-              Profile
-              <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
-            </Link>
-          </DropdownMenuItem>
-          <DropdownMenuItem asChild>
-            <Link to='/settings'>
-              Billing
-              <DropdownMenuShortcut>⌘B</DropdownMenuShortcut>
-            </Link>
-          </DropdownMenuItem>
-          <DropdownMenuItem asChild>
-            <Link to='/settings'>
-              Settings
-              <DropdownMenuShortcut>⌘S</DropdownMenuShortcut>
-            </Link>
-          </DropdownMenuItem>
-          <DropdownMenuItem>New Team</DropdownMenuItem>
-        </DropdownMenuGroup>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={() => setRole(nextRole)}>
-          Switch to {nextRole}
+        <DropdownMenuItem onClick={() => auth.signoutRedirect()}>
+          Log out
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

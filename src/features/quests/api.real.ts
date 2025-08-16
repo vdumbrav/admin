@@ -6,8 +6,29 @@ type QuestsResponse = { items: Task[]; total: number }
 
 const BASE_URL = import.meta.env.VITE_API_URL
 
+function getAccessToken(): string | undefined {
+  try {
+    const rawIssuer = import.meta.env.VITE_OIDC_AUTHORITY as string
+    const authority = rawIssuer.endsWith('/')
+      ? rawIssuer.slice(0, -1)
+      : rawIssuer
+    const key = `oidc.user:${authority}:mobile_app`
+    const raw = window.localStorage.getItem(key)
+    return raw ? JSON.parse(raw)?.access_token : undefined
+  } catch {
+    return undefined
+  }
+}
+
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
-  const res = await fetch(`${BASE_URL}${path}`, options)
+  const token = getAccessToken()
+  const res = await fetch(`${BASE_URL}${path}`, {
+    ...options,
+    headers: {
+      ...(options?.headers || {}),
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+  })
   if (!res.ok) throw new Error('Request failed')
   return res.json() as Promise<T>
 }
