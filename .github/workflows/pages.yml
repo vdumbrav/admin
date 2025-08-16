@@ -28,9 +28,9 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm build
         env:
-          VITE_API_URL: ${{ vars.API_URL }}
+          VITE_API_URL: "http://localhost:3000"
           VITE_APP_BASE_URL: https://vdumbrav.github.io/admin/
-          VITE_OIDC_AUTHORITY: ${{ vars.OIDC_AUTHORITY }}
+          VITE_OIDC_AUTHORITY: "https://auth.jamcard.io/realms/jamcard"
           VITE_USE_FAKE_AUTH: "true"
           VITE_USE_FAKE_API: "true"
       - run: cp dist/index.html dist/404.html
