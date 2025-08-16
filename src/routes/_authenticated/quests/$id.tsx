@@ -7,4 +7,3 @@ export const Route = createFileRoute('/_authenticated/quests/$id')({
   component: QuestEditPage,
   staticData: { title: 'Edit Quest', breadcrumb: 'Edit Quest' },
 })
-
