@@ -1,4 +1,5 @@
 import * as React from 'react'
+import { useRouter, useSearch } from '@tanstack/react-router'
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -14,7 +15,6 @@ import {
   getSortedRowModel,
   useReactTable,
 } from '@tanstack/react-table'
-import { useRouter, useSearch } from '@tanstack/react-router'
 import type { Row } from '@tanstack/react-table'
 import type { TaskGroup } from '@/types/tasks'
 import { DndContext, DragEndEvent } from '@dnd-kit/core'
@@ -143,10 +143,20 @@ export const QuestsDataTable = ({ columns, isAdmin }: DataTableProps) => {
       limit: pagination.pageSize,
       sort,
     }
-      if (JSON.stringify(next) !== JSON.stringify(searchParams)) {
-        router.navigate({ to: '/quests', search: next, replace: true })
-      }
-    }, [search, group, type, provider, visible, pagination, sort, router, searchParams])
+    if (JSON.stringify(next) !== JSON.stringify(searchParams)) {
+      router.navigate({ to: '/quests', search: next, replace: true })
+    }
+  }, [
+    search,
+    group,
+    type,
+    provider,
+    visible,
+    pagination,
+    sort,
+    router,
+    searchParams,
+  ])
 
   React.useEffect(() => {
     if (!reorderMode) {

@@ -1,4 +1,6 @@
 import React from 'react'
+import { IconPlus } from '@tabler/icons-react'
+import { useAppAuth } from '@/auth/provider'
 import {
   Sidebar,
   SidebarContent,
@@ -10,8 +12,6 @@ import { NavGroup } from '@/components/layout/nav-group'
 import { NavUser } from '@/components/layout/nav-user'
 import { TeamSwitcher } from '@/components/layout/team-switcher'
 import { sidebarData } from './data/sidebar-data'
-import { useAppAuth } from '@/auth/provider'
-import { IconPlus } from '@tabler/icons-react'
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const auth = useAppAuth()

@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { requireAdminBeforeLoad } from '@/auth/guards'
-import { QuestEditPage } from '@/features/quests/pages'
 import { parseQuestSearch } from '@/features/quests/default-search'
+import { QuestEditPage } from '@/features/quests/pages'
 
 export const Route = createFileRoute('/_authenticated/quests/$id')({
   beforeLoad: requireAdminBeforeLoad,

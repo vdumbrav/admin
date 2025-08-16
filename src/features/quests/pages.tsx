@@ -29,7 +29,10 @@ export const QuestCreatePage = () => {
             <h2 className='text-2xl font-bold tracking-tight'>New Quest</h2>
             <p className='text-muted-foreground'>Create a new quest.</p>
           </div>
-          <Button variant='outline' onClick={() => nav({ to: '/quests', search })}>
+          <Button
+            variant='outline'
+            onClick={() => nav({ to: '/quests', search })}
+          >
             Back to list
           </Button>
         </div>
@@ -95,7 +98,10 @@ export const QuestEditPage = () => {
             </h2>
             <p className='text-muted-foreground'>Update quest properties.</p>
           </div>
-          <Button variant='outline' onClick={() => nav({ to: '/quests', search })}>
+          <Button
+            variant='outline'
+            onClick={() => nav({ to: '/quests', search })}
+          >
             Back to list
           </Button>
         </div>

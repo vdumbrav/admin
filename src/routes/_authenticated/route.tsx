@@ -1,8 +1,8 @@
 import { useEffect } from 'react'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { requireAdminBeforeLoad } from '@/auth/guards'
 import { useAppAuth } from '@/auth/provider'
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout'
-import { requireAdminBeforeLoad } from '@/auth/guards'
 
 function AuthenticatedRoute() {
   const auth = useAppAuth()

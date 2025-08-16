@@ -1,10 +1,10 @@
 import React from 'react'
 import { AuthProvider, useAuth as useRealAuth } from 'react-oidc-context'
+import { toast } from 'sonner'
+import { logError } from '@/utils/log'
 import { MockAuthProvider, useMockAuth } from './mock'
 import { oidcConfig } from './oidc'
 import { extractRoles } from './roles'
-import { toast } from 'sonner'
-import { logError } from '@/utils/log'
 
 const useFake = import.meta.env.VITE_USE_FAKE_AUTH === 'true'
 const useAuthImpl = useFake ? useMockAuth : useRealAuth

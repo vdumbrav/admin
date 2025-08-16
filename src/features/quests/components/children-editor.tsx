@@ -213,20 +213,20 @@ const ChildRow = ({ id, index, remove }: RowProps) => {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Reward</FormLabel>
-                <FormControl>
-                  <Input
-                    type='number'
-                    {...field}
-                    value={field.value ?? ''}
-                    onChange={(e) =>
-                      field.onChange(
-                        Number.isNaN(e.target.valueAsNumber)
-                          ? undefined
-                          : e.target.valueAsNumber
-                      )
-                    }
-                  />
-                </FormControl>
+              <FormControl>
+                <Input
+                  type='number'
+                  {...field}
+                  value={field.value ?? ''}
+                  onChange={(e) =>
+                    field.onChange(
+                      Number.isNaN(e.target.valueAsNumber)
+                        ? undefined
+                        : e.target.valueAsNumber
+                    )
+                  }
+                />
+              </FormControl>
               <FormMessage />
             </FormItem>
           )}
