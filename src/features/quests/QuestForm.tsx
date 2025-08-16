@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from 'react'
 import { z } from 'zod'
-import { useForm } from 'react-hook-form'
+import { useForm, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Button } from '@/components/ui/button'
 import {
@@ -19,6 +19,7 @@ import { SelectDropdown } from '@/components/select-dropdown'
 import { Switch } from '@/components/ui/switch'
 import { useNavigate } from '@tanstack/react-router'
 import { defaultPartnerTask, type Task } from '@/types/tasks'
+import { toast } from 'sonner'
 import { groups, types, providers } from './data/data'
 import { uploadMedia } from './api'
 
@@ -131,30 +132,54 @@ export const QuestForm = ({
     },
   })
 
-  const typeValue = form.watch('type')
-  const provider = form.watch('provider')
-  const icon = form.watch('resources.icon')
+  const type = useWatch({ control: form.control, name: 'type' })
+  const provider = useWatch({ control: form.control, name: 'provider' })
+  const icon = useWatch({ control: form.control, name: 'resources.icon' })
+  const adsgramType = useWatch({
+    control: form.control,
+    name: 'resources.adsgram.type',
+  })
+
+  const popupField = (key: string) => `resources.ui['pop-up'].${key}` as const
 
   useEffect(() => {
-    if (typeValue === 'partner_invite') {
+    if (type !== 'partner_invite') return
+    const values = form.getValues()
+    if (!values.title) {
       form.setValue('title', defaultPartnerTask.title, { shouldDirty: true })
+    }
+    if (!values.description) {
       form.setValue('description', defaultPartnerTask.description ?? '', {
         shouldDirty: true,
       })
+    }
+    if (values.group === 'all') {
       form.setValue('group', defaultPartnerTask.group, { shouldDirty: true })
-      form.setValue('order_by', defaultPartnerTask.order_by, { shouldDirty: true })
+    }
+    if (values.order_by === 0) {
+      form.setValue('order_by', defaultPartnerTask.order_by, {
+        shouldDirty: true,
+      })
+    }
+    if (!values.uri) {
       form.setValue('uri', defaultPartnerTask.uri ?? '', { shouldDirty: true })
+    }
+    if (!values.resources?.ui?.button) {
       form.setValue(
         'resources.ui.button',
         defaultPartnerTask.resources?.ui?.button ?? '',
         { shouldDirty: true }
       )
     }
-  }, [typeValue, form])
+  }, [type, form])
 
   const handleUpload = async (file: File) => {
-    const { url } = await uploadMedia(file)
-    form.setValue('resources.icon', url, { shouldDirty: true })
+    try {
+      const { url } = await uploadMedia(file)
+      form.setValue('resources.icon', url, { shouldDirty: true })
+    } catch {
+      toast.error('Failed to upload icon')
+    }
   }
 
   return (
@@ -350,7 +375,7 @@ export const QuestForm = ({
             <div className='text-sm font-medium'>Pop-up</div>
             <FormField
               control={form.control}
-              name="resources.ui['pop-up'].name"
+              name={popupField('name')}
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Name</FormLabel>
@@ -363,7 +388,7 @@ export const QuestForm = ({
             />
             <FormField
               control={form.control}
-              name="resources.ui['pop-up'].button"
+              name={popupField('button')}
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Button</FormLabel>
@@ -376,7 +401,7 @@ export const QuestForm = ({
             />
             <FormField
               control={form.control}
-              name="resources.ui['pop-up'].description"
+              name={popupField('description')}
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Description</FormLabel>
@@ -389,7 +414,7 @@ export const QuestForm = ({
             />
             <FormField
               control={form.control}
-              name="resources.ui['pop-up'].static"
+              name={popupField('static')}
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Static</FormLabel>
@@ -402,7 +427,7 @@ export const QuestForm = ({
             />
             <FormField
               control={form.control}
-              name="resources.ui['pop-up']['additional-title']"
+              name={popupField('additional-title')}
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Additional title</FormLabel>
@@ -415,7 +440,7 @@ export const QuestForm = ({
             />
             <FormField
               control={form.control}
-              name="resources.ui['pop-up']['additional-description']"
+              name={popupField('additional-description')}
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Additional description</FormLabel>
@@ -460,26 +485,28 @@ export const QuestForm = ({
               </FormItem>
             )}
           />
-          <FormField
-            control={form.control}
-            name='resources.adsgram.subtype'
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>AdsGram Subtype</FormLabel>
-                <SelectDropdown
-                  defaultValue={field.value as string}
-                  onValueChange={(v) => field.onChange(v || undefined)}
-                  placeholder='Select subtype'
-                  items={[
-                    { label: '—', value: '' },
-                    { label: 'video-ad', value: 'video-ad' },
-                    { label: 'post-style-image', value: 'post-style-image' },
-                  ]}
-                />
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          {adsgramType === 'task' && (
+            <FormField
+              control={form.control}
+              name='resources.adsgram.subtype'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>AdsGram Subtype</FormLabel>
+                  <SelectDropdown
+                    defaultValue={field.value as string}
+                    onValueChange={(v) => field.onChange(v || undefined)}
+                    placeholder='Select subtype'
+                    items={[
+                      { label: '—', value: '' },
+                      { label: 'video-ad', value: 'video-ad' },
+                      { label: 'post-style-image', value: 'post-style-image' },
+                    ]}
+                  />
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
         </div>
 
         <div className='space-y-2'>
