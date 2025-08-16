@@ -4,6 +4,8 @@ import {
   ColumnFiltersState,
   SortingState,
   VisibilityState,
+  PaginationState,
+  Updater,
   flexRender,
   getCoreRowModel,
   getFacetedRowModel,
@@ -12,6 +14,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from '@tanstack/react-table'
+import { useRouter, useSearch } from '@tanstack/react-router'
 import type { Row } from '@tanstack/react-table'
 import type { TaskGroup } from '@/types/tasks'
 import { DndContext, DragEndEvent } from '@dnd-kit/core'
@@ -41,19 +44,36 @@ interface DataTableProps {
   isAdmin: boolean
 }
 
-export const QuestsDataTable = ({ columns, isAdmin }: DataTableProps) => {
+  export const QuestsDataTable = ({ columns, isAdmin }: DataTableProps) => {
+    const router = useRouter()
+    const searchParams = useSearch({ from: '/_authenticated/quests/' as const })
   const [rowSelection, setRowSelection] = React.useState({})
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({})
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-    []
+    () => {
+      const init: ColumnFiltersState = []
+      if (searchParams.search)
+        init.push({ id: 'title', value: searchParams.search })
+      if (searchParams.group && searchParams.group !== 'all')
+        init.push({ id: 'group', value: [searchParams.group] })
+      if (searchParams.type)
+        init.push({ id: 'type', value: [searchParams.type] })
+      if (searchParams.provider)
+        init.push({ id: 'provider', value: [searchParams.provider] })
+      if (searchParams.visible)
+        init.push({ id: 'visible', value: [searchParams.visible] })
+      return init
+    }
   )
-  const [sorting, setSorting] = React.useState<SortingState>([
-    { id: 'order_by', desc: false },
-  ])
+  const [sorting, setSorting] = React.useState<SortingState>(() => {
+    const s = searchParams.sort ?? 'order_by:asc'
+    const [id, dir] = s.split(':')
+    return [{ id, desc: dir === 'desc' }]
+  })
   const [pagination, setPagination] = React.useState({
-    pageIndex: 0,
-    pageSize: 20,
+    pageIndex: (searchParams.page ?? 1) - 1,
+    pageSize: searchParams.limit ?? 20,
   })
   const [reorderMode, setReorderMode] = React.useState(false)
   const [rows, setRows] = React.useState<Quest[]>([])
@@ -91,12 +111,51 @@ export const QuestsDataTable = ({ columns, isAdmin }: DataTableProps) => {
   }, [search, group, type, provider, visible, sorting])
 
   React.useEffect(() => {
+    const nextFilters: ColumnFiltersState = []
+    if (searchParams.search)
+      nextFilters.push({ id: 'title', value: searchParams.search })
+    if (searchParams.group && searchParams.group !== 'all')
+      nextFilters.push({ id: 'group', value: [searchParams.group] })
+    if (searchParams.type)
+      nextFilters.push({ id: 'type', value: [searchParams.type] })
+    if (searchParams.provider)
+      nextFilters.push({ id: 'provider', value: [searchParams.provider] })
+    if (searchParams.visible)
+      nextFilters.push({ id: 'visible', value: [searchParams.visible] })
+    setColumnFilters(nextFilters)
+    const s = searchParams.sort ?? 'order_by:asc'
+    const [id, dir] = s.split(':')
+    setSorting([{ id, desc: dir === 'desc' }])
+    setPagination({
+      pageIndex: (searchParams.page ?? 1) - 1,
+      pageSize: searchParams.limit ?? 20,
+    })
+  }, [searchParams])
+
+  React.useEffect(() => {
+    const next = {
+      search,
+      group,
+      type,
+      provider,
+      visible,
+      page: pagination.pageIndex + 1,
+      limit: pagination.pageSize,
+      sort,
+    }
+      if (JSON.stringify(next) !== JSON.stringify(searchParams)) {
+        router.navigate({ to: '/quests', search: next, replace: true })
+      }
+    }, [search, group, type, provider, visible, pagination, sort, router, searchParams])
+
+  React.useEffect(() => {
     if (!reorderMode) {
       setRows((data?.items ?? []) as Quest[])
     }
   }, [data, reorderMode])
 
   const handleDragEnd = (e: DragEndEvent) => {
+    if (reorder.isPending) return
     const { active, over } = e
     if (!over || active.id === over.id) return
     const oldIndex = rows.findIndex((r) => r.id === Number(active.id))
@@ -126,7 +185,18 @@ export const QuestsDataTable = ({ columns, isAdmin }: DataTableProps) => {
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     onColumnVisibilityChange: setColumnVisibility,
-    onPaginationChange: setPagination,
+    onPaginationChange: (updater: Updater<PaginationState>) => {
+      setPagination((old) => {
+        const next =
+          typeof updater === 'function'
+            ? (updater as (s: PaginationState) => PaginationState)(old)
+            : updater
+        return {
+          pageIndex: next.pageSize !== old.pageSize ? 0 : next.pageIndex,
+          pageSize: next.pageSize,
+        }
+      })
+    },
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getSortedRowModel: getSortedRowModel(),

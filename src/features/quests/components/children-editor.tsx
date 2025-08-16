@@ -182,7 +182,7 @@ const ChildRow = ({ id, index, remove }: RowProps) => {
             <FormItem>
               <FormLabel>Type</FormLabel>
               <SelectDropdown
-                defaultValue={field.value}
+                value={field.value}
                 onValueChange={field.onChange}
                 placeholder='Select type'
                 items={childTypes}
@@ -198,7 +198,7 @@ const ChildRow = ({ id, index, remove }: RowProps) => {
             <FormItem>
               <FormLabel>Provider</FormLabel>
               <SelectDropdown
-                defaultValue={field.value}
+                value={field.value}
                 onValueChange={field.onChange}
                 placeholder='Select provider'
                 items={childProviders}
@@ -213,18 +213,20 @@ const ChildRow = ({ id, index, remove }: RowProps) => {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Reward</FormLabel>
-              <FormControl>
-                <Input
-                  type='number'
-                  {...field}
-                  value={field.value ?? ''}
-                  onChange={(e) =>
-                    field.onChange(
-                      e.target.value === '' ? undefined : Number(e.target.value)
-                    )
-                  }
-                />
-              </FormControl>
+                <FormControl>
+                  <Input
+                    type='number'
+                    {...field}
+                    value={field.value ?? ''}
+                    onChange={(e) =>
+                      field.onChange(
+                        Number.isNaN(e.target.valueAsNumber)
+                          ? undefined
+                          : e.target.valueAsNumber
+                      )
+                    }
+                  />
+                </FormControl>
               <FormMessage />
             </FormItem>
           )}

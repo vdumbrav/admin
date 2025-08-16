@@ -1,10 +1,10 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { z } from 'zod'
 import { useForm, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useNavigate, useBlocker } from '@tanstack/react-router'
+import { useNavigate, useBlocker, useSearch } from '@tanstack/react-router'
 import { useAppAuth } from '@/auth/provider'
 import { defaultPartnerTask, type Task } from '@/types/tasks'
 import { toast } from 'sonner'
@@ -154,7 +154,9 @@ export const QuestForm = ({
 }) => {
   const auth = useAppAuth()
   const nav = useNavigate({})
+  const search = useSearch({ from: '/_authenticated/quests/' })
   const fileRef = useRef<HTMLInputElement | null>(null)
+  const [iconPreview, setIconPreview] = useState<string>()
 
   const form = useForm({
     resolver: zodResolver(schema),
@@ -255,6 +257,14 @@ export const QuestForm = ({
   }, [form.formState.isDirty])
 
   const handleUpload = async (file: File) => {
+    if (!file.type.startsWith('image/')) {
+      toast.error('Only image files allowed')
+      return
+    }
+    if (file.size > 1024 * 1024) {
+      toast.error('File too large (max 1MB)')
+      return
+    }
     try {
       const { url } = await uploadMedia(file, auth.getAccessToken())
       form.setValue('resources.icon', url, { shouldDirty: true })
@@ -262,6 +272,36 @@ export const QuestForm = ({
       toast.error('Failed to upload icon')
     }
   }
+
+  useEffect(() => {
+    let preview: string | undefined
+    const controller = new AbortController()
+    const load = async () => {
+      if (!icon) {
+        setIconPreview(undefined)
+        return
+      }
+      try {
+        const token = auth.getAccessToken()
+        const res = await fetch(icon, {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+          signal: controller.signal,
+        })
+        const blob = await res.blob()
+        preview = URL.createObjectURL(blob)
+        setIconPreview(preview)
+      } catch (e) {
+        if (!(e instanceof DOMException && e.name === 'AbortError')) {
+          toast.error('Failed to load icon')
+        }
+      }
+    }
+    load()
+    return () => {
+      controller.abort()
+      if (preview) URL.revokeObjectURL(preview)
+    }
+  }, [icon, auth])
 
   return (
     <Form {...form}>
@@ -295,7 +335,7 @@ export const QuestForm = ({
               <FormItem>
                 <FormLabel>Type</FormLabel>
                 <SelectDropdown
-                  defaultValue={field.value}
+                  value={field.value}
                   onValueChange={field.onChange}
                   placeholder='Select type'
                   items={types.map(({ label, value }) => ({ label, value }))}
@@ -311,7 +351,7 @@ export const QuestForm = ({
               <FormItem>
                 <FormLabel>Group</FormLabel>
                 <SelectDropdown
-                  defaultValue={field.value}
+                  value={field.value}
                   onValueChange={field.onChange}
                   placeholder='Select group'
                   items={groups.map(({ label, value }) => ({ label, value }))}
@@ -333,7 +373,9 @@ export const QuestForm = ({
                     value={field.value as number}
                     onChange={(e) =>
                       field.onChange(
-                        e.target.value === '' ? 0 : Number(e.target.value)
+                        Number.isNaN(e.target.valueAsNumber)
+                          ? 0
+                          : e.target.valueAsNumber
                       )
                     }
                   />
@@ -362,7 +404,7 @@ export const QuestForm = ({
               <FormItem>
                 <FormLabel>Provider</FormLabel>
                 <SelectDropdown
-                  defaultValue={field.value}
+                  value={field.value}
                   onValueChange={(v) => field.onChange(v || undefined)}
                   placeholder='Select provider'
                   items={providers.map(({ label, value }) => ({
@@ -430,9 +472,9 @@ export const QuestForm = ({
                     value={(field.value as number | undefined) ?? ''}
                     onChange={(e) =>
                       field.onChange(
-                        e.target.value === ''
+                        Number.isNaN(e.target.valueAsNumber)
                           ? undefined
-                          : Number(e.target.value)
+                          : e.target.valueAsNumber
                       )
                     }
                   />
@@ -601,7 +643,7 @@ export const QuestForm = ({
                     <FormItem>
                       <FormLabel>AdsGram Type</FormLabel>
                       <SelectDropdown
-                        defaultValue={field.value || 'none'}
+                        value={field.value || 'none'}
                         onValueChange={(v) => {
                           const next = v === 'none' ? '' : v
                           field.onChange(next)
@@ -632,7 +674,7 @@ export const QuestForm = ({
                       <FormItem>
                         <FormLabel>AdsGram Subtype</FormLabel>
                         <SelectDropdown
-                          defaultValue={field.value || 'none'}
+                          value={field.value || 'none'}
                           onValueChange={(v) =>
                             field.onChange(v === 'none' ? '' : v)
                           }
@@ -658,9 +700,9 @@ export const QuestForm = ({
 
         <div className='space-y-2'>
           <FormLabel>Icon</FormLabel>
-          {icon ? (
+          {iconPreview ? (
             <img
-              src={icon}
+              src={iconPreview}
               className='h-16 w-16 rounded border object-contain'
             />
           ) : null}
@@ -687,7 +729,7 @@ export const QuestForm = ({
           <Button
             variant='outline'
             type='button'
-            onClick={() => nav({ to: '/quests' })}
+            onClick={() => nav({ to: '/quests', search })}
           >
             Cancel
           </Button>

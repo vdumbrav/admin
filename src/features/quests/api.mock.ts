@@ -19,9 +19,19 @@ export function useQuests(query: {
     ...query,
     visible: query.visible === '' ? undefined : query.visible === 'true',
   }
+  const search = new URLSearchParams(
+    Object.fromEntries(
+      Object.entries(params)
+        .filter(([, v]) => v !== undefined)
+        .map(([k, v]) => [k, String(v)])
+    )
+  ).toString()
   return useQuery<QuestsResponse>({
-    queryKey: ['quests', params],
+    // eslint-disable-next-line @tanstack/query/exhaustive-deps
+    queryKey: ['quests', search],
     queryFn: () => fx.getQuests(params),
+    staleTime: 20_000,
+    placeholderData: (prev) => prev,
   })
 }
 
