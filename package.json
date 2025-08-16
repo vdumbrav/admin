@@ -1,7 +1,9 @@
 {
-  "name": "shadcn-admin",
-  "private": false,
+  "name": "waitlist-admin",
+  "private": true,
   "version": "1.4.2",
+  "license": "UNLICENSED",
+  "description": "Internal Waitlist Admin app",
   "type": "module",
   "scripts": {
     "dev": "vite",
