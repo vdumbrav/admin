@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import * as fx from '@/faker'
-import type { Task, TaskGroup } from '@/types/quests'
+import type { Task, TaskGroup } from '@/types/tasks'
 import type { QuestPayload } from './types'
 
 type QuestsResponse = { items: Task[]; total: number }

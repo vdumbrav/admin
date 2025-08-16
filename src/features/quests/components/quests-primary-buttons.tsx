@@ -5,12 +5,7 @@ import { Button } from '@/components/ui/button'
 
 export const QuestsPrimaryButtons = () => {
   const { user } = useAuth()
-  const roles =
-    (user?.profile && (user.profile as { roles?: string[] | string }).roles) ||
-    []
-  const isAdmin = Array.isArray(roles)
-    ? roles.includes('admin')
-    : roles === 'admin'
+  const isAdmin = user?.roles.includes('admin')
   if (!isAdmin) return null
   return (
     <Button asChild className='space-x-1'>

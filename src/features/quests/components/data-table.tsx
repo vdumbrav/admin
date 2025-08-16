@@ -13,7 +13,7 @@ import {
   useReactTable,
 } from '@tanstack/react-table'
 import type { Row } from '@tanstack/react-table'
-import type { TaskGroup } from '@/types/quests'
+import type { TaskGroup } from '@/types/tasks'
 import { DndContext, DragEndEvent } from '@dnd-kit/core'
 import {
   SortableContext,

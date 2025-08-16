@@ -1,3 +1,3 @@
-import type { Task } from '@/types/quests'
+import type { Task } from '@/types/tasks'
 
 export type QuestPayload = Partial<Task>

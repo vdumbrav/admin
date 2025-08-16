@@ -4,9 +4,8 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
 import { Toaster } from '@/components/ui/sonner'
 import { NavigationProgress } from '@/components/navigation-progress'
-
-const NotFound = () => <div className='p-4'>Page not found</div>
-const GeneralError = () => <div className='p-4'>Something went wrong</div>
+import GeneralError from '@/features/errors/general-error'
+import NotFoundError from '@/features/errors/not-found-error'
 
 export const Route = createRootRouteWithContext<{
   queryClient: QueryClient
@@ -26,6 +25,6 @@ export const Route = createRootRouteWithContext<{
       </>
     )
   },
-  notFoundComponent: NotFound,
+  notFoundComponent: NotFoundError,
   errorComponent: GeneralError,
 })

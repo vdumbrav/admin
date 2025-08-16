@@ -1,18 +1,13 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import type { Task, TaskGroup } from '@/types/quests'
-import { userManager } from '@/lib/oidc'
+import type { Task, TaskGroup } from '@/types/tasks'
 import type { QuestPayload } from './types'
 
 type QuestsResponse = { items: Task[]; total: number }
 
 const BASE_URL = import.meta.env.VITE_API_URL
 
-async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
-  const user = await userManager.getUser()
-  const headers = new Headers(options.headers)
-  if (user?.access_token)
-    headers.set('Authorization', `Bearer ${user.access_token}`)
-  const res = await fetch(`${BASE_URL}${path}`, { ...options, headers })
+async function request<T>(path: string, options?: RequestInit): Promise<T> {
+  const res = await fetch(`${BASE_URL}${path}`, options)
   if (!res.ok) throw new Error('Request failed')
   return res.json() as Promise<T>
 }

@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import type { Task as BaseTask } from '@/types/quests'
+import type { Task as BaseTask } from '@/types/tasks'
 
 export const questSchema = z.object({
   id: z.number(),

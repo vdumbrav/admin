@@ -10,14 +10,13 @@ I've been creating dashboard UIs at work and for my personal projects. I always 
 
 ## Features
 
-- Quests management with drag-and-drop reordering
-- Settings pages
-- OIDC authentication
 - Light/dark mode
 - Responsive
 - Accessible
-- Built-in Sidebar component
-- Global search command
+- With built-in Sidebar component
+- Global Search Command
+- 10+ pages
+- Extra custom components
 
 ## Tech Stack
 
@@ -33,7 +32,7 @@ I've been creating dashboard UIs at work and for my personal projects. I always 
 
 **Icons:** [Tabler Icons](https://tabler.io/icons)
 
-**Auth:** OIDC via `react-oidc-context` + `oidc-client-ts`
+**Auth (partial):** [Clerk](https://go.clerk.com/GttUAaK)
 
 ## Run Locally
 
@@ -66,6 +65,10 @@ Start the server
 If you find this project helpful or use this in your own work, consider [sponsoring me](https://github.com/sponsors/satnaing) to support development and maintenance. You can [buy me a coffee](https://buymeacoffee.com/satnaing) as well. Don’t worry, every penny helps. Thank you! 🙏
 
 For questions or sponsorship inquiries, feel free to reach out at [contact@satnaing.dev](mailto:contact@satnaing.dev).
+
+### Current Sponsor
+
+- [Clerk](https://go.clerk.com/GttUAaK) - for backing the implementation of Clerk in this project
 
 ## Author
 

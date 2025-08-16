@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { useFieldArray, useFormContext, useWatch } from 'react-hook-form'
-import type { Task } from '@/types/quests'
+import type { Task } from '@/types/tasks'
 import { DndContext, DragEndEvent } from '@dnd-kit/core'
 import {
   SortableContext,
@@ -80,7 +80,7 @@ export const ChildrenEditor = () => {
   return (
     <div className='space-y-4'>
       <div className='flex items-center justify-between'>
-        <h3 className='text-sm font-medium'>Child quests</h3>
+        <h3 className='text-sm font-medium'>Child tasks</h3>
         <Button
           type='button'
           onClick={() =>
