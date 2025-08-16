@@ -17,7 +17,7 @@ function SignInPage() {
   }, [signinRedirect])
 
   return (
-    <div className="flex h-[60vh] items-center justify-center text-muted-foreground">
+    <div className='text-muted-foreground flex h-[60vh] items-center justify-center'>
       Signing in…
     </div>
   )

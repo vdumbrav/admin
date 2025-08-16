@@ -1,8 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useAppAuth } from '@/auth/provider'
-import { http } from '@/lib/http'
-import { toast } from 'sonner'
 import type { Task, TaskGroup } from '@/types/tasks'
+import { toast } from 'sonner'
+import { http } from '@/lib/http'
 import type { QuestPayload } from './types'
 
 interface QuestsResponse {
@@ -34,7 +34,8 @@ export const useQuests = (query: {
   ).toString()
   return useQuery<QuestsResponse>({
     queryKey: ['quests', params],
-    queryFn: () => http<QuestsResponse>(`/quests?${search}`, { token: getAccessToken() }),
+    queryFn: () =>
+      http<QuestsResponse>(`/quests?${search}`, { token: getAccessToken() }),
   })
 }
 
@@ -106,12 +107,16 @@ export const useToggleVisibility = () => {
       const prev = qc.getQueryData<QuestsResponse>(['quests'])
       qc.setQueryData<QuestsResponse>(['quests'], (d) =>
         d
-          ? { ...d, items: d.items.map((t) => (t.id === id ? { ...t, visible } : t)) }
+          ? {
+              ...d,
+              items: d.items.map((t) => (t.id === id ? { ...t, visible } : t)),
+            }
           : d
       )
       return { prev }
     },
-    onError: (_e, _v, ctx) => ctx?.prev && qc.setQueryData(['quests'], ctx.prev),
+    onError: (_e, _v, ctx) =>
+      ctx?.prev && qc.setQueryData(['quests'], ctx.prev),
     onSettled: () => qc.invalidateQueries({ queryKey: ['quests'] }),
   })
 }
@@ -120,7 +125,13 @@ export const useBulkAction = () => {
   const qc = useQueryClient()
   const { getAccessToken } = useAppAuth()
   return useMutation({
-    mutationFn: ({ ids, action }: { ids: number[]; action: 'hide' | 'show' | 'delete' }) =>
+    mutationFn: ({
+      ids,
+      action,
+    }: {
+      ids: number[]
+      action: 'hide' | 'show' | 'delete'
+    }) =>
       http('/quests/bulk', {
         method: 'POST',
         body: JSON.stringify({ ids, action }),
@@ -137,7 +148,9 @@ export const useBulkAction = () => {
         const visible = action === 'show'
         return {
           ...d,
-          items: d.items.map((i) => (ids.includes(i.id) ? { ...i, visible } : i)),
+          items: d.items.map((i) =>
+            ids.includes(i.id) ? { ...i, visible } : i
+          ),
         }
       })
       return { prev }

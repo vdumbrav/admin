@@ -1,7 +1,7 @@
 import { Link } from '@tanstack/react-router'
 import { IconPlus } from '@tabler/icons-react'
-import { Button } from '@/components/ui/button'
 import { useAppAuth } from '@/auth/provider'
+import { Button } from '@/components/ui/button'
 
 export const QuestsPrimaryButtons = () => {
   const auth = useAppAuth()

@@ -7,14 +7,19 @@ if (!rawApiUrl) {
 const API_URL = rawApiUrl
 const APP_BASE = import.meta.env.BASE_URL
 
-export const http = async <T>(path: string, init: HttpInit = {}): Promise<T> => {
+export const http = async <T>(
+  path: string,
+  init: HttpInit = {}
+): Promise<T> => {
   const { token, headers, body, ...rest } = init
   const res = await fetch(`${API_URL}${path}`, {
     ...rest,
     headers: {
       ...(headers ?? {}),
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...(body instanceof FormData ? {} : { 'Content-Type': 'application/json' }),
+      ...(body instanceof FormData
+        ? {}
+        : { 'Content-Type': 'application/json' }),
     },
     body,
   })
