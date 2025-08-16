@@ -19,9 +19,14 @@ import {
 import { Input } from '@/components/ui/input'
 import { SelectDropdown } from '@/components/select-dropdown'
 
+type ChildType = Extract<
+  Task['type'],
+  'like' | 'share' | 'comment' | 'join' | 'connect'
+>
+
 interface Child {
   title: string
-  type: 'like' | 'share' | 'comment' | 'join' | 'connect'
+  type: ChildType
   provider?: Task['provider']
   reward?: number
   order_by: number

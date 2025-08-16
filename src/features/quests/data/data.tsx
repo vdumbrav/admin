@@ -8,10 +8,15 @@ export const groups = [
 export const types = [
   { value: 'like', label: 'Like' },
   { value: 'comment', label: 'Comment' },
-  { value: 'multiple', label: 'Multiple' },
-  { value: 'external', label: 'External' },
   { value: 'share', label: 'Share' },
   { value: 'join', label: 'Join' },
+  { value: 'connect', label: 'Connect' },
+  { value: 'multiple', label: 'Multiple' },
+  { value: 'repeatable', label: 'Repeatable' },
+  { value: 'dummy', label: 'Dummy' },
+  { value: 'partner_invite', label: 'Partner invite' },
+  { value: 'referral', label: 'Referral' },
+  { value: 'external', label: 'External' },
 ]
 
 export const providers = [

@@ -47,7 +47,7 @@ const childSchema = withTwitterValidation(
         'adsgram',
       ])
       .optional(),
-    reward: z.coerce.number().int().optional(),
+    reward: z.coerce.number().int().nonnegative().optional(),
     order_by: z.coerce.number().int().nonnegative(),
     resources: z
       .object({
@@ -90,11 +90,10 @@ const baseSchema = withTwitterValidation(
         ])
         .optional(),
       uri: z
-        .string()
-        .url()
+        .union([z.url(), z.literal('')])
         .optional()
-        .or(z.literal('').transform(() => undefined)),
-      reward: z.coerce.number().int().optional(),
+        .transform((val) => (val === '' ? undefined : val)),
+      reward: z.coerce.number().int().nonnegative().optional(),
       resources: z
         .object({
           icon: z.string().url().optional(),
@@ -128,7 +127,7 @@ const baseSchema = withTwitterValidation(
             .superRefine((val, ctx) => {
               if (val && val.type !== 'task' && val.subtype) {
                 ctx.addIssue({
-                  code: z.ZodIssueCode.custom,
+                  code: 'custom',
                   message: "subtype allowed only when type is 'task'",
                   path: ['subtype'],
                 })
@@ -138,7 +137,7 @@ const baseSchema = withTwitterValidation(
         .optional(),
       visible: z.boolean().optional(),
     })
-    .passthrough()
+    .loose()
 )
 
 const schema = baseSchema.extend({ child: z.array(childSchema).optional() })
@@ -275,6 +274,7 @@ export const QuestForm = ({
 
   useEffect(() => {
     const controller = new AbortController()
+    let localUrl: string | undefined
 
     if (!icon) {
       setIconPreview((oldUrl) => {
@@ -292,10 +292,10 @@ export const QuestForm = ({
           signal: controller.signal,
         })
         const blob = await res.blob()
-        const newUrl = URL.createObjectURL(blob)
+        localUrl = URL.createObjectURL(blob)
         setIconPreview((oldUrl) => {
           if (oldUrl) URL.revokeObjectURL(oldUrl)
-          return newUrl
+          return localUrl
         })
       } catch (e) {
         if (!(e instanceof DOMException && e.name === 'AbortError')) {
@@ -307,6 +307,7 @@ export const QuestForm = ({
 
     return () => {
       controller.abort()
+      if (localUrl) URL.revokeObjectURL(localUrl)
     }
   }, [icon, auth])
 
@@ -423,36 +424,37 @@ export const QuestForm = ({
               </FormItem>
             )}
           />
-          {provider === 'twitter' && (
-            <>
-              <FormField
-                control={form.control}
-                name='resources.tweetId'
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Tweet ID</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name='resources.username'
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Username</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </>
-          )}
+          {provider === 'twitter' &&
+            ['like', 'share', 'comment'].includes(type) && (
+              <>
+                <FormField
+                  control={form.control}
+                  name='resources.tweetId'
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Tweet ID</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name='resources.username'
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Username</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </>
+            )}
           <FormField
             control={form.control}
             name='uri'
@@ -643,6 +645,7 @@ export const QuestForm = ({
                     </FormItem>
                   )}
                 />
+                // AdsGram Type
                 <FormField
                   control={form.control}
                   name='resources.adsgram.type'
@@ -650,15 +653,18 @@ export const QuestForm = ({
                     <FormItem>
                       <FormLabel>AdsGram Type</FormLabel>
                       <SelectDropdown
-                        value={field.value || 'none'}
+                        value={field.value ?? 'none'}
                         onValueChange={(v) => {
-                          const next = v === 'none' ? '' : v
+                          const next =
+                            v === 'none' ? undefined : (v as 'task' | 'reward')
                           field.onChange(next)
                           if (next !== 'task') {
                             form.setValue(
                               'resources.adsgram.subtype',
                               undefined,
-                              { shouldDirty: true }
+                              {
+                                shouldDirty: true,
+                              }
                             )
                           }
                         }}
@@ -673,6 +679,34 @@ export const QuestForm = ({
                     </FormItem>
                   )}
                 />
+                // AdsGram Subtype (only when type === 'task')
+                {adsgramType === 'task' && (
+                  <FormField
+                    control={form.control}
+                    name='resources.adsgram.subtype'
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>AdsGram Subtype</FormLabel>
+                        <SelectDropdown
+                          value={field.value ?? 'none'}
+                          onValueChange={(v) =>
+                            field.onChange(v === 'none' ? undefined : v)
+                          }
+                          placeholder='Select subtype'
+                          items={[
+                            { label: '—', value: 'none' },
+                            { label: 'video-ad', value: 'video-ad' },
+                            {
+                              label: 'post-style-image',
+                              value: 'post-style-image',
+                            },
+                          ]}
+                        />
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                )}
                 {adsgramType === 'task' && (
                   <FormField
                     control={form.control}
