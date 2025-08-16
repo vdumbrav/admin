@@ -182,7 +182,7 @@ const ChildRow = ({ id, index, remove }: RowProps) => {
             <FormItem>
               <FormLabel>Type</FormLabel>
               <SelectDropdown
-                defaultValue={field.value as string}
+                defaultValue={field.value}
                 onValueChange={field.onChange}
                 placeholder='Select type'
                 items={childTypes}
@@ -198,7 +198,7 @@ const ChildRow = ({ id, index, remove }: RowProps) => {
             <FormItem>
               <FormLabel>Provider</FormLabel>
               <SelectDropdown
-                defaultValue={field.value as string}
+                defaultValue={field.value}
                 onValueChange={field.onChange}
                 placeholder='Select provider'
                 items={childProviders}

@@ -36,7 +36,7 @@ export const QuestCreatePage = () => {
           onSubmit={async (v) => {
             try {
               // backend accepts partial Task shape for children
-              await create.mutateAsync(v as unknown as Partial<Task>)
+              await create.mutateAsync(v as Partial<Task>)
               toast.success('Saved')
               nav({ to: '/quests' })
             } catch (e) {

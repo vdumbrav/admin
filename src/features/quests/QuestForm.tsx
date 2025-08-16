@@ -293,7 +293,7 @@ export const QuestForm = ({
               <FormItem>
                 <FormLabel>Type</FormLabel>
                 <SelectDropdown
-                  defaultValue={field.value as string}
+                  defaultValue={field.value}
                   onValueChange={field.onChange}
                   placeholder='Select type'
                   items={types.map(({ label, value }) => ({ label, value }))}
@@ -309,7 +309,7 @@ export const QuestForm = ({
               <FormItem>
                 <FormLabel>Group</FormLabel>
                 <SelectDropdown
-                  defaultValue={field.value as string}
+                  defaultValue={field.value}
                   onValueChange={field.onChange}
                   placeholder='Select group'
                   items={groups.map(({ label, value }) => ({ label, value }))}
@@ -360,7 +360,7 @@ export const QuestForm = ({
               <FormItem>
                 <FormLabel>Provider</FormLabel>
                 <SelectDropdown
-                  defaultValue={field.value as string}
+                  defaultValue={field.value}
                   onValueChange={(v) => field.onChange(v || undefined)}
                   placeholder='Select provider'
                   items={providers.map(({ label, value }) => ({
