@@ -27,9 +27,38 @@ import { Textarea } from '@/components/ui/textarea'
 import { SelectDropdown } from '@/components/select-dropdown'
 import { uploadMedia } from './api'
 import { groups, types, providers } from './data/data'
+import { ChildrenEditor } from './components/children-editor'
+import type { Child } from './components/children-editor'
+import { withTwitterValidation } from './validation'
 
-const schema = z
-  .object({
+const childSchema = withTwitterValidation(
+  z.object({
+    title: z.string().min(1),
+    type: z.enum(['like', 'share', 'comment', 'join', 'connect']),
+    provider: z
+      .enum([
+        'twitter',
+        'telegram',
+        'discord',
+        'matrix',
+        'walme',
+        'monetag',
+        'adsgram',
+      ])
+      .optional(),
+    reward: z.coerce.number().int().optional(),
+    order_by: z.coerce.number().int().nonnegative(),
+    resources: z
+      .object({
+        tweetId: z.string().optional(),
+        username: z.string().optional(),
+      })
+      .optional(),
+  })
+)
+
+const baseSchema = withTwitterValidation(
+  z.object({
     title: z.string().min(1),
     type: z.enum([
       'referral',
@@ -107,30 +136,10 @@ const schema = z
       .optional(),
     visible: z.boolean().optional(),
   })
-  .passthrough()
-  .superRefine((val, ctx) => {
-    const needsTweet =
-      ['like', 'share', 'comment'].includes(val.type) &&
-      val.provider === 'twitter'
-    if (needsTweet) {
-      const hasId = !!val.resources?.tweetId
-      const hasUser = !!val.resources?.username
-      if (!hasId) {
-        ctx.addIssue({
-          path: ['resources', 'tweetId'],
-          code: z.ZodIssueCode.custom,
-          message: 'Tweet ID is required for Twitter like/share/comment.',
-        })
-      }
-      if (!hasUser) {
-        ctx.addIssue({
-          path: ['resources', 'username'],
-          code: z.ZodIssueCode.custom,
-          message: 'Username is required for Twitter like/share/comment.',
-        })
-      }
-    }
-  })
+    .passthrough()
+)
+
+const schema = baseSchema.extend({ child: z.array(childSchema).optional() })
 
 type FormValues = z.infer<typeof schema>
 
@@ -144,7 +153,7 @@ export const QuestForm = ({
   const nav = useNavigate({})
   const fileRef = useRef<HTMLInputElement | null>(null)
 
-  const form = useForm<FormValues>({
+  const form = useForm({
     resolver: zodResolver(schema),
     defaultValues: {
       title: initial?.title ?? '',
@@ -157,6 +166,17 @@ export const QuestForm = ({
       reward: initial?.reward,
       resources: initial?.resources ?? { ui: { button: '' } },
       visible: initial?.visible ?? true,
+      child:
+        initial?.child?.map((c) => ({
+          title: c.title ?? '',
+          type: c.type as Child['type'],
+          provider: c.provider,
+          reward: c.reward,
+          order_by: c.order_by ?? 0,
+          resources: c.resources
+            ? { tweetId: c.resources.tweetId, username: c.resources.username }
+            : undefined,
+        })) ?? [],
     },
   })
 
@@ -243,7 +263,12 @@ export const QuestForm = ({
   return (
     <Form {...form}>
       <form
-        onSubmit={form.handleSubmit(onSubmit)}
+        onSubmit={form.handleSubmit((values) =>
+          onSubmit({
+            ...values,
+            child: values.child?.map((c, i) => ({ ...c, order_by: i })),
+          })
+        )}
         className='mx-auto max-w-5xl space-y-6'
       >
         <div className='grid gap-4 sm:grid-cols-2'>
@@ -302,6 +327,7 @@ export const QuestForm = ({
                   <Input
                     type='number'
                     {...field}
+                    value={field.value as number}
                     onChange={(e) =>
                       field.onChange(
                         e.target.value === '' ? 0 : Number(e.target.value)
@@ -398,7 +424,7 @@ export const QuestForm = ({
                   <Input
                     type='number'
                     {...field}
-                    value={field.value ?? ''}
+                    value={(field.value as number | undefined) ?? ''}
                     onChange={(e) =>
                       field.onChange(
                         e.target.value === ''
@@ -412,6 +438,11 @@ export const QuestForm = ({
               </FormItem>
             )}
           />
+          {type === 'multiple' && (
+            <div className='sm:col-span-2'>
+              <ChildrenEditor />
+            </div>
+          )}
           <FormField
             control={form.control}
             name='visible'

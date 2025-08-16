@@ -75,6 +75,13 @@ export function bulk(ids: number[], action: 'hide' | 'show' | 'delete') {
     items = items.map((i) => (ids.includes(i.id) ? { ...i, visible: v } : i))
   }
 }
+
+export function reorder(rows: Array<{ id: number; order_by: number }>) {
+  const map = new Map(rows.map((r) => [r.id, r.order_by]))
+  items = items
+    .map((i) => ({ ...i, order_by: map.get(i.id) ?? i.order_by }))
+    .sort((a, b) => a.order_by - b.order_by)
+}
 export function fakeUrl(name = 'image.png') {
   return `blob:/fake/${Date.now()}-${name}`
 }

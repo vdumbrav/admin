@@ -11,12 +11,16 @@ interface DataTableToolbarProps<TData> {
   table: Table<TData>
   isAdmin: boolean
   onBulk: (ids: number[], action: 'hide' | 'show' | 'delete') => void
+  reorderMode: boolean
+  onToggleReorder: () => void
 }
 
 export const DataTableToolbar = <TData,>({
   table,
   isAdmin,
   onBulk,
+  reorderMode,
+  onToggleReorder,
 }: DataTableToolbarProps<TData>) => {
   const isFiltered = table.getState().columnFilters.length > 0
   const selected = table
@@ -116,7 +120,19 @@ export const DataTableToolbar = <TData,>({
           </Button>
         )}
       </div>
-      <DataTableViewOptions table={table} />
+      <div className='flex items-center gap-2'>
+        {isAdmin && (
+          <Button
+            variant='outline'
+            size='sm'
+            onClick={onToggleReorder}
+            aria-label='Toggle reorder mode'
+          >
+            {reorderMode ? 'Done' : 'Reorder'}
+          </Button>
+        )}
+        <DataTableViewOptions table={table} />
+      </div>
     </div>
   )
 }

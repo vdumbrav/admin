@@ -8,6 +8,7 @@ import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
 import { QuestForm } from './QuestForm'
 import { useCreateQuest, useQuest, useUpdateQuest } from './api'
+import type { Task } from '@/types/tasks'
 
 export const QuestCreatePage = () => {
   const create = useCreateQuest()
@@ -34,7 +35,8 @@ export const QuestCreatePage = () => {
         <QuestForm
           onSubmit={async (v) => {
             try {
-              await create.mutateAsync(v)
+              // backend accepts partial Task shape for children
+              await create.mutateAsync(v as unknown as Partial<Task>)
               toast.success('Saved')
               nav({ to: '/quests' })
             } catch (e) {
@@ -99,7 +101,8 @@ export const QuestEditPage = () => {
           initial={data}
           onSubmit={async (v) => {
             try {
-              await update.mutateAsync(v)
+              // backend accepts partial Task shape for children
+              await update.mutateAsync(v as unknown as Partial<Task>)
               toast.success('Saved')
               nav({ to: '/quests' })
             } catch (e) {

@@ -19,3 +19,6 @@ export const useToggleVisibility = useFake
   : real.useToggleVisibility
 export const useBulkAction = useFake ? mock.useBulkAction : real.useBulkAction
 export const uploadMedia = useFake ? mock.uploadMedia : real.uploadMedia
+export const useReorderQuests = useFake
+  ? mock.useReorderQuests
+  : real.useReorderQuests

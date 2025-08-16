@@ -23,8 +23,18 @@ import {
 } from '@/components/ui/table'
 import { DataTablePagination } from '@/components/table/data-table-pagination'
 import { useQuests, useBulkAction } from '../api'
+import { useReorderQuests } from '../api'
 import type { Quest } from '../data/schema'
 import { DataTableToolbar } from './data-table-toolbar'
+import { DndContext, DragEndEvent } from '@dnd-kit/core'
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+  arrayMove,
+  useSortable,
+} from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
+import type { Row } from '@tanstack/react-table'
 
 interface DataTableProps {
   columns: ColumnDef<Quest>[]
@@ -45,6 +55,8 @@ export const QuestsDataTable = ({ columns, isAdmin }: DataTableProps) => {
     pageIndex: 0,
     pageSize: 20,
   })
+  const [reorderMode, setReorderMode] = React.useState(false)
+  const [rows, setRows] = React.useState<Quest[]>([])
   const pickSingle = (id: string, fallback = ''): string => {
     const raw = columnFilters.find((f) => f.id === id)?.value as unknown
     if (Array.isArray(raw)) return (raw[0] ?? fallback) as string
@@ -72,13 +84,31 @@ export const QuestsDataTable = ({ columns, isAdmin }: DataTableProps) => {
     sort,
   })
   const bulk = useBulkAction()
+  const reorder = useReorderQuests()
 
   React.useEffect(() => {
     setPagination((p) => ({ ...p, pageIndex: 0 }))
   }, [search, group, type, provider, visible, sorting])
 
+  React.useEffect(() => {
+    if (!reorderMode) {
+      setRows((data?.items ?? []) as Quest[])
+    }
+  }, [data, reorderMode])
+
+  const handleDragEnd = (e: DragEndEvent) => {
+    const { active, over } = e
+    if (!over || active.id === over.id) return
+    const oldIndex = rows.findIndex((r) => r.id === Number(active.id))
+    const newIndex = rows.findIndex((r) => r.id === Number(over.id))
+    const newRows = arrayMove(rows, oldIndex, newIndex)
+    setRows(newRows)
+    const payload = newRows.map((r, i) => ({ id: r.id, order_by: i }))
+    reorder.mutate({ rows: payload }, { onError: () => setRows(rows) })
+  }
+
   const table = useReactTable({
-    data: (data?.items ?? []) as Quest[],
+    data: (reorderMode ? rows : data?.items ?? []) as Quest[],
     columns,
     pageCount: data ? Math.ceil(data.total / pagination.pageSize) : -1,
     state: {
@@ -88,7 +118,7 @@ export const QuestsDataTable = ({ columns, isAdmin }: DataTableProps) => {
       columnFilters,
       pagination,
     },
-    enableRowSelection: isAdmin,
+    enableRowSelection: isAdmin && !reorderMode,
     manualPagination: true,
     manualSorting: true,
     manualFiltering: true,
@@ -110,6 +140,11 @@ export const QuestsDataTable = ({ columns, isAdmin }: DataTableProps) => {
         table={table}
         isAdmin={isAdmin}
         onBulk={(ids, action) => bulk.mutate({ ids, action })}
+        reorderMode={reorderMode}
+        onToggleReorder={() => {
+          setReorderMode((m) => !m)
+          setPagination({ pageIndex: 0, pageSize: !reorderMode ? 100 : 20 })
+        }}
       />
       <div className='overflow-hidden rounded-md border'>
         <Table>
@@ -131,21 +166,36 @@ export const QuestsDataTable = ({ columns, isAdmin }: DataTableProps) => {
           </TableHeader>
           <TableBody>
             {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && 'selected'}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))
+              reorderMode ? (
+                <DndContext onDragEnd={handleDragEnd}>
+                  <SortableContext
+                    items={table
+                      .getRowModel()
+                      .rows.map((r) => r.original.id)}
+                    strategy={verticalListSortingStrategy}
+                  >
+                    {table.getRowModel().rows.map((row) => (
+                      <SortableRow key={row.id} row={row} />
+                    ))}
+                  </SortableContext>
+                </DndContext>
+              ) : (
+                table.getRowModel().rows.map((row) => (
+                  <TableRow
+                    key={row.id}
+                    data-state={row.getIsSelected() && 'selected'}
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell key={cell.id}>
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))
+              )
             ) : (
               <TableRow>
                 <TableCell
@@ -159,7 +209,38 @@ export const QuestsDataTable = ({ columns, isAdmin }: DataTableProps) => {
           </TableBody>
         </Table>
       </div>
-      <DataTablePagination table={table} />
+      {!reorderMode && <DataTablePagination table={table} />}
     </div>
+  )
+}
+
+const SortableRow = ({ row }: { row: Row<Quest> }) => {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: row.original.id })
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  }
+  return (
+    <TableRow
+      ref={setNodeRef}
+      style={style}
+      className={isDragging ? 'cursor-move opacity-60' : 'cursor-move'}
+      data-state={row.getIsSelected() && 'selected'}
+      {...attributes}
+      {...listeners}
+    >
+      {row.getVisibleCells().map((cell) => (
+        <TableCell key={cell.id}>
+          {flexRender(cell.column.columnDef.cell, cell.getContext())}
+        </TableCell>
+      ))}
+    </TableRow>
   )
 }
