@@ -17,6 +17,7 @@ export const oidcConfig: AuthProviderProps = {
   redirect_uri: baseUrl,
   post_logout_redirect_uri: baseUrl,
   popup_redirect_uri: `${baseUrl}popup-callback.html`,
+  silent_redirect_uri: `${baseUrl}silent-callback.html`,
   response_type: 'code',
   scope: 'openid profile email',
   automaticSilentRenew: true,

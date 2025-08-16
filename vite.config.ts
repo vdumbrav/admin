@@ -4,8 +4,11 @@ import react from '@vitejs/plugin-react-swc'
 import tailwindcss from '@tailwindcss/vite'
 import { tanstackRouter } from '@tanstack/router-plugin/vite'
 
+// Use VITE_PUBLIC_BASE for GH Pages builds
+const base = process.env.VITE_PUBLIC_BASE ?? '/admin/'
+
 export default defineConfig({
-  base: '/admin/',
+  base,
   plugins: [
     react(),
     tanstackRouter({ routesDirectory: 'src/routes' }),
