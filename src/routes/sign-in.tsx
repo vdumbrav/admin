@@ -7,14 +7,14 @@ export const Route = createFileRoute('/sign-in')({
 })
 
 function SignInPage() {
-  const auth = useAppAuth()
+  const { signinRedirect } = useAppAuth()
   React.useEffect(() => {
     if (import.meta.env.VITE_USE_FAKE_AUTH === 'true') {
       window.location.replace(`${import.meta.env.BASE_URL}quests`)
     } else {
-      auth.signinRedirect()
+      signinRedirect()
     }
-  }, [auth])
+  }, [signinRedirect])
 
   return (
     <div className="flex h-[60vh] items-center justify-center text-muted-foreground">

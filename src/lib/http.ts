@@ -1,6 +1,10 @@
 export type HttpInit = RequestInit & { token?: string }
 
-const API_URL = import.meta.env.VITE_API_URL as string
+const rawApiUrl = import.meta.env.VITE_API_URL as string | undefined
+if (!rawApiUrl) {
+  throw new Error('VITE_API_URL is not defined')
+}
+const API_URL = rawApiUrl
 const APP_BASE = import.meta.env.BASE_URL
 
 export const http = async <T>(path: string, init: HttpInit = {}): Promise<T> => {
@@ -23,10 +27,12 @@ export const http = async <T>(path: string, init: HttpInit = {}): Promise<T> => 
     const text = await res.text().catch(() => '')
     throw new Error(text || `HTTP ${res.status}`)
   }
+  if (res.status === 204) {
+    return undefined as T
+  }
   const ct = res.headers.get('content-type') ?? ''
   if (ct.includes('application/json')) {
     return (await res.json()) as T
   }
-  // Return text for non-JSON responses
   return (await res.text()) as unknown as T
 }

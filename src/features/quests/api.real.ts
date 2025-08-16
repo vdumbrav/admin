@@ -122,11 +122,30 @@ export const useBulkAction = () => {
         body: JSON.stringify({ ids, action }),
         token: getAccessToken(),
       }),
+    onMutate: async ({ ids, action }) => {
+      await qc.cancelQueries({ queryKey: ['quests'] })
+      const prev = qc.getQueryData<QuestsResponse>(['quests'])
+      qc.setQueryData<QuestsResponse>(['quests'], (d) => {
+        if (!d) return d
+        if (action === 'delete') {
+          return { ...d, items: d.items.filter((i) => !ids.includes(i.id)) }
+        }
+        const visible = action === 'show'
+        return {
+          ...d,
+          items: d.items.map((i) => (ids.includes(i.id) ? { ...i, visible } : i)),
+        }
+      })
+      return { prev }
+    },
+    onError: (e: unknown, _v, ctx) => {
+      if (ctx?.prev) qc.setQueryData(['quests'], ctx.prev)
+      toast.error(String(e))
+    },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['quests'] })
       toast.success('Bulk action applied')
     },
-    onError: (e: unknown) => toast.error(String(e)),
   })
 }
 
