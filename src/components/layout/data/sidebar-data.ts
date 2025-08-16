@@ -63,6 +63,7 @@ export const sidebarData: SidebarData = {
           title: 'Quests',
           url: '/quests',
           icon: IconChecklist,
+          isActive: (pathname: string) => pathname.startsWith('/quests'),
         },
         {
           title: 'Apps',

@@ -1,14 +1,9 @@
 import { useParams, useNavigate } from '@tanstack/react-router'
 import type { Task } from '@/types/tasks'
 import { QuestForm } from './QuestForm'
-import { QuestsTable } from './QuestsTable'
 import { useCreateQuest, useQuest, useUpdateQuest } from './api'
 
-export function QuestsListPage() {
-  return <QuestsTable />
-}
-
-export function QuestCreatePage() {
+export const QuestCreatePage = () => {
   const create = useCreateQuest()
   const nav = useNavigate({})
   return (
@@ -21,7 +16,7 @@ export function QuestCreatePage() {
   )
 }
 
-export function QuestEditPage() {
+export const QuestEditPage = () => {
   const params = useParams({ from: '/_authenticated/quests/$id' })
   const id = Number(params.id)
   const { data } = useQuest(id)

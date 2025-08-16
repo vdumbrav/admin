@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { QuestsListPage } from '@/features/quests/pages'
+import { Quests } from '@/features/quests'
 
 export const Route = createFileRoute('/_authenticated/quests/')({
-  component: QuestsListPage,
+  component: Quests,
   staticData: { title: 'Quests', breadcrumb: 'Quests' },
 })

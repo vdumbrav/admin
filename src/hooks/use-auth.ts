@@ -5,7 +5,12 @@ interface AuthResult {
   isLoading: boolean
 }
 
-export function useAuth(): AuthResult {
+export const useAuth = (): AuthResult => {
   const role = useAuthStore((s) => s.role)
   return { user: { roles: [role] }, isLoading: false }
+}
+
+export const getAuth = (): { user: { roles: string[] } | null } => {
+  const role = useAuthStore.getState().role
+  return { user: { roles: [role] } }
 }
