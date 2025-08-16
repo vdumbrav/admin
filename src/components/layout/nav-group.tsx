@@ -168,7 +168,8 @@ const SidebarMenuCollapsedDropdown = ({
   )
 }
 
-function checkIsActive(href: string, item: NavItem, mainNav = false) {
+const checkIsActive = (href: string, item: NavItem, mainNav = false) => {
+  if (item.isActive) return item.isActive(href)
   return (
     href === item.url || // /endpint?search=param
     href.split('?')[0] === item.url || // endpoint
