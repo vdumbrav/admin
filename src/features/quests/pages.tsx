@@ -1,4 +1,5 @@
 import { useParams, useNavigate } from '@tanstack/react-router'
+import type { Task } from '@/types/tasks'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Header } from '@/components/layout/header'
@@ -34,7 +35,8 @@ export const QuestCreatePage = () => {
         <QuestForm
           onSubmit={async (v) => {
             try {
-              await create.mutateAsync(v)
+              // backend accepts partial Task shape for children
+              await create.mutateAsync(v as unknown as Partial<Task>)
               toast.success('Saved')
               nav({ to: '/quests' })
             } catch (e) {
@@ -99,7 +101,8 @@ export const QuestEditPage = () => {
           initial={data}
           onSubmit={async (v) => {
             try {
-              await update.mutateAsync(v)
+              // backend accepts partial Task shape for children
+              await update.mutateAsync(v as unknown as Partial<Task>)
               toast.success('Saved')
               nav({ to: '/quests' })
             } catch (e) {

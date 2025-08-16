@@ -26,27 +26,15 @@ import { Switch } from '@/components/ui/switch'
 import { Textarea } from '@/components/ui/textarea'
 import { SelectDropdown } from '@/components/select-dropdown'
 import { uploadMedia } from './api'
+import { ChildrenEditor } from './components/children-editor'
+import type { Child } from './components/children-editor'
 import { groups, types, providers } from './data/data'
+import { withTwitterValidation } from './validation'
 
-const schema = z
-  .object({
+const childSchema = withTwitterValidation(
+  z.object({
     title: z.string().min(1),
-    type: z.enum([
-      'referral',
-      'connect',
-      'join',
-      'share',
-      'like',
-      'comment',
-      'multiple',
-      'repeatable',
-      'dummy',
-      'partner_invite',
-      'external',
-    ]),
-    description: z.string().nullable().optional(),
-    group: z.enum(['social', 'daily', 'referral', 'partner', 'all']),
-    order_by: z.coerce.number().int().nonnegative(),
+    type: z.enum(['like', 'share', 'comment', 'join', 'connect']),
     provider: z
       .enum([
         'twitter',
@@ -58,79 +46,101 @@ const schema = z
         'adsgram',
       ])
       .optional(),
-    uri: z
-      .string()
-      .url()
-      .optional()
-      .or(z.literal('').transform(() => undefined)),
     reward: z.coerce.number().int().optional(),
+    order_by: z.coerce.number().int().nonnegative(),
     resources: z
       .object({
-        icon: z.string().url().optional(),
         tweetId: z.string().optional(),
         username: z.string().optional(),
-        isNew: z.boolean().optional(),
-        block_id: z.string().optional(),
-        ui: z.object({
-          button: z.string(),
-          'pop-up': z
-            .object({
-              name: z.string(),
-              button: z.string(),
-              description: z.string(),
-              static: z
-                .string()
-                .url()
-                .optional()
-                .or(z.literal('').transform(() => undefined)),
-              'additional-title': z.string().optional(),
-              'additional-description': z.string().optional(),
-            })
-            .optional(),
-        }),
-        adsgram: z
-          .object({
-            type: z.enum(['task', 'reward']),
-            subtype: z.enum(['video-ad', 'post-style-image']).optional(),
-          })
-          .optional()
-          .superRefine((val, ctx) => {
-            if (val && val.type !== 'task' && val.subtype) {
-              ctx.addIssue({
-                code: z.ZodIssueCode.custom,
-                message: "subtype allowed only when type is 'task'",
-                path: ['subtype'],
-              })
-            }
-          }),
       })
       .optional(),
-    visible: z.boolean().optional(),
   })
-  .passthrough()
-  .superRefine((val, ctx) => {
-    const needsTweet =
-      ['like', 'share', 'comment'].includes(val.type) &&
-      val.provider === 'twitter'
-    if (needsTweet) {
-      const hasId = !!val.resources?.tweetId
-      const hasUser = !!val.resources?.username
-      if (!hasId) {
-        ctx.addIssue({
-          path: ['resources', 'tweetId'],
-          code: z.ZodIssueCode.custom,
-          message: 'Tweet ID is required for Twitter like/share/comment.',
+)
+
+const baseSchema = withTwitterValidation(
+  z
+    .object({
+      title: z.string().min(1),
+      type: z.enum([
+        'referral',
+        'connect',
+        'join',
+        'share',
+        'like',
+        'comment',
+        'multiple',
+        'repeatable',
+        'dummy',
+        'partner_invite',
+        'external',
+      ]),
+      description: z.string().nullable().optional(),
+      group: z.enum(['social', 'daily', 'referral', 'partner', 'all']),
+      order_by: z.coerce.number().int().nonnegative(),
+      provider: z
+        .enum([
+          'twitter',
+          'telegram',
+          'discord',
+          'matrix',
+          'walme',
+          'monetag',
+          'adsgram',
+        ])
+        .optional(),
+      uri: z
+        .string()
+        .url()
+        .optional()
+        .or(z.literal('').transform(() => undefined)),
+      reward: z.coerce.number().int().optional(),
+      resources: z
+        .object({
+          icon: z.string().url().optional(),
+          tweetId: z.string().optional(),
+          username: z.string().optional(),
+          isNew: z.boolean().optional(),
+          block_id: z.string().optional(),
+          ui: z.object({
+            button: z.string(),
+            'pop-up': z
+              .object({
+                name: z.string(),
+                button: z.string(),
+                description: z.string(),
+                static: z
+                  .string()
+                  .url()
+                  .optional()
+                  .or(z.literal('').transform(() => undefined)),
+                'additional-title': z.string().optional(),
+                'additional-description': z.string().optional(),
+              })
+              .optional(),
+          }),
+          adsgram: z
+            .object({
+              type: z.enum(['task', 'reward']),
+              subtype: z.enum(['video-ad', 'post-style-image']).optional(),
+            })
+            .optional()
+            .superRefine((val, ctx) => {
+              if (val && val.type !== 'task' && val.subtype) {
+                ctx.addIssue({
+                  code: z.ZodIssueCode.custom,
+                  message: "subtype allowed only when type is 'task'",
+                  path: ['subtype'],
+                })
+              }
+            }),
         })
-      }
-      if (!hasUser) {
-        ctx.addIssue({
-          path: ['resources', 'username'],
-          code: z.ZodIssueCode.custom,
-          message: 'Username is required for Twitter like/share/comment.',
-        })
-      }
-    }
-  })
+        .optional(),
+      visible: z.boolean().optional(),
+    })
+    .passthrough()
+)
+
+const schema = baseSchema.extend({ child: z.array(childSchema).optional() })
 
 type FormValues = z.infer<typeof schema>
 
@@ -144,7 +154,7 @@ export const QuestForm = ({
   const nav = useNavigate({})
   const fileRef = useRef<HTMLInputElement | null>(null)
 
-  const form = useForm<FormValues>({
+  const form = useForm({
     resolver: zodResolver(schema),
     defaultValues: {
       title: initial?.title ?? '',
@@ -157,6 +167,17 @@ export const QuestForm = ({
       reward: initial?.reward,
       resources: initial?.resources ?? { ui: { button: '' } },
       visible: initial?.visible ?? true,
+      child:
+        initial?.child?.map((c) => ({
+          title: c.title ?? '',
+          type: c.type as Child['type'],
+          provider: c.provider,
+          reward: c.reward,
+          order_by: c.order_by ?? 0,
+          resources: c.resources
+            ? { tweetId: c.resources.tweetId, username: c.resources.username }
+            : undefined,
+        })) ?? [],
     },
   })
 
@@ -243,7 +264,12 @@ export const QuestForm = ({
   return (
     <Form {...form}>
       <form
-        onSubmit={form.handleSubmit(onSubmit)}
+        onSubmit={form.handleSubmit((values) =>
+          onSubmit({
+            ...values,
+            child: values.child?.map((c, i) => ({ ...c, order_by: i })),
+          })
+        )}
         className='mx-auto max-w-5xl space-y-6'
       >
         <div className='grid gap-4 sm:grid-cols-2'>
@@ -302,6 +328,7 @@ export const QuestForm = ({
                   <Input
                     type='number'
                     {...field}
+                    value={field.value as number}
                     onChange={(e) =>
                       field.onChange(
                         e.target.value === '' ? 0 : Number(e.target.value)
@@ -398,7 +425,7 @@ export const QuestForm = ({
                   <Input
                     type='number'
                     {...field}
-                    value={field.value ?? ''}
+                    value={(field.value as number | undefined) ?? ''}
                     onChange={(e) =>
                       field.onChange(
                         e.target.value === ''
@@ -412,6 +439,11 @@ export const QuestForm = ({
               </FormItem>
             )}
           />
+          {type === 'multiple' && (
+            <div className='sm:col-span-2'>
+              <ChildrenEditor />
+            </div>
+          )}
           <FormField
             control={form.control}
             name='visible'

@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import * as fx from '@/faker'
 import type { Task, TaskGroup } from '@/types/tasks'
+import type { QuestPayload } from './types'
 
 type QuestsResponse = { items: Task[]; total: number }
 
@@ -35,7 +36,7 @@ export function useQuest(id: number) {
 export function useCreateQuest() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: (payload: Partial<Task>) => fx.postQuest(payload),
+    mutationFn: (payload: QuestPayload) => fx.postQuest(payload),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['quests'] }),
   })
 }
@@ -43,7 +44,7 @@ export function useCreateQuest() {
 export function useUpdateQuest(id: number) {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: (payload: Partial<Task>) => fx.patchQuest(id, payload),
+    mutationFn: (payload: QuestPayload) => fx.patchQuest(id, payload),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['quests'] })
       qc.invalidateQueries({ queryKey: ['quest', id] })
@@ -121,4 +122,13 @@ export function useBulkAction() {
 
 export async function uploadMedia(file: File) {
   return fx.postMedia(file)
+}
+
+export function useReorderQuests() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ rows }: { rows: Array<{ id: number; order_by: number }> }) =>
+      fx.reorderQuests(rows),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['quests'] }),
+  })
 }

@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import type { Task, TaskGroup } from '@/types/tasks'
+import type { QuestPayload } from './types'
 
 type QuestsResponse = { items: Task[]; total: number }
 
@@ -54,7 +55,7 @@ export function useQuest(id: number) {
 export function useCreateQuest() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: (payload: Partial<Task>) =>
+    mutationFn: (payload: QuestPayload) =>
       request<Task>('/admin/quests', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -67,7 +68,7 @@ export function useCreateQuest() {
 export function useUpdateQuest(id: number) {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: (payload: Partial<Task>) =>
+    mutationFn: (payload: QuestPayload) =>
       request<Task>(`/admin/quests/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
@@ -167,4 +168,17 @@ export async function uploadMedia(file: File) {
   })
   if (!res.ok) throw new Error('Request failed')
   return (await res.json()) as { url: string }
+}
+
+export function useReorderQuests() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ rows }: { rows: Array<{ id: number; order_by: number }> }) =>
+      request<{ ok: boolean }>(`/admin/quests/reorder`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ rows }),
+      }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['quests'] }),
+  })
 }
