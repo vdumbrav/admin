@@ -1,7 +1,15 @@
 name: Deploy to GitHub Pages
-on: { push: { branches: [main] }, workflow_dispatch: {} }
-permissions: { contents: read, pages: write, id-token: write }
-concurrency: { group: pages, cancel-in-progress: true }
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: pages
+  cancel-in-progress: true
 
 jobs:
   build:
@@ -9,9 +17,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
-        with: { version: latest, run_install: false }
+        with:
+          version: 10
+          run_install: false
       - uses: actions/setup-node@v4
-        with: { node-version: 22, cache: pnpm }
+        with:
+          node-version: 22
+          cache: pnpm
+      - uses: actions/configure-pages@v5
       - run: pnpm install --frozen-lockfile
       - run: pnpm build
         env:
@@ -22,9 +35,13 @@ jobs:
           VITE_USE_FAKE_API: "true"
       - run: cp dist/index.html dist/404.html
       - uses: actions/upload-pages-artifact@v3
-        with: { path: dist }
+        with:
+          path: dist
+
   deploy:
     needs: build
     runs-on: ubuntu-latest
+    environment:
+      name: github-pages
     steps:
       - uses: actions/deploy-pages@v4
