@@ -3,12 +3,13 @@ import { useEffect } from 'react'
 import { useAppAuth } from '@/auth/provider'
 
 function SignIn() {
-  const auth = useAppAuth()
+  const { isAuthenticated, isLoading, error, signinRedirect } = useAppAuth()
   const nav = useNavigate()
   useEffect(() => {
-    if (auth.isAuthenticated) nav({ to: '/quests' })
-    else auth.signinRedirect()
-  }, [auth, nav])
+    if (isAuthenticated) nav({ to: '/quests' })
+    else if (!isLoading && !error) signinRedirect()
+  }, [isAuthenticated, isLoading, error, nav, signinRedirect])
+  if (error) return <div className='p-4'>Sign-in failed</div>
   return <div className='p-4'>Signing in…</div>
 }
 

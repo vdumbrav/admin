@@ -11,8 +11,7 @@ I've been creating dashboard UIs at work and for my personal projects. I always 
 ## Features
 
 - Quests management with drag-and-drop reordering
-- Settings pages
-- OIDC authentication
+- OIDC authentication (Keycloak) with mock and real modes
 - Light/dark mode
 - Responsive
 - Accessible
@@ -55,10 +54,25 @@ Install dependencies
   pnpm install
 ```
 
-Start the server
+## Configuration
+
+Copy `.env.example` to `.env` and adjust as needed:
+
+```env
+VITE_USE_FAKE_API=true
+VITE_API_URL=http://localhost:3000
+
+VITE_APP_BASE_URL=http://localhost:5173
+VITE_OIDC_AUTHORITY=https://keycloak.example.com/realms/your-realm
+VITE_USE_FAKE_AUTH=true
+```
+
+Set `VITE_USE_FAKE_AUTH` and `VITE_USE_FAKE_API` to `false` to use real Keycloak and API endpoints. The access token for real mode is stored in `localStorage` under the key `oidc.user:<authority>:mobile_app`.
+
+Start the server:
 
 ```bash
-  pnpm run dev
+pnpm run dev
 ```
 
 ## Sponsoring this project ❤️

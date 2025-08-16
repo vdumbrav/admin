@@ -13,6 +13,9 @@ interface AuthResult {
   signinRedirect: () => void
   signoutRedirect: () => void
   getAccessToken: () => string | undefined
+  roles: string[]
+  hasRole: (role: string) => boolean
+  error?: unknown
 }
 
 export const AppAuthProvider: React.FC<React.PropsWithChildren> = ({
@@ -24,6 +27,9 @@ export const AppAuthProvider: React.FC<React.PropsWithChildren> = ({
 
 export function useAppAuth(): AuthResult {
   const a = useAuthImpl()
+  const roles = useFake
+    ? (a as ReturnType<typeof useMockAuth>).roles
+    : extractRoles((a as ReturnType<typeof useRealAuth>).user)
   return {
     isAuthenticated: a.isAuthenticated,
     isLoading: a.isLoading,
@@ -33,5 +39,28 @@ export function useAppAuth(): AuthResult {
     getAccessToken: useFake
       ? (a as ReturnType<typeof useMockAuth>).getAccessToken
       : () => (a as ReturnType<typeof useRealAuth>).user?.access_token,
+    roles,
+    hasRole: (role) => roles.includes(role),
+    error: (a as { error?: unknown }).error,
   }
+}
+
+function extractRoles(user: unknown): string[] {
+  if (typeof user !== 'object' || user === null) return []
+  const profile = (user as { profile?: unknown }).profile
+  if (typeof profile !== 'object' || profile === null) return []
+  const resourceAccess = (profile as { resource_access?: unknown }).resource_access
+  if (resourceAccess && typeof resourceAccess === 'object') {
+    const app = (resourceAccess as Record<string, unknown>)['mobile_app']
+    if (app && typeof app === 'object') {
+      const roles = (app as { roles?: unknown }).roles
+      if (Array.isArray(roles)) return roles.filter((r): r is string => typeof r === 'string')
+    }
+  }
+  const realmAccess = (profile as { realm_access?: unknown }).realm_access
+  if (realmAccess && typeof realmAccess === 'object') {
+    const roles = (realmAccess as { roles?: unknown }).roles
+    if (Array.isArray(roles)) return roles.filter((r): r is string => typeof r === 'string')
+  }
+  return []
 }

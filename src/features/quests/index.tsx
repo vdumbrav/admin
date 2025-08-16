@@ -12,8 +12,8 @@ import { QuestsPrimaryButtons } from './components/quests-primary-buttons'
 import { QuestsProvider } from './context/quests-context'
 
 export const Quests = () => {
-  useAppAuth()
-  const isAdmin = true
+  const auth = useAppAuth()
+  const isAdmin = auth.hasRole('admin')
   const columns = React.useMemo(() => getColumns(isAdmin), [isAdmin])
   return (
     <QuestsProvider>

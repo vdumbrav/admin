@@ -6,17 +6,28 @@ type QuestsResponse = { items: Task[]; total: number }
 
 const BASE_URL = import.meta.env.VITE_API_URL
 
+function tokenKey(): string {
+  const rawIssuer = import.meta.env.VITE_OIDC_AUTHORITY as string
+  const authority = rawIssuer.endsWith('/')
+    ? rawIssuer.slice(0, -1)
+    : rawIssuer
+  return `oidc.user:${authority}:mobile_app`
+}
+
 function getAccessToken(): string | undefined {
   try {
-    const rawIssuer = import.meta.env.VITE_OIDC_AUTHORITY as string
-    const authority = rawIssuer.endsWith('/')
-      ? rawIssuer.slice(0, -1)
-      : rawIssuer
-    const key = `oidc.user:${authority}:mobile_app`
-    const raw = window.localStorage.getItem(key)
+    const raw = window.localStorage.getItem(tokenKey())
     return raw ? JSON.parse(raw)?.access_token : undefined
   } catch {
     return undefined
+  }
+}
+
+function removeAccessToken(): void {
+  try {
+    window.localStorage.removeItem(tokenKey())
+  } catch {
+    /* empty */
   }
 }
 
@@ -29,7 +40,16 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
     },
   })
-  if (!res.ok) throw new Error('Request failed')
+  if (!res.ok) {
+    const text = await res.text().catch(() => '')
+    // eslint-disable-next-line no-console
+    console.error('Request failed', res.status, text)
+    if (res.status === 401) {
+      removeAccessToken()
+      window.location.href = '/sign-in'
+    }
+    throw new Error(`Request failed with ${res.status}`)
+  }
   return res.json() as Promise<T>
 }
 
@@ -183,12 +203,10 @@ export function useBulkAction() {
 export async function uploadMedia(file: File) {
   const fd = new FormData()
   fd.append('file', file)
-  const res = await fetch(`${BASE_URL}/admin/media`, {
+  return request<{ url: string }>(`/admin/media`, {
     method: 'POST',
     body: fd,
   })
-  if (!res.ok) throw new Error('Request failed')
-  return (await res.json()) as { url: string }
 }
 
 export function useReorderQuests() {
