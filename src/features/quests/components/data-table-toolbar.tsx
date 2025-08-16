@@ -77,6 +77,7 @@ export const DataTableToolbar = <TData,>({
               column={table.getColumn('group')}
               title='Group'
               options={groups}
+              multiple={false}
             />
           )}
           {table.getColumn('type') && (
@@ -84,6 +85,7 @@ export const DataTableToolbar = <TData,>({
               column={table.getColumn('type')}
               title='Type'
               options={types}
+              multiple={false}
             />
           )}
           {table.getColumn('provider') && (
@@ -91,6 +93,7 @@ export const DataTableToolbar = <TData,>({
               column={table.getColumn('provider')}
               title='Provider'
               options={providers}
+              multiple={false}
             />
           )}
           {table.getColumn('visible') && (
@@ -98,6 +101,7 @@ export const DataTableToolbar = <TData,>({
               column={table.getColumn('visible')}
               title='Visible'
               options={visibilities}
+              multiple={false}
             />
           )}
         </div>

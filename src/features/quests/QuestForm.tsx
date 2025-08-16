@@ -4,10 +4,15 @@ import { useEffect, useRef } from 'react'
 import { z } from 'zod'
 import { useForm, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useNavigate } from '@tanstack/react-router'
+import { useNavigate, useBlocker } from '@tanstack/react-router'
 import { defaultPartnerTask, type Task } from '@/types/tasks'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible'
 import {
   Form,
   FormControl,
@@ -41,7 +46,7 @@ const schema = z
     ]),
     description: z.string().nullable().optional(),
     group: z.enum(['social', 'daily', 'referral', 'partner', 'all']),
-    order_by: z.number().int().nonnegative(),
+    order_by: z.coerce.number().int().nonnegative(),
     provider: z
       .enum([
         'twitter',
@@ -58,7 +63,7 @@ const schema = z
       .url()
       .optional()
       .or(z.literal('').transform(() => undefined)),
-    reward: z.number().int().optional(),
+    reward: z.coerce.number().int().optional(),
     resources: z
       .object({
         icon: z.string().url().optional(),
@@ -103,6 +108,29 @@ const schema = z
     visible: z.boolean().optional(),
   })
   .passthrough()
+  .superRefine((val, ctx) => {
+    const needsTweet =
+      ['like', 'share', 'comment'].includes(val.type) &&
+      val.provider === 'twitter'
+    if (needsTweet) {
+      const hasId = !!val.resources?.tweetId
+      const hasUser = !!val.resources?.username
+      if (!hasId) {
+        ctx.addIssue({
+          path: ['resources', 'tweetId'],
+          code: z.ZodIssueCode.custom,
+          message: 'Tweet ID is required for Twitter like/share/comment.',
+        })
+      }
+      if (!hasUser) {
+        ctx.addIssue({
+          path: ['resources', 'username'],
+          code: z.ZodIssueCode.custom,
+          message: 'Username is required for Twitter like/share/comment.',
+        })
+      }
+    }
+  })
 
 type FormValues = z.infer<typeof schema>
 
@@ -126,7 +154,7 @@ export const QuestForm = ({
       order_by: initial?.order_by ?? 0,
       provider: initial?.provider as Task['provider'],
       uri: initial?.uri ?? '',
-      reward: initial?.reward ?? 0,
+      reward: initial?.reward,
       resources: initial?.resources ?? { ui: { button: '' } },
       visible: initial?.visible ?? true,
     },
@@ -172,6 +200,36 @@ export const QuestForm = ({
       )
     }
   }, [type, form])
+
+  useEffect(() => {
+    if (adsgramType !== 'task') {
+      form.setValue('resources.adsgram.subtype', undefined, {
+        shouldDirty: true,
+      })
+    }
+  }, [adsgramType, form])
+
+  const blocker = useBlocker({
+    shouldBlockFn: () => form.formState.isDirty,
+    withResolver: true,
+  })
+
+  useEffect(() => {
+    if (blocker.status === 'blocked') {
+      if (window.confirm('Discard changes?')) blocker.proceed?.()
+      else blocker.reset?.()
+    }
+  }, [blocker])
+
+  useEffect(() => {
+    const handler = (e: BeforeUnloadEvent) => {
+      if (!form.formState.isDirty) return
+      e.preventDefault()
+      e.returnValue = ''
+    }
+    window.addEventListener('beforeunload', handler)
+    return () => window.removeEventListener('beforeunload', handler)
+  }, [form.formState.isDirty])
 
   const handleUpload = async (file: File) => {
     try {
@@ -241,7 +299,15 @@ export const QuestForm = ({
               <FormItem>
                 <FormLabel>Order</FormLabel>
                 <FormControl>
-                  <Input type='number' {...field} />
+                  <Input
+                    type='number'
+                    {...field}
+                    onChange={(e) =>
+                      field.onChange(
+                        e.target.value === '' ? 0 : Number(e.target.value)
+                      )
+                    }
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -329,7 +395,18 @@ export const QuestForm = ({
               <FormItem>
                 <FormLabel>Reward</FormLabel>
                 <FormControl>
-                  <Input type='number' {...field} />
+                  <Input
+                    type='number'
+                    {...field}
+                    value={field.value ?? ''}
+                    onChange={(e) =>
+                      field.onChange(
+                        e.target.value === ''
+                          ? undefined
+                          : Number(e.target.value)
+                      )
+                    }
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -380,142 +457,169 @@ export const QuestForm = ({
               </FormItem>
             )}
           />
-          <div className='space-y-2 sm:col-span-2'>
-            <div className='text-sm font-medium'>Pop-up</div>
-            <FormField
-              control={form.control}
-              name={popupField('name')}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Name</FormLabel>
-                  <FormControl>
-                    <Input {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name={popupField('button')}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Button</FormLabel>
-                  <FormControl>
-                    <Input {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name={popupField('description')}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Description</FormLabel>
-                  <FormControl>
-                    <Textarea rows={4} {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name={popupField('static')}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Static</FormLabel>
-                  <FormControl>
-                    <Input {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name={popupField('additional-title')}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Additional title</FormLabel>
-                  <FormControl>
-                    <Input {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name={popupField('additional-description')}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Additional description</FormLabel>
-                  <FormControl>
-                    <Input {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-          <FormField
-            control={form.control}
-            name='resources.block_id'
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>AdsGram Block ID</FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name='resources.adsgram.type'
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>AdsGram Type</FormLabel>
-                <SelectDropdown
-                  defaultValue={field.value || 'none'}
-                  onValueChange={(v) => field.onChange(v === 'none' ? '' : v)}
-                  placeholder='Select type'
-                  items={[
-                    { label: '—', value: 'none' },
-                    { label: 'task', value: 'task' },
-                    { label: 'reward', value: 'reward' },
-                  ]}
+          <Collapsible>
+            <CollapsibleTrigger asChild>
+              <Button type='button' variant='outline'>
+                Advanced
+              </Button>
+            </CollapsibleTrigger>
+            <CollapsibleContent className='space-y-4'>
+              <div className='space-y-3 rounded-md border p-4'>
+                <div className='text-sm font-medium'>Pop-up</div>
+                <FormField
+                  control={form.control}
+                  name={popupField('name')}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Name</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          {adsgramType === 'task' && (
-            <FormField
-              control={form.control}
-              name='resources.adsgram.subtype'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>AdsGram Subtype</FormLabel>
-                  <SelectDropdown
-                    defaultValue={field.value || 'none'}
-                    onValueChange={(v) => field.onChange(v === 'none' ? '' : v)}
-                    placeholder='Select subtype'
-                    items={[
-                      { label: '—', value: 'none' },
-                      { label: 'video-ad', value: 'video-ad' },
-                      { label: 'post-style-image', value: 'post-style-image' },
-                    ]}
+                <FormField
+                  control={form.control}
+                  name={popupField('button')}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Button</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name={popupField('description')}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Description</FormLabel>
+                      <FormControl>
+                        <Textarea rows={4} {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name={popupField('static')}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Static</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name={popupField('additional-title')}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Additional title</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name={popupField('additional-description')}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Additional description</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <div className='space-y-3 rounded-md border p-4'>
+                <div className='text-sm font-medium'>AdsGram</div>
+                <FormField
+                  control={form.control}
+                  name='resources.block_id'
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>AdsGram Block ID</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name='resources.adsgram.type'
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>AdsGram Type</FormLabel>
+                      <SelectDropdown
+                        defaultValue={field.value || 'none'}
+                        onValueChange={(v) => {
+                          const next = v === 'none' ? '' : v
+                          field.onChange(next)
+                          if (next !== 'task') {
+                            form.setValue(
+                              'resources.adsgram.subtype',
+                              undefined,
+                              { shouldDirty: true }
+                            )
+                          }
+                        }}
+                        placeholder='Select type'
+                        items={[
+                          { label: '—', value: 'none' },
+                          { label: 'task', value: 'task' },
+                          { label: 'reward', value: 'reward' },
+                        ]}
+                      />
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                {adsgramType === 'task' && (
+                  <FormField
+                    control={form.control}
+                    name='resources.adsgram.subtype'
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>AdsGram Subtype</FormLabel>
+                        <SelectDropdown
+                          defaultValue={field.value || 'none'}
+                          onValueChange={(v) =>
+                            field.onChange(v === 'none' ? '' : v)
+                          }
+                          placeholder='Select subtype'
+                          items={[
+                            { label: '—', value: 'none' },
+                            { label: 'video-ad', value: 'video-ad' },
+                            {
+                              label: 'post-style-image',
+                              value: 'post-style-image',
+                            },
+                          ]}
+                        />
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   />
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          )}
+                )}
+              </div>
+            </CollapsibleContent>
+          </Collapsible>
         </div>
 
         <div className='space-y-2'>
@@ -553,7 +657,9 @@ export const QuestForm = ({
           >
             Cancel
           </Button>
-          <Button type='submit'>Save</Button>
+          <Button type='submit' disabled={form.formState.isSubmitting}>
+            {form.formState.isSubmitting ? 'Saving...' : 'Save'}
+          </Button>
         </div>
       </form>
     </Form>

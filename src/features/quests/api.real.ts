@@ -11,7 +11,7 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
   return res.json() as Promise<T>
 }
 
-export function useQuests(params: {
+export function useQuests(query: {
   search?: string
   group?: TaskGroup | 'all'
   type?: string
@@ -21,6 +21,10 @@ export function useQuests(params: {
   limit?: number
   sort?: string
 }) {
+  const params = {
+    ...query,
+    visible: query.visible === '' ? undefined : query.visible === 'true',
+  }
   return useQuery<QuestsResponse>({
     queryKey: ['quests', params],
     queryFn: () =>
@@ -30,7 +34,7 @@ export function useQuests(params: {
           group: params.group ?? '',
           type: params.type ?? '',
           provider: params.provider ?? '',
-          visible: params.visible ?? '',
+          visible: params.visible === undefined ? '' : String(params.visible),
           page: String(params.page ?? 1),
           limit: String(params.limit ?? 20),
           sort: params.sort ?? 'order_by:asc',

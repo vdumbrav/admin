@@ -28,15 +28,20 @@ interface DataTableFacetedFilterProps<TData, TValue> {
     value: string
     icon?: React.ComponentType<{ className?: string }>
   }[]
+  multiple?: boolean
 }
 
 export function DataTableFacetedFilter<TData, TValue>({
   column,
   title,
   options,
+  multiple = true,
 }: DataTableFacetedFilterProps<TData, TValue>) {
   const facets = column?.getFacetedUniqueValues()
-  const selectedValues = new Set(column?.getFilterValue() as string[])
+  const raw = column?.getFilterValue()
+  const selectedValues = new Set(
+    Array.isArray(raw) ? (raw as string[]) : raw ? [String(raw)] : []
+  )
 
   return (
     <Popover>
@@ -91,15 +96,19 @@ export function DataTableFacetedFilter<TData, TValue>({
                   <CommandItem
                     key={option.value}
                     onSelect={() => {
-                      if (isSelected) {
-                        selectedValues.delete(option.value)
+                      if (multiple) {
+                        const arr = new Set(selectedValues)
+                        if (isSelected) arr.delete(option.value)
+                        else arr.add(option.value)
+                        const filterValues = Array.from(arr)
+                        column?.setFilterValue(
+                          filterValues.length ? filterValues : undefined
+                        )
                       } else {
-                        selectedValues.add(option.value)
+                        column?.setFilterValue(
+                          isSelected ? undefined : option.value
+                        )
                       }
-                      const filterValues = Array.from(selectedValues)
-                      column?.setFilterValue(
-                        filterValues.length ? filterValues : undefined
-                      )
                     }}
                   >
                     <div

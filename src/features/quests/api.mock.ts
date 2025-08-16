@@ -4,7 +4,7 @@ import type { Task, TaskGroup } from '@/types/tasks'
 
 type QuestsResponse = { items: Task[]; total: number }
 
-export function useQuests(params: {
+export function useQuests(query: {
   search?: string
   group?: TaskGroup | 'all'
   type?: string
@@ -14,6 +14,10 @@ export function useQuests(params: {
   limit?: number
   sort?: string
 }) {
+  const params = {
+    ...query,
+    visible: query.visible === '' ? undefined : query.visible === 'true',
+  }
   return useQuery<QuestsResponse>({
     queryKey: ['quests', params],
     queryFn: () => fx.getQuests(params),

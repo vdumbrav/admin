@@ -37,8 +37,13 @@ export const getColumns = (isAdmin: boolean): ColumnDef<Quest>[] => {
       ),
       cell: (ctx) => <VisibleCell row={ctx.row} isAdmin={isAdmin} />,
       enableSorting: false,
-      filterFn: (row, id, value) =>
-        value.includes(String(row.getValue(id) ?? true)),
+      filterFn: (row, id, value) => {
+        const v = String(row.getValue(id) ?? true).toLowerCase()
+        const selected = (Array.isArray(value) ? value : [value]).map((x) =>
+          String(x).toLowerCase()
+        )
+        return selected.includes(v)
+      },
     },
     {
       accessorKey: 'id',
