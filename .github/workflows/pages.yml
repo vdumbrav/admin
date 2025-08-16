@@ -1,0 +1,28 @@
+name: Deploy to GitHub Pages
+on: { push: { branches: [main] }, workflow_dispatch: {} }
+permissions: { contents: read, pages: write, id-token: write }
+concurrency: { group: pages, cancel-in-progress: true }
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: pnpm }
+      - run: corepack enable
+      - run: pnpm i --frozen-lockfile
+      - run: pnpm build
+        env:
+          VITE_API_URL: ${{ vars.API_URL }}
+          VITE_APP_BASE_URL: https://vdumbrav.github.io/admin/
+          VITE_OIDC_AUTHORITY: ${{ vars.OIDC_AUTHORITY }}
+          VITE_USE_FAKE_AUTH: "true"
+          VITE_USE_FAKE_API: "true"
+      - run: cp dist/index.html dist/404.html
+      - uses: actions/upload-pages-artifact@v3
+        with: { path: dist }
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/deploy-pages@v4
