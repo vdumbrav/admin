@@ -20,7 +20,7 @@ export const QuestCreatePage = () => {
         </div>
       </Header>
       <Main>
-        <div className='mb-4'>
+        <div className='mb-4 mx-auto max-w-5xl'>
           <h2 className='text-2xl font-bold tracking-tight'>New Quest</h2>
           <p className='text-muted-foreground'>Create a new quest.</p>
         </div>
