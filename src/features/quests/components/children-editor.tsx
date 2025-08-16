@@ -146,7 +146,7 @@ const ChildRow = ({ id, index, remove }: RowProps) => {
       ref={setNodeRef}
       style={style}
       data-dragging={isDragging}
-      className='space-y-2 rounded-md border bg-white p-4 transition-shadow data-[dragging=true]:shadow-lg'
+      className='space-y-2 rounded-md border p-4 transition-shadow data-[dragging=true]:shadow-lg'
     >
       <div className='flex justify-between'>
         <span {...attributes} {...listeners} className='cursor-move'>
