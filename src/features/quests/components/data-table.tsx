@@ -75,7 +75,7 @@ export const QuestsDataTable = ({ columns, isAdmin }: DataTableProps) => {
 
   React.useEffect(() => {
     setPagination((p) => ({ ...p, pageIndex: 0 }))
-  }, [search, group, type, provider, visible])
+  }, [search, group, type, provider, visible, sorting])
 
   const table = useReactTable({
     data: (data?.items ?? []) as Quest[],

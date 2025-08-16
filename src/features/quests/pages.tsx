@@ -1,4 +1,6 @@
 import { useParams, useNavigate } from '@tanstack/react-router'
+import { toast } from 'sonner'
+import { Button } from '@/components/ui/button'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
 import { ProfileDropdown } from '@/components/profile-dropdown'
@@ -20,14 +22,24 @@ export const QuestCreatePage = () => {
         </div>
       </Header>
       <Main>
-        <div className='mb-4 mx-auto max-w-5xl'>
-          <h2 className='text-2xl font-bold tracking-tight'>New Quest</h2>
-          <p className='text-muted-foreground'>Create a new quest.</p>
+        <div className='mx-auto mb-4 flex max-w-5xl items-center justify-between'>
+          <div>
+            <h2 className='text-2xl font-bold tracking-tight'>New Quest</h2>
+            <p className='text-muted-foreground'>Create a new quest.</p>
+          </div>
+          <Button variant='outline' onClick={() => nav({ to: '/quests' })}>
+            Back to list
+          </Button>
         </div>
         <QuestForm
           onSubmit={async (v) => {
-            await create.mutateAsync(v)
-            nav({ to: '/quests' })
+            try {
+              await create.mutateAsync(v)
+              toast.success('Saved')
+              nav({ to: '/quests' })
+            } catch (e) {
+              toast.error(e instanceof Error ? e.message : 'Failed to save')
+            }
           }}
         />
       </Main>
@@ -42,7 +54,26 @@ export const QuestEditPage = () => {
   const update = useUpdateQuest(questId)
   const nav = useNavigate({})
 
-  if (!data) return null
+  if (!data) {
+    return (
+      <>
+        <Header fixed>
+          <Search />
+          <div className='ml-auto flex items-center space-x-4'>
+            <ThemeSwitch />
+            <ProfileDropdown />
+          </div>
+        </Header>
+        <Main>
+          <div className='max-w-5xl space-y-3'>
+            <div className='bg-muted h-7 w-48 animate-pulse rounded' />
+            <div className='bg-muted h-5 w-80 animate-pulse rounded' />
+            <div className='bg-muted h-64 w-full animate-pulse rounded' />
+          </div>
+        </Main>
+      </>
+    )
+  }
   return (
     <>
       <Header fixed>
@@ -53,17 +84,27 @@ export const QuestEditPage = () => {
         </div>
       </Header>
       <Main>
-        <div className='mb-4'>
-          <h2 className='text-2xl font-bold tracking-tight'>
-            Edit Quest #{id}
-          </h2>
-          <p className='text-muted-foreground'>Update quest properties.</p>
+        <div className='mb-4 flex items-center justify-between'>
+          <div>
+            <h2 className='text-2xl font-bold tracking-tight'>
+              Edit Quest #{id}
+            </h2>
+            <p className='text-muted-foreground'>Update quest properties.</p>
+          </div>
+          <Button variant='outline' onClick={() => nav({ to: '/quests' })}>
+            Back to list
+          </Button>
         </div>
         <QuestForm
           initial={data}
           onSubmit={async (v) => {
-            await update.mutateAsync(v)
-            nav({ to: '/quests' })
+            try {
+              await update.mutateAsync(v)
+              toast.success('Saved')
+              nav({ to: '/quests' })
+            } catch (e) {
+              toast.error(e instanceof Error ? e.message : 'Failed to save')
+            }
           }}
         />
       </Main>
