@@ -10,9 +10,6 @@ interface QuestsResponse {
   total: number
 }
 
-const buildSearch = (query: Record<string, unknown>): string =>
-  new URLSearchParams(query as Record<string, string>).toString()
-
 export const useQuests = (query: {
   search?: string
   group?: TaskGroup | 'all'
@@ -28,9 +25,16 @@ export const useQuests = (query: {
     visible: query.visible === '' ? undefined : query.visible === 'true',
   }
   const { getAccessToken } = useAppAuth()
+  const search = new URLSearchParams(
+    Object.fromEntries(
+      Object.entries(params)
+        .filter(([, v]) => v !== undefined)
+        .map(([k, v]) => [k, String(v)])
+    )
+  ).toString()
   return useQuery<QuestsResponse>({
     queryKey: ['quests', params],
-    queryFn: () => http<QuestsResponse>(`/quests?${buildSearch(params)}`, { token: getAccessToken() }),
+    queryFn: () => http<QuestsResponse>(`/quests?${search}`, { token: getAccessToken() }),
   })
 }
 
