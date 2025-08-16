@@ -96,7 +96,7 @@ const baseSchema = withTwitterValidation(
       reward: z.coerce.number().int().nonnegative().optional(),
       resources: z
         .object({
-          icon: z.string().url().optional(),
+          icon: z.url().optional(),
           tweetId: z.string().optional(),
           username: z.string().optional(),
           isNew: z.boolean().optional(),
@@ -109,10 +109,9 @@ const baseSchema = withTwitterValidation(
                 button: z.string(),
                 description: z.string(),
                 static: z
-                  .string()
-                  .url()
+                  .union([z.url(), z.literal('')])
                   .optional()
-                  .or(z.literal('').transform(() => undefined)),
+                  .transform((val) => (val === '' ? undefined : val)),
                 'additional-title': z.string().optional(),
                 'additional-description': z.string().optional(),
               })
@@ -691,33 +690,6 @@ export const QuestForm = ({
                           value={field.value ?? 'none'}
                           onValueChange={(v) =>
                             field.onChange(v === 'none' ? undefined : v)
-                          }
-                          placeholder='Select subtype'
-                          items={[
-                            { label: '—', value: 'none' },
-                            { label: 'video-ad', value: 'video-ad' },
-                            {
-                              label: 'post-style-image',
-                              value: 'post-style-image',
-                            },
-                          ]}
-                        />
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                )}
-                {adsgramType === 'task' && (
-                  <FormField
-                    control={form.control}
-                    name='resources.adsgram.subtype'
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>AdsGram Subtype</FormLabel>
-                        <SelectDropdown
-                          value={field.value || 'none'}
-                          onValueChange={(v) =>
-                            field.onChange(v === 'none' ? '' : v)
                           }
                           placeholder='Select subtype'
                           items={[
