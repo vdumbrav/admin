@@ -52,8 +52,7 @@ export const QuestsDataTable = ({ columns, isAdmin }: DataTableProps) => {
     return fallback
   }
 
-  const search =
-    (columnFilters.find((f) => f.id === 'title')?.value as string) ?? ''
+  const search = pickSingle('title').trim()
   const group = (pickSingle('group', 'all') as TaskGroup | 'all')
   const type = pickSingle('type', '')
   const provider = pickSingle('provider', '')
@@ -73,6 +72,10 @@ export const QuestsDataTable = ({ columns, isAdmin }: DataTableProps) => {
     sort,
   })
   const bulk = useBulkAction()
+
+  React.useEffect(() => {
+    setPagination((p) => ({ ...p, pageIndex: 0 }))
+  }, [search, group, type, provider, visible])
 
   const table = useReactTable({
     data: (data?.items ?? []) as Quest[],

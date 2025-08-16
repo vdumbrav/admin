@@ -472,11 +472,11 @@ export const QuestForm = ({
               <FormItem>
                 <FormLabel>AdsGram Type</FormLabel>
                 <SelectDropdown
-                  defaultValue={field.value as string}
-                  onValueChange={(v) => field.onChange(v || undefined)}
+                  defaultValue={field.value || 'none'}
+                  onValueChange={(v) => field.onChange(v === 'none' ? '' : v)}
                   placeholder='Select type'
                   items={[
-                    { label: '—', value: '' },
+                    { label: '—', value: 'none' },
                     { label: 'task', value: 'task' },
                     { label: 'reward', value: 'reward' },
                   ]}
@@ -493,11 +493,11 @@ export const QuestForm = ({
                 <FormItem>
                   <FormLabel>AdsGram Subtype</FormLabel>
                   <SelectDropdown
-                    defaultValue={field.value as string}
-                    onValueChange={(v) => field.onChange(v || undefined)}
+                    defaultValue={field.value || 'none'}
+                    onValueChange={(v) => field.onChange(v === 'none' ? '' : v)}
                     placeholder='Select subtype'
                     items={[
-                      { label: '—', value: '' },
+                      { label: '—', value: 'none' },
                       { label: 'video-ad', value: 'video-ad' },
                       { label: 'post-style-image', value: 'post-style-image' },
                     ]}
