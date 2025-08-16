@@ -45,18 +45,19 @@ export const QuestsDataTable = ({ columns, isAdmin }: DataTableProps) => {
     pageIndex: 0,
     pageSize: 20,
   })
+  const pickSingle = (id: string, fallback = ''): string => {
+    const raw = columnFilters.find((f) => f.id === id)?.value as unknown
+    if (Array.isArray(raw)) return (raw[0] ?? fallback) as string
+    if (typeof raw === 'string') return raw
+    return fallback
+  }
 
   const search =
     (columnFilters.find((f) => f.id === 'title')?.value as string) ?? ''
-  const group =
-    (columnFilters.find((f) => f.id === 'group')?.value as TaskGroup | 'all') ??
-    'all'
-  const type =
-    (columnFilters.find((f) => f.id === 'type')?.value as string) ?? ''
-  const provider =
-    (columnFilters.find((f) => f.id === 'provider')?.value as string) ?? ''
-  const visible =
-    (columnFilters.find((f) => f.id === 'visible')?.value as string) ?? ''
+  const group = (pickSingle('group', 'all') as TaskGroup | 'all')
+  const type = pickSingle('type', '')
+  const provider = pickSingle('provider', '')
+  const visible = pickSingle('visible', '')
   const sort = sorting[0]
     ? `${sorting[0].id}:${sorting[0].desc ? 'desc' : 'asc'}`
     : 'order_by:asc'
