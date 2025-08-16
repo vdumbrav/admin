@@ -1,4 +1,5 @@
 import { Link } from '@tanstack/react-router'
+import { useAuthStore } from '@/stores/authStore'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import {
@@ -13,6 +14,10 @@ import {
 } from '@/components/ui/dropdown-menu'
 
 export function ProfileDropdown() {
+  const role = useAuthStore((s) => s.role)
+  const setRole = useAuthStore((s) => s.setRole)
+  const nextRole = role === 'admin' ? 'user' : 'admin'
+
   return (
     <DropdownMenu modal={false}>
       <DropdownMenuTrigger asChild>
@@ -55,9 +60,8 @@ export function ProfileDropdown() {
           <DropdownMenuItem>New Team</DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem>
-          Log out
-          <DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut>
+        <DropdownMenuItem onClick={() => setRole(nextRole)}>
+          Switch to {nextRole}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
