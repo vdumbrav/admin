@@ -1,14 +1,33 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useAppAuth } from '@/auth/provider'
 import type { Task, TaskGroup } from '@/types/tasks'
 import type { QuestPayload } from './types'
 
 type QuestsResponse = { items: Task[]; total: number }
 
-const BASE_URL = import.meta.env.VITE_API_URL
+const BASE_URL = import.meta.env.VITE_API_URL as string
 
-async function request<T>(path: string, options?: RequestInit): Promise<T> {
-  const res = await fetch(`${BASE_URL}${path}`, options)
-  if (!res.ok) throw new Error('Request failed')
+async function request<T>(
+  path: string,
+  token: string | undefined,
+  options?: RequestInit
+): Promise<T> {
+  const res = await fetch(`${BASE_URL}${path}`, {
+    ...options,
+    headers: {
+      ...(options?.headers || {}),
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+  })
+  if (!res.ok) {
+    const text = await res.text().catch(() => '')
+    // eslint-disable-next-line no-console
+    console.error('Request failed', res.status, text)
+    if (res.status === 401) {
+      window.location.href = '/sign-in'
+    }
+    throw new Error(`Request failed with ${res.status}`)
+  }
   return res.json() as Promise<T>
 }
 
@@ -26,6 +45,7 @@ export function useQuests(query: {
     ...query,
     visible: query.visible === '' ? undefined : query.visible === 'true',
   }
+  const { getAccessToken } = useAppAuth()
   return useQuery<QuestsResponse>({
     queryKey: ['quests', params],
     queryFn: () =>
@@ -39,24 +59,27 @@ export function useQuests(query: {
           page: String(params.page ?? 1),
           limit: String(params.limit ?? 20),
           sort: params.sort ?? 'order_by:asc',
-        })}`
+        })}`,
+        getAccessToken()
       ),
   })
 }
 
 export function useQuest(id: number) {
+  const { getAccessToken } = useAppAuth()
   return useQuery<Task>({
     queryKey: ['quest', id],
-    queryFn: () => request<Task>(`/admin/quests/${id}`),
+    queryFn: () => request<Task>(`/admin/quests/${id}`, getAccessToken()),
     enabled: !!id,
   })
 }
 
 export function useCreateQuest() {
   const qc = useQueryClient()
+  const { getAccessToken } = useAppAuth()
   return useMutation({
     mutationFn: (payload: QuestPayload) =>
-      request<Task>('/admin/quests', {
+      request<Task>('/admin/quests', getAccessToken(), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
@@ -67,9 +90,10 @@ export function useCreateQuest() {
 
 export function useUpdateQuest(id: number) {
   const qc = useQueryClient()
+  const { getAccessToken } = useAppAuth()
   return useMutation({
     mutationFn: (payload: QuestPayload) =>
-      request<Task>(`/admin/quests/${id}`, {
+      request<Task>(`/admin/quests/${id}`, getAccessToken(), {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
@@ -83,18 +107,22 @@ export function useUpdateQuest(id: number) {
 
 export function useDeleteQuest() {
   const qc = useQueryClient()
+  const { getAccessToken } = useAppAuth()
   return useMutation({
     mutationFn: (id: number) =>
-      request<unknown>(`/admin/quests/${id}`, { method: 'DELETE' }),
+      request<unknown>(`/admin/quests/${id}`, getAccessToken(), {
+        method: 'DELETE',
+      }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['quests'] }),
   })
 }
 
 export function useToggleVisibility() {
   const qc = useQueryClient()
+  const { getAccessToken } = useAppAuth()
   return useMutation({
     mutationFn: ({ id, visible }: { id: number; visible: boolean }) =>
-      request<Task>(`/admin/quests/${id}/visibility`, {
+      request<Task>(`/admin/quests/${id}/visibility`, getAccessToken(), {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ visible }),
@@ -122,6 +150,7 @@ export function useToggleVisibility() {
 
 export function useBulkAction() {
   const qc = useQueryClient()
+  const { getAccessToken } = useAppAuth()
   return useMutation({
     mutationFn: ({
       ids,
@@ -130,7 +159,7 @@ export function useBulkAction() {
       ids: number[]
       action: 'hide' | 'show' | 'delete'
     }) =>
-      request<unknown>(`/admin/quests/bulk`, {
+      request<unknown>(`/admin/quests/bulk`, getAccessToken(), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ids, action }),
@@ -159,22 +188,21 @@ export function useBulkAction() {
   })
 }
 
-export async function uploadMedia(file: File) {
+export async function uploadMedia(file: File, token: string | undefined) {
   const fd = new FormData()
   fd.append('file', file)
-  const res = await fetch(`${BASE_URL}/admin/media`, {
+  return request<{ url: string }>(`/admin/media`, token, {
     method: 'POST',
     body: fd,
   })
-  if (!res.ok) throw new Error('Request failed')
-  return (await res.json()) as { url: string }
 }
 
 export function useReorderQuests() {
   const qc = useQueryClient()
+  const { getAccessToken } = useAppAuth()
   return useMutation({
     mutationFn: ({ rows }: { rows: Array<{ id: number; order_by: number }> }) =>
-      request<{ ok: boolean }>(`/admin/quests/reorder`, {
+      request<{ ok: boolean }>(`/admin/quests/reorder`, getAccessToken(), {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ rows }),

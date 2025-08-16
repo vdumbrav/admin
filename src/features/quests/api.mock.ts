@@ -120,7 +120,7 @@ export function useBulkAction() {
   })
 }
 
-export async function uploadMedia(file: File) {
+export async function uploadMedia(file: File, _token?: string) {
   return fx.postMedia(file)
 }
 

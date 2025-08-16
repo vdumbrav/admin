@@ -5,6 +5,7 @@ import { z } from 'zod'
 import { useForm, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useNavigate, useBlocker } from '@tanstack/react-router'
+import { useAppAuth } from '@/auth/provider'
 import { defaultPartnerTask, type Task } from '@/types/tasks'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
@@ -151,6 +152,7 @@ export const QuestForm = ({
   initial?: Partial<Task>
   onSubmit: (v: FormValues) => void
 }) => {
+  const auth = useAppAuth()
   const nav = useNavigate({})
   const fileRef = useRef<HTMLInputElement | null>(null)
 
@@ -254,7 +256,7 @@ export const QuestForm = ({
 
   const handleUpload = async (file: File) => {
     try {
-      const { url } = await uploadMedia(file)
+      const { url } = await uploadMedia(file, auth.getAccessToken())
       form.setValue('resources.icon', url, { shouldDirty: true })
     } catch {
       toast.error('Failed to upload icon')
