@@ -33,7 +33,7 @@ export const useQuests = (query: {
     )
   ).toString()
   return useQuery<QuestsResponse>({
-    queryKey: ['quests', params],
+    queryKey: ['quests', params, search],
     queryFn: () =>
       http<QuestsResponse>(`/quests?${search}`, { token: getAccessToken() }),
   })

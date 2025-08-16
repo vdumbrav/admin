@@ -1,4 +1,4 @@
-import { WebStorageStateStore } from 'oidc-client-ts'
+import { UserManager, WebStorageStateStore } from 'oidc-client-ts'
 import type { AuthProviderProps } from 'react-oidc-context'
 
 const rawBaseEnv = import.meta.env.VITE_APP_BASE_URL as string | undefined
@@ -27,3 +27,5 @@ export const oidcConfig: AuthProviderProps = {
     window.history.replaceState({}, document.title, window.location.pathname)
   },
 }
+
+export const userManager = new UserManager(oidcConfig)
