@@ -13,7 +13,12 @@ import { QuestsProvider } from './context/quests-context'
 
 export const Quests = () => {
   const { user } = useAuth()
-  const isAdmin = !!user?.roles.includes('admin')
+  const roles =
+    (user?.profile && (user.profile as { roles?: string[] | string }).roles) ||
+    []
+  const isAdmin = Array.isArray(roles)
+    ? roles.includes('admin')
+    : roles === 'admin'
   const columns = React.useMemo(() => getColumns(isAdmin), [isAdmin])
   return (
     <QuestsProvider>

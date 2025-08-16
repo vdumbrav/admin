@@ -1,5 +1,5 @@
 import { Link } from '@tanstack/react-router'
-import { useAuthStore } from '@/stores/authStore'
+import { useAuth } from '@/hooks/use-auth'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import {
@@ -14,9 +14,19 @@ import {
 } from '@/components/ui/dropdown-menu'
 
 export function ProfileDropdown() {
-  const role = useAuthStore((s) => s.role)
-  const setRole = useAuthStore((s) => s.setRole)
-  const nextRole = role === 'admin' ? 'user' : 'admin'
+  const auth = useAuth()
+  const name =
+    (auth.user?.profile &&
+      ('name' in auth.user.profile
+        ? (auth.user.profile as { name?: string }).name
+        : undefined)) ||
+    'user'
+  const email =
+    (auth.user?.profile &&
+      ('email' in auth.user.profile
+        ? (auth.user.profile as { email?: string }).email
+        : undefined)) ||
+    ''
 
   return (
     <DropdownMenu modal={false}>
@@ -31,10 +41,12 @@ export function ProfileDropdown() {
       <DropdownMenuContent className='w-56' align='end' forceMount>
         <DropdownMenuLabel className='font-normal'>
           <div className='flex flex-col space-y-1'>
-            <p className='text-sm leading-none font-medium'>satnaing</p>
-            <p className='text-muted-foreground text-xs leading-none'>
-              satnaingdev@gmail.com
-            </p>
+            <p className='text-sm leading-none font-medium'>{name}</p>
+            {email && (
+              <p className='text-muted-foreground text-xs leading-none'>
+                {email}
+              </p>
+            )}
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
@@ -60,9 +72,6 @@ export function ProfileDropdown() {
           <DropdownMenuItem>New Team</DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={() => setRole(nextRole)}>
-          Switch to {nextRole}
-        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   )

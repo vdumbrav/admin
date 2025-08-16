@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from '@tanstack/react-router'
-import type { Task } from '@/types/tasks'
+import type { Task } from '@/types/quests'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Header } from '@/components/layout/header'

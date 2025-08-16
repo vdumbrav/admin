@@ -5,7 +5,7 @@ import { z } from 'zod'
 import { useForm, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useNavigate, useBlocker } from '@tanstack/react-router'
-import { defaultPartnerTask, type Task } from '@/types/tasks'
+import { defaultPartnerTask, type Task } from '@/types/quests'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import {
