@@ -26,6 +26,13 @@ import {
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import {
+  LS_TABLE_SIZE,
+  LS_TABLE_SORT,
+  LS_TABLE_VIS,
+  loadJSON,
+  saveJSON,
+} from '@/utils/persist'
+import {
   Table,
   TableBody,
   TableCell,
@@ -34,7 +41,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { DataTablePagination } from '@/components/table/data-table-pagination'
-import { useQuests, useBulkAction } from '../api'
+import { useQuests } from '../api'
 import { useReorderQuests } from '../api'
 import type { Quest } from '../data/schema'
 import { DataTableToolbar } from './data-table-toolbar'
@@ -47,9 +54,8 @@ interface DataTableProps {
 export const QuestsDataTable = ({ columns, isAdmin }: DataTableProps) => {
   const router = useRouter()
   const searchParams = useSearch({ from: '/_authenticated/quests/' as const })
-  const [rowSelection, setRowSelection] = React.useState({})
   const [columnVisibility, setColumnVisibility] =
-    React.useState<VisibilityState>({})
+    React.useState<VisibilityState>(() => loadJSON(LS_TABLE_VIS, {}))
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     () => {
       const init: ColumnFiltersState = []
@@ -67,14 +73,16 @@ export const QuestsDataTable = ({ columns, isAdmin }: DataTableProps) => {
     }
   )
   const [sorting, setSorting] = React.useState<SortingState>(() => {
-    const s = searchParams.sort ?? 'order_by:asc'
+    const s = searchParams.sort ?? loadJSON(LS_TABLE_SORT, 'order_by:asc')
     const [id, dir] = s.split(':')
     return [{ id, desc: dir === 'desc' }]
   })
+  const pageSizeFromStorage = loadJSON(LS_TABLE_SIZE, 20)
   const [pagination, setPagination] = React.useState({
     pageIndex: (searchParams.page ?? 1) - 1,
-    pageSize: searchParams.limit ?? 20,
+    pageSize: searchParams.limit ?? pageSizeFromStorage,
   })
+  const pageSizeRef = React.useRef(pagination.pageSize)
   const [reorderMode, setReorderMode] = React.useState(false)
   const [rows, setRows] = React.useState<Quest[]>([])
   const pickSingle = (id: string, fallback = ''): string => {
@@ -103,12 +111,36 @@ export const QuestsDataTable = ({ columns, isAdmin }: DataTableProps) => {
     limit: pagination.pageSize,
     sort,
   })
-  const bulk = useBulkAction()
   const reorder = useReorderQuests()
+
+  const highlightId = searchParams.highlight
+    ? Number(searchParams.highlight)
+    : null
+  const bodyRef = React.useRef<HTMLTableSectionElement>(null)
 
   React.useEffect(() => {
     setPagination((p) => ({ ...p, pageIndex: 0 }))
   }, [search, group, type, provider, visible, sorting])
+
+  React.useEffect(() => {
+    saveJSON(LS_TABLE_VIS, columnVisibility)
+  }, [columnVisibility])
+
+  React.useEffect(() => {
+    if (!reorderMode) {
+      saveJSON(LS_TABLE_SIZE, pagination.pageSize)
+    }
+  }, [pagination.pageSize, reorderMode])
+
+  React.useEffect(() => {
+    if (!reorderMode) {
+      pageSizeRef.current = pagination.pageSize
+    }
+  }, [pagination.pageSize, reorderMode])
+
+  React.useEffect(() => {
+    saveJSON(LS_TABLE_SORT, sort)
+  }, [sort])
 
   React.useEffect(() => {
     const nextFilters: ColumnFiltersState = []
@@ -126,11 +158,13 @@ export const QuestsDataTable = ({ columns, isAdmin }: DataTableProps) => {
     const s = searchParams.sort ?? 'order_by:asc'
     const [id, dir] = s.split(':')
     setSorting([{ id, desc: dir === 'desc' }])
+    const size = searchParams.limit ?? pageSizeFromStorage
     setPagination({
       pageIndex: (searchParams.page ?? 1) - 1,
-      pageSize: searchParams.limit ?? 20,
+      pageSize: size,
     })
-  }, [searchParams])
+    pageSizeRef.current = size
+  }, [searchParams, pageSizeFromStorage])
 
   React.useEffect(() => {
     const next = {
@@ -142,6 +176,7 @@ export const QuestsDataTable = ({ columns, isAdmin }: DataTableProps) => {
       page: pagination.pageIndex + 1,
       limit: pagination.pageSize,
       sort,
+      highlight: searchParams.highlight,
     }
     if (JSON.stringify(next) !== JSON.stringify(searchParams)) {
       router.navigate({ to: '/quests', search: next, replace: true })
@@ -164,6 +199,28 @@ export const QuestsDataTable = ({ columns, isAdmin }: DataTableProps) => {
     }
   }, [data, reorderMode])
 
+  React.useEffect(() => {
+    if (!highlightId || !data) return
+    const id = setTimeout(() => {
+      const el = bodyRef.current?.querySelector<HTMLElement>(
+        `[data-row-id='${highlightId}']`
+      )
+      if (!el) return
+      el.scrollIntoView({ block: 'center' })
+      const cls = 'animate-[fade-bg_1.5s_ease-in-out]'
+      el.classList.add(cls)
+      setTimeout(() => {
+        el.classList.remove(cls)
+      }, 1500)
+      router.navigate({
+        to: '/quests',
+        search: { ...searchParams, highlight: undefined },
+        replace: true,
+      })
+    })
+    return () => clearTimeout(id)
+  }, [highlightId, data, router, searchParams])
+
   const handleDragEnd = (e: DragEndEvent) => {
     if (reorder.isPending) return
     const { active, over } = e
@@ -180,18 +237,10 @@ export const QuestsDataTable = ({ columns, isAdmin }: DataTableProps) => {
     data: (reorderMode ? rows : (data?.items ?? [])) as Quest[],
     columns,
     pageCount: data ? Math.ceil(data.total / pagination.pageSize) : -1,
-    state: {
-      sorting,
-      columnVisibility,
-      rowSelection,
-      columnFilters,
-      pagination,
-    },
-    enableRowSelection: isAdmin && !reorderMode,
+    state: { sorting, columnVisibility, columnFilters, pagination },
     manualPagination: true,
     manualSorting: true,
     manualFiltering: true,
-    onRowSelectionChange: setRowSelection,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     onColumnVisibilityChange: setColumnVisibility,
@@ -219,11 +268,13 @@ export const QuestsDataTable = ({ columns, isAdmin }: DataTableProps) => {
       <DataTableToolbar
         table={table}
         isAdmin={isAdmin}
-        onBulk={(ids, action) => bulk.mutate({ ids, action })}
         reorderMode={reorderMode}
         onToggleReorder={() => {
           setReorderMode((m) => !m)
-          setPagination({ pageIndex: 0, pageSize: !reorderMode ? 100 : 20 })
+          setPagination({
+            pageIndex: 0,
+            pageSize: !reorderMode ? 100 : pageSizeRef.current,
+          })
         }}
       />
       <div className='overflow-hidden rounded-md border'>
@@ -244,7 +295,7 @@ export const QuestsDataTable = ({ columns, isAdmin }: DataTableProps) => {
               </TableRow>
             ))}
           </TableHeader>
-          <TableBody>
+          <TableBody ref={bodyRef}>
             {table.getRowModel().rows?.length ? (
               reorderMode ? (
                 <DndContext onDragEnd={handleDragEnd}>
@@ -259,10 +310,7 @@ export const QuestsDataTable = ({ columns, isAdmin }: DataTableProps) => {
                 </DndContext>
               ) : (
                 table.getRowModel().rows.map((row) => (
-                  <TableRow
-                    key={row.id}
-                    data-state={row.getIsSelected() && 'selected'}
-                  >
+                  <TableRow key={row.id} data-row-id={row.original.id}>
                     {row.getVisibleCells().map((cell) => (
                       <TableCell key={cell.id}>
                         {flexRender(
@@ -287,7 +335,16 @@ export const QuestsDataTable = ({ columns, isAdmin }: DataTableProps) => {
           </TableBody>
         </Table>
       </div>
-      {!reorderMode && <DataTablePagination table={table} />}
+      <div
+        className={
+          reorderMode
+            ? 'pointer-events-none cursor-not-allowed opacity-50'
+            : undefined
+        }
+        title={reorderMode ? 'Exit reorder mode to paginate' : undefined}
+      >
+        <DataTablePagination table={table} />
+      </div>
     </div>
   )
 }
@@ -310,7 +367,7 @@ const SortableRow = ({ row }: { row: Row<Quest> }) => {
       ref={setNodeRef}
       style={style}
       className={isDragging ? 'cursor-move opacity-60' : 'cursor-move'}
-      data-state={row.getIsSelected() && 'selected'}
+      data-row-id={row.original.id}
       {...attributes}
       {...listeners}
     >

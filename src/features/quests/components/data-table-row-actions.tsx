@@ -1,5 +1,5 @@
 import { DotsHorizontalIcon } from '@radix-ui/react-icons'
-import { Link, useSearch } from '@tanstack/react-router'
+import { Link } from '@tanstack/react-router'
 import { Row } from '@tanstack/react-table'
 import { IconTrash } from '@tabler/icons-react'
 import { Button } from '@/components/ui/button'
@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { useQuestsContext } from '../context/quests-context'
 import { questSchema, type Quest } from '../data/schema'
+import { useQuestSearch } from '../use-quest-search'
 
 interface DataTableRowActionsProps<TData> {
   row: Row<TData>
@@ -23,7 +24,7 @@ export const DataTableRowActions = <TData,>({
 }: DataTableRowActionsProps<TData>) => {
   const quest = questSchema.parse(row.original) as Quest
   const { setOpen, setCurrentRow } = useQuestsContext()
-  const search = useSearch({ from: '/_authenticated/quests/' as const })
+  const search = useQuestSearch({ from: '/_authenticated/quests/' as const })
   return (
     <DropdownMenu modal={false}>
       <DropdownMenuTrigger asChild>

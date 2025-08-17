@@ -67,15 +67,6 @@ export function remove(id: number) {
 export function toggle(id: number, visible: boolean) {
   return update(id, { visible })
 }
-export function bulk(ids: number[], action: 'hide' | 'show' | 'delete') {
-  if (action === 'delete') {
-    items = items.filter((i) => !ids.includes(i.id))
-  } else {
-    const v = action === 'show'
-    items = items.map((i) => (ids.includes(i.id) ? { ...i, visible: v } : i))
-  }
-}
-
 export function reorder(rows: Array<{ id: number; order_by: number }>) {
   const map = new Map(rows.map((r) => [r.id, r.order_by]))
   items = items

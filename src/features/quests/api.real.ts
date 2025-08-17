@@ -38,6 +38,7 @@ export const useQuests = (query: {
       http<QuestsResponse>(`/quests?${search}`, { token: getAccessToken() }),
     staleTime: 20_000,
     placeholderData: (prev) => prev,
+    gcTime: 300_000,
   })
 }
 
@@ -120,51 +121,6 @@ export const useToggleVisibility = () => {
     onError: (_e, _v, ctx) =>
       ctx?.prev && qc.setQueryData(['quests'], ctx.prev),
     onSettled: () => qc.invalidateQueries({ queryKey: ['quests'] }),
-  })
-}
-
-export const useBulkAction = () => {
-  const qc = useQueryClient()
-  const { getAccessToken } = useAppAuth()
-  return useMutation({
-    mutationFn: ({
-      ids,
-      action,
-    }: {
-      ids: number[]
-      action: 'hide' | 'show' | 'delete'
-    }) =>
-      http('/quests/bulk', {
-        method: 'POST',
-        body: JSON.stringify({ ids, action }),
-        token: getAccessToken(),
-      }),
-    onMutate: async ({ ids, action }) => {
-      await qc.cancelQueries({ queryKey: ['quests'] })
-      const prev = qc.getQueryData<QuestsResponse>(['quests'])
-      qc.setQueryData<QuestsResponse>(['quests'], (d) => {
-        if (!d) return d
-        if (action === 'delete') {
-          return { ...d, items: d.items.filter((i) => !ids.includes(i.id)) }
-        }
-        const visible = action === 'show'
-        return {
-          ...d,
-          items: d.items.map((i) =>
-            ids.includes(i.id) ? { ...i, visible } : i
-          ),
-        }
-      })
-      return { prev }
-    },
-    onError: (e: unknown, _v, ctx) => {
-      if (ctx?.prev) qc.setQueryData(['quests'], ctx.prev)
-      toast.error(String(e))
-    },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['quests'] })
-      toast.success('Bulk action applied')
-    },
   })
 }
 

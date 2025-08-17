@@ -1,11 +1,12 @@
-import { Link, useSearch } from '@tanstack/react-router'
+import { Link } from '@tanstack/react-router'
 import { IconPlus } from '@tabler/icons-react'
 import { useAppAuth } from '@/auth/provider'
 import { Button } from '@/components/ui/button'
+import { useQuestSearch } from '../use-quest-search'
 
 export const QuestsPrimaryButtons = () => {
   const auth = useAppAuth()
-  const search = useSearch({ from: '/_authenticated/quests/' as const })
+  const search = useQuestSearch({ from: '/_authenticated/quests/' as const })
   if (!auth.hasRole('admin')) return null
   return (
     <Button asChild className='space-x-1'>

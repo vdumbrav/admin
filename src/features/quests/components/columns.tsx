@@ -1,7 +1,6 @@
 /* eslint-disable react-refresh/only-export-components */
 import { ColumnDef, Row } from '@tanstack/react-table'
 import { Badge } from '@/components/ui/badge'
-import { Checkbox } from '@/components/ui/checkbox'
 import { Switch } from '@/components/ui/switch'
 import { DataTableColumnHeader } from '@/components/table/data-table-column-header'
 import { useToggleVisibility } from '../api'
@@ -137,30 +136,6 @@ export const getColumns = (isAdmin: boolean): ColumnDef<Quest>[] => {
     },
   ]
   if (isAdmin) {
-    cols.unshift({
-      id: 'select',
-      header: ({ table }) => (
-        <Checkbox
-          checked={
-            table.getIsAllPageRowsSelected() ||
-            (table.getIsSomePageRowsSelected() && 'indeterminate')
-          }
-          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-          aria-label='Select all'
-          className='translate-y-[2px]'
-        />
-      ),
-      cell: ({ row }) => (
-        <Checkbox
-          checked={row.getIsSelected()}
-          onCheckedChange={(value) => row.toggleSelected(!!value)}
-          aria-label='Select row'
-          className='translate-y-[2px]'
-        />
-      ),
-      enableSorting: false,
-      enableHiding: false,
-    })
     cols.push({
       id: 'actions',
       cell: ({ row }) => <DataTableRowActions row={row} />,

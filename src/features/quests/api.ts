@@ -17,7 +17,6 @@ export const useDeleteQuest = useFake
 export const useToggleVisibility = useFake
   ? mock.useToggleVisibility
   : real.useToggleVisibility
-export const useBulkAction = useFake ? mock.useBulkAction : real.useBulkAction
 export const uploadMedia = useFake ? mock.uploadMedia : real.uploadMedia
 export const useReorderQuests = useFake
   ? mock.useReorderQuests

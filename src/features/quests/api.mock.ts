@@ -32,6 +32,7 @@ export function useQuests(query: {
     queryFn: () => fx.getQuests(params),
     staleTime: 20_000,
     placeholderData: (prev) => prev,
+    gcTime: 300_000,
   })
 }
 
@@ -88,40 +89,6 @@ export function useToggleVisibility() {
             }
           : d
       )
-      return { prev }
-    },
-    onError: (_e, _v, ctx) =>
-      ctx?.prev && qc.setQueryData(['quests'], ctx.prev),
-    onSettled: () => qc.invalidateQueries({ queryKey: ['quests'] }),
-  })
-}
-
-export function useBulkAction() {
-  const qc = useQueryClient()
-  return useMutation({
-    mutationFn: ({
-      ids,
-      action,
-    }: {
-      ids: number[]
-      action: 'hide' | 'show' | 'delete'
-    }) => fx.bulkAction(ids, action),
-    onMutate: async ({ ids, action }) => {
-      await qc.cancelQueries({ queryKey: ['quests'] })
-      const prev = qc.getQueryData<QuestsResponse>(['quests'])
-      qc.setQueryData<QuestsResponse>(['quests'], (d) => {
-        if (!d) return d
-        if (action === 'delete') {
-          return { ...d, items: d.items.filter((i) => !ids.includes(i.id)) }
-        }
-        const v = action === 'show'
-        return {
-          ...d,
-          items: d.items.map((i) =>
-            ids.includes(i.id) ? { ...i, visible: v } : i
-          ),
-        }
-      })
       return { prev }
     },
     onError: (_e, _v, ctx) =>

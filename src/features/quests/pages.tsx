@@ -1,4 +1,4 @@
-import { useParams, useNavigate, useSearch } from '@tanstack/react-router'
+import { useParams, useNavigate } from '@tanstack/react-router'
 import type { Task } from '@/types/tasks'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
@@ -9,11 +9,14 @@ import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
 import { QuestForm } from './QuestForm'
 import { useCreateQuest, useQuest, useUpdateQuest } from './api'
+import { useQuestSearch } from './use-quest-search'
 
 export const QuestCreatePage = () => {
   const create = useCreateQuest()
   const nav = useNavigate({})
-  const search = useSearch({ from: '/_authenticated/quests/new' })
+  const search = useQuestSearch({
+    from: '/_authenticated/quests/new' as const,
+  })
   return (
     <>
       <Header fixed>
@@ -39,9 +42,12 @@ export const QuestCreatePage = () => {
         <QuestForm
           onSubmit={async (v) => {
             try {
-              await create.mutateAsync(v as Partial<Task>)
+              const saved = await create.mutateAsync(v as Partial<Task>)
               toast.success('Saved')
-              nav({ to: '/quests', search })
+              nav({
+                to: '/quests',
+                search: { ...search, highlight: String(saved.id) },
+              })
             } catch (e) {
               toast.error(e instanceof Error ? e.message : 'Failed to save')
             }
@@ -59,7 +65,9 @@ export const QuestEditPage = () => {
   const { data } = useQuest(questId)
   const update = useUpdateQuest(questId)
   const nav = useNavigate({})
-  const search = useSearch({ from: '/_authenticated/quests/$id' })
+  const search = useQuestSearch({
+    from: '/_authenticated/quests/$id' as const,
+  })
 
   if (!data) {
     return (
@@ -111,7 +119,10 @@ export const QuestEditPage = () => {
             try {
               await update.mutateAsync(v as unknown as Partial<Task>)
               toast.success('Saved')
-              nav({ to: '/quests', search })
+              nav({
+                to: '/quests',
+                search: { ...search, highlight: String(questId) },
+              })
             } catch (e) {
               toast.error(e instanceof Error ? e.message : 'Failed to save')
             }

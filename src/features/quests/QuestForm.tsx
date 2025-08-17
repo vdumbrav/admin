@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { z } from 'zod'
 import { useForm, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -28,6 +28,7 @@ import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'
 import { Textarea } from '@/components/ui/textarea'
 import { ImageDropzone } from '@/components/image-dropzone'
+import { NoWheelNumber } from '@/components/no-wheel-number'
 import { SelectDropdown } from '@/components/select-dropdown'
 import { uploadMedia } from './api'
 import { ChildrenEditor } from './components/children-editor'
@@ -195,6 +196,19 @@ export const QuestForm = ({
     name: 'resources.adsgram.type',
   })
 
+  const groupItems = useMemo(
+    () => groups.map(({ label, value }) => ({ label, value })),
+    []
+  )
+  const typeItems = useMemo(
+    () => types.map(({ label, value }) => ({ label, value })),
+    []
+  )
+  const providerItems = useMemo(
+    () => providers.map(({ label, value }) => ({ label, value })),
+    []
+  )
+
   const popupField = (key: string) => `resources.ui['pop-up'].${key}` as const
 
   useEffect(() => {
@@ -350,7 +364,7 @@ export const QuestForm = ({
                   value={field.value}
                   onValueChange={field.onChange}
                   placeholder='Select type'
-                  items={types.map(({ label, value }) => ({ label, value }))}
+                  items={typeItems}
                 />
                 <FormMessage />
               </FormItem>
@@ -366,7 +380,7 @@ export const QuestForm = ({
                   value={field.value}
                   onValueChange={field.onChange}
                   placeholder='Select group'
-                  items={groups.map(({ label, value }) => ({ label, value }))}
+                  items={groupItems}
                 />
                 <FormMessage />
               </FormItem>
@@ -379,8 +393,7 @@ export const QuestForm = ({
               <FormItem>
                 <FormLabel>Order</FormLabel>
                 <FormControl>
-                  <Input
-                    type='number'
+                  <NoWheelNumber
                     {...field}
                     value={field.value as number}
                     onChange={(e) =>
@@ -419,10 +432,7 @@ export const QuestForm = ({
                   value={field.value}
                   onValueChange={(v) => field.onChange(v || undefined)}
                   placeholder='Select provider'
-                  items={providers.map(({ label, value }) => ({
-                    label,
-                    value,
-                  }))}
+                  items={providerItems}
                 />
                 <FormMessage />
               </FormItem>
@@ -479,8 +489,7 @@ export const QuestForm = ({
               <FormItem>
                 <FormLabel>Reward</FormLabel>
                 <FormControl>
-                  <Input
-                    type='number'
+                  <NoWheelNumber
                     {...field}
                     value={(field.value as number | undefined) ?? ''}
                     onChange={(e) =>

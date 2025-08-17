@@ -6,12 +6,10 @@ import { Input } from '@/components/ui/input'
 import { DataTableFacetedFilter } from '@/components/table/data-table-faceted-filter'
 import { DataTableViewOptions } from '@/components/table/data-table-view-options'
 import { groups, types, providers, visibilities } from '../data/data'
-import { Quest } from '../data/schema'
 
 interface DataTableToolbarProps<TData> {
   table: Table<TData>
   isAdmin: boolean
-  onBulk: (ids: number[], action: 'hide' | 'show' | 'delete') => void
   reorderMode: boolean
   onToggleReorder: () => void
 }
@@ -19,14 +17,10 @@ interface DataTableToolbarProps<TData> {
 export const DataTableToolbar = <TData,>({
   table,
   isAdmin,
-  onBulk,
   reorderMode,
   onToggleReorder,
 }: DataTableToolbarProps<TData>) => {
   const isFiltered = table.getState().columnFilters.length > 0
-  const selected = table
-    .getFilteredSelectedRowModel()
-    .rows.map((r) => (r.original as Quest).id)
   const filterValue =
     (table.getColumn('title')?.getFilterValue() as string) ?? ''
   const [search, setSearch] = React.useState(filterValue)
@@ -45,50 +39,22 @@ export const DataTableToolbar = <TData,>({
   return (
     <div className='flex items-center justify-between'>
       <div className='flex flex-1 flex-col-reverse items-start gap-y-2 sm:flex-row sm:items-center sm:space-x-2'>
-        {isAdmin && selected.length > 0 && (
-          <div className='flex gap-2'>
-            <Button
-              variant='outline'
-              size='sm'
-              onClick={() => {
-                onBulk(selected, 'hide')
-                table.toggleAllPageRowsSelected(false)
-              }}
-              aria-label='Hide selected'
-            >
-              Hide
-            </Button>
-            <Button
-              variant='outline'
-              size='sm'
-              onClick={() => {
-                onBulk(selected, 'show')
-                table.toggleAllPageRowsSelected(false)
-              }}
-              aria-label='Show selected'
-            >
-              Show
-            </Button>
-            <Button
-              variant='destructive'
-              size='sm'
-              onClick={() => {
-                onBulk(selected, 'delete')
-                table.toggleAllPageRowsSelected(false)
-              }}
-              aria-label='Delete selected'
-            >
-              Delete
-            </Button>
-          </div>
-        )}
         <Input
-          placeholder='Search quests...'
+          placeholder='Search by title...'
           value={search}
           onChange={(event) => setSearch(event.target.value)}
           className='h-8 w-[150px] lg:w-[250px]'
+          disabled={reorderMode}
+          title={reorderMode ? 'Exit reorder mode to search' : undefined}
         />
-        <div className='flex gap-x-2'>
+        <div
+          className={`flex gap-x-2${
+            reorderMode
+              ? 'pointer-events-none cursor-not-allowed opacity-50'
+              : ''
+          }`}
+          title={reorderMode ? 'Exit reorder mode to filter' : undefined}
+        >
           {table.getColumn('group') && (
             <DataTableFacetedFilter
               column={table.getColumn('group')}
