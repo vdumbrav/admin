@@ -5,7 +5,9 @@ import { Button } from '@/components/ui/button'
 
 export const QuestsPrimaryButtons = () => {
   const auth = useAppAuth()
-  const search = useSearch({ from: '/_authenticated/quests/' as const })
+  const { highlight: _highlight, ...search } = useSearch({
+    from: '/_authenticated/quests/' as const,
+  })
   if (!auth.hasRole('admin')) return null
   return (
     <Button asChild className='space-x-1'>

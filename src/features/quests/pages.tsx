@@ -13,7 +13,9 @@ import { useCreateQuest, useQuest, useUpdateQuest } from './api'
 export const QuestCreatePage = () => {
   const create = useCreateQuest()
   const nav = useNavigate({})
-  const search = useSearch({ from: '/_authenticated/quests/new' })
+  const { highlight: _highlight, ...search } = useSearch({
+    from: '/_authenticated/quests/new',
+  })
   return (
     <>
       <Header fixed>
@@ -39,9 +41,12 @@ export const QuestCreatePage = () => {
         <QuestForm
           onSubmit={async (v) => {
             try {
-              await create.mutateAsync(v as Partial<Task>)
+              const saved = await create.mutateAsync(v as Partial<Task>)
               toast.success('Saved')
-              nav({ to: '/quests', search })
+              nav({
+                to: '/quests',
+                search: { ...search, highlight: String(saved.id) },
+              })
             } catch (e) {
               toast.error(e instanceof Error ? e.message : 'Failed to save')
             }
@@ -59,7 +64,9 @@ export const QuestEditPage = () => {
   const { data } = useQuest(questId)
   const update = useUpdateQuest(questId)
   const nav = useNavigate({})
-  const search = useSearch({ from: '/_authenticated/quests/$id' })
+  const { highlight: _highlight, ...search } = useSearch({
+    from: '/_authenticated/quests/$id',
+  })
 
   if (!data) {
     return (
@@ -111,7 +118,10 @@ export const QuestEditPage = () => {
             try {
               await update.mutateAsync(v as unknown as Partial<Task>)
               toast.success('Saved')
-              nav({ to: '/quests', search })
+              nav({
+                to: '/quests',
+                search: { ...search, highlight: String(questId) },
+              })
             } catch (e) {
               toast.error(e instanceof Error ? e.message : 'Failed to save')
             }

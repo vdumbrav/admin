@@ -18,6 +18,7 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { SelectDropdown } from '@/components/select-dropdown'
+import { NoWheelNumber } from '@/components/no-wheel-number'
 
 type ChildType = Extract<
   Task['type'],
@@ -219,8 +220,7 @@ const ChildRow = ({ id, index, remove }: RowProps) => {
             <FormItem>
               <FormLabel>Reward</FormLabel>
               <FormControl>
-                <Input
-                  type='number'
+                <NoWheelNumber
                   {...field}
                   value={field.value ?? ''}
                   onChange={(e) =>

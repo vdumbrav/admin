@@ -32,6 +32,7 @@ export function useQuests(query: {
     queryFn: () => fx.getQuests(params),
     staleTime: 20_000,
     placeholderData: (prev) => prev,
+    gcTime: 300_000,
   })
 }
 

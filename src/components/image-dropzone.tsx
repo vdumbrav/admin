@@ -46,7 +46,7 @@ export const ImageDropzone = ({
       <div
         {...getRootProps({
           className: cn(
-            'flex flex-col items-center justify-center rounded border-2 border-dashed p-4 text-center transition-colors hover:bg-muted/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50',
+            'relative flex flex-col items-center justify-center rounded border-2 border-dashed p-4 text-center transition-colors hover:bg-muted/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50',
             isDragActive && 'border-primary bg-primary/5',
             disabled && 'opacity-50'
           ),
@@ -66,6 +66,11 @@ export const ImageDropzone = ({
           <div className='text-muted-foreground flex h-16 w-16 items-center justify-center rounded border text-xs'>
             No image
           </div>
+        )}
+        {isDragActive && (
+          <span className='absolute inset-0 flex items-center justify-center rounded bg-background/80 text-sm'>
+            Drop to upload
+          </span>
         )}
         {disabled && (
           <span className='text-muted-foreground mt-2 text-xs'>

@@ -23,7 +23,9 @@ export const DataTableRowActions = <TData,>({
 }: DataTableRowActionsProps<TData>) => {
   const quest = questSchema.parse(row.original) as Quest
   const { setOpen, setCurrentRow } = useQuestsContext()
-  const search = useSearch({ from: '/_authenticated/quests/' as const })
+  const { highlight: _highlight, ...search } = useSearch({
+    from: '/_authenticated/quests/' as const,
+  })
   return (
     <DropdownMenu modal={false}>
       <DropdownMenuTrigger asChild>

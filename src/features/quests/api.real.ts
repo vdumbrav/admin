@@ -38,6 +38,7 @@ export const useQuests = (query: {
       http<QuestsResponse>(`/quests?${search}`, { token: getAccessToken() }),
     staleTime: 20_000,
     placeholderData: (prev) => prev,
+    gcTime: 300_000,
   })
 }
 
