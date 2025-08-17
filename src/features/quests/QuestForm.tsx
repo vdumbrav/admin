@@ -1,13 +1,15 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { z } from 'zod'
 import { useForm, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useBlocker } from '@tanstack/react-router'
 import { useAppAuth } from '@/auth/provider'
+import { mediaErrors } from '@/errors/media'
 import { defaultPartnerTask, type Task } from '@/types/tasks'
 import { toast } from 'sonner'
+import { replaceObjectUrl } from '@/utils/object-url'
 import { Button } from '@/components/ui/button'
 import {
   Collapsible,
@@ -25,6 +27,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'
 import { Textarea } from '@/components/ui/textarea'
+import { ImageDropzone } from '@/components/image-dropzone'
 import { SelectDropdown } from '@/components/select-dropdown'
 import { uploadMedia } from './api'
 import { ChildrenEditor } from './components/children-editor'
@@ -153,8 +156,9 @@ export const QuestForm = ({
   onCancel: () => void
 }) => {
   const auth = useAppAuth()
-  const fileRef = useRef<HTMLInputElement | null>(null)
   const [iconPreview, setIconPreview] = useState<string>()
+  const [isUploading, setIsUploading] = useState(false)
+  const clearIconPreview = () => setIconPreview((old) => replaceObjectUrl(old))
 
   const form = useForm({
     resolver: zodResolver(schema),
@@ -255,33 +259,33 @@ export const QuestForm = ({
   }, [form.formState.isDirty])
 
   const handleUpload = async (file: File) => {
-    if (!file.type.startsWith('image/')) {
-      toast.error('Only image files allowed')
-      return
-    }
-    if (file.size > 1024 * 1024) {
-      toast.error('File too large (max 1MB)')
-      return
-    }
+    setIconPreview((old) => replaceObjectUrl(old, file))
+    setIsUploading(true)
     try {
       const { url } = await uploadMedia(file, auth.getAccessToken())
       form.setValue('resources.icon', url, { shouldDirty: true })
     } catch {
-      toast.error('Failed to upload icon')
+      toast.error(mediaErrors.upload)
+      clearIconPreview()
+    } finally {
+      setIsUploading(false)
     }
   }
 
+  const handleClearIcon = () => {
+    form.setValue('resources.icon', undefined, { shouldDirty: true })
+    clearIconPreview()
+  }
+
   useEffect(() => {
+    if (!icon) {
+      clearIconPreview()
+      return
+    }
+    if (iconPreview) return
+
     const controller = new AbortController()
     let localUrl: string | undefined
-
-    if (!icon) {
-      setIconPreview((oldUrl) => {
-        if (oldUrl) URL.revokeObjectURL(oldUrl)
-        return undefined
-      })
-      return () => controller.abort()
-    }
 
     const load = async () => {
       try {
@@ -290,15 +294,16 @@ export const QuestForm = ({
           headers: token ? { Authorization: `Bearer ${token}` } : {},
           signal: controller.signal,
         })
+        if (!res.ok) throw new Error(String(res.status))
         const blob = await res.blob()
-        localUrl = URL.createObjectURL(blob)
         setIconPreview((oldUrl) => {
-          if (oldUrl) URL.revokeObjectURL(oldUrl)
-          return localUrl
+          const newUrl = replaceObjectUrl(oldUrl, blob)
+          localUrl = newUrl
+          return newUrl
         })
       } catch (e) {
         if (!(e instanceof DOMException && e.name === 'AbortError')) {
-          toast.error('Failed to load icon')
+          toast.error(mediaErrors.load)
         }
       }
     }
@@ -308,7 +313,7 @@ export const QuestForm = ({
       controller.abort()
       if (localUrl) URL.revokeObjectURL(localUrl)
     }
-  }, [icon, auth])
+  }, [icon, auth, iconPreview])
 
   return (
     <Form {...form}>
@@ -547,7 +552,7 @@ export const QuestForm = ({
                 Advanced
               </Button>
             </CollapsibleTrigger>
-            <CollapsibleContent className='space-y-4'>
+            <CollapsibleContent className='mt-4 space-y-4'>
               <div className='space-y-3 rounded-md border p-4'>
                 <div className='text-sm font-medium'>Pop-up</div>
                 <FormField
@@ -644,7 +649,6 @@ export const QuestForm = ({
                     </FormItem>
                   )}
                 />
-                // AdsGram Type
                 <FormField
                   control={form.control}
                   name='resources.adsgram.type'
@@ -678,7 +682,6 @@ export const QuestForm = ({
                     </FormItem>
                   )}
                 />
-                // AdsGram Subtype (only when type === 'task')
                 {adsgramType === 'task' && (
                   <FormField
                     control={form.control}
@@ -713,29 +716,12 @@ export const QuestForm = ({
 
         <div className='space-y-2'>
           <FormLabel>Icon</FormLabel>
-          {iconPreview ? (
-            <img
-              src={iconPreview}
-              className='h-16 w-16 rounded border object-contain'
-            />
-          ) : null}
-          <input
-            ref={fileRef}
-            type='file'
-            accept='image/*'
-            className='hidden'
-            onChange={async (e) => {
-              const f = e.target.files?.[0]
-              if (f) await handleUpload(f)
-            }}
+          <ImageDropzone
+            preview={iconPreview}
+            onFile={handleUpload}
+            onClear={handleClearIcon}
+            disabled={isUploading}
           />
-          <Button
-            type='button'
-            variant='outline'
-            onClick={() => fileRef.current?.click()}
-          >
-            Upload Icon
-          </Button>
         </div>
 
         <div className='flex gap-2'>
