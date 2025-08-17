@@ -1,8 +1,8 @@
-import { useDropzone, type FileError } from 'react-dropzone'
-import { Button } from '@/components/ui/button'
-import { cn } from '@/lib/utils'
-import { toast } from 'sonner'
 import { mediaErrors } from '@/errors/media'
+import { useDropzone, type FileError } from 'react-dropzone'
+import { toast } from 'sonner'
+import { cn } from '@/lib/utils'
+import { Button } from '@/components/ui/button'
 
 const dropErrors: Record<FileError['code'], string> = {
   'file-too-large': mediaErrors.size,
@@ -37,7 +37,7 @@ export const ImageDropzone = ({
     maxSize: 1024 * 1024,
     multiple: false,
     disabled,
-    noClick: true,
+    noClick: false,
     noKeyboard: true,
   })
 
@@ -57,27 +57,43 @@ export const ImageDropzone = ({
       >
         <input {...getInputProps()} />
         {preview ? (
-          <img src={preview} alt='Icon preview' className='h-16 w-16 rounded object-contain' />
+          <img
+            src={preview}
+            alt='Icon preview'
+            className='h-16 w-16 rounded object-contain'
+          />
         ) : (
-          <div className='flex h-16 w-16 items-center justify-center rounded border text-xs text-muted-foreground'>
+          <div className='text-muted-foreground flex h-16 w-16 items-center justify-center rounded border text-xs'>
             No image
           </div>
         )}
         {disabled && (
-          <span className='mt-2 text-xs text-muted-foreground'>Uploading...</span>
+          <span className='text-muted-foreground mt-2 text-xs'>
+            Uploading...
+          </span>
         )}
       </div>
       <div className='flex gap-2'>
-        <Button type='button' variant='outline' onClick={open} disabled={disabled}>
+        <Button
+          type='button'
+          variant='outline'
+          onClick={open}
+          disabled={disabled}
+        >
           Choose File
         </Button>
         {preview && (
-          <Button type='button' variant='ghost' onClick={onClear} disabled={disabled}>
+          <Button
+            type='button'
+            variant='ghost'
+            onClick={onClear}
+            disabled={disabled}
+          >
             Clear
           </Button>
         )}
       </div>
-      <p id='icon-hint' className='text-xs text-muted-foreground'>
+      <p id='icon-hint' className='text-muted-foreground text-xs'>
         Drag an image here or choose a file. Max 1MB.
       </p>
     </div>

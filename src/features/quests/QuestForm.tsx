@@ -6,8 +6,10 @@ import { useForm, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useBlocker } from '@tanstack/react-router'
 import { useAppAuth } from '@/auth/provider'
+import { mediaErrors } from '@/errors/media'
 import { defaultPartnerTask, type Task } from '@/types/tasks'
 import { toast } from 'sonner'
+import { replaceObjectUrl } from '@/utils/object-url'
 import { Button } from '@/components/ui/button'
 import {
   Collapsible,
@@ -25,15 +27,13 @@ import {
 import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'
 import { Textarea } from '@/components/ui/textarea'
-import { SelectDropdown } from '@/components/select-dropdown'
 import { ImageDropzone } from '@/components/image-dropzone'
+import { SelectDropdown } from '@/components/select-dropdown'
 import { uploadMedia } from './api'
 import { ChildrenEditor } from './components/children-editor'
 import type { Child } from './components/children-editor'
 import { groups, types, providers } from './data/data'
 import { withTwitterValidation } from './validation'
-import { replaceObjectUrl } from '@/utils/object-url'
-import { mediaErrors } from '@/errors/media'
 
 const childSchema = withTwitterValidation(
   z.object({
@@ -158,8 +158,7 @@ export const QuestForm = ({
   const auth = useAppAuth()
   const [iconPreview, setIconPreview] = useState<string>()
   const [isUploading, setIsUploading] = useState(false)
-  const clearIconPreview = () =>
-    setIconPreview((old) => replaceObjectUrl(old))
+  const clearIconPreview = () => setIconPreview((old) => replaceObjectUrl(old))
 
   const form = useForm({
     resolver: zodResolver(schema),
@@ -553,7 +552,7 @@ export const QuestForm = ({
                 Advanced
               </Button>
             </CollapsibleTrigger>
-            <CollapsibleContent className='space-y-4'>
+            <CollapsibleContent className='mt-4 space-y-4'>
               <div className='space-y-3 rounded-md border p-4'>
                 <div className='text-sm font-medium'>Pop-up</div>
                 <FormField
