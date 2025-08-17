@@ -26,6 +26,13 @@ import {
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import {
+  LS_TABLE_SIZE,
+  LS_TABLE_SORT,
+  LS_TABLE_VIS,
+  loadJSON,
+  saveJSON,
+} from '@/utils/persist'
+import {
   Table,
   TableBody,
   TableCell,
@@ -34,7 +41,6 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { DataTablePagination } from '@/components/table/data-table-pagination'
-import { LS_TABLE_SIZE, LS_TABLE_SORT, LS_TABLE_VIS, loadJSON, saveJSON } from '@/utils/persist'
 import { useQuests } from '../api'
 import { useReorderQuests } from '../api'
 import type { Quest } from '../data/schema'

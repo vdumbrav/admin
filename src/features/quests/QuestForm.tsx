@@ -28,13 +28,13 @@ import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'
 import { Textarea } from '@/components/ui/textarea'
 import { ImageDropzone } from '@/components/image-dropzone'
+import { NoWheelNumber } from '@/components/no-wheel-number'
 import { SelectDropdown } from '@/components/select-dropdown'
 import { uploadMedia } from './api'
 import { ChildrenEditor } from './components/children-editor'
 import type { Child } from './components/children-editor'
 import { groups, types, providers } from './data/data'
 import { withTwitterValidation } from './validation'
-import { NoWheelNumber } from '@/components/no-wheel-number'
 
 const childSchema = withTwitterValidation(
   z.object({
@@ -196,8 +196,14 @@ export const QuestForm = ({
     name: 'resources.adsgram.type',
   })
 
-  const groupItems = useMemo(() => groups.map(({ label, value }) => ({ label, value })), [])
-  const typeItems = useMemo(() => types.map(({ label, value }) => ({ label, value })), [])
+  const groupItems = useMemo(
+    () => groups.map(({ label, value }) => ({ label, value })),
+    []
+  )
+  const typeItems = useMemo(
+    () => types.map(({ label, value }) => ({ label, value })),
+    []
+  )
   const providerItems = useMemo(
     () => providers.map(({ label, value }) => ({ label, value })),
     []

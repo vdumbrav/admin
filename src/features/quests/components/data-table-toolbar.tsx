@@ -50,7 +50,7 @@ export const DataTableToolbar = <TData,>({
         <div
           className={`flex gap-x-2${
             reorderMode
-              ? ' pointer-events-none cursor-not-allowed opacity-50'
+              ? 'pointer-events-none cursor-not-allowed opacity-50'
               : ''
           }`}
           title={reorderMode ? 'Exit reorder mode to filter' : undefined}
@@ -92,7 +92,8 @@ export const DataTableToolbar = <TData,>({
           <Button
             variant='ghost'
             onClick={() => table.resetColumnFilters()}
-            className='h-8 px-2 lg:px-3'>
+            className='h-8 px-2 lg:px-3'
+          >
             Reset
             <Cross2Icon className='ml-2 h-4 w-4' />
           </Button>

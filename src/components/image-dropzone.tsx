@@ -68,7 +68,7 @@ export const ImageDropzone = ({
           </div>
         )}
         {isDragActive && (
-          <span className='absolute inset-0 flex items-center justify-center rounded bg-background/80 text-sm'>
+          <span className='bg-background/80 absolute inset-0 flex items-center justify-center rounded text-sm'>
             Drop to upload
           </span>
         )}
