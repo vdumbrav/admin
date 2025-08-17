@@ -1,4 +1,4 @@
-import { useParams, useNavigate, useSearch } from '@tanstack/react-router'
+import { useParams, useNavigate } from '@tanstack/react-router'
 import type { Task } from '@/types/tasks'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
@@ -8,13 +8,14 @@ import { ProfileDropdown } from '@/components/profile-dropdown'
 import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
 import { QuestForm } from './QuestForm'
+import { useQuestSearch } from './use-quest-search'
 import { useCreateQuest, useQuest, useUpdateQuest } from './api'
 
 export const QuestCreatePage = () => {
   const create = useCreateQuest()
   const nav = useNavigate({})
-  const { highlight: _highlight, ...search } = useSearch({
-    from: '/_authenticated/quests/new',
+  const search = useQuestSearch({
+    from: '/_authenticated/quests/new' as const,
   })
   return (
     <>
@@ -64,8 +65,8 @@ export const QuestEditPage = () => {
   const { data } = useQuest(questId)
   const update = useUpdateQuest(questId)
   const nav = useNavigate({})
-  const { highlight: _highlight, ...search } = useSearch({
-    from: '/_authenticated/quests/$id',
+  const search = useQuestSearch({
+    from: '/_authenticated/quests/$id' as const,
   })
 
   if (!data) {

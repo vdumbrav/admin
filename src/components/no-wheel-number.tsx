@@ -4,13 +4,12 @@ import { Input } from '@/components/ui/input'
 export const NoWheelNumber = React.forwardRef<
   HTMLInputElement,
   React.ComponentProps<typeof Input>
->(({ onWheel, ...props }, ref) => (
+>((props, ref) => (
   <Input
     ref={ref}
     type='number'
     {...props}
     onWheel={(e) => {
-      onWheel?.(e)
       e.currentTarget.blur()
     }}
   />
