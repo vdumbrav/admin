@@ -6,29 +6,21 @@ import { Input } from '@/components/ui/input'
 import { DataTableFacetedFilter } from '@/components/table/data-table-faceted-filter'
 import { DataTableViewOptions } from '@/components/table/data-table-view-options'
 import { groups, types, providers, visibilities } from '../data/data'
-import { Quest } from '../data/schema'
 
 interface DataTableToolbarProps<TData> {
   table: Table<TData>
   isAdmin: boolean
-  onBulk: (ids: number[], action: 'hide' | 'show' | 'delete') => void
   reorderMode: boolean
   onToggleReorder: () => void
-  bulkPending: boolean
 }
 
 export const DataTableToolbar = <TData,>({
   table,
   isAdmin,
-  onBulk,
   reorderMode,
   onToggleReorder,
-  bulkPending,
 }: DataTableToolbarProps<TData>) => {
   const isFiltered = table.getState().columnFilters.length > 0
-  const selected = table
-    .getFilteredSelectedRowModel()
-    .rows.map((r) => (r.original as Quest).id)
   const filterValue =
     (table.getColumn('title')?.getFilterValue() as string) ?? ''
   const [search, setSearch] = React.useState(filterValue)
@@ -47,51 +39,6 @@ export const DataTableToolbar = <TData,>({
   return (
     <div className='flex items-center justify-between'>
       <div className='flex flex-1 flex-col-reverse items-start gap-y-2 sm:flex-row sm:items-center sm:space-x-2'>
-        {isAdmin && (
-          <div className='flex items-center gap-2'>
-            {selected.length > 0 && (
-              <span className='text-sm text-muted-foreground'>
-                {selected.length} selected
-              </span>
-            )}
-            <Button
-              variant='outline'
-              size='sm'
-              onClick={() => {
-                onBulk(selected, 'hide')
-                table.toggleAllPageRowsSelected(false)
-              }}
-              aria-label='Hide selected'
-              disabled={selected.length === 0 || bulkPending}
-            >
-              Hide
-            </Button>
-            <Button
-              variant='outline'
-              size='sm'
-              onClick={() => {
-                onBulk(selected, 'show')
-                table.toggleAllPageRowsSelected(false)
-              }}
-              aria-label='Show selected'
-              disabled={selected.length === 0 || bulkPending}
-            >
-              Show
-            </Button>
-            <Button
-              variant='destructive'
-              size='sm'
-              onClick={() => {
-                onBulk(selected, 'delete')
-                table.toggleAllPageRowsSelected(false)
-              }}
-              aria-label='Delete selected'
-              disabled={selected.length === 0 || bulkPending}
-            >
-              Delete
-            </Button>
-          </div>
-        )}
         <Input
           placeholder='Search by title...'
           value={search}

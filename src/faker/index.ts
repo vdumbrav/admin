@@ -26,13 +26,6 @@ export async function patchVisibility(id: number, visible: boolean) {
   await delay()
   return db.toggle(id, visible)!
 }
-export async function bulkAction(
-  ids: number[],
-  action: 'hide' | 'show' | 'delete'
-) {
-  await delay()
-  return db.bulk(ids, action)
-}
 export async function postMedia(file: File) {
   await delay()
   return { url: db.fakeUrl(file.name) }

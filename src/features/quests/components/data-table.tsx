@@ -35,7 +35,7 @@ import {
 } from '@/components/ui/table'
 import { DataTablePagination } from '@/components/table/data-table-pagination'
 import { LS_TABLE_SIZE, LS_TABLE_SORT, LS_TABLE_VIS, loadJSON, saveJSON } from '@/utils/persist'
-import { useQuests, useBulkAction } from '../api'
+import { useQuests } from '../api'
 import { useReorderQuests } from '../api'
 import type { Quest } from '../data/schema'
 import { DataTableToolbar } from './data-table-toolbar'
@@ -48,7 +48,6 @@ interface DataTableProps {
 export const QuestsDataTable = ({ columns, isAdmin }: DataTableProps) => {
   const router = useRouter()
   const searchParams = useSearch({ from: '/_authenticated/quests/' as const })
-  const [rowSelection, setRowSelection] = React.useState({})
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>(() => loadJSON(LS_TABLE_VIS, {}))
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -106,7 +105,6 @@ export const QuestsDataTable = ({ columns, isAdmin }: DataTableProps) => {
     limit: pagination.pageSize,
     sort,
   })
-  const bulk = useBulkAction()
   const reorder = useReorderQuests()
 
   const highlightId = searchParams.highlight
@@ -233,18 +231,10 @@ export const QuestsDataTable = ({ columns, isAdmin }: DataTableProps) => {
     data: (reorderMode ? rows : (data?.items ?? [])) as Quest[],
     columns,
     pageCount: data ? Math.ceil(data.total / pagination.pageSize) : -1,
-    state: {
-      sorting,
-      columnVisibility,
-      rowSelection,
-      columnFilters,
-      pagination,
-    },
-    enableRowSelection: isAdmin && !reorderMode,
+    state: { sorting, columnVisibility, columnFilters, pagination },
     manualPagination: true,
     manualSorting: true,
     manualFiltering: true,
-    onRowSelectionChange: setRowSelection,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     onColumnVisibilityChange: setColumnVisibility,
@@ -272,9 +262,7 @@ export const QuestsDataTable = ({ columns, isAdmin }: DataTableProps) => {
       <DataTableToolbar
         table={table}
         isAdmin={isAdmin}
-        onBulk={(ids, action) => bulk.mutate({ ids, action })}
         reorderMode={reorderMode}
-        bulkPending={bulk.isPending}
         onToggleReorder={() => {
           setReorderMode((m) => !m)
           setPagination({
@@ -316,11 +304,7 @@ export const QuestsDataTable = ({ columns, isAdmin }: DataTableProps) => {
                 </DndContext>
               ) : (
                 table.getRowModel().rows.map((row) => (
-                  <TableRow
-                    key={row.id}
-                    data-state={row.getIsSelected() && 'selected'}
-                    data-row-id={row.original.id}
-                  >
+                  <TableRow key={row.id} data-row-id={row.original.id}>
                     {row.getVisibleCells().map((cell) => (
                       <TableCell key={cell.id}>
                         {flexRender(
@@ -377,7 +361,6 @@ const SortableRow = ({ row }: { row: Row<Quest> }) => {
       ref={setNodeRef}
       style={style}
       className={isDragging ? 'cursor-move opacity-60' : 'cursor-move'}
-      data-state={row.getIsSelected() && 'selected'}
       data-row-id={row.original.id}
       {...attributes}
       {...listeners}
