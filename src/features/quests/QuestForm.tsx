@@ -121,7 +121,7 @@ const baseSchema = withTwitterValidation(
                 'additional-description': z.string().optional(),
               })
               .optional(),
-          }),
+          }).optional(),
           adsgram: z
             .object({
               type: z.enum(['task', 'reward']),
