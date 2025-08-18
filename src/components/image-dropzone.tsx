@@ -1,9 +1,9 @@
+import { Spinner } from '@radix-ui/themes'
 import { mediaErrors } from '@/errors/media'
 import { useDropzone, type FileError } from 'react-dropzone'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
-import { Spinner } from '@radix-ui/themes'
 
 const dropErrors: Record<FileError['code'], string> = {
   'file-too-large': mediaErrors.size,
@@ -76,7 +76,7 @@ export const ImageDropzone = ({
           </span>
         )}
         {loading && (
-          <span className='absolute inset-0 flex items-center justify-center rounded bg-background/80'>
+          <span className='bg-background/80 absolute inset-0 flex items-center justify-center rounded'>
             <Spinner />
           </span>
         )}

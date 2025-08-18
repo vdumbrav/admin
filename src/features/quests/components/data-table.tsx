@@ -1,4 +1,5 @@
 import * as React from 'react'
+import { Spinner } from '@radix-ui/themes'
 import { Link, useRouter, useSearch } from '@tanstack/react-router'
 import {
   ColumnDef,
@@ -23,6 +24,7 @@ import {
   loadJSON,
   saveJSON,
 } from '@/utils/persist'
+import { Button } from '@/components/ui/button'
 import {
   Table,
   TableBody,
@@ -31,8 +33,6 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { Spinner } from '@radix-ui/themes'
-import { Button } from '@/components/ui/button'
 import { DataTablePagination } from '@/components/table/data-table-pagination'
 import { useQuests } from '../api'
 import type { Quest } from '../data/schema'
@@ -204,7 +204,7 @@ export const QuestsDataTable = ({ columns, isAdmin }: DataTableProps) => {
       <DataTableToolbar table={table} />
       <div className='relative overflow-hidden rounded-md border'>
         {isFetching && (
-          <div className='absolute inset-0 z-10 flex items-center justify-center bg-background/50'>
+          <div className='bg-background/50 absolute inset-0 z-10 flex items-center justify-center'>
             <Spinner />
           </div>
         )}
@@ -226,48 +226,49 @@ export const QuestsDataTable = ({ columns, isAdmin }: DataTableProps) => {
             ))}
           </TableHeader>
           <TableBody>
-            {isLoading
-              ? null
-              : table.getRowModel().rows.length ? (
-                  table.getRowModel().rows.map((row) => (
-                    <TableRow key={row.id}>
-                      {row.getVisibleCells().map((cell) => (
-                        <TableCell key={cell.id}>
-                          {flexRender(
-                            cell.column.columnDef.cell,
-                            cell.getContext()
-                          )}
-                        </TableCell>
-                      ))}
-                    </TableRow>
-                  ))
-                ) : (
-                  <TableRow>
-                    <TableCell colSpan={memoColumns.length} className='h-24 text-center'>
-                      {table.getState().columnFilters.length ? (
-                        <div className='flex flex-col items-center gap-2'>
-                          <p>No results match filters</p>
-                          <Button
-                            variant='outline'
-                            size='sm'
-                            onClick={() => table.resetColumnFilters()}
-                          >
-                            Clear filters
-                          </Button>
-                        </div>
-                      ) : (
-                        <div className='flex flex-col items-center gap-2'>
-                          <p>No quests</p>
-                          {isAdmin && (
-                            <Button asChild size='sm'>
-                              <Link to='/quests/new'>Create quest</Link>
-                            </Button>
-                          )}
-                        </div>
+            {isLoading ? null : table.getRowModel().rows.length ? (
+              table.getRowModel().rows.map((row) => (
+                <TableRow key={row.id}>
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell key={cell.id}>
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
                       )}
                     </TableCell>
-                  </TableRow>
-                )}
+                  ))}
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell
+                  colSpan={memoColumns.length}
+                  className='h-24 text-center'
+                >
+                  {table.getState().columnFilters.length ? (
+                    <div className='flex flex-col items-center gap-2'>
+                      <p>No results match filters</p>
+                      <Button
+                        variant='outline'
+                        size='sm'
+                        onClick={() => table.resetColumnFilters()}
+                      >
+                        Clear filters
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className='flex flex-col items-center gap-2'>
+                      <p>No quests</p>
+                      {isAdmin && (
+                        <Button asChild size='sm'>
+                          <Link to='/quests/new'>Create quest</Link>
+                        </Button>
+                      )}
+                    </div>
+                  )}
+                </TableCell>
+              </TableRow>
+            )}
           </TableBody>
         </Table>
       </div>
@@ -275,4 +276,3 @@ export const QuestsDataTable = ({ columns, isAdmin }: DataTableProps) => {
     </div>
   )
 }
-
