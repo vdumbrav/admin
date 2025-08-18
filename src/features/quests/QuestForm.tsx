@@ -8,7 +8,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useBlocker } from '@tanstack/react-router'
 import { useAppAuth } from '@/auth/provider'
 import { mediaErrors } from '@/errors/media'
-import { defaultPartnerTask, type Task } from '@/types/tasks'
+import { defaultPartnerTask, type Task, type Resources } from '@/types/tasks'
 import { toast } from 'sonner'
 import { replaceObjectUrl } from '@/utils/object-url'
 import { Button } from '@/components/ui/button'
@@ -22,6 +22,7 @@ import {
   FormControl,
   FormField,
   FormItem,
+  FormDescription,
   FormLabel,
   FormMessage,
 } from '@/components/ui/form'
@@ -31,6 +32,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { ImageDropzone } from '@/components/image-dropzone'
 import { NoWheelNumber } from '@/components/no-wheel-number'
 import { SelectDropdown } from '@/components/select-dropdown'
+import { TwitterEmbed } from '@/components/twitter-embed'
 import { uploadMedia } from './api'
 import { ChildrenEditor } from './components/children-editor'
 import type { Child } from './components/children-editor'
@@ -57,6 +59,7 @@ const childSchema = withTwitterValidation(
     resources: z
       .object({
         tweetId: z.string().optional(),
+        twitterUsername: z.string().optional(),
         username: z.string().optional(),
       })
       .optional(),
@@ -103,6 +106,7 @@ const baseSchema = withTwitterValidation(
         .object({
           icon: z.url().optional(),
           tweetId: z.string().optional(),
+          twitterUsername: z.string().optional(),
           username: z.string().optional(),
           isNew: z.boolean().optional(),
           block_id: z.string().optional(),
@@ -163,8 +167,13 @@ export const QuestForm = ({
   const [iconPreview, setIconPreview] = useState<string>()
   const [isUploading, setIsUploading] = useState(false)
   const clearIconPreview = () => setIconPreview((old) => replaceObjectUrl(old))
-  const initialValues = useMemo(
-    () => ({
+  const initialValues = useMemo(() => {
+    type LegacyResources = Resources & {
+      social?: { twitterUsername?: string; twitterId?: string }
+    }
+    const res: LegacyResources = (initial?.resources as LegacyResources) ?? {}
+    const { social, ui, ...rest } = res
+    return {
       title: initial?.title ?? '',
       type: (initial?.type as Task['type']) ?? 'external',
       description: initial?.description ?? '',
@@ -173,7 +182,13 @@ export const QuestForm = ({
       provider: initial?.provider as Task['provider'],
       uri: initial?.uri ?? '',
       reward: initial?.reward,
-      resources: initial?.resources ?? { ui: { button: '' } },
+      resources: {
+        ...rest,
+        ui: { button: '', ...(ui ?? {}) },
+        twitterUsername:
+          res.twitterUsername ?? res.username ?? social?.twitterUsername ?? '',
+        tweetId: res.tweetId ?? social?.twitterId ?? '',
+      },
       visible: initial?.visible ?? true,
       child:
         initial?.child?.map((c) => ({
@@ -183,12 +198,15 @@ export const QuestForm = ({
           reward: c.reward,
           order_by: c.order_by ?? 0,
           resources: c.resources
-            ? { tweetId: c.resources.tweetId, username: c.resources.username }
+            ? {
+                tweetId: c.resources.tweetId,
+                twitterUsername:
+                  c.resources.twitterUsername ?? c.resources.username,
+              }
             : undefined,
         })) ?? [],
-    }),
-    [initial]
-  )
+    }
+  }, [initial])
 
   const form = useForm({
     resolver: zodResolver(schema),
@@ -196,7 +214,6 @@ export const QuestForm = ({
   })
 
   const type = useWatch({ control: form.control, name: 'type' })
-  const provider = useWatch({ control: form.control, name: 'provider' })
   const icon = useWatch({ control: form.control, name: 'resources.icon' })
   const isSubmitting = form.formState.isSubmitting
   const adsgramType = useWatch({
@@ -349,12 +366,16 @@ export const QuestForm = ({
   return (
     <Form {...form}>
       <form
-        onSubmit={form.handleSubmit((values) =>
+        onSubmit={form.handleSubmit((values) => {
+          const v = { ...values }
+          if (v.resources?.twitterUsername && !v.resources.username) {
+            v.resources.username = v.resources.twitterUsername
+          }
           onSubmit({
-            ...values,
-            child: values.child?.map((c, i) => ({ ...c, order_by: i })),
+            ...v,
+            child: v.child?.map((c, i) => ({ ...c, order_by: i })),
           })
-        )}
+        })}
         className='mx-auto max-w-5xl space-y-6'
       >
         <div className='grid gap-4 sm:grid-cols-2'>
@@ -457,37 +478,64 @@ export const QuestForm = ({
               </FormItem>
             )}
           />
-          {provider === 'twitter' &&
-            ['like', 'share', 'comment'].includes(type) && (
-              <>
-                <FormField
-                  control={form.control}
-                  name='resources.tweetId'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Tweet ID</FormLabel>
-                      <FormControl>
-                        <Input {...field} placeholder='1234567890' />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name='resources.username'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Username</FormLabel>
-                      <FormControl>
-                        <Input {...field} placeholder='@example' />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </>
+          <FormField
+            control={form.control}
+            name='resources.twitterUsername'
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Twitter Username</FormLabel>
+                <FormControl>
+                  <Input
+                    {...field}
+                    placeholder='Enter Twitter username (e.g. waitlist)'
+                    onBlur={(e) =>
+                      field.onChange(
+                        (e.target.value ?? '').trim().replace(/^@/, '')
+                      )
+                    }
+                  />
+                </FormControl>
+                <FormDescription>
+                  Without @. Defaults to waitlist if empty
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
             )}
+          />
+          <FormField
+            control={form.control}
+            name='resources.tweetId'
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Twitter Post</FormLabel>
+                <FormControl>
+                  <Input
+                    {...field}
+                    placeholder='Enter Tweet ID (e.g. 1872110056027116095)'
+                    onBlur={(e) =>
+                      field.onChange((e.target.value ?? '').trim())
+                    }
+                  />
+                </FormControl>
+                <FormDescription>
+                  Only Tweet ID (the last part of the Twitter URL).
+                </FormDescription>
+                <FormMessage />
+                {field.value && (
+                  <div className='mt-4'>
+                    <TwitterEmbed
+                      username={
+                        form
+                          .getValues('resources.twitterUsername')
+                          ?.replace(/^@/, '') || 'waitlist'
+                      }
+                      tweetId={field.value}
+                    />
+                  </div>
+                )}
+              </FormItem>
+            )}
+          />
           <FormField
             control={form.control}
             name='uri'
