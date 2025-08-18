@@ -47,8 +47,8 @@ export function create(payload: Partial<Task>): Task {
   const t: Task = {
     id: ++seq,
     order_by: 0,
-    group: 'all' as any,
-    type: 'dummy' as any,
+    group: 'all',
+    type: 'dummy',
     title: '',
     description: null,
     ...payload,

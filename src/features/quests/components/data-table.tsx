@@ -142,8 +142,7 @@ export const QuestsDataTable = ({ columns, isAdmin }: DataTableProps) => {
   }, [searchParams, pageSizeFromStorage])
 
   React.useEffect(() => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const next: Record<string, any> = {
+    const next = {
       search,
       group,
       type,
@@ -153,11 +152,8 @@ export const QuestsDataTable = ({ columns, isAdmin }: DataTableProps) => {
       limit: pagination.pageSize,
       sort,
     }
-    if (next.page === 1) delete next.page
-    if (next.sort === 'order_by:asc') delete next.sort
     if (JSON.stringify(next) !== JSON.stringify(searchParams)) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      router.navigate({ to: '/quests', search: next as any, replace: true })
+      router.navigate({ to: '/quests', search: next, replace: true })
     }
   }, [
     search,
@@ -263,7 +259,9 @@ export const QuestsDataTable = ({ columns, isAdmin }: DataTableProps) => {
                       <p>No quests</p>
                       {isAdmin && (
                         <Button asChild size='sm'>
-                          <Link to='/quests/new' search={searchParams}>Create quest</Link>
+                          <Link to='/quests/new' search={searchParams}>
+                            Create quest
+                          </Link>
                         </Button>
                       )}
                     </div>
