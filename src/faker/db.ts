@@ -23,7 +23,13 @@ export function list({
   if (search) {
     const s = search.toLowerCase()
     res = res.filter((i) =>
-      [i.title, i.provider, i.resources?.username, i.resources?.tweetId]
+      [
+        i.title,
+        i.provider,
+        i.resources?.username,
+        i.resources?.tweetId,
+        i.resources?.twitterUsername,
+      ]
         .map((v) => (v ? String(v).toLowerCase() : ''))
         .some((v) => v.includes(s))
     )

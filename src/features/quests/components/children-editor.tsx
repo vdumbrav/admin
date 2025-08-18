@@ -31,7 +31,7 @@ interface Child {
   provider?: Task['provider']
   reward?: number
   order_by: number
-  resources?: { tweetId?: string; username?: string }
+  resources?: { tweetId?: string; twitterUsername?: string; username?: string }
 }
 
 interface FormValues {
@@ -248,7 +248,13 @@ const ChildRow = ({ id, index, remove }: RowProps) => {
               <FormItem>
                 <FormLabel>Tweet ID</FormLabel>
                 <FormControl>
-                  <Input {...field} placeholder='1234567890' />
+                  <Input
+                    {...field}
+                    placeholder='1234567890'
+                    onBlur={(e) =>
+                      field.onChange((e.target.value ?? '').trim())
+                    }
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -256,12 +262,20 @@ const ChildRow = ({ id, index, remove }: RowProps) => {
           />
           <FormField
             control={control}
-            name={`child.${index}.resources.username`}
+            name={`child.${index}.resources.twitterUsername`}
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Username</FormLabel>
+                <FormLabel>Twitter Username</FormLabel>
                 <FormControl>
-                  <Input {...field} placeholder='@example' />
+                  <Input
+                    {...field}
+                    placeholder='Enter Twitter username (e.g. waitlist)'
+                    onBlur={(e) =>
+                      field.onChange(
+                        (e.target.value ?? '').trim().replace(/^@/, '')
+                      )
+                    }
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>

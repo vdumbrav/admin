@@ -5,22 +5,33 @@ export const withTwitterValidation = <T extends z.ZodTypeAny>(schema: T): T =>
     const v = val as {
       type?: string
       provider?: string
-      resources?: { tweetId?: string; username?: string }
+      resources?: {
+        tweetId?: string
+        username?: string
+        twitterUsername?: string
+      }
     }
     const needsTweet =
       ['like', 'share', 'comment'].includes(v.type ?? '') &&
       v.provider === 'twitter'
     if (!needsTweet) return
-    if (!v.resources?.tweetId) {
+    const tweetId = v.resources?.tweetId
+    if (!tweetId) {
       ctx.addIssue({
         path: ['resources', 'tweetId'],
         code: z.ZodIssueCode.custom,
         message: 'Tweet ID is required for Twitter like/share/comment.',
       })
-    }
-    if (!v.resources?.username) {
+    } else if (!/^\d+$/.test(tweetId)) {
       ctx.addIssue({
-        path: ['resources', 'username'],
+        path: ['resources', 'tweetId'],
+        code: z.ZodIssueCode.custom,
+        message: 'Tweet ID must be numeric.',
+      })
+    }
+    if (!v.resources?.twitterUsername && !v.resources?.username) {
+      ctx.addIssue({
+        path: ['resources', 'twitterUsername'],
         code: z.ZodIssueCode.custom,
         message: 'Username is required for Twitter like/share/comment.',
       })

@@ -76,6 +76,7 @@ export const getColumns = (isAdmin: boolean): ColumnDef<Quest>[] => {
           q.provider,
           q.resources?.username,
           q.resources?.tweetId,
+          q.resources?.twitterUsername,
         ]
           .filter(Boolean)
           .some((v) => String(v).toLowerCase().includes(str))
