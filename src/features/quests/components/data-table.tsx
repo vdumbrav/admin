@@ -226,7 +226,7 @@ export const QuestsDataTable = ({ columns, isAdmin }: DataTableProps) => {
             ))}
           </TableHeader>
           <TableBody>
-            {isLoading || isFetching
+            {isLoading
               ? null
               : table.getRowModel().rows.length ? (
                   table.getRowModel().rows.map((row) => (
