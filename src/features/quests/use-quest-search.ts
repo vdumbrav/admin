@@ -1,19 +1,13 @@
-import * as React from 'react'
 import { useSearch } from '@tanstack/react-router'
+import type { QuestSearch } from './default-search'
 
-interface UseQuestSearchOptions<Path extends string> {
-  from: Path
+interface UseQuestSearchOptions {
+  from:
+    | '/_authenticated/quests/'
+    | '/_authenticated/quests/new'
+    | '/_authenticated/quests/$id'
 }
 
-export const useQuestSearch = <Path extends string>(
-  options: UseQuestSearchOptions<Path>
-) => {
-  const search = useSearch(options)
-  return React.useMemo(() => {
-    const { page, sort, ...rest } = search
-    const result: Record<string, unknown> = { ...rest }
-    if (page && page !== 1) result.page = page
-    if (sort && sort !== 'order_by:asc') result.sort = sort
-    return result
-  }, [search])
+export const useQuestSearch = (options: UseQuestSearchOptions): QuestSearch => {
+  return useSearch(options) as QuestSearch
 }

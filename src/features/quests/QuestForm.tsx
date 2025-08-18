@@ -110,22 +110,24 @@ const baseSchema = withTwitterValidation(
           username: z.string().optional(),
           isNew: z.boolean().optional(),
           block_id: z.string().optional(),
-          ui: z.object({
-            button: z.string(),
-            'pop-up': z
-              .object({
-                name: z.string(),
-                button: z.string(),
-                description: z.string(),
-                static: z
-                  .union([z.url(), z.literal('')])
-                  .optional()
-                  .transform((val) => (val === '' ? undefined : val)),
-                'additional-title': z.string().optional(),
-                'additional-description': z.string().optional(),
-              })
-              .optional(),
-          }),
+          ui: z
+            .object({
+              button: z.string(),
+              'pop-up': z
+                .object({
+                  name: z.string(),
+                  button: z.string(),
+                  description: z.string(),
+                  static: z
+                    .union([z.url(), z.literal('')])
+                    .optional()
+                    .transform((val) => (val === '' ? undefined : val)),
+                  'additional-title': z.string().optional(),
+                  'additional-description': z.string().optional(),
+                })
+                .optional(),
+            })
+            .optional(),
           adsgram: z
             .object({
               type: z.enum(['task', 'reward']),

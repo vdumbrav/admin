@@ -56,31 +56,8 @@ export const getColumns = (isAdmin: boolean): ColumnDef<Quest>[] => {
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title='Title' />
       ),
-      cell: ({ row }) => {
-        const q = row.original
-        return (
-          <div className='flex space-x-2'>
-            {q.group && <Badge variant='outline'>{q.group}</Badge>}
-            {q.type && <Badge variant='outline'>{q.type}</Badge>}
-            <span className='max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]'>
-              {q.title}
-            </span>
-          </div>
-        )
-      },
-      filterFn: (row, _id, value) => {
-        const q = row.original
-        const str = String(value).toLowerCase()
-        return [
-          q.title,
-          q.provider,
-          q.resources?.username,
-          q.resources?.tweetId,
-          q.resources?.twitterUsername,
-        ]
-          .filter(Boolean)
-          .some((v) => String(v).toLowerCase().includes(str))
-      },
+      cell: ({ row }) => row.getValue('title'),
+      filterFn: (row, id, value) => value.includes(row.getValue(id)),
     },
     {
       accessorKey: 'type',
@@ -119,13 +96,6 @@ export const getColumns = (isAdmin: boolean): ColumnDef<Quest>[] => {
         <DataTableColumnHeader column={column} title='Order' />
       ),
       cell: ({ row }) => row.getValue('order_by'),
-    },
-    {
-      accessorKey: 'status',
-      header: ({ column }) => (
-        <DataTableColumnHeader column={column} title='Status' />
-      ),
-      cell: ({ row }) => row.getValue('status'),
     },
     {
       id: 'isNew',
