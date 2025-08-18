@@ -211,7 +211,7 @@ export const QuestsDataTable = ({ columns, isAdmin }: DataTableProps) => {
         pageIndex: Math.max(totalPages - 1, 0),
       }))
     }
-  }, [data?.total, pagination.pageSize, pagination.pageIndex])
+  }, [data?.total, pagination.pageSize, pagination.pageIndex, setPagination])
 
   return (
     <div className='space-y-4'>
