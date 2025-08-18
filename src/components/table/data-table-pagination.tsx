@@ -18,25 +18,25 @@ interface DataTablePaginationProps<TData> {
   table: Table<TData>
 }
 
-export function DataTablePagination<TData>({
+export const DataTablePagination = <TData,>({
   table,
-}: DataTablePaginationProps<TData>) {
+}: DataTablePaginationProps<TData>) => {
+  const pageCount = Math.max(table.getPageCount(), 1)
+
   return (
     <div
-      className='flex items-center justify-between overflow-clip px-2'
+      className='flex items-center justify-end overflow-clip px-2'
       style={{ overflowClipMargin: 1 }}
     >
-      <div className='text-muted-foreground hidden flex-1 text-sm sm:block'>
-        {table.getFilteredSelectedRowModel().rows.length} of{' '}
-        {table.getFilteredRowModel().rows.length} row(s) selected.
-      </div>
       <div className='flex items-center sm:space-x-6 lg:space-x-8'>
         <div className='flex items-center space-x-2'>
           <p className='hidden text-sm font-medium sm:block'>Rows per page</p>
           <Select
             value={`${table.getState().pagination.pageSize}`}
             onValueChange={(value) => {
-              table.setPageSize(Number(value))
+              const size = Number(value)
+              if (size === table.getState().pagination.pageSize) return
+              table.setPageSize(size)
             }}
           >
             <SelectTrigger className='h-8 w-[70px]'>
@@ -51,9 +51,8 @@ export function DataTablePagination<TData>({
             </SelectContent>
           </Select>
         </div>
-        <div className='flex w-[100px] items-center justify-center text-sm font-medium'>
-          Page {table.getState().pagination.pageIndex + 1} of{' '}
-          {table.getPageCount()}
+        <div className='flex min-w-[100px] items-center justify-center text-sm font-medium'>
+          Page {table.getState().pagination.pageIndex + 1} of {pageCount}
         </div>
         <div className='flex items-center space-x-2'>
           <Button
@@ -86,7 +85,7 @@ export function DataTablePagination<TData>({
           <Button
             variant='outline'
             className='hidden h-8 w-8 p-0 lg:flex'
-            onClick={() => table.setPageIndex(table.getPageCount() - 1)}
+            onClick={() => table.setPageIndex(pageCount - 1)}
             disabled={!table.getCanNextPage()}
           >
             <span className='sr-only'>Go to last page</span>

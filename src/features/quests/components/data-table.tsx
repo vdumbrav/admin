@@ -43,6 +43,9 @@ interface DataTableProps {
   isAdmin: boolean
 }
 
+const getSafePageCount = (total: number | undefined, size: number) =>
+  Math.max(1, Math.ceil((total ?? 0) / size))
+
 export const QuestsDataTable = ({ columns, isAdmin }: DataTableProps) => {
   const router = useRouter()
   const searchParams = useSearch({ from: '/_authenticated/quests/' as const })
@@ -170,7 +173,7 @@ export const QuestsDataTable = ({ columns, isAdmin }: DataTableProps) => {
   const table = useReactTable({
     data: (data?.items ?? []) as Quest[],
     columns: memoColumns,
-    pageCount: data ? Math.ceil(data.total / pagination.pageSize) : -1,
+    pageCount: getSafePageCount(data?.total, pagination.pageSize),
     state: { sorting, columnVisibility, columnFilters, pagination },
     manualPagination: true,
     manualSorting: true,
@@ -184,6 +187,8 @@ export const QuestsDataTable = ({ columns, isAdmin }: DataTableProps) => {
           typeof updater === 'function'
             ? (updater as (s: PaginationState) => PaginationState)(old)
             : updater
+        if (next.pageSize === old.pageSize && next.pageIndex === old.pageIndex)
+          return old
         return {
           pageIndex: next.pageSize !== old.pageSize ? 0 : next.pageIndex,
           pageSize: next.pageSize,
@@ -196,6 +201,16 @@ export const QuestsDataTable = ({ columns, isAdmin }: DataTableProps) => {
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
   })
+
+  React.useEffect(() => {
+    const totalPages = getSafePageCount(data?.total, pagination.pageSize)
+    if (pagination.pageIndex > totalPages - 1) {
+      setPagination((prev) => ({
+        ...prev,
+        pageIndex: Math.max(totalPages - 1, 0),
+      }))
+    }
+  }, [data?.total, pagination.pageSize, pagination.pageIndex, setPagination])
 
   return (
     <div className='space-y-4'>
