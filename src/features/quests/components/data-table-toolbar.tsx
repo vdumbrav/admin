@@ -9,16 +9,10 @@ import { groups, types, providers, visibilities } from '../data/data'
 
 interface DataTableToolbarProps<TData> {
   table: Table<TData>
-  isAdmin: boolean
-  reorderMode: boolean
-  onToggleReorder: () => void
 }
 
 export const DataTableToolbar = <TData,>({
   table,
-  isAdmin,
-  reorderMode,
-  onToggleReorder,
 }: DataTableToolbarProps<TData>) => {
   const isFiltered = table.getState().columnFilters.length > 0
   const filterValue =
@@ -44,17 +38,8 @@ export const DataTableToolbar = <TData,>({
           value={search}
           onChange={(event) => setSearch(event.target.value)}
           className='h-8 w-[150px] lg:w-[250px]'
-          disabled={reorderMode}
-          title={reorderMode ? 'Exit reorder mode to search' : undefined}
         />
-        <div
-          className={`flex gap-x-2${
-            reorderMode
-              ? 'pointer-events-none cursor-not-allowed opacity-50'
-              : ''
-          }`}
-          title={reorderMode ? 'Exit reorder mode to filter' : undefined}
-        >
+        <div className='flex gap-x-2'>
           {table.getColumn('group') && (
             <DataTableFacetedFilter
               column={table.getColumn('group')}
@@ -100,16 +85,6 @@ export const DataTableToolbar = <TData,>({
         )}
       </div>
       <div className='flex items-center gap-2'>
-        {isAdmin && (
-          <Button
-            variant='outline'
-            size='sm'
-            onClick={onToggleReorder}
-            aria-label='Toggle reorder mode'
-          >
-            {reorderMode ? 'Done' : 'Reorder'}
-          </Button>
-        )}
         <DataTableViewOptions table={table} />
       </div>
     </div>

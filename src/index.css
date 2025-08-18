@@ -184,11 +184,3 @@
   }
 }
 
-@keyframes fade-bg {
-  from {
-    background-color: var(--accent);
-  }
-  to {
-    background-color: transparent;
-  }
-}

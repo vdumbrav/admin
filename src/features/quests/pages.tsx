@@ -42,12 +42,9 @@ export const QuestCreatePage = () => {
         <QuestForm
           onSubmit={async (v) => {
             try {
-              const saved = await create.mutateAsync(v as Partial<Task>)
+              await create.mutateAsync(v as Partial<Task>)
               toast.success('Saved')
-              nav({
-                to: '/quests',
-                search: { ...search, highlight: String(saved.id) },
-              })
+              nav({ to: '/quests', search })
             } catch (e) {
               toast.error(e instanceof Error ? e.message : 'Failed to save')
             }
@@ -119,10 +116,7 @@ export const QuestEditPage = () => {
             try {
               await update.mutateAsync(v as unknown as Partial<Task>)
               toast.success('Saved')
-              nav({
-                to: '/quests',
-                search: { ...search, highlight: String(questId) },
-              })
+              nav({ to: '/quests', search })
             } catch (e) {
               toast.error(e instanceof Error ? e.message : 'Failed to save')
             }

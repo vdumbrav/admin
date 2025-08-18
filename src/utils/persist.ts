@@ -1,6 +1,6 @@
-export const LS_TABLE_VIS = 'quests.table.visibility'
-export const LS_TABLE_SIZE = 'quests.table.pageSize'
-export const LS_TABLE_SORT = 'quests.table.sort'
+export const LS_TABLE_VIS = 'WL/quests.table.visibility'
+export const LS_TABLE_SIZE = 'WL/quests.table.pageSize'
+export const LS_TABLE_SORT = 'WL/quests.table.sort'
 
 export const loadJSON = <T>(k: string, f: T): T => {
   try {

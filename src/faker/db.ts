@@ -67,12 +67,6 @@ export function remove(id: number) {
 export function toggle(id: number, visible: boolean) {
   return update(id, { visible })
 }
-export function reorder(rows: Array<{ id: number; order_by: number }>) {
-  const map = new Map(rows.map((r) => [r.id, r.order_by]))
-  items = items
-    .map((i) => ({ ...i, order_by: map.get(i.id) ?? i.order_by }))
-    .sort((a, b) => a.order_by - b.order_by)
-}
 export function fakeUrl(name = 'image.png') {
   return `blob:/fake/${Date.now()}-${name}`
 }

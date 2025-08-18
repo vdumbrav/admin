@@ -100,12 +100,3 @@ export function useToggleVisibility() {
 export async function uploadMedia(file: File, _token?: string) {
   return fx.postMedia(file)
 }
-
-export function useReorderQuests() {
-  const qc = useQueryClient()
-  return useMutation({
-    mutationFn: ({ rows }: { rows: Array<{ id: number; order_by: number }> }) =>
-      fx.reorderQuests(rows),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['quests'] }),
-  })
-}

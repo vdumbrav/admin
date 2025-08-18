@@ -133,21 +133,3 @@ export const uploadMedia = (file: File, token: string | undefined) => {
     token,
   })
 }
-
-export const useReorderQuests = () => {
-  const qc = useQueryClient()
-  const { getAccessToken } = useAppAuth()
-  return useMutation({
-    mutationFn: ({ rows }: { rows: Array<{ id: number; order_by: number }> }) =>
-      http<{ ok: boolean }>(`/quests/reorder`, {
-        method: 'PATCH',
-        body: JSON.stringify({ rows }),
-        token: getAccessToken(),
-      }),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['quests'] })
-      toast.success('Order saved')
-    },
-    onError: (e: unknown) => toast.error(String(e)),
-  })
-}

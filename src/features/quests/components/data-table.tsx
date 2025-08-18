@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { useRouter, useSearch } from '@tanstack/react-router'
+import { Link, useRouter, useSearch } from '@tanstack/react-router'
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -15,16 +15,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from '@tanstack/react-table'
-import type { Row } from '@tanstack/react-table'
 import type { TaskGroup } from '@/types/tasks'
-import { DndContext, DragEndEvent } from '@dnd-kit/core'
-import {
-  SortableContext,
-  verticalListSortingStrategy,
-  arrayMove,
-  useSortable,
-} from '@dnd-kit/sortable'
-import { CSS } from '@dnd-kit/utilities'
 import {
   LS_TABLE_SIZE,
   LS_TABLE_SORT,
@@ -40,9 +31,10 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import { Spinner } from '@radix-ui/themes'
+import { Button } from '@/components/ui/button'
 import { DataTablePagination } from '@/components/table/data-table-pagination'
 import { useQuests } from '../api'
-import { useReorderQuests } from '../api'
 import type { Quest } from '../data/schema'
 import { DataTableToolbar } from './data-table-toolbar'
 
@@ -54,6 +46,7 @@ interface DataTableProps {
 export const QuestsDataTable = ({ columns, isAdmin }: DataTableProps) => {
   const router = useRouter()
   const searchParams = useSearch({ from: '/_authenticated/quests/' as const })
+  const memoColumns = React.useMemo(() => columns, [columns])
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>(() => loadJSON(LS_TABLE_VIS, {}))
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -82,9 +75,7 @@ export const QuestsDataTable = ({ columns, isAdmin }: DataTableProps) => {
     pageIndex: (searchParams.page ?? 1) - 1,
     pageSize: searchParams.limit ?? pageSizeFromStorage,
   })
-  const pageSizeRef = React.useRef(pagination.pageSize)
-  const [reorderMode, setReorderMode] = React.useState(false)
-  const [rows, setRows] = React.useState<Quest[]>([])
+
   const pickSingle = (id: string, fallback = ''): string => {
     const raw = columnFilters.find((f) => f.id === id)?.value as unknown
     if (Array.isArray(raw)) return (raw[0] ?? fallback) as string
@@ -101,7 +92,7 @@ export const QuestsDataTable = ({ columns, isAdmin }: DataTableProps) => {
     ? `${sorting[0].id}:${sorting[0].desc ? 'desc' : 'asc'}`
     : 'order_by:asc'
 
-  const { data } = useQuests({
+  const { data, isFetching, isLoading } = useQuests({
     search,
     group,
     type,
@@ -111,12 +102,6 @@ export const QuestsDataTable = ({ columns, isAdmin }: DataTableProps) => {
     limit: pagination.pageSize,
     sort,
   })
-  const reorder = useReorderQuests()
-
-  const highlightId = searchParams.highlight
-    ? Number(searchParams.highlight)
-    : null
-  const bodyRef = React.useRef<HTMLTableSectionElement>(null)
 
   React.useEffect(() => {
     setPagination((p) => ({ ...p, pageIndex: 0 }))
@@ -127,16 +112,8 @@ export const QuestsDataTable = ({ columns, isAdmin }: DataTableProps) => {
   }, [columnVisibility])
 
   React.useEffect(() => {
-    if (!reorderMode) {
-      saveJSON(LS_TABLE_SIZE, pagination.pageSize)
-    }
-  }, [pagination.pageSize, reorderMode])
-
-  React.useEffect(() => {
-    if (!reorderMode) {
-      pageSizeRef.current = pagination.pageSize
-    }
-  }, [pagination.pageSize, reorderMode])
+    saveJSON(LS_TABLE_SIZE, pagination.pageSize)
+  }, [pagination.pageSize])
 
   React.useEffect(() => {
     saveJSON(LS_TABLE_SORT, sort)
@@ -158,12 +135,10 @@ export const QuestsDataTable = ({ columns, isAdmin }: DataTableProps) => {
     const s = searchParams.sort ?? 'order_by:asc'
     const [id, dir] = s.split(':')
     setSorting([{ id, desc: dir === 'desc' }])
-    const size = searchParams.limit ?? pageSizeFromStorage
     setPagination({
       pageIndex: (searchParams.page ?? 1) - 1,
-      pageSize: size,
+      pageSize: searchParams.limit ?? pageSizeFromStorage,
     })
-    pageSizeRef.current = size
   }, [searchParams, pageSizeFromStorage])
 
   React.useEffect(() => {
@@ -176,8 +151,9 @@ export const QuestsDataTable = ({ columns, isAdmin }: DataTableProps) => {
       page: pagination.pageIndex + 1,
       limit: pagination.pageSize,
       sort,
-      highlight: searchParams.highlight,
     }
+    if (next.page === 1) delete next.page
+    if (next.sort === 'order_by:asc') delete next.sort
     if (JSON.stringify(next) !== JSON.stringify(searchParams)) {
       router.navigate({ to: '/quests', search: next, replace: true })
     }
@@ -193,49 +169,9 @@ export const QuestsDataTable = ({ columns, isAdmin }: DataTableProps) => {
     searchParams,
   ])
 
-  React.useEffect(() => {
-    if (!reorderMode) {
-      setRows((data?.items ?? []) as Quest[])
-    }
-  }, [data, reorderMode])
-
-  React.useEffect(() => {
-    if (!highlightId || !data) return
-    const id = setTimeout(() => {
-      const el = bodyRef.current?.querySelector<HTMLElement>(
-        `[data-row-id='${highlightId}']`
-      )
-      if (!el) return
-      el.scrollIntoView({ block: 'center' })
-      const cls = 'animate-[fade-bg_1.5s_ease-in-out]'
-      el.classList.add(cls)
-      setTimeout(() => {
-        el.classList.remove(cls)
-      }, 1500)
-      router.navigate({
-        to: '/quests',
-        search: { ...searchParams, highlight: undefined },
-        replace: true,
-      })
-    })
-    return () => clearTimeout(id)
-  }, [highlightId, data, router, searchParams])
-
-  const handleDragEnd = (e: DragEndEvent) => {
-    if (reorder.isPending) return
-    const { active, over } = e
-    if (!over || active.id === over.id) return
-    const oldIndex = rows.findIndex((r) => r.id === Number(active.id))
-    const newIndex = rows.findIndex((r) => r.id === Number(over.id))
-    const newRows = arrayMove(rows, oldIndex, newIndex)
-    setRows(newRows)
-    const payload = newRows.map((r, i) => ({ id: r.id, order_by: i }))
-    reorder.mutate({ rows: payload }, { onError: () => setRows(rows) })
-  }
-
   const table = useReactTable({
-    data: (reorderMode ? rows : (data?.items ?? [])) as Quest[],
-    columns,
+    data: (data?.items ?? []) as Quest[],
+    columns: memoColumns,
     pageCount: data ? Math.ceil(data.total / pagination.pageSize) : -1,
     state: { sorting, columnVisibility, columnFilters, pagination },
     manualPagination: true,
@@ -265,19 +201,13 @@ export const QuestsDataTable = ({ columns, isAdmin }: DataTableProps) => {
 
   return (
     <div className='space-y-4'>
-      <DataTableToolbar
-        table={table}
-        isAdmin={isAdmin}
-        reorderMode={reorderMode}
-        onToggleReorder={() => {
-          setReorderMode((m) => !m)
-          setPagination({
-            pageIndex: 0,
-            pageSize: !reorderMode ? 100 : pageSizeRef.current,
-          })
-        }}
-      />
-      <div className='overflow-hidden rounded-md border'>
+      <DataTableToolbar table={table} />
+      <div className='relative overflow-hidden rounded-md border'>
+        {isFetching && (
+          <div className='absolute inset-0 z-10 flex items-center justify-center bg-background/50'>
+            <Spinner />
+          </div>
+        )}
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -295,87 +225,54 @@ export const QuestsDataTable = ({ columns, isAdmin }: DataTableProps) => {
               </TableRow>
             ))}
           </TableHeader>
-          <TableBody ref={bodyRef}>
-            {table.getRowModel().rows?.length ? (
-              reorderMode ? (
-                <DndContext onDragEnd={handleDragEnd}>
-                  <SortableContext
-                    items={table.getRowModel().rows.map((r) => r.original.id)}
-                    strategy={verticalListSortingStrategy}
-                  >
-                    {table.getRowModel().rows.map((row) => (
-                      <SortableRow key={row.id} row={row} />
-                    ))}
-                  </SortableContext>
-                </DndContext>
-              ) : (
-                table.getRowModel().rows.map((row) => (
-                  <TableRow key={row.id} data-row-id={row.original.id}>
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id}>
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
-                        )}
-                      </TableCell>
-                    ))}
+          <TableBody>
+            {isLoading || isFetching
+              ? null
+              : table.getRowModel().rows.length ? (
+                  table.getRowModel().rows.map((row) => (
+                    <TableRow key={row.id}>
+                      {row.getVisibleCells().map((cell) => (
+                        <TableCell key={cell.id}>
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext()
+                          )}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={memoColumns.length} className='h-24 text-center'>
+                      {table.getState().columnFilters.length ? (
+                        <div className='flex flex-col items-center gap-2'>
+                          <p>No results match filters</p>
+                          <Button
+                            variant='outline'
+                            size='sm'
+                            onClick={() => table.resetColumnFilters()}
+                          >
+                            Clear filters
+                          </Button>
+                        </div>
+                      ) : (
+                        <div className='flex flex-col items-center gap-2'>
+                          <p>No quests</p>
+                          {isAdmin && (
+                            <Button asChild size='sm'>
+                              <Link to='/quests/new'>Create quest</Link>
+                            </Button>
+                          )}
+                        </div>
+                      )}
+                    </TableCell>
                   </TableRow>
-                ))
-              )
-            ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className='h-24 text-center'
-                >
-                  No results.
-                </TableCell>
-              </TableRow>
-            )}
+                )}
           </TableBody>
         </Table>
       </div>
-      <div
-        className={
-          reorderMode
-            ? 'pointer-events-none cursor-not-allowed opacity-50'
-            : undefined
-        }
-        title={reorderMode ? 'Exit reorder mode to paginate' : undefined}
-      >
-        <DataTablePagination table={table} />
-      </div>
+      <DataTablePagination table={table} />
     </div>
   )
 }
 
-const SortableRow = ({ row }: { row: Row<Quest> }) => {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id: row.original.id })
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-  }
-  return (
-    <TableRow
-      ref={setNodeRef}
-      style={style}
-      className={isDragging ? 'cursor-move opacity-60' : 'cursor-move'}
-      data-row-id={row.original.id}
-      {...attributes}
-      {...listeners}
-    >
-      {row.getVisibleCells().map((cell) => (
-        <TableCell key={cell.id}>
-          {flexRender(cell.column.columnDef.cell, cell.getContext())}
-        </TableCell>
-      ))}
-    </TableRow>
-  )
-}
