@@ -7,7 +7,6 @@ import {
   SortingState,
   VisibilityState,
   PaginationState,
-  Updater,
   flexRender,
   getCoreRowModel,
   getFacetedRowModel,
@@ -47,6 +46,19 @@ const getSafePageCount = (total: number | undefined, size: number) =>
   Math.max(1, Math.ceil((total ?? 0) / size))
 
 export const QuestsDataTable = ({ columns, isAdmin }: DataTableProps) => {
+  const isEqualJSON = React.useCallback((a: unknown, b: unknown) => {
+    return JSON.stringify(a) === JSON.stringify(b)
+  }, [])
+  const isEqualSorting = React.useCallback(
+    (a: SortingState, b: SortingState) => {
+      return (
+        a.length === b.length &&
+        a.every((s, i) => s.id === b[i]?.id && s.desc === b[i]?.desc)
+      )
+    },
+    []
+  )
+
   const router = useRouter()
   const searchParams = useSearch({ from: '/_authenticated/quests/' as const })
   const memoColumns = React.useMemo(() => columns, [columns])
@@ -74,7 +86,7 @@ export const QuestsDataTable = ({ columns, isAdmin }: DataTableProps) => {
     return [{ id, desc: dir === 'desc' }]
   })
   const pageSizeFromStorage = loadJSON(LS_TABLE_SIZE, 20)
-  const [pagination, setPagination] = React.useState({
+  const [pagination, setPagination] = React.useState<PaginationState>({
     pageIndex: (searchParams.page ?? 1) - 1,
     pageSize: searchParams.limit ?? pageSizeFromStorage,
   })
@@ -107,10 +119,6 @@ export const QuestsDataTable = ({ columns, isAdmin }: DataTableProps) => {
   })
 
   React.useEffect(() => {
-    setPagination((p) => ({ ...p, pageIndex: 0 }))
-  }, [search, group, type, provider, visible, sorting])
-
-  React.useEffect(() => {
     saveJSON(LS_TABLE_VIS, columnVisibility)
   }, [columnVisibility])
 
@@ -134,15 +142,25 @@ export const QuestsDataTable = ({ columns, isAdmin }: DataTableProps) => {
       nextFilters.push({ id: 'provider', value: [searchParams.provider] })
     if (searchParams.visible)
       nextFilters.push({ id: 'visible', value: [searchParams.visible] })
-    setColumnFilters(nextFilters)
+    setColumnFilters((prev) =>
+      isEqualJSON(prev, nextFilters) ? prev : nextFilters
+    )
     const s = searchParams.sort ?? 'order_by:asc'
     const [id, dir] = s.split(':')
-    setSorting([{ id, desc: dir === 'desc' }])
-    setPagination({
+    const nextSorting: SortingState = [{ id, desc: dir === 'desc' }]
+    setSorting((prev) =>
+      isEqualSorting(prev, nextSorting) ? prev : nextSorting
+    )
+    const nextPag = {
       pageIndex: (searchParams.page ?? 1) - 1,
       pageSize: searchParams.limit ?? pageSizeFromStorage,
-    })
-  }, [searchParams, pageSizeFromStorage])
+    }
+    setPagination((prev) =>
+      prev.pageIndex === nextPag.pageIndex && prev.pageSize === nextPag.pageSize
+        ? prev
+        : nextPag
+    )
+  }, [searchParams, pageSizeFromStorage, isEqualJSON, isEqualSorting])
 
   React.useEffect(() => {
     const next = {
@@ -155,8 +173,21 @@ export const QuestsDataTable = ({ columns, isAdmin }: DataTableProps) => {
       limit: pagination.pageSize,
       sort,
     }
-    if (JSON.stringify(next) !== JSON.stringify(searchParams)) {
-      router.navigate({ to: '/quests', search: next, replace: true })
+    const same =
+      next.search === searchParams.search &&
+      next.group === searchParams.group &&
+      next.type === searchParams.type &&
+      next.provider === searchParams.provider &&
+      next.visible === searchParams.visible &&
+      next.page === searchParams.page &&
+      next.limit === searchParams.limit &&
+      next.sort === searchParams.sort
+    if (!same) {
+      router.navigate({
+        to: '/quests',
+        search: next,
+        replace: true,
+      })
     }
   }, [
     search,
@@ -178,23 +209,40 @@ export const QuestsDataTable = ({ columns, isAdmin }: DataTableProps) => {
     manualPagination: true,
     manualSorting: true,
     manualFiltering: true,
-    onSortingChange: setSorting,
-    onColumnFiltersChange: setColumnFilters,
     onColumnVisibilityChange: setColumnVisibility,
-    onPaginationChange: (updater: Updater<PaginationState>) => {
+    onSortingChange: (updater) =>
+      setSorting((old) => {
+        const next = typeof updater === 'function' ? updater(old) : updater
+        const changed = !isEqualSorting(old, next)
+        if (changed) {
+          setPagination((p) => ({ ...p, pageIndex: 0 }))
+        }
+        return changed ? next : old
+      }),
+    onColumnFiltersChange: (updater) =>
+      setColumnFilters((old) => {
+        const next = typeof updater === 'function' ? updater(old) : updater
+        const changed = !isEqualJSON(old, next)
+        if (changed) {
+          setPagination((p) => ({ ...p, pageIndex: 0 }))
+        }
+        return changed ? next : old
+      }),
+    autoResetPageIndex: false,
+    onPaginationChange: (updater) =>
       setPagination((old) => {
-        const next =
-          typeof updater === 'function'
-            ? (updater as (s: PaginationState) => PaginationState)(old)
-            : updater
+        const raw = typeof updater === 'function' ? updater(old) : updater
+        const next = {
+          pageIndex: raw.pageIndex ?? old.pageIndex,
+          pageSize: raw.pageSize ?? old.pageSize,
+        }
         if (next.pageSize === old.pageSize && next.pageIndex === old.pageIndex)
           return old
         return {
           pageIndex: next.pageSize !== old.pageSize ? 0 : next.pageIndex,
           pageSize: next.pageSize,
         }
-      })
-    },
+      }),
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getSortedRowModel: getSortedRowModel(),
@@ -203,7 +251,8 @@ export const QuestsDataTable = ({ columns, isAdmin }: DataTableProps) => {
   })
 
   React.useEffect(() => {
-    const totalPages = getSafePageCount(data?.total, pagination.pageSize)
+    if (typeof data?.total !== 'number' || Number.isNaN(data.total)) return
+    const totalPages = getSafePageCount(data.total, pagination.pageSize)
     if (pagination.pageIndex > totalPages - 1) {
       setPagination((prev) => ({
         ...prev,
