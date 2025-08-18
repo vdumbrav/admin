@@ -1,3 +1,4 @@
+import { Spinner } from '@radix-ui/themes'
 import { mediaErrors } from '@/errors/media'
 import { useDropzone, type FileError } from 'react-dropzone'
 import { toast } from 'sonner'
@@ -14,6 +15,7 @@ interface ImageDropzoneProps {
   onFile: (file: File) => void
   onClear: () => void
   disabled?: boolean
+  loading?: boolean
 }
 
 export const ImageDropzone = ({
@@ -21,6 +23,7 @@ export const ImageDropzone = ({
   onFile,
   onClear,
   disabled,
+  loading,
 }: ImageDropzoneProps) => {
   const { getRootProps, getInputProps, open, isDragActive } = useDropzone({
     onDrop: (accepted) => {
@@ -33,10 +36,10 @@ export const ImageDropzone = ({
         if (msg) toast.error(msg)
       })
     },
-    accept: { 'image/*': [] },
+    accept: { 'image/png': [], 'image/jpeg': [] },
     maxSize: 1024 * 1024,
     multiple: false,
-    disabled,
+    disabled: disabled || loading,
     noClick: false,
     noKeyboard: true,
   })
@@ -48,10 +51,10 @@ export const ImageDropzone = ({
           className: cn(
             'relative flex flex-col items-center justify-center rounded border-2 border-dashed p-4 text-center transition-colors hover:bg-muted/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50',
             isDragActive && 'border-primary bg-primary/5',
-            disabled && 'opacity-50'
+            (disabled || loading) && 'opacity-50 pointer-events-none'
           ),
           role: 'button',
-          'aria-disabled': disabled,
+          'aria-disabled': disabled || loading,
           'aria-describedby': 'icon-hint',
         })}
       >
@@ -72,9 +75,9 @@ export const ImageDropzone = ({
             Drop to upload
           </span>
         )}
-        {disabled && (
-          <span className='text-muted-foreground mt-2 text-xs'>
-            Uploading...
+        {loading && (
+          <span className='bg-background/80 absolute inset-0 flex items-center justify-center rounded'>
+            <Spinner />
           </span>
         )}
       </div>
@@ -83,7 +86,7 @@ export const ImageDropzone = ({
           type='button'
           variant='outline'
           onClick={open}
-          disabled={disabled}
+          disabled={disabled || loading}
         >
           Choose File
         </Button>
@@ -92,14 +95,14 @@ export const ImageDropzone = ({
             type='button'
             variant='ghost'
             onClick={onClear}
-            disabled={disabled}
+            disabled={disabled || loading}
           >
             Clear
           </Button>
         )}
       </div>
       <p id='icon-hint' className='text-muted-foreground text-xs'>
-        Drag an image here or choose a file. Max 1MB.
+        Accepted formats: PNG/JPEG, up to 1MB
       </p>
     </div>
   )

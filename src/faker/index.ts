@@ -30,10 +30,3 @@ export async function postMedia(file: File) {
   await delay()
   return { url: db.fakeUrl(file.name) }
 }
-
-export async function reorderQuests(
-  rows: Array<{ id: number; order_by: number }>
-) {
-  await delay()
-  return db.reorder(rows)
-}

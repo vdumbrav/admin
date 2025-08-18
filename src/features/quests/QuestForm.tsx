@@ -3,6 +3,7 @@
 import { useEffect, useState, useMemo } from 'react'
 import { z } from 'zod'
 import { useForm, useWatch } from 'react-hook-form'
+import { Spinner } from '@radix-ui/themes'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useBlocker } from '@tanstack/react-router'
 import { useAppAuth } from '@/auth/provider'
@@ -160,10 +161,8 @@ export const QuestForm = ({
   const [iconPreview, setIconPreview] = useState<string>()
   const [isUploading, setIsUploading] = useState(false)
   const clearIconPreview = () => setIconPreview((old) => replaceObjectUrl(old))
-
-  const form = useForm({
-    resolver: zodResolver(schema),
-    defaultValues: {
+  const initialValues = useMemo(
+    () => ({
       title: initial?.title ?? '',
       type: (initial?.type as Task['type']) ?? 'external',
       description: initial?.description ?? '',
@@ -185,12 +184,19 @@ export const QuestForm = ({
             ? { tweetId: c.resources.tweetId, username: c.resources.username }
             : undefined,
         })) ?? [],
-    },
+    }),
+    [initial]
+  )
+
+  const form = useForm({
+    resolver: zodResolver(schema),
+    defaultValues: initialValues,
   })
 
   const type = useWatch({ control: form.control, name: 'type' })
   const provider = useWatch({ control: form.control, name: 'provider' })
   const icon = useWatch({ control: form.control, name: 'resources.icon' })
+  const isSubmitting = form.formState.isSubmitting
   const adsgramType = useWatch({
     control: form.control,
     name: 'resources.adsgram.type',
@@ -289,6 +295,15 @@ export const QuestForm = ({
   const handleClearIcon = () => {
     form.setValue('resources.icon', undefined, { shouldDirty: true })
     clearIconPreview()
+  }
+
+  const handleReset = () => {
+    form.reset(initialValues)
+    if (initial?.resources?.icon) {
+      setIconPreview(initial.resources.icon)
+    } else {
+      clearIconPreview()
+    }
   }
 
   useEffect(() => {
@@ -403,6 +418,8 @@ export const QuestForm = ({
                           : e.target.valueAsNumber
                       )
                     }
+                    min={0}
+                    step={1}
                   />
                 </FormControl>
                 <FormMessage />
@@ -448,7 +465,7 @@ export const QuestForm = ({
                     <FormItem>
                       <FormLabel>Tweet ID</FormLabel>
                       <FormControl>
-                        <Input {...field} />
+                        <Input {...field} placeholder='1234567890' />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -461,7 +478,7 @@ export const QuestForm = ({
                     <FormItem>
                       <FormLabel>Username</FormLabel>
                       <FormControl>
-                        <Input {...field} />
+                        <Input {...field} placeholder='@example' />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -476,7 +493,7 @@ export const QuestForm = ({
               <FormItem>
                 <FormLabel>URI</FormLabel>
                 <FormControl>
-                  <Input {...field} />
+                  <Input {...field} placeholder='https://…' />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -499,6 +516,8 @@ export const QuestForm = ({
                           : e.target.valueAsNumber
                       )
                     }
+                    min={0}
+                    step={1}
                   />
                 </FormControl>
                 <FormMessage />
@@ -610,7 +629,7 @@ export const QuestForm = ({
                     <FormItem>
                       <FormLabel>Static</FormLabel>
                       <FormControl>
-                        <Input {...field} />
+                        <Input {...field} placeholder='https://…' />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -730,15 +749,24 @@ export const QuestForm = ({
             onFile={handleUpload}
             onClear={handleClearIcon}
             disabled={isUploading}
+            loading={isUploading}
           />
         </div>
 
         <div className='flex gap-2'>
+          <Button variant='outline' type='button' onClick={handleReset}>
+            Reset
+          </Button>
           <Button variant='outline' type='button' onClick={onCancel}>
             Cancel
           </Button>
-          <Button type='submit' disabled={form.formState.isSubmitting}>
-            {form.formState.isSubmitting ? 'Saving...' : 'Save'}
+          <Button
+            type='submit'
+            disabled={isSubmitting}
+            aria-busy={isSubmitting}
+          >
+            {isSubmitting && <Spinner className='mr-2' />}
+            Save
           </Button>
         </div>
       </form>

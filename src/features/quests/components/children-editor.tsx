@@ -230,6 +230,8 @@ const ChildRow = ({ id, index, remove }: RowProps) => {
                         : e.target.valueAsNumber
                     )
                   }
+                  min={0}
+                  step={1}
                 />
               </FormControl>
               <FormMessage />
@@ -246,7 +248,7 @@ const ChildRow = ({ id, index, remove }: RowProps) => {
               <FormItem>
                 <FormLabel>Tweet ID</FormLabel>
                 <FormControl>
-                  <Input {...field} />
+                  <Input {...field} placeholder='1234567890' />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -259,7 +261,7 @@ const ChildRow = ({ id, index, remove }: RowProps) => {
               <FormItem>
                 <FormLabel>Username</FormLabel>
                 <FormControl>
-                  <Input {...field} />
+                  <Input {...field} placeholder='@example' />
                 </FormControl>
                 <FormMessage />
               </FormItem>
