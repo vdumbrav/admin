@@ -14,7 +14,6 @@ export const questSchema = z.object({
     .object({
       username: z.string().optional(),
       tweetId: z.string().optional(),
-      twitterUsername: z.string().optional(),
       isNew: z.boolean().optional(),
     })
     .optional(),

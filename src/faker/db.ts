@@ -28,7 +28,7 @@ export function list({
         i.provider,
         i.resources?.username,
         i.resources?.tweetId,
-        i.resources?.twitterUsername,
+        i.resources?.username,
       ]
         .map((v) => (v ? String(v).toLowerCase() : ''))
         .some((v) => v.includes(s))

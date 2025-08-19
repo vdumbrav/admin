@@ -8,7 +8,6 @@ export const withTwitterValidation = <T extends z.ZodTypeAny>(schema: T): T =>
       resources?: {
         tweetId?: string
         username?: string
-        twitterUsername?: string
       }
     }
     const needsTweet =
@@ -29,9 +28,9 @@ export const withTwitterValidation = <T extends z.ZodTypeAny>(schema: T): T =>
         message: 'Tweet ID must be numeric.',
       })
     }
-    if (!v.resources?.twitterUsername && !v.resources?.username) {
+    if (!v.resources?.username) {
       ctx.addIssue({
-        path: ['resources', 'twitterUsername'],
+        path: ['resources', 'username'],
         code: z.ZodIssueCode.custom,
         message: 'Username is required for Twitter like/share/comment.',
       })

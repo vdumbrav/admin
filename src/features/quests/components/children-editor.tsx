@@ -31,7 +31,7 @@ interface Child {
   provider?: Task['provider']
   reward?: number
   order_by: number
-  resources?: { tweetId?: string; twitterUsername?: string; username?: string }
+  resources?: { tweetId?: string; username?: string }
 }
 
 interface FormValues {
@@ -262,7 +262,7 @@ const ChildRow = ({ id, index, remove }: RowProps) => {
           />
           <FormField
             control={control}
-            name={`child.${index}.resources.twitterUsername`}
+            name={`child.${index}.resources.username`}
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Twitter Username</FormLabel>

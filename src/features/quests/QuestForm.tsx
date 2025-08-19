@@ -8,7 +8,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useBlocker } from '@tanstack/react-router'
 import { useAppAuth } from '@/auth/provider'
 import { mediaErrors } from '@/errors/media'
-import { defaultPartnerTask, type Task, type Resources } from '@/types/tasks'
+import { defaultPartnerTask, type Task } from '@/types/tasks'
 import { toast } from 'sonner'
 import { replaceObjectUrl } from '@/utils/object-url'
 import { Button } from '@/components/ui/button'
@@ -59,7 +59,6 @@ const childSchema = withTwitterValidation(
     resources: z
       .object({
         tweetId: z.string().optional(),
-        twitterUsername: z.string().optional(),
         username: z.string().optional(),
       })
       .optional(),
@@ -106,7 +105,6 @@ const baseSchema = withTwitterValidation(
         .object({
           icon: z.url().optional(),
           tweetId: z.string().optional(),
-          twitterUsername: z.string().optional(),
           username: z.string().optional(),
           isNew: z.boolean().optional(),
           block_id: z.string().optional(),
@@ -167,13 +165,8 @@ export const QuestForm = ({
   const [iconPreview, setIconPreview] = useState<string>()
   const [isUploading, setIsUploading] = useState(false)
   const clearIconPreview = () => setIconPreview((old) => replaceObjectUrl(old))
-  const initialValues = useMemo(() => {
-    type LegacyResources = Resources & {
-      social?: { twitterUsername?: string; twitterId?: string }
-    }
-    const res: LegacyResources = (initial?.resources as LegacyResources) ?? {}
-    const { social, ui, ...rest } = res
-    return {
+  const initialValues = useMemo(
+    () => ({
       title: initial?.title ?? '',
       type: (initial?.type as Task['type']) ?? 'external',
       description: initial?.description ?? '',
@@ -182,13 +175,7 @@ export const QuestForm = ({
       provider: initial?.provider as Task['provider'],
       uri: initial?.uri ?? '',
       reward: initial?.reward,
-      resources: {
-        ...rest,
-        ui: { button: '', ...(ui ?? {}) },
-        twitterUsername:
-          res.twitterUsername ?? res.username ?? social?.twitterUsername ?? '',
-        tweetId: res.tweetId ?? social?.twitterId ?? '',
-      },
+      resources: initial?.resources ?? { ui: { button: '' } },
       visible: initial?.visible ?? true,
       child:
         initial?.child?.map((c) => ({
@@ -198,15 +185,12 @@ export const QuestForm = ({
           reward: c.reward,
           order_by: c.order_by ?? 0,
           resources: c.resources
-            ? {
-                tweetId: c.resources.tweetId,
-                twitterUsername:
-                  c.resources.twitterUsername ?? c.resources.username,
-              }
+            ? { tweetId: c.resources.tweetId, username: c.resources.username }
             : undefined,
         })) ?? [],
-    }
-  }, [initial])
+    }),
+    [initial]
+  )
 
   const form = useForm({
     resolver: zodResolver(schema),
@@ -368,9 +352,6 @@ export const QuestForm = ({
       <form
         onSubmit={form.handleSubmit((values) => {
           const v = { ...values }
-          if (v.resources?.twitterUsername && !v.resources.username) {
-            v.resources.username = v.resources.twitterUsername
-          }
           onSubmit({
             ...v,
             child: v.child?.map((c, i) => ({ ...c, order_by: i })),
@@ -526,7 +507,7 @@ export const QuestForm = ({
                     <TwitterEmbed
                       username={
                         form
-                          .getValues('resources.twitterUsername')
+                          .getValues('resources.username')
                           ?.replace(/^@/, '') || 'waitlist'
                       }
                       tweetId={field.value}

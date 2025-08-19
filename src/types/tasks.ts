@@ -22,7 +22,6 @@ export interface Resources {
   icon?: string
   tweetId?: string
   username?: string
-  twitterUsername?: string
   isNew?: boolean
   block_id?: string
   adsgram?: AdsGramResource
