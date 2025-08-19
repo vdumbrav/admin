@@ -461,7 +461,7 @@ export const QuestForm = ({
           />
           <FormField
             control={form.control}
-            name='resources.twitterUsername'
+            name='resources.username'
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Twitter Username</FormLabel>
