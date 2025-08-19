@@ -464,11 +464,11 @@ export const QuestForm = ({
             name='resources.username'
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Twitter Username</FormLabel>
+                <FormLabel>Username</FormLabel>
                 <FormControl>
                   <Input
                     {...field}
-                    placeholder='Enter Twitter username (e.g. waitlist)'
+                    placeholder='Enter username (e.g. waitlist)'
                     onBlur={(e) =>
                       field.onChange(
                         (e.target.value ?? '').trim().replace(/^@/, '')
