@@ -148,7 +148,9 @@ const baseSchema = withTwitterValidation(
     .loose()
 )
 
-const schema = baseSchema.extend({ child: z.array(childSchema).optional() })
+const schema = baseSchema.and(
+  z.object({ child: z.array(childSchema).optional() })
+)
 
 type FormValues = z.infer<typeof schema>
 
