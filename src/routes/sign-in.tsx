@@ -64,11 +64,11 @@ function SignInPage() {
           </CardHeader>
           <CardContent className='space-y-4 text-center'>
             <p className='text-muted-foreground'>
-              You need {UserRole.Admin} or {UserRole.Moderator} role to access
+              You need <span className='text-yellow-600 font-medium'>{UserRole.Admin}</span> or <span className='text-sky-500 font-medium'>{UserRole.Moderator}</span> role to access
               the admin panel.
             </p>
             <p className='text-muted-foreground text-sm'>
-              Current roles: {roles.length > 0 ? roles.join(', ') : 'None'}
+              Current role: {roles.includes('user') ? 'user' : 'unknown'}
             </p>
             <p className='text-muted-foreground text-sm'>
               Please contact your administrator to get the required permissions.
