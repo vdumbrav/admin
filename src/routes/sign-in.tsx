@@ -1,7 +1,8 @@
-import * as React from 'react'
+import { useCallback, useEffect } from 'react'
 import { createFileRoute, Navigate } from '@tanstack/react-router'
 import { useAppAuth } from '@/auth/provider'
 import { UserRole } from '@/auth/roles'
+import { Loader2 } from 'lucide-react'
 import { logError } from '@/utils/log'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -21,34 +22,39 @@ function SignInPage() {
     signoutRedirect,
     error,
   } = useAppAuth()
-  const [hasTriedLogin, setHasTriedLogin] = React.useState(false)
 
   // Auto-redirect for fake auth
-  React.useEffect(() => {
+  useEffect(() => {
     if (import.meta.env.VITE_USE_FAKE_AUTH === 'true') {
       window.location.replace(`${import.meta.env.BASE_URL}quests`)
       return
     }
   }, [])
 
+  const handleSignIn = useCallback(() => {
+    try {
+      signinRedirect()
+    } catch (e) {
+      logError('signinRedirect failed', e)
+    }
+  }, [signinRedirect])
+
+  // Auto-redirect to sign in for unauthenticated users
+  useEffect(() => {
+    if (!isAuthenticated && !isLoading) {
+      handleSignIn()
+    }
+  }, [isAuthenticated, isLoading, handleSignIn])
+
   // Redirect if authenticated and has proper role
   if (isAuthenticated && hasAllowedRole) {
     return <Navigate to='/quests' search={defaultQuestSearch} replace />
   }
 
-  const handleSignIn = () => {
-    try {
-      setHasTriedLogin(true)
-      signinRedirect()
-    } catch (e) {
-      logError('signinRedirect failed', e)
-    }
-  }
-
   if (isLoading) {
     return (
       <div className='flex min-h-screen items-center justify-center'>
-        <div className='border-primary h-8 w-8 animate-spin rounded-full border-4 border-t-transparent' />
+        <Loader2 className='h-8 w-8 animate-spin' />
       </div>
     )
   }
@@ -111,6 +117,7 @@ function SignInPage() {
               There was an error during authentication. Please try again.
             </p>
             <Button onClick={handleSignIn} className='w-full'>
+              <Loader2 className='mr-2 h-4 w-4 animate-spin' />
               Retry Sign In
             </Button>
           </CardContent>
@@ -119,32 +126,13 @@ function SignInPage() {
     )
   }
 
-  // Show login prompt or signing in state
+  // Show loading while redirecting
   return (
-    <div className='flex min-h-screen items-center justify-center p-4'>
-      <Card className='w-full max-w-md'>
-        <CardHeader>
-          <CardTitle className='text-center'>Admin Panel Sign In</CardTitle>
-        </CardHeader>
-        <CardContent className='space-y-4 text-center'>
-          {hasTriedLogin ? (
-            <>
-              <div className='border-primary mx-auto h-8 w-8 animate-spin rounded-full border-4 border-t-transparent' />
-              <p className='text-muted-foreground'>Redirecting to sign in...</p>
-            </>
-          ) : (
-            <>
-              <p className='text-muted-foreground'>
-                Access to the admin panel requires {UserRole.Admin} or{' '}
-                {UserRole.Moderator} role.
-              </p>
-              <Button onClick={handleSignIn} className='w-full'>
-                Sign In with Keycloak
-              </Button>
-            </>
-          )}
-        </CardContent>
-      </Card>
+    <div className='flex min-h-screen items-center justify-center'>
+      <div className='space-y-4 text-center'>
+        <Loader2 className='mx-auto h-8 w-8 animate-spin' />
+        <p className='text-muted-foreground'>Redirecting to sign in...</p>
+      </div>
     </div>
   )
 }
