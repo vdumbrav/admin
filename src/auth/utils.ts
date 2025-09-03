@@ -29,7 +29,7 @@ export const getRolesFromUser = (user: User | null): string[] => {
     const uniqueRoles = [...new Set(allRoles)]
 
     return uniqueRoles
-  } catch (err) {
+  } catch {
     return []
   }
 }

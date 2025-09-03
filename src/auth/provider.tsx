@@ -5,7 +5,7 @@ import { logError } from '@/utils/log'
 import { MockAuthProvider, useMockAuth } from './mock'
 import { oidcConfig } from './oidc'
 import { hasAllowedRole, UserRole } from './roles'
-import { type AuthResult, type KeycloakUser } from './types'
+import { type AuthResult } from './types'
 import {
   getRolesFromUser,
   userHasAllowedRole,
@@ -56,7 +56,7 @@ export function useAppAuth(): AuthResult {
   return {
     isAuthenticated: a.isAuthenticated,
     isLoading: a.isLoading,
-    user: a.user as unknown as KeycloakUser,
+    user: (a as ReturnType<typeof useRealAuth>).user || null,
     signinRedirect: a.signinRedirect,
     signoutRedirect,
     getAccessToken,

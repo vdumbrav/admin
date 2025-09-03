@@ -18,21 +18,12 @@ export interface KeycloakProfile {
   email: string
 }
 
-export interface KeycloakUser {
-  id_token: string
-  session_state: string
-  access_token: string
-  refresh_token: string
-  token_type: string
-  scope: string
-  profile: KeycloakProfile
-  expires_at: number
-}
+import type { User } from 'oidc-client-ts'
 
 export interface AuthResult {
   isAuthenticated: boolean
   isLoading: boolean
-  user: KeycloakUser
+  user: User | null
   roles: string[]
   hasAllowedRole: boolean
   isAdmin: boolean

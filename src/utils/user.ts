@@ -1,4 +1,4 @@
-import { type KeycloakProfile } from '@/auth/types'
+import { type IdTokenClaims } from 'oidc-client-ts'
 
 /**
  * Generate user initials from name or email
@@ -22,7 +22,7 @@ export const getUserInitials = (name?: string, email?: string): string => {
  * Get display name from user profile - prefer name or preferred_username, no fallback to email
  */
 export const getDisplayName = (
-  profile?: KeycloakProfile | null
+  profile?: IdTokenClaims | null
 ): string | undefined => {
   if (!profile) return undefined
 
@@ -32,14 +32,14 @@ export const getDisplayName = (
 /**
  * Get user email - required field
  */
-export const getUserEmail = (profile?: KeycloakProfile | null): string => {
+export const getUserEmail = (profile?: IdTokenClaims | null): string => {
   return profile?.email || ''
 }
 
 /**
  * Get user name for display - prefer name/preferred_username, fallback to email
  */
-export const getUserShowName = (profile?: KeycloakProfile | null): string => {
+export const getUserShowName = (profile?: IdTokenClaims | null): string => {
   const displayName = getDisplayName(profile)
   const userEmail = getUserEmail(profile)
   return displayName || userEmail
@@ -48,7 +48,7 @@ export const getUserShowName = (profile?: KeycloakProfile | null): string => {
 /**
  * Get all user display data at once
  */
-export const getUserDisplayData = (profile?: KeycloakProfile | null) => {
+export const getUserDisplayData = (profile?: IdTokenClaims | null) => {
   const showName = getUserShowName(profile)
   const userEmail = getUserEmail(profile)
   const userInitials = getUserInitials(showName, userEmail)
