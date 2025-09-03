@@ -356,6 +356,28 @@ The MCP server supports these operations:
 - **Type Safety:** Full TypeScript support maintained
 - **Documentation Integration:** AI understands component APIs and usage
 
+## 📚 Documentation & Prompts
+
+This project includes comprehensive documentation and AI prompts for enhanced development:
+
+- `prompts/admin-development.md` - Complete development guide for admin panel
+- `prompts/authentication-system.md` - OIDC authentication and role-based access control
+- `prompts/ui-components.md` - shadcn/ui components reference and examples
+- `prompts/deployment-guide.md` - Production deployment and configuration
+- `.claude/instructions.md` - AI development instructions for Claude Code
+
+### AI-Enhanced Development
+
+Use natural language with Claude Code for:
+
+```
+"Add user management features with data table"
+"Create a dashboard with analytics charts"
+"Implement role-based permission system"
+"Add authentication error handling"
+"Setup production deployment configuration"
+```
+
 ## 🔄 Auth0 Migration (Future)
 
 The architecture is designed to support multiple OIDC providers:
