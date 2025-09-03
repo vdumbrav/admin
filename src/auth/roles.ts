@@ -19,7 +19,7 @@ export const extractRoles = (profile: unknown): string[] => {
   }
 
   // Keycloak client roles
-  const clientId = import.meta.env.VITE_OIDC_CLIENT_ID || 'admin-panel'
+  const clientId = import.meta.env.VITE_OIDC_CLIENT_ID || 'waitlist-api'
   const resourceAccess = (
     profile as {
       resource_access?: { [key: string]: { roles?: unknown } }

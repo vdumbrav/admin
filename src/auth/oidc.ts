@@ -14,7 +14,7 @@ if (!rawIssuer) {
 }
 const authority = rawIssuer.endsWith('/') ? rawIssuer.slice(0, -1) : rawIssuer
 
-const clientId = import.meta.env.VITE_OIDC_CLIENT_ID || 'admin-panel'
+const clientId = import.meta.env.VITE_OIDC_CLIENT_ID || 'waitlist-api'
 const scope =
   import.meta.env.VITE_OIDC_SCOPE || 'openid profile email roles offline_access'
 

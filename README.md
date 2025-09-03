@@ -26,7 +26,7 @@ This admin panel uses **OIDC (OpenID Connect)** with **role-based access control
 | --------------------- | ----------------------------------------------------- | ---------------------------------- |
 | `VITE_USE_FAKE_AUTH`  | `true` / `false`                                      | Mock vs real OIDC authentication   |
 | `VITE_OIDC_AUTHORITY` | `https://keycloak.example.com/realms/your-realm`      | OIDC issuer/authority URL          |
-| `VITE_OIDC_CLIENT_ID` | `admin-panel`                                         | OIDC client identifier             |
+| `VITE_OIDC_CLIENT_ID` | `waitlist-api`                                        | OIDC client identifier             |
 | `VITE_OIDC_SCOPE`     | `openid profile email roles offline_access`           | Requested OIDC scopes              |
 | `VITE_APP_BASE_URL`   | `http://localhost:3000` or `https://admin.domain.com` | Application base URL for redirects |
 
@@ -52,7 +52,7 @@ This admin panel uses **OIDC (OpenID Connect)** with **role-based access control
    # .env
    VITE_USE_FAKE_AUTH=false
    VITE_OIDC_AUTHORITY=https://your-keycloak.com/realms/your-realm
-   VITE_OIDC_CLIENT_ID=admin-panel
+   VITE_OIDC_CLIENT_ID=waitlist-api
    VITE_APP_BASE_URL=http://localhost:3000
    ```
 
