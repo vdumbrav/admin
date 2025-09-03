@@ -24,7 +24,6 @@ This admin panel uses **OIDC (OpenID Connect)** with **role-based access control
 
 | Variable              | Example                                               | Purpose                            |
 | --------------------- | ----------------------------------------------------- | ---------------------------------- |
-| `VITE_USE_FAKE_AUTH`  | `true` / `false`                                      | Mock vs real OIDC authentication   |
 | `VITE_OIDC_AUTHORITY` | `https://keycloak.example.com/realms/your-realm`      | OIDC issuer/authority URL          |
 | `VITE_OIDC_CLIENT_ID` | `waitlist-api`                                        | OIDC client identifier             |
 | `VITE_OIDC_SCOPE`     | `openid profile email roles offline_access`           | Requested OIDC scopes              |
@@ -50,7 +49,6 @@ This admin panel uses **OIDC (OpenID Connect)** with **role-based access control
 
    ```bash
    # .env
-   VITE_USE_FAKE_AUTH=false
    VITE_OIDC_AUTHORITY=https://your-keycloak.com/realms/your-realm
    VITE_OIDC_CLIENT_ID=waitlist-api
    VITE_APP_BASE_URL=http://localhost:3000
@@ -65,20 +63,16 @@ This admin panel uses **OIDC (OpenID Connect)** with **role-based access control
 
 ### Development Mode
 
-**Mock Authentication (for development):**
+**Development with mock API:**
 
 ```bash
-VITE_USE_FAKE_AUTH=true \
-VITE_USE_FAKE_API=true \
-npm run dev
+VITE_USE_FAKE_API=true npm run dev
 ```
 
-**Real Authentication:**
+**Production mode:**
 
 ```bash
-VITE_USE_FAKE_AUTH=false \
-VITE_USE_FAKE_API=false \
-npm run dev
+VITE_USE_FAKE_API=false npm run dev
 ```
 
 ### Authentication Flow
@@ -229,7 +223,6 @@ const profile =
 # Production settings
 VITE_OIDC_AUTHORITY=https://keycloak.yourdomain.com/realms/production
 VITE_APP_BASE_URL=https://admin.yourdomain.com
-VITE_USE_FAKE_AUTH=false  # Never true in production
 ```
 
 ### Role-Based Access Control (RBAC)
@@ -260,7 +253,7 @@ VITE_USE_FAKE_AUTH=false  # Never true in production
 
 **Security Checklist:**
 
-- [ ] `VITE_USE_FAKE_AUTH=false` in production
+- [ ] OIDC authority configured with proper realm
 - [ ] HTTPS enabled for all URLs
 - [ ] OIDC provider configured with proper redirect URIs
 - [ ] Role mapping configured correctly
@@ -277,6 +270,7 @@ VITE_USE_FAKE_AUTH=false  # Never true in production
 - **Clear error messages:** Shows contact instructions for access issues
 
 ### MCP Integration
+
 - **shadcn/ui registry access:** Browse and install components directly through Claude Code
 - **Automatic dependency management:** Dependencies are installed automatically with components
 - **AI-enhanced development:** Use natural language to request and install UI components
@@ -298,6 +292,7 @@ MCP is already configured with `.mcp.json` and `components.json`. The shadcn MCP
 You can use natural language with Claude Code to:
 
 **Install Components:**
+
 ```
 "Add a data table component from shadcn"
 "Install the calendar component"
@@ -305,6 +300,7 @@ You can use natural language with Claude Code to:
 ```
 
 **Browse Registry:**
+
 ```
 "Show me all available shadcn components"
 "What navigation components are available?"
@@ -312,6 +308,7 @@ You can use natural language with Claude Code to:
 ```
 
 **Create with Components:**
+
 ```
 "Create a settings page using shadcn form components"
 "Build a dashboard with cards and tables from shadcn"
@@ -329,6 +326,7 @@ The MCP server supports these operations:
 ### Configuration Files
 
 **`.mcp.json`** - MCP server configuration:
+
 ```json
 {
   "mcpServers": {
@@ -341,6 +339,7 @@ The MCP server supports these operations:
 ```
 
 **`components.json`** - Registry configuration:
+
 ```json
 {
   "registries": {

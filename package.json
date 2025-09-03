@@ -3,7 +3,7 @@
   "private": true,
   "version": "1.4.2",
   "license": "UNLICENSED",
-  "description": "Internal Waitlist Admin app",
+  "description": "Internal admin UI for managing the Waitlist service with OIDC authentication and MCP integration",
   "type": "module",
   "scripts": {
     "dev": "vite",

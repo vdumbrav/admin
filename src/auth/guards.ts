@@ -5,9 +5,6 @@ import { UserRole } from './roles'
 import { getRolesFromUser, userHasAllowedRole, userIsAdmin } from './utils'
 
 export const requireAuthBeforeLoad = async () => {
-  if (import.meta.env.VITE_USE_FAKE_AUTH === 'true') {
-    return
-  }
   let user
   try {
     user = await userManager.getUser()
@@ -33,9 +30,6 @@ export const requireAuthBeforeLoad = async () => {
 }
 
 export const requireAdminBeforeLoad = async () => {
-  if (import.meta.env.VITE_USE_FAKE_AUTH === 'true') {
-    return
-  }
   let user
   try {
     user = await userManager.getUser()
@@ -52,7 +46,5 @@ export const requireAdminBeforeLoad = async () => {
 }
 
 export const requireModeratorOrAdminBeforeLoad = async () => {
-  if (import.meta.env.VITE_USE_FAKE_AUTH === 'true') return
-
   await requireAuthBeforeLoad()
 }

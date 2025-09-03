@@ -23,14 +23,6 @@ function SignInPage() {
     error,
   } = useAppAuth()
 
-  // Auto-redirect for fake auth
-  useEffect(() => {
-    if (import.meta.env.VITE_USE_FAKE_AUTH === 'true') {
-      window.location.replace(`${import.meta.env.BASE_URL}quests`)
-      return
-    }
-  }, [])
-
   const handleSignIn = useCallback(() => {
     try {
       signinRedirect()
