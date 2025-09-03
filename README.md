@@ -270,6 +270,7 @@ VITE_USE_FAKE_AUTH=false  # Never true in production
 ## 🔧 Features
 
 ### Authentication Flow
+
 - **No auto-logout:** Users with insufficient roles see "Try Different Account" option
 - **Role-based messaging:** Role requirements displayed with colored text (`admin` in yellow, `moderator` in light blue)
 - **Manual account switching:** Users control when to try a different account

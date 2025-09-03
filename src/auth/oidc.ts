@@ -4,18 +4,8 @@ import type { AuthProviderProps } from 'react-oidc-context'
 const rawBaseEnv = import.meta.env.VITE_APP_BASE_URL as string | undefined
 const rawBase = rawBaseEnv ?? window.location.origin
 
-// Build base URL: always add /admin/ path
+// Build base URL
 const baseUrl = rawBase.endsWith('/') ? rawBase.slice(0, -1) : rawBase
-const fullBaseUrl = `${baseUrl}/admin/`
-
-// Debug log for URL construction
-// eslint-disable-next-line no-console
-console.log('OIDC URL Debug:', {
-  rawBaseEnv,
-  baseUrl,
-  fullBaseUrl,
-  redirect_uri: `${fullBaseUrl}auth/callback`,
-})
 
 const rawIssuer = import.meta.env.VITE_OIDC_AUTHORITY as string | undefined
 if (!rawIssuer) {
@@ -30,10 +20,10 @@ const scope =
 export const oidcConfig: AuthProviderProps = {
   authority,
   client_id: clientId,
-  redirect_uri: `${fullBaseUrl}auth/callback`,
-  post_logout_redirect_uri: fullBaseUrl,
-  popup_redirect_uri: `${fullBaseUrl}popup-callback.html`,
-  silent_redirect_uri: `${fullBaseUrl}silent-callback.html`,
+  redirect_uri: `${baseUrl}auth/callback`,
+  post_logout_redirect_uri: baseUrl,
+  popup_redirect_uri: `${baseUrl}popup-callback.html`,
+  silent_redirect_uri: `${baseUrl}silent-callback.html`,
   response_type: 'code',
   scope,
   automaticSilentRenew: true,
