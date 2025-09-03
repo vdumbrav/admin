@@ -57,8 +57,8 @@ This admin panel uses **OIDC (OpenID Connect)** with **role-based access control
    ```
 
 3. Ensure your Keycloak client is configured with:
-   - **Valid Redirect URIs:** `http://localhost:3000/auth/callback`
-   - **Valid Post Logout Redirect URIs:** `http://localhost:3000`
+   - **Valid Redirect URIs:** `http://localhost:3000/auth/callback`, `https://your-domain.com/auth/callback`
+   - **Valid Post Logout Redirect URIs:** `http://localhost:3000/`, `https://your-domain.com/`
    - **Client roles:** `admin`, `moderator` (or use realm roles)
 
 ## 🚀 Usage
@@ -85,8 +85,8 @@ npm run dev
 
 1. **Unauthenticated users** → Redirected to `/sign-in`
 2. **Sign-in page** → Redirects to Keycloak for authentication
-3. **After authentication** → Redirected back to `/auth/callback`
-4. **Role validation** → Users without `admin`/`moderator` roles see access denied
+3. **After authentication** → Redirected back to auth callback
+4. **Role validation** → Users without `admin`/`moderator` roles see access denied with "Try Different Account" option
 5. **Authorized users** → Access granted to admin interface
 
 ### Role Requirements
@@ -266,6 +266,14 @@ VITE_USE_FAKE_AUTH=false  # Never true in production
 - [ ] Role mapping configured correctly
 - [ ] Token lifetimes set appropriately
 - [ ] Security headers configured (CSP, HSTS, etc.)
+
+## 🔧 Features
+
+### Authentication Flow
+- **No auto-logout:** Users with insufficient roles see "Try Different Account" option
+- **Role-based messaging:** Role requirements displayed with colored text (`admin` in yellow, `moderator` in light blue)
+- **Manual account switching:** Users control when to try a different account
+- **Clear error messages:** Shows contact instructions for access issues
 
 ## 🔄 Auth0 Migration (Future)
 
