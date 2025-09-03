@@ -4,22 +4,17 @@ import { toast } from 'sonner'
 import { logError } from '@/utils/log'
 import { MockAuthProvider, useMockAuth } from './mock'
 import { oidcConfig } from './oidc'
-import { extractRoles } from './roles'
+import { hasAllowedRole, UserRole } from './roles'
+import { type AuthResult, type KeycloakUser } from './types'
+import {
+  getRolesFromUser,
+  userHasAllowedRole,
+  userIsAdmin,
+  userIsModerator,
+} from './utils'
 
 const useFake = import.meta.env.VITE_USE_FAKE_AUTH === 'true'
 const useAuthImpl = useFake ? useMockAuth : useRealAuth
-
-interface AuthResult {
-  isAuthenticated: boolean
-  isLoading: boolean
-  user: unknown
-  signinRedirect: () => void
-  signoutRedirect: () => void
-  getAccessToken: () => string | undefined
-  roles: string[]
-  hasRole: (role: string) => boolean
-  error?: unknown
-}
 
 export const AppAuthProvider: React.FC<React.PropsWithChildren> = ({
   children,
@@ -30,9 +25,13 @@ export const AppAuthProvider: React.FC<React.PropsWithChildren> = ({
 
 export function useAppAuth(): AuthResult {
   const a = useAuthImpl()
+  const profile = useFake
+    ? (a as ReturnType<typeof useMockAuth>).user
+    : (a as ReturnType<typeof useRealAuth>).user?.profile
+
   const roles = useFake
     ? (a as ReturnType<typeof useMockAuth>).roles
-    : extractRoles((a as ReturnType<typeof useRealAuth>).user?.profile)
+    : getRolesFromUser((a as ReturnType<typeof useRealAuth>).user || null)
   const token = useFake
     ? (a as ReturnType<typeof useMockAuth>).getAccessToken()
     : (a as ReturnType<typeof useRealAuth>).user?.access_token
@@ -43,15 +42,29 @@ export function useAppAuth(): AuthResult {
       toast.error('Failed to sign out')
     })
   }, [a])
+
+  const hasAllowedRoleValue = useFake
+    ? hasAllowedRole(profile)
+    : userHasAllowedRole((a as ReturnType<typeof useRealAuth>).user || null)
+  const isAdmin = useFake
+    ? roles.includes(UserRole.Admin)
+    : userIsAdmin((a as ReturnType<typeof useRealAuth>).user || null)
+  const isModerator = useFake
+    ? roles.includes(UserRole.Moderator)
+    : userIsModerator((a as ReturnType<typeof useRealAuth>).user || null)
+
   return {
     isAuthenticated: a.isAuthenticated,
     isLoading: a.isLoading,
-    user: a.user,
+    user: a.user as unknown as KeycloakUser,
     signinRedirect: a.signinRedirect,
     signoutRedirect,
     getAccessToken,
     roles,
     hasRole: (role) => roles.includes(role),
+    hasAllowedRole: hasAllowedRoleValue,
+    isAdmin,
+    isModerator,
     error: (a as { error?: unknown }).error,
   }
 }

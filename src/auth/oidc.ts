@@ -3,7 +3,10 @@ import type { AuthProviderProps } from 'react-oidc-context'
 
 const rawBaseEnv = import.meta.env.VITE_APP_BASE_URL as string | undefined
 const rawBase = rawBaseEnv ?? window.location.origin
-const baseUrl = rawBase.endsWith('/') ? rawBase : `${rawBase}/`
+const vitePath = import.meta.env.VITE_PUBLIC_BASE || '/admin/'
+const normalizedVitePath = vitePath.startsWith('/') ? vitePath : `/${vitePath}`
+const baseUrl = rawBase.endsWith('/') ? rawBase.slice(0, -1) : rawBase
+const fullBaseUrl = `${baseUrl}${normalizedVitePath}`
 
 const rawIssuer = import.meta.env.VITE_OIDC_AUTHORITY as string | undefined
 if (!rawIssuer) {
@@ -11,18 +14,28 @@ if (!rawIssuer) {
 }
 const authority = rawIssuer.endsWith('/') ? rawIssuer.slice(0, -1) : rawIssuer
 
+const clientId = import.meta.env.VITE_OIDC_CLIENT_ID || 'admin-panel'
+const scope =
+  import.meta.env.VITE_OIDC_SCOPE || 'openid profile email roles offline_access'
+
 export const oidcConfig: AuthProviderProps = {
   authority,
-  client_id: 'mobile_app',
-  redirect_uri: baseUrl,
-  post_logout_redirect_uri: baseUrl,
-  popup_redirect_uri: `${baseUrl}popup-callback.html`,
-  silent_redirect_uri: `${baseUrl}silent-callback.html`,
+  client_id: clientId,
+  redirect_uri: `${fullBaseUrl}auth/callback`,
+  post_logout_redirect_uri: fullBaseUrl,
+  popup_redirect_uri: `${fullBaseUrl}popup-callback.html`,
+  silent_redirect_uri: `${fullBaseUrl}silent-callback.html`,
   response_type: 'code',
-  scope: 'openid profile email',
+  scope,
   automaticSilentRenew: true,
   monitorSession: false,
-  userStore: new WebStorageStateStore({ store: window.localStorage }),
+  includeIdTokenInSilentRenew: true,
+  revokeTokensOnSignout: true,
+  accessTokenExpiringNotificationTimeInSeconds: 60,
+  userStore: new WebStorageStateStore({
+    store: window.localStorage,
+    prefix: 'oidc.',
+  }),
   onSigninCallback: () => {
     window.history.replaceState({}, document.title, window.location.pathname)
   },

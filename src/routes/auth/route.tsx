@@ -1,9 +1,9 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, Outlet } from '@tanstack/react-router'
 
-const AuthPage = () => {
-  return <div>Auth page</div>
+const AuthLayout = () => {
+  return <Outlet />
 }
 
 export const Route = createFileRoute('/auth')({
-  component: AuthPage,
+  component: AuthLayout,
 })

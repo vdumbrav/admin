@@ -9,6 +9,9 @@ const base = process.env.VITE_PUBLIC_BASE ?? '/admin/'
 
 export default defineConfig({
   base,
+  server: {
+    port: 3000,
+  },
   plugins: [
     react(),
     tanstackRouter({ routesDirectory: 'src/routes' }),

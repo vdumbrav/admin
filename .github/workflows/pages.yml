@@ -31,9 +31,10 @@ jobs:
       - run: pnpm build
         env:
           VITE_API_URL: "http://localhost:3000"
-          VITE_APP_BASE_URL: https://vdumbrav.github.io/admin/
-          VITE_OIDC_AUTHORITY: "https://keycloak.example.com/realms/realm"
-          VITE_USE_FAKE_AUTH: "true"
+          VITE_APP_BASE_URL: "https://vdumbrav.github.io/admin/"
+          VITE_OIDC_AUTHORITY: "https://auth.cedradev.xyz/realms/waitlist"
+          VITE_OIDC_CLIENT_ID: "admin-panel"
+          VITE_OIDC_SCOPE: "openid profile email roles offline_access"
           VITE_USE_FAKE_API: "true"
           VITE_PUBLIC_BASE: "/admin/"
       - run: cp dist/index.html dist/404.html
