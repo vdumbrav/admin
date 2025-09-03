@@ -276,6 +276,87 @@ VITE_USE_FAKE_AUTH=false  # Never true in production
 - **Manual account switching:** Users control when to try a different account
 - **Clear error messages:** Shows contact instructions for access issues
 
+### MCP Integration
+- **shadcn/ui registry access:** Browse and install components directly through Claude Code
+- **Automatic dependency management:** Dependencies are installed automatically with components
+- **AI-enhanced development:** Use natural language to request and install UI components
+
+## 🤖 Working with MCP (Model Context Protocol)
+
+This project is configured with MCP support for enhanced AI-assisted development with Claude Code.
+
+### Setup
+
+MCP is already configured with `.mcp.json` and `components.json`. The shadcn MCP server provides:
+
+- Access to the official shadcn/ui component registry
+- Automatic component installation with dependencies
+- Integration with your existing project configuration
+
+### Usage Examples
+
+You can use natural language with Claude Code to:
+
+**Install Components:**
+```
+"Add a data table component from shadcn"
+"Install the calendar component"
+"Add form components for user registration"
+```
+
+**Browse Registry:**
+```
+"Show me all available shadcn components"
+"What navigation components are available?"
+"List components for data visualization"
+```
+
+**Create with Components:**
+```
+"Create a settings page using shadcn form components"
+"Build a dashboard with cards and tables from shadcn"
+"Add a contact form with proper validation"
+```
+
+### MCP Commands
+
+The MCP server supports these operations:
+
+- **`mcp://shadcn/list`** - List available components
+- **`mcp://shadcn/get/{name}`** - Get component details
+- **`mcp://shadcn/install/{name}`** - Install component with dependencies
+
+### Configuration Files
+
+**`.mcp.json`** - MCP server configuration:
+```json
+{
+  "mcpServers": {
+    "shadcn": {
+      "command": "npx",
+      "args": ["shadcn@latest", "mcp"]
+    }
+  }
+}
+```
+
+**`components.json`** - Registry configuration:
+```json
+{
+  "registries": {
+    "@shadcn/ui": "https://ui.shadcn.com/r/{name}.json"
+  }
+}
+```
+
+### Benefits
+
+- **Faster Development:** Install components with a single AI prompt
+- **Consistent Styling:** All components follow your configured theme
+- **Dependency Management:** Automatic installation of required dependencies
+- **Type Safety:** Full TypeScript support maintained
+- **Documentation Integration:** AI understands component APIs and usage
+
 ## 🔄 Auth0 Migration (Future)
 
 The architecture is designed to support multiple OIDC providers:
