@@ -18,6 +18,7 @@ function SignInPage() {
     hasAllowedRole,
     roles,
     signinRedirect,
+    signoutRedirect,
     error,
   } = useAppAuth()
   const [hasTriedLogin, setHasTriedLogin] = React.useState(false)
@@ -82,7 +83,7 @@ function SignInPage() {
             </p>
             <div className='space-y-2'>
               <Button
-                onClick={handleSignIn}
+                onClick={signoutRedirect}
                 variant='outline'
                 className='w-full'
               >
