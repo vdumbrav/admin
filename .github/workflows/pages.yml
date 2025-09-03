@@ -33,7 +33,7 @@ jobs:
           VITE_API_URL: "http://localhost:3000"
           VITE_APP_BASE_URL: "https://vdumbrav.github.io/admin/"
           VITE_OIDC_AUTHORITY: "https://auth.cedradev.xyz/realms/waitlist"
-          VITE_OIDC_CLIENT_ID: "admin-panel"
+          VITE_OIDC_CLIENT_ID: "waitlist-api"
           VITE_OIDC_SCOPE: "openid profile email roles offline_access"
           VITE_USE_FAKE_API: "true"
           VITE_PUBLIC_BASE: "/admin/"

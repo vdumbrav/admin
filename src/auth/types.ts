@@ -1,3 +1,5 @@
+import type { User } from 'oidc-client-ts'
+
 /**
  * Keycloak user types for auth integration
  */
@@ -17,8 +19,6 @@ export interface KeycloakProfile {
   family_name: string
   email: string
 }
-
-import type { User } from 'oidc-client-ts'
 
 export interface AuthResult {
   isAuthenticated: boolean

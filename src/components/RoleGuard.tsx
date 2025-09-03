@@ -16,7 +16,6 @@ export function RoleGuard({
 
   const hasRequiredRole = requiredRoles.some((role) => roles.includes(role))
 
-
   if (isLoading) {
     return (
       <div className='flex min-h-screen items-center justify-center'>

@@ -64,8 +64,15 @@ function SignInPage() {
           </CardHeader>
           <CardContent className='space-y-4 text-center'>
             <p className='text-muted-foreground'>
-              You need <span className='text-yellow-600 font-medium'>{UserRole.Admin}</span> or <span className='text-sky-500 font-medium'>{UserRole.Moderator}</span> role to access
-              the admin panel.
+              You need{' '}
+              <span className='font-medium text-yellow-600'>
+                {UserRole.Admin}
+              </span>{' '}
+              or{' '}
+              <span className='font-medium text-sky-500'>
+                {UserRole.Moderator}
+              </span>{' '}
+              role to access the admin panel.
             </p>
             <p className='text-muted-foreground text-sm'>
               Current role: {roles.includes('user') ? 'user' : 'unknown'}
