@@ -4,21 +4,15 @@ import type { AuthProviderProps } from 'react-oidc-context'
 const rawBaseEnv = import.meta.env.VITE_APP_BASE_URL as string | undefined
 const rawBase = rawBaseEnv ?? window.location.origin
 
-// For GitHub Pages, VITE_APP_BASE_URL already includes the /admin/ path
-// So we don't need to add VITE_PUBLIC_BASE again
-const isDev = import.meta.env.DEV
-const fullBaseUrl = isDev
-  ? `${rawBase}/admin/`
-  : rawBase.endsWith('/')
-    ? rawBase
-    : `${rawBase}/`
+// Build base URL: always add /admin/ path
+const baseUrl = rawBase.endsWith('/') ? rawBase.slice(0, -1) : rawBase
+const fullBaseUrl = `${baseUrl}/admin/`
 
 // Debug log for URL construction
 // eslint-disable-next-line no-console
 console.log('OIDC URL Debug:', {
   rawBaseEnv,
-  rawBase,
-  isDev,
+  baseUrl,
   fullBaseUrl,
   redirect_uri: `${fullBaseUrl}auth/callback`,
 })
