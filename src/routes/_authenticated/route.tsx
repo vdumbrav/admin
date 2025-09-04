@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { requireModeratorOrAdminBeforeLoad } from '@/auth/guards'
-import { ProtectedRoute } from '@/components/RoleGuard'
+import { ProtectedRoute } from '@/auth/role-guard'
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout'
 
 function AuthenticatedRoute() {
