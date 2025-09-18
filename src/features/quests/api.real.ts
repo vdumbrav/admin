@@ -113,7 +113,9 @@ export const useQuest = (id: number) => {
   } = useAdminControllerGetWaitlistTasks()
 
   // Find specific task by ID
-  const task = adminTasks?.find((task) => task.id === id)
+  const task = adminTasks?.find(
+    (task: AdminWaitlistTasksResponseDto) => task.id === id
+  )
 
   // Transform single task to match expected Quest format using the same transformation
   const transformedTask = task ? transformAdminTask(task) : undefined
