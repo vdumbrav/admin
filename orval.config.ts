@@ -3,7 +3,7 @@ import { defineConfig } from "orval";
 export default defineConfig({
   waitlistApi: {
     input: {
-      target: process.env.VITE_SWAGGER_URL || "https://waitlist.cedradev.xyz/api/api-tools/docs-json",
+      target: process.env.VITE_SWAGGER_URL!,
     },
     hooks: {
       afterAllFilesWrite: "tsx src/lib/api/scripts/post-orval.mjs",

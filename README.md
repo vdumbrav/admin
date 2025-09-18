@@ -31,12 +31,12 @@ This admin panel uses **OIDC (OpenID Connect)** with **role-based access control
 
 ### API Variables
 
-| Variable            | Example                                                 | Purpose                                    |
-| ------------------- | ------------------------------------------------------- | ------------------------------------------ |
-| `VITE_USE_FAKE_API` | `true` / `false`                                        | Mock vs real Waitlist API                  |
-| `VITE_API_URL`      | `https://waitlist.cedradev.xyz/api`                     | Backend API base URL for requests          |
-| `VITE_SWAGGER_URL`  | `https://waitlist.cedradev.xyz/api/api-tools/docs-json` | Swagger JSON URL for API client generation |
-| `VITE_PUBLIC_BASE`  | `/admin/`                                               | Vite base path for deployment              |
+| Variable            | Example                         | Purpose                                    |
+| ------------------- | ------------------------------- | ------------------------------------------ |
+| `VITE_USE_FAKE_API` | `true` / `false`                | Mock vs real Waitlist API                  |
+| `VITE_API_URL`      | Backend API base URL (required) | Backend API base URL for requests          |
+| `VITE_SWAGGER_URL`  | Swagger JSON URL (required)     | Swagger JSON URL for API client generation |
+| `VITE_PUBLIC_BASE`  | `/admin/`                       | Vite base path for deployment              |
 
 ### Setup
 
