@@ -287,7 +287,7 @@ export const QuestForm = ({
     setIconPreview((old) => replaceObjectUrl(old, file))
     setIsUploading(true)
     try {
-      const { url } = await uploadMedia(file, auth.getAccessToken())
+      const { url } = await uploadMedia(file, await auth.getAccessToken())
       form.setValue('resources.icon', url, { shouldDirty: true })
     } catch {
       toast.error(mediaErrors.upload)
@@ -323,7 +323,7 @@ export const QuestForm = ({
 
     const load = async () => {
       try {
-        const token = auth.getAccessToken()
+        const token = await auth.getAccessToken()
         const res = await fetch(icon, {
           headers: token ? { Authorization: `Bearer ${token}` } : {},
           signal: controller.signal,

@@ -31,6 +31,6 @@ export interface AuthResult {
   error?: unknown
   signinRedirect: () => void
   signoutRedirect: () => void
-  getAccessToken: () => string | undefined
+  getAccessToken: () => Promise<string | undefined>
   hasRole: (role: string) => boolean
 }

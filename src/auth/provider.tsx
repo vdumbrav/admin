@@ -10,18 +10,54 @@ import {
   userIsAdmin,
   userIsSupport,
 } from './utils'
+import { TokenAutoRenew } from './TokenAutoRenew'
+import { debugToken } from './debug'
 
 export const AppAuthProvider: React.FC<React.PropsWithChildren> = ({
   children,
 }) => {
-  return <AuthProvider {...oidcConfig}>{children}</AuthProvider>
+  return (
+    <AuthProvider {...oidcConfig}>
+      <TokenAutoRenew />
+      {children}
+    </AuthProvider>
+  )
 }
 
 export function useAppAuth(): AuthResult {
   const auth = useAuth()
   const roles = getRolesFromUser(auth.user || null)
-  const token = auth.user?.access_token
-  const getAccessToken = React.useCallback(() => token, [token])
+
+  const getAccessToken = React.useCallback(async (): Promise<string | undefined> => {
+    // Check for valid OIDC token first
+    if (auth.user && !auth.user.expired) {
+      const token = auth.user.access_token
+      debugToken(token, 'AuthProvider - Valid Token')
+      return token
+    }
+
+    // Try to refresh token if user exists but token is expired
+    if (auth.user && !auth.activeNavigator) {
+      try {
+        debugToken(auth.user.access_token, 'AuthProvider - Expired Token (before refresh)')
+        const freshUser = await auth.signinSilent()
+        const newToken = freshUser?.access_token
+        debugToken(newToken, 'AuthProvider - Refreshed Token')
+        return newToken
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error('[AuthProvider] Token refresh failed:', error)
+        // Return existing token instead of undefined to avoid immediate logout
+        const fallbackToken = auth.user?.access_token
+        debugToken(fallbackToken, 'AuthProvider - Fallback Token')
+        return fallbackToken
+      }
+    }
+
+    const token = auth.user?.access_token
+    debugToken(token, 'AuthProvider - Default Token')
+    return token
+  }, [auth])
 
   const signoutRedirect = React.useCallback(() => {
     Promise.resolve(auth.signoutRedirect()).catch((e: unknown) => {

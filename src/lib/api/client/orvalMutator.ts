@@ -1,5 +1,5 @@
 import axios, { type AxiosInstance, type AxiosRequestConfig, AxiosResponse } from "axios";
-import { useAuth } from "react-oidc-context";
+import { useAppAuth } from "@/auth/provider";
 
 export type OrvalClient = AxiosInstance;
 
@@ -75,17 +75,18 @@ export async function orvalMutator<TResponse>(
 
 // Hook version for components that need authentication
 export function useOrvalMutator() {
-  const auth = useAuth();
+  const auth = useAppAuth();
 
   return async function authenticatedOrvalMutator<TResponse>(
     config: AxiosRequestConfig,
     options: OrvalRequestOptions = {},
   ): Promise<TResponse> {
     // Add authorization header if user is authenticated
-    if (auth.user?.access_token) {
+    const token = await auth.getAccessToken();
+    if (token) {
       config.headers = {
         ...config.headers,
-        Authorization: `Bearer ${auth.user.access_token}`,
+        Authorization: `Bearer ${token}`,
       };
     }
 
