@@ -17,7 +17,7 @@
     "generate:api": "orval --config orval.config.ts",
     "update:api:barrel": "tsx src/lib/api/scripts/update-api-barrel.ts",
     "api:update": "tsx src/lib/api/scripts/update-api.ts",
-    "api:ensure": "tsx src/lib/api/scripts/ensure-api.ts",
+    "api:ensure": "VITE_SWAGGER_URL=https://waitlist.cedradev.xyz/api/api-tools/docs-json tsx src/lib/api/scripts/ensure-api.ts",
     "postinstall": "npm run api:ensure"
   },
   "dependencies": {

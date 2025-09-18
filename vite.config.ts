@@ -11,6 +11,13 @@ export default defineConfig({
   base,
   server: {
     port: 3000,
+    proxy: {
+      '/api': {
+        target: process.env.VITE_API_URL || 'https://waitlist.cedradev.xyz/api',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, ''),
+      },
+    },
   },
   plugins: [
     react(),

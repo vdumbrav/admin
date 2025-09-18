@@ -7,7 +7,7 @@ import { useQuestSearch } from '../use-quest-search'
 export const QuestsPrimaryButtons = () => {
   const auth = useAppAuth()
   const search = useQuestSearch({ from: '/_authenticated/quests/' as const })
-  if (!auth.hasRole('admin')) return null
+  if (!auth.isAdmin) return null
   return (
     <Button asChild className='space-x-1'>
       <Link to='/quests/new' search={search}>

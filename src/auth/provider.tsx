@@ -8,7 +8,7 @@ import {
   getRolesFromUser,
   userHasAllowedRole,
   userIsAdmin,
-  userIsModerator,
+  userIsSupport,
 } from './utils'
 
 export const AppAuthProvider: React.FC<React.PropsWithChildren> = ({
@@ -32,7 +32,7 @@ export function useAppAuth(): AuthResult {
 
   const hasAllowedRoleValue = userHasAllowedRole(auth.user || null)
   const isAdmin = userIsAdmin(auth.user || null)
-  const isModerator = userIsModerator(auth.user || null)
+  const isSupport = userIsSupport(auth.user || null)
 
   return {
     isAuthenticated: auth.isAuthenticated,
@@ -45,7 +45,7 @@ export function useAppAuth(): AuthResult {
     hasRole: (role) => roles.includes(role),
     hasAllowedRole: hasAllowedRoleValue,
     isAdmin,
-    isModerator,
+    isSupport,
     error: auth.error,
   }
 }

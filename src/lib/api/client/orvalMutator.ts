@@ -9,13 +9,19 @@ export interface OrvalRequestOptions {
 
 // Create axios instance
 const createApiClient = (): AxiosInstance => {
-  const rawApiUrl = import.meta.env.VITE_API_URL as string | undefined;
-  if (!rawApiUrl) {
-    throw new Error("VITE_API_URL is not defined");
+  // In development, use the proxy path to avoid CORS issues
+  // In production, use the full API URL
+  const isDevelopment = import.meta.env.DEV;
+  const baseURL = isDevelopment
+    ? '/api' // Use Vite proxy in development
+    : import.meta.env.VITE_API_URL; // Use direct URL in production
+
+  if (!baseURL) {
+    throw new Error("API URL is not defined");
   }
 
   return axios.create({
-    baseURL: rawApiUrl,
+    baseURL,
     timeout: 30000,
     headers: {
       "Content-Type": "application/json",

@@ -27,7 +27,7 @@ export interface AuthResult {
   roles: string[]
   hasAllowedRole: boolean
   isAdmin: boolean
-  isModerator: boolean
+  isSupport: boolean
   error?: unknown
   signinRedirect: () => void
   signoutRedirect: () => void

@@ -22,8 +22,8 @@ export default defineConfig({
       },
       override: {
         mutator: {
-          path: "./src/lib/api/client/orvalMutator.ts",
-          name: "orvalMutator",
+          path: "./src/lib/api/client/authenticatedMutator.ts",
+          name: "authenticatedMutator",
         },
         query: {
           version: 5,

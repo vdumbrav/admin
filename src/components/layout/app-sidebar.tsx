@@ -15,7 +15,7 @@ import { sidebarData } from './data/sidebar-data'
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const auth = useAppAuth()
-  const isAdmin = auth.hasRole('admin')
+  const isAdmin = auth.isAdmin
   const navGroups = React.useMemo(() => {
     const groups = sidebarData.navGroups.map((g) => ({
       ...g,

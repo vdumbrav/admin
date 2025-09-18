@@ -23,7 +23,7 @@ export const requireAuthBeforeLoad = async () => {
     const roles = getRolesFromUser(user)
     logError('Insufficient role for access', {
       roles,
-      requiredRoles: [UserRole.Admin, UserRole.Moderator],
+      requiredRoles: [UserRole.Admin, UserRole.Administrator, UserRole.Moderator, UserRole.Support],
     })
     throw redirect({ to: '/sign-in', replace: true })
   }
@@ -45,6 +45,6 @@ export const requireAdminBeforeLoad = async () => {
   }
 }
 
-export const requireModeratorOrAdminBeforeLoad = async () => {
+export const requireSupportOrAdminBeforeLoad = async () => {
   await requireAuthBeforeLoad()
 }

@@ -13,7 +13,7 @@ import { QuestsProvider } from './context/quests-context'
 
 export const Quests = () => {
   const auth = useAppAuth()
-  const isAdmin = auth.hasRole('admin')
+  const isAdmin = auth.isAdmin
   const columns = React.useMemo(() => getColumns(isAdmin), [isAdmin])
   return (
     <QuestsProvider>

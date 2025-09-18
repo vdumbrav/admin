@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { requireModeratorOrAdminBeforeLoad } from '@/auth/guards'
+import { requireSupportOrAdminBeforeLoad } from '@/auth/guards'
 import { ProtectedRoute } from '@/auth/role-guard'
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout'
 
@@ -12,6 +12,6 @@ function AuthenticatedRoute() {
 }
 
 export const Route = createFileRoute('/_authenticated')({
-  beforeLoad: requireModeratorOrAdminBeforeLoad,
+  beforeLoad: requireSupportOrAdminBeforeLoad,
   component: AuthenticatedRoute,
 })

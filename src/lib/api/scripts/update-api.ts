@@ -3,7 +3,6 @@
 import { execSync } from "node:child_process";
 import { existsSync, mkdirSync } from "node:fs";
 import { resolve } from "node:path";
-import { fileURLToPath } from "node:url";
 
 const PROJECT_ROOT = resolve(process.cwd());
 const GENERATED_DIR = resolve(PROJECT_ROOT, "src/lib/api/generated");

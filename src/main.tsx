@@ -4,6 +4,7 @@ import { AxiosError } from 'axios'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { RouterProvider, createRouter } from '@tanstack/react-router'
 import { AppAuthProvider } from '@/auth/provider'
+import { AuthProvider } from '@/lib/api/client/AuthProvider'
 import { toast } from 'sonner'
 import { handleServerError } from '@/utils/handle-server-error'
 import { FontProvider } from './context/font-context'
@@ -63,13 +64,15 @@ if (!rootElement.innerHTML) {
   root.render(
     <StrictMode>
       <AppAuthProvider>
-        <QueryClientProvider client={queryClient}>
-          <ThemeProvider defaultTheme='system' storageKey='vite-ui-theme'>
-            <FontProvider>
-              <RouterProvider router={router} />
-            </FontProvider>
-          </ThemeProvider>
-        </QueryClientProvider>
+        <AuthProvider>
+          <QueryClientProvider client={queryClient}>
+            <ThemeProvider defaultTheme='system' storageKey='vite-ui-theme'>
+              <FontProvider>
+                <RouterProvider router={router} />
+              </FontProvider>
+            </ThemeProvider>
+          </QueryClientProvider>
+        </AuthProvider>
       </AppAuthProvider>
     </StrictMode>
   )

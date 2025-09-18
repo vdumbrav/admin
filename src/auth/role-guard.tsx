@@ -9,7 +9,7 @@ interface RoleGuardProps {
 }
 
 export function RoleGuard({
-  requiredRoles = [UserRole.Admin, UserRole.Moderator],
+  requiredRoles = [UserRole.Admin, UserRole.Administrator, UserRole.Moderator, UserRole.Support],
   children,
 }: RoleGuardProps) {
   const { isLoading, isAuthenticated, hasAllowedRole, roles } = useAppAuth()

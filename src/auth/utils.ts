@@ -1,4 +1,5 @@
 import type { User } from 'oidc-client-ts'
+import { UserRole } from './roles'
 
 /**
  * Extract roles only from access_token (not from id_token profile)
@@ -48,22 +49,27 @@ export const userHasAnyRole = (
 }
 
 /**
- * Check if user has admin role
+ * Check if user has admin role (admin or Administrator)
  */
 export const userIsAdmin = (user: User | null): boolean => {
-  return userHasAnyRole(user, ['admin'])
+  return userHasAnyRole(user, [UserRole.Admin, UserRole.Administrator])
 }
 
 /**
- * Check if user has moderator role
+ * Check if user has support role (moderator or Support)
  */
-export const userIsModerator = (user: User | null): boolean => {
-  return userHasAnyRole(user, ['moderator'])
+export const userIsSupport = (user: User | null): boolean => {
+  return userHasAnyRole(user, [UserRole.Moderator, UserRole.Support])
 }
 
 /**
- * Check if user has admin or moderator role (allowed for app access)
+ * Check if user has admin or support role (allowed for app access)
  */
 export const userHasAllowedRole = (user: User | null): boolean => {
-  return userHasAnyRole(user, ['admin', 'moderator'])
+  return userHasAnyRole(user, [
+    UserRole.Admin,
+    UserRole.Administrator,
+    UserRole.Moderator,
+    UserRole.Support
+  ])
 }
