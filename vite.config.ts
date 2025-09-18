@@ -1,33 +1,37 @@
 import path from 'path'
-import { defineConfig } from 'vite'
+import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react-swc'
 import tailwindcss from '@tailwindcss/vite'
 import { tanstackRouter } from '@tanstack/router-plugin/vite'
 
-// Use VITE_PUBLIC_BASE for GH Pages builds
-const base = process.env.VITE_PUBLIC_BASE ?? '/admin/'
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd(), '')
 
-export default defineConfig({
-  base,
-  server: {
-    port: 3000,
-    proxy: {
-      '/api': {
-        target: process.env.VITE_API_URL!,
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, ''),
+  // Use VITE_PUBLIC_BASE for GH Pages builds
+  const base = env.VITE_PUBLIC_BASE ?? '/admin/'
+
+  return {
+    base,
+    server: {
+      port: 3000,
+      proxy: {
+        '/api': {
+          target: env.VITE_API_URL,
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/api/, ''),
+        },
       },
     },
-  },
-  plugins: [
-    react(),
-    tanstackRouter({ routesDirectory: 'src/routes' }),
-    tailwindcss(),
-  ],
-  resolve: {
-    alias: {
-      '@': path.resolve(__dirname, './src'),
-      '@tabler/icons-react': '@tabler/icons-react/dist/esm/icons/index.mjs',
+    plugins: [
+      react(),
+      tanstackRouter({ routesDirectory: 'src/routes' }),
+      tailwindcss(),
+    ],
+    resolve: {
+      alias: {
+        '@': path.resolve(__dirname, './src'),
+        '@tabler/icons-react': '@tabler/icons-react/dist/esm/icons/index.mjs',
+      },
     },
-  },
+  }
 })
