@@ -9,7 +9,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   React.useEffect(() => {
     // Set the global authenticated mutator
-    const authenticatedMutator = async function <TResponse>(config: AxiosRequestConfig): Promise<TResponse> {
+    const authenticatedMutator = async function <TResponse>(
+      config: AxiosRequestConfig
+    ): Promise<TResponse> {
       // Add auth header if user is authenticated
       if (auth.user?.access_token) {
         config.headers = {

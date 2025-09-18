@@ -25,8 +25,13 @@ export const debugToken = (token: string | undefined, context: string = '') => {
     // eslint-disable-next-line no-console
     console.log(`[${context}] Token debug:`, {
       isExpired,
-      expiresAt: payload.exp ? new Date(payload.exp * 1000).toISOString() : 'unknown',
-      timeLeft: timeLeft > 0 ? `${Math.floor(timeLeft / 60)}m ${timeLeft % 60}s` : 'expired',
+      expiresAt: payload.exp
+        ? new Date(payload.exp * 1000).toISOString()
+        : 'unknown',
+      timeLeft:
+        timeLeft > 0
+          ? `${Math.floor(timeLeft / 60)}m ${timeLeft % 60}s`
+          : 'expired',
       roles: payload?.realm_access?.roles || [],
       clientRoles: payload?.resource_access || {},
       subject: payload.sub,

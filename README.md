@@ -31,12 +31,12 @@ This admin panel uses **OIDC (OpenID Connect)** with **role-based access control
 
 ### API Variables
 
-| Variable              | Example                                                    | Purpose                                   |
-| --------------------- | ---------------------------------------------------------- | ----------------------------------------- |
-| `VITE_USE_FAKE_API`   | `true` / `false`                                           | Mock vs real Waitlist API                |
-| `VITE_API_URL`        | `https://waitlist.cedradev.xyz/api`                       | Backend API base URL for requests        |
-| `VITE_SWAGGER_URL`    | `https://waitlist.cedradev.xyz/api/api-tools/docs-json`   | Swagger JSON URL for API client generation |
-| `VITE_PUBLIC_BASE`    | `/admin/`                                                  | Vite base path for deployment             |
+| Variable            | Example                                                 | Purpose                                    |
+| ------------------- | ------------------------------------------------------- | ------------------------------------------ |
+| `VITE_USE_FAKE_API` | `true` / `false`                                        | Mock vs real Waitlist API                  |
+| `VITE_API_URL`      | `https://waitlist.cedradev.xyz/api`                     | Backend API base URL for requests          |
+| `VITE_SWAGGER_URL`  | `https://waitlist.cedradev.xyz/api/api-tools/docs-json` | Swagger JSON URL for API client generation |
+| `VITE_PUBLIC_BASE`  | `/admin/`                                               | Vite base path for deployment              |
 
 ### Setup
 
@@ -139,18 +139,23 @@ src/lib/api/
 #### Usage Examples
 
 **Basic Query:**
+
 ```tsx
 import { useWaitlistControllerGetWaitlistTasks } from '@/lib/api/generated'
 
 function TasksList() {
-  const { data: tasks, isLoading, error } = useWaitlistControllerGetWaitlistTasks()
+  const {
+    data: tasks,
+    isLoading,
+    error,
+  } = useWaitlistControllerGetWaitlistTasks()
 
   if (isLoading) return <div>Loading...</div>
   if (error) return <div>Error: {error.message}</div>
 
   return (
     <div>
-      {tasks?.map(task => (
+      {tasks?.map((task) => (
         <div key={task.id}>{task.title}</div>
       ))}
     </div>
@@ -159,6 +164,7 @@ function TasksList() {
 ```
 
 **Mutation with Authentication:**
+
 ```tsx
 import { useWaitlistControllerPatchUserTask } from '@/lib/api/generated'
 
@@ -185,15 +191,15 @@ All API types are automatically generated and available:
 import type {
   WaitlistTasksResponseDto,
   UserProfileResponseDto,
-  PremiumBundlesResponseDto
+  PremiumBundlesResponseDto,
 } from '@/lib/api/generated'
 
 // Fully typed API responses
 const task: WaitlistTasksResponseDto = {
   id: 1,
-  title: "Complete profile",
-  description: "Fill out your profile information",
-  status: "pending",
+  title: 'Complete profile',
+  description: 'Fill out your profile information',
+  status: 'pending',
   reward: 100,
   level: 1,
   // ... all other fields with proper types

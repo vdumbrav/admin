@@ -66,13 +66,16 @@ function SignInPage() {
               You need{' '}
               <span className='font-medium text-yellow-600'>
                 {UserRole.Admin}
-              </span>,{' '}
+              </span>
+              ,{' '}
               <span className='font-medium text-blue-600'>
                 {UserRole.Administrator}
-              </span>,{' '}
+              </span>
+              ,{' '}
               <span className='font-medium text-green-600'>
                 {UserRole.Moderator}
-              </span>, or{' '}
+              </span>
+              , or{' '}
               <span className='font-medium text-sky-500'>
                 {UserRole.Support}
               </span>{' '}

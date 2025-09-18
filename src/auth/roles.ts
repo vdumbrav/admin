@@ -6,7 +6,12 @@ export enum UserRole {
   Client = 'Client',
 }
 
-export const ALLOWED_ROLES = [UserRole.Admin, UserRole.Administrator, UserRole.Moderator, UserRole.Support]
+export const ALLOWED_ROLES = [
+  UserRole.Admin,
+  UserRole.Administrator,
+  UserRole.Moderator,
+  UserRole.Support,
+]
 
 export const extractRoles = (profile: unknown): string[] => {
   if (!profile || typeof profile !== 'object') {
@@ -58,7 +63,9 @@ export const extractRoles = (profile: unknown): string[] => {
 
 export const hasAdministratorRole = (profile: unknown): boolean => {
   const roles = extractRoles(profile)
-  return roles.includes(UserRole.Admin) || roles.includes(UserRole.Administrator)
+  return (
+    roles.includes(UserRole.Admin) || roles.includes(UserRole.Administrator)
+  )
 }
 
 export const hasSupportRole = (profile: unknown): boolean => {

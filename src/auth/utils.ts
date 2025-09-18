@@ -70,6 +70,6 @@ export const userHasAllowedRole = (user: User | null): boolean => {
     UserRole.Admin,
     UserRole.Administrator,
     UserRole.Moderator,
-    UserRole.Support
+    UserRole.Support,
   ])
 }

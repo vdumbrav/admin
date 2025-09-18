@@ -2,6 +2,8 @@ import React from 'react'
 import { AuthProvider, useAuth } from 'react-oidc-context'
 import { toast } from 'sonner'
 import { logError } from '@/utils/log'
+import { TokenAutoRenew } from './TokenAutoRenew'
+import { debugToken } from './debug'
 import { oidcConfig } from './oidc'
 import { type AuthResult } from './types'
 import {
@@ -10,8 +12,6 @@ import {
   userIsAdmin,
   userIsSupport,
 } from './utils'
-import { TokenAutoRenew } from './TokenAutoRenew'
-import { debugToken } from './debug'
 
 export const AppAuthProvider: React.FC<React.PropsWithChildren> = ({
   children,
@@ -28,7 +28,9 @@ export function useAppAuth(): AuthResult {
   const auth = useAuth()
   const roles = getRolesFromUser(auth.user || null)
 
-  const getAccessToken = React.useCallback(async (): Promise<string | undefined> => {
+  const getAccessToken = React.useCallback(async (): Promise<
+    string | undefined
+  > => {
     // Check for valid OIDC token first
     if (auth.user && !auth.user.expired) {
       const token = auth.user.access_token
@@ -39,7 +41,10 @@ export function useAppAuth(): AuthResult {
     // Try to refresh token if user exists but token is expired
     if (auth.user && !auth.activeNavigator) {
       try {
-        debugToken(auth.user.access_token, 'AuthProvider - Expired Token (before refresh)')
+        debugToken(
+          auth.user.access_token,
+          'AuthProvider - Expired Token (before refresh)'
+        )
         const freshUser = await auth.signinSilent()
         const newToken = freshUser?.access_token
         debugToken(newToken, 'AuthProvider - Refreshed Token')
