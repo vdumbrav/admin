@@ -13,7 +13,7 @@ const createApiClient = (): AxiosInstance => {
   // In production, use the full API URL
   const isDevelopment = import.meta.env.DEV;
   const baseURL = isDevelopment
-    ? '/api' // Use Vite proxy in development
+    ? '/' // Use Vite proxy in development (proxy handles /api prefix)
     : import.meta.env.VITE_API_URL; // Use direct URL in production
 
   if (!baseURL) {
