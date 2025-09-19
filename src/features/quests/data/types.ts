@@ -131,7 +131,7 @@ export interface LocalFilterConfig {
   group?: UIGroup;
   type?: string;
   provider?: string;
-  visible?: 'true' | 'false' | string;
+  visible?: boolean;
 }
 
 export interface QuestQuery extends LocalFilterConfig, Partial<LocalPaginationConfig> {

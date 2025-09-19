@@ -28,7 +28,9 @@ export const ImageDropzone = ({
   const { getRootProps, getInputProps, open, isDragActive } = useDropzone({
     onDrop: (accepted) => {
       const file = accepted[0];
-      if (file) void onFile(file);
+      if (file) {
+        void onFile(file);
+      }
     },
     onDropRejected: (rejections) => {
       rejections[0]?.errors.forEach((e) => {

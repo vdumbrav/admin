@@ -28,7 +28,7 @@ export default tseslint.config(
     },
     rules: {
       ...reactHooks.configs.recommended.rules,
-      'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
+      'react-refresh/only-export-components': ['error', { allowConstantExport: true }],
 
       // Enhanced TypeScript rules
       '@typescript-eslint/no-explicit-any': 'error', // Stricter - no any allowed
@@ -53,16 +53,16 @@ export default tseslint.config(
       '@typescript-eslint/no-floating-promises': 'error', // Stricter - handle all promises
       '@typescript-eslint/await-thenable': 'error',
       '@typescript-eslint/no-misused-promises': 'error', // Stricter
-      '@typescript-eslint/prefer-readonly': 'warn',
+      '@typescript-eslint/prefer-readonly': 'error',
       '@typescript-eslint/prefer-as-const': 'error',
-      '@typescript-eslint/no-base-to-string': 'off', // Disabled: Some UI library components stringify objects for display
+      '@typescript-eslint/no-base-to-string': 'warn', // Warn: Some UI library components stringify objects for display
       '@typescript-eslint/no-duplicate-enum-values': 'error',
       '@typescript-eslint/no-extra-non-null-assertion': 'error',
       '@typescript-eslint/no-for-in-array': 'error',
       '@typescript-eslint/no-implied-eval': 'error',
-      '@typescript-eslint/no-meaningless-void-operator': 'off', // Disabled: void operator used for ignoring promises in event handlers
+      '@typescript-eslint/no-meaningless-void-operator': 'warn', // Warn: void operator used for ignoring promises in event handlers
       '@typescript-eslint/no-non-null-asserted-optional-chain': 'error',
-      '@typescript-eslint/no-redundant-type-constituents': 'warn',
+      '@typescript-eslint/no-redundant-type-constituents': 'error',
       '@typescript-eslint/no-this-alias': 'error',
       '@typescript-eslint/only-throw-error': 'off', // Disabled: TanStack Router uses throw redirect() pattern
       '@typescript-eslint/no-unnecessary-boolean-literal-compare': 'error',
@@ -74,7 +74,7 @@ export default tseslint.config(
       '@typescript-eslint/prefer-regexp-exec': 'error',
       '@typescript-eslint/prefer-return-this-type': 'error',
       '@typescript-eslint/prefer-string-starts-ends-with': 'error',
-      '@typescript-eslint/promise-function-async': 'off', // Disabled: React event handlers return promises without async
+      '@typescript-eslint/promise-function-async': 'warn', // Warn: React event handlers return promises without async
       '@typescript-eslint/require-array-sort-compare': 'error',
       '@typescript-eslint/switch-exhaustiveness-check': 'error',
       '@typescript-eslint/consistent-type-imports': [
@@ -103,7 +103,7 @@ export default tseslint.config(
 
       // Import ordering - basic built-in rule
       'sort-imports': [
-        'warn',
+        'error',
         {
           ignoreCase: true,
           ignoreDeclarationSort: true, // Don't sort the import statements themselves
@@ -139,7 +139,7 @@ export default tseslint.config(
 
       // API import restrictions as warnings
       'no-restricted-imports': [
-        'warn',
+        'error',
         {
           paths: [
             {

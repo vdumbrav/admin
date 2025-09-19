@@ -202,8 +202,8 @@ export const QuestForm = ({
 
   useEffect(() => {
     if (blocker.status === 'blocked') {
-      if (window.confirm('Discard changes?')) blocker.proceed?.();
-      else blocker.reset?.();
+      if (window.confirm('Discard changes?')) blocker.proceed();
+      else blocker.reset();
     }
   }, [blocker]);
 

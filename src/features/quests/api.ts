@@ -40,8 +40,8 @@ export const useQuests = (query: QuestQuery) => {
       const matchesProvider = !query.provider || item.provider === query.provider;
 
       const matchesVisibility =
-        !query.visible ||
-        (query.visible === 'true' ? item.visible !== false : item.visible === false);
+        query.visible === undefined ||
+        item.visible === query.visible;
 
       return matchesSearch && matchesGroup && matchesType && matchesProvider && matchesVisibility;
     });

@@ -84,7 +84,8 @@ export const QuestsDataTable = ({ columns, isAdmin }: DataTableProps) => {
   const group = pickSingle('group', 'all') as TaskGroup | 'all';
   const type = pickSingle('type', '');
   const provider = pickSingle('provider', '');
-  const visible = pickSingle('visible', '');
+  const visibleParam = pickSingle('visible', '');
+  const visible = visibleParam === 'true' ? true : visibleParam === 'false' ? false : undefined;
   const sort = sorting[0] ? `${sorting[0].id}:${sorting[0].desc ? 'desc' : 'asc'}` : 'order_by:asc';
 
   const { data, isFetching, isLoading } = useQuests({
@@ -138,7 +139,7 @@ export const QuestsDataTable = ({ columns, isAdmin }: DataTableProps) => {
       group,
       type,
       provider,
-      visible,
+      visible: visible === undefined ? '' : visible.toString(),
       page: pagination.pageIndex + 1,
       limit: pagination.pageSize,
       sort,

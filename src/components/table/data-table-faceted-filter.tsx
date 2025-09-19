@@ -35,7 +35,15 @@ export function DataTableFacetedFilter<TData, TValue>({
 }: DataTableFacetedFilterProps<TData, TValue>) {
   const facets = column?.getFacetedUniqueValues();
   const raw = column?.getFilterValue();
-  const selectedValues = new Set(Array.isArray(raw) ? (raw as string[]) : raw ? [String(raw)] : []);
+  const selectedValues = new Set(
+    Array.isArray(raw)
+      ? (raw as string[])
+      : raw && typeof raw === 'string'
+        ? [raw]
+        : raw
+          ? [JSON.stringify(raw)]
+          : []
+  );
 
   return (
     <Popover>
@@ -43,7 +51,7 @@ export function DataTableFacetedFilter<TData, TValue>({
         <Button variant='outline' size='sm' className='h-8 border-dashed'>
           <PlusCircledIcon className='mr-2 h-4 w-4' />
           {title}
-          {selectedValues?.size > 0 && (
+          {selectedValues.size > 0 && (
             <>
               <Separator orientation='vertical' className='mx-2 h-4' />
               <Badge variant='secondary' className='rounded-sm px-1 font-normal lg:hidden'>

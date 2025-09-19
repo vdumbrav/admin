@@ -5,7 +5,7 @@ export function TokenAutoRenew() {
   const auth = useAuth();
 
   useEffect(() => {
-    const handleTokenExpired = auth.events.addAccessTokenExpired?.(() => {
+    const handleTokenExpired = auth.events.addAccessTokenExpired(() => {
       // Don't create parallel navigators
       if (auth.activeNavigator) return;
 
@@ -21,7 +21,7 @@ export function TokenAutoRenew() {
     });
 
     return () => {
-      handleTokenExpired?.();
+      handleTokenExpired();
     };
   }, [auth]);
 
