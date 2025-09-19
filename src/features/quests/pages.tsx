@@ -10,6 +10,7 @@ import { QuestForm } from './QuestForm';
 import { useCreateQuest, useQuest, useUpdateQuest } from './api';
 import { adaptQuestToTask, adaptTaskToQuest } from './data/adapters';
 import type { Task } from './data/types';
+import { getPreset, type PresetId } from './presets';
 import { useQuestSearch } from './use-quest-search';
 
 export const QuestCreatePage = () => {
@@ -108,6 +109,55 @@ export const QuestEditPage = () => {
           onSubmit={async (v) => {
             try {
               await update.mutateAsync(adaptTaskToQuest(v as Partial<Task>));
+              toast.success('Saved');
+              void nav({ to: '/quests', search });
+            } catch (e) {
+              toast.error(e instanceof Error ? e.message : 'Failed to save');
+            }
+          }}
+          onCancel={() => void nav({ to: '/quests', search })}
+        />
+      </Main>
+    </>
+  );
+};
+
+export const QuestCreateWithPresetPage = () => {
+  const { preset } = useParams({ from: '/_authenticated/quests/new/$preset' });
+  const create = useCreateQuest();
+  const nav = useNavigate({});
+  const search = useQuestSearch({
+    from: '/_authenticated/quests/new' as const,
+  });
+
+  // Get preset configuration
+  const presetConfig = getPreset(preset as PresetId);
+
+  return (
+    <>
+      <Header fixed>
+        <Search />
+        <div className='ml-auto flex items-center space-x-4'>
+          <ThemeSwitch />
+          <ProfileDropdown />
+        </div>
+      </Header>
+      <Main>
+        <div className='mx-auto mb-4 flex max-w-5xl items-center justify-between'>
+          <div>
+            <h2 className='text-2xl font-bold tracking-tight'>
+              New Quest - {presetConfig.name} {presetConfig.icon}
+            </h2>
+            <p className='text-muted-foreground'>{presetConfig.description}</p>
+          </div>
+          <Button variant='outline' onClick={() => void nav({ to: '/quests', search })}>
+            Back to list
+          </Button>
+        </div>
+        <QuestForm
+          onSubmit={async (v) => {
+            try {
+              await create.mutateAsync(adaptTaskToQuest(v as Partial<Task>));
               toast.success('Saved');
               void nav({ to: '/quests', search });
             } catch (e) {
