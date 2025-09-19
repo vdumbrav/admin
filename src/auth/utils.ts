@@ -11,7 +11,8 @@ export const getRolesFromUser = (user: User | null | undefined): string[] => {
   }
 
   try {
-    const tokenPart = user.access_token.split('.')[1];
+    const tokenParts = user.access_token.split('.');
+    const tokenPart = tokenParts[1];
     if (!tokenPart) {
       return [];
     }
@@ -22,7 +23,9 @@ export const getRolesFromUser = (user: User | null | undefined): string[] => {
 
     // Extract client roles (secondary source)
     const clientId = import.meta.env['VITE_OIDC_CLIENT_ID'] as string | undefined;
-    const clientRoles: string[] = clientId ? payload?.resource_access?.[clientId]?.roles ?? [] : [];
+    const clientRoles: string[] = clientId
+      ? (payload?.resource_access?.[clientId]?.roles ?? [])
+      : [];
 
     // Extract account roles (fallback)
     const accountRoles: string[] = payload?.resource_access?.['account']?.roles ?? [];

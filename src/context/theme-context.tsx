@@ -26,12 +26,10 @@ export function ThemeProvider({
   storageKey = 'WL/theme',
   ...props
 }: ThemeProviderProps) {
-  const [theme, _setTheme] = useState<Theme>(
-    () => {
-      const stored = localStorage.getItem(storageKey);
-      return (stored as Theme) || defaultTheme;
-    },
-  );
+  const [theme, _setTheme] = useState<Theme>(() => {
+    const stored = localStorage.getItem(storageKey);
+    return (stored as Theme) || defaultTheme;
+  });
 
   useEffect(() => {
     const root = window.document.documentElement;

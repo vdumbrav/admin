@@ -95,13 +95,13 @@ export function adaptAdminTaskToQuest(task: AdminWaitlistTasksResponseDto): Ques
 export function adaptQuestToTask(quest: Quest): Task {
   return {
     id: quest.id,
-    type: Array.isArray(quest.type) ? quest.type[0] : 'external',
+    type: Array.isArray(quest.type) ? quest.type[0] : quest.type,
     title: quest.title,
     description: quest.description,
     blocking_task: quest.blocking_task,
     reward: quest.reward,
     level: quest.level,
-    group: quest.group as Task['group'],
+    group: quest.group === 'all' ? 'social' : quest.group,
     order_by: quest.order_by,
     provider: quest.provider,
     uri: quest.uri,

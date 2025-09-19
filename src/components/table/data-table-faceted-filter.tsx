@@ -42,7 +42,7 @@ export function DataTableFacetedFilter<TData, TValue>({
         ? [raw]
         : raw
           ? [JSON.stringify(raw)]
-          : []
+          : [],
   );
 
   return (

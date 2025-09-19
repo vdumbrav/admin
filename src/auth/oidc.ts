@@ -14,7 +14,9 @@ if (!rawIssuer) {
 const authority = rawIssuer.endsWith('/') ? rawIssuer.slice(0, -1) : rawIssuer;
 
 const clientId = (import.meta.env['VITE_OIDC_CLIENT_ID'] as string | undefined) ?? 'waitlist-api';
-const scope = (import.meta.env['VITE_OIDC_SCOPE'] as string | undefined) ?? 'openid profile email roles offline_access';
+const scope =
+  (import.meta.env['VITE_OIDC_SCOPE'] as string | undefined) ??
+  'openid profile email roles offline_access';
 
 export const oidcConfig: AuthProviderProps = {
   authority,
