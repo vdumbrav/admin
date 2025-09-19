@@ -53,7 +53,7 @@ This is an internal admin UI for managing the Waitlist service with OIDC authent
 
 ### Important Notes
 - The project uses dark theme by default
-- All authentication is real OIDC (no mock/fake auth)
+- All authentication is real OIDC (production-ready)
 - Build process includes lint and typecheck validation
 - MCP is configured for enhanced AI development workflow
 - The app base URL is configurable via environment variables
