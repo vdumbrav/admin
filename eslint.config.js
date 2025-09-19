@@ -31,7 +31,7 @@ export default tseslint.config(
       'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
 
       // Enhanced TypeScript rules
-      '@typescript-eslint/no-explicit-any': 'warn',
+      '@typescript-eslint/no-explicit-any': 'error', // Stricter - no any allowed
       '@typescript-eslint/no-unused-vars': [
         'error',
         {
@@ -48,13 +48,35 @@ export default tseslint.config(
       // Type-aware rules - now enabled with project config
       '@typescript-eslint/prefer-nullish-coalescing': 'error',
       '@typescript-eslint/prefer-optional-chain': 'error',
-      '@typescript-eslint/no-unnecessary-condition': 'off', // Too strict for many valid cases
-      '@typescript-eslint/no-unnecessary-type-assertion': 'warn',
-      '@typescript-eslint/no-floating-promises': 'warn', // Warn instead of error
+      '@typescript-eslint/no-unnecessary-condition': 'warn', // Enable as warning
+      '@typescript-eslint/no-unnecessary-type-assertion': 'error', // Stricter
+      '@typescript-eslint/no-floating-promises': 'error', // Stricter - handle all promises
       '@typescript-eslint/await-thenable': 'error',
-      '@typescript-eslint/no-misused-promises': 'warn', // Warn for event handlers
+      '@typescript-eslint/no-misused-promises': 'error', // Stricter
       '@typescript-eslint/prefer-readonly': 'warn',
       '@typescript-eslint/prefer-as-const': 'error',
+      '@typescript-eslint/no-base-to-string': 'off', // Disabled: Some UI library components stringify objects for display
+      '@typescript-eslint/no-duplicate-enum-values': 'error',
+      '@typescript-eslint/no-extra-non-null-assertion': 'error',
+      '@typescript-eslint/no-for-in-array': 'error',
+      '@typescript-eslint/no-implied-eval': 'error',
+      '@typescript-eslint/no-meaningless-void-operator': 'off', // Disabled: void operator used for ignoring promises in event handlers
+      '@typescript-eslint/no-non-null-asserted-optional-chain': 'error',
+      '@typescript-eslint/no-redundant-type-constituents': 'warn',
+      '@typescript-eslint/no-this-alias': 'error',
+      '@typescript-eslint/only-throw-error': 'off', // Disabled: TanStack Router uses throw redirect() pattern
+      '@typescript-eslint/no-unnecessary-boolean-literal-compare': 'error',
+      '@typescript-eslint/no-unnecessary-parameter-property-assignment': 'error',
+      '@typescript-eslint/no-unnecessary-template-expression': 'error',
+      '@typescript-eslint/no-useless-empty-export': 'error',
+      '@typescript-eslint/prefer-includes': 'error',
+      '@typescript-eslint/prefer-reduce-type-parameter': 'error',
+      '@typescript-eslint/prefer-regexp-exec': 'error',
+      '@typescript-eslint/prefer-return-this-type': 'error',
+      '@typescript-eslint/prefer-string-starts-ends-with': 'error',
+      '@typescript-eslint/promise-function-async': 'off', // Disabled: React event handlers return promises without async
+      '@typescript-eslint/require-array-sort-compare': 'error',
+      '@typescript-eslint/switch-exhaustiveness-check': 'error',
       '@typescript-eslint/consistent-type-imports': [
         'error',
         {

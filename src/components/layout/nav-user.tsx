@@ -59,7 +59,7 @@ export function NavUser() {
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => void auth.signoutRedirect()}>
+            <DropdownMenuItem onClick={() => auth.signoutRedirect()}>
               <LogOut />
               Log out
             </DropdownMenuItem>

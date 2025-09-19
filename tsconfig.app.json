@@ -42,8 +42,8 @@
     "noImplicitOverride": true,
     "allowUnusedLabels": false,
     "allowUnreachableCode": false,
-    "exactOptionalPropertyTypes": false, // Too strict for now - enable gradually
-    "noUncheckedIndexedAccess": false // Too strict for now - enable gradually
+    "exactOptionalPropertyTypes": false, // Disabled: Would require extensive changes to component props and API types
+    "noUncheckedIndexedAccess": false // Disabled: Would require null checks for all array/object access throughout codebase
   },
   "include": ["src", "vite.config.ts"]
 }

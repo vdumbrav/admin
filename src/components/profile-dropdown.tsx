@@ -32,7 +32,7 @@ export function ProfileDropdown() {
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={() => void auth.signoutRedirect()}>Log out</DropdownMenuItem>
+        <DropdownMenuItem onClick={() => auth.signoutRedirect()}>Log out</DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );

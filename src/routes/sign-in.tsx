@@ -74,7 +74,7 @@ function SignInPage() {
               Please contact your administrator to get the required permissions.
             </p>
             <div className='space-y-2'>
-              <Button onClick={() => void signoutRedirect()} variant='outline' className='w-full'>
+              <Button onClick={() => signoutRedirect()} variant='outline' className='w-full'>
                 Try Different Account
               </Button>
             </div>
