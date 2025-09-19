@@ -19,7 +19,7 @@ interface ConfirmDialogProps {
   cancelBtnText?: string;
   confirmText?: React.ReactNode;
   destructive?: boolean;
-  handleConfirm: () => void;
+  handleConfirm: () => void | Promise<void>;
   isLoading?: boolean;
   className?: string;
   children?: React.ReactNode;
@@ -53,7 +53,7 @@ export function ConfirmDialog(props: ConfirmDialogProps) {
           <AlertDialogCancel disabled={isLoading}>{cancelBtnText ?? 'Cancel'}</AlertDialogCancel>
           <Button
             variant={destructive ? 'destructive' : 'default'}
-            onClick={handleConfirm}
+            onClick={() => void handleConfirm()}
             disabled={disabled || isLoading}
           >
             {confirmText ?? 'Continue'}

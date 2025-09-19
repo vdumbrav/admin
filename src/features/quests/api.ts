@@ -1,10 +1,8 @@
 import { useMemo } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import {
-  type AdminWaitlistTasksResponseDto,
-  useAdminControllerGetWaitlistTasks,
-} from '@/lib/api/generated';
+import { useAdminControllerGetWaitlistTasks } from '@/lib/api/generated/admin/admin';
+import { type AdminWaitlistTasksResponseDto } from '@/lib/api/generated/model';
 import { adaptAdminTasksToQuests, adaptAdminTaskToQuest } from './data/adapters';
 import type { Quest, QuestQuery, QuestsResponse } from './data/types';
 

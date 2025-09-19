@@ -1,31 +1,40 @@
 import * as React from 'react';
-import { IconEye, IconEyeOff } from '@tabler/icons-react';
+import { Eye, EyeOff } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Button } from './ui/button';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 
-type PasswordInputProps = Omit<React.InputHTMLAttributes<HTMLInputElement>, 'type'>;
+export interface PasswordInputProps
+  extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'type'> {
+  showPasswordButtonProps?: React.ComponentProps<typeof Button>;
+}
 
 const PasswordInput = React.forwardRef<HTMLInputElement, PasswordInputProps>(
-  ({ className, disabled, ...props }, ref) => {
+  ({ className, showPasswordButtonProps, ...props }, ref) => {
     const [showPassword, setShowPassword] = React.useState(false);
+
     return (
-      <div className={cn('relative rounded-md', className)}>
-        <input
+      <div className='relative'>
+        <Input
           type={showPassword ? 'text' : 'password'}
-          className='border-input placeholder:text-muted-foreground focus-visible:ring-ring flex h-9 w-full rounded-md border bg-transparent px-3 py-1 text-sm shadow-xs transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:ring-1 focus-visible:outline-hidden disabled:cursor-not-allowed disabled:opacity-50'
+          className={cn('pr-10', className)}
           ref={ref}
-          disabled={disabled}
           {...props}
         />
         <Button
           type='button'
-          size='icon'
           variant='ghost'
-          disabled={disabled}
-          className='text-muted-foreground absolute top-1/2 right-1 h-6 w-6 -translate-y-1/2 rounded-md'
+          size='sm'
+          className='absolute top-0 right-0 h-full px-3 py-2 hover:bg-transparent'
           onClick={() => setShowPassword((prev) => !prev)}
+          {...showPasswordButtonProps}
         >
-          {showPassword ? <IconEye size={18} /> : <IconEyeOff size={18} />}
+          {showPassword ? (
+            <EyeOff className='h-4 w-4' aria-hidden='true' />
+          ) : (
+            <Eye className='h-4 w-4' aria-hidden='true' />
+          )}
+          <span className='sr-only'>{showPassword ? 'Hide password' : 'Show password'}</span>
         </Button>
       </div>
     );

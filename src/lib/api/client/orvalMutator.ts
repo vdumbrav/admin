@@ -1,5 +1,5 @@
 import axios, { type AxiosInstance, type AxiosRequestConfig, type AxiosResponse } from 'axios';
-import { useAppAuth } from '@/auth/provider';
+import { useAppAuth } from '@/auth/hooks';
 
 export type OrvalClient = AxiosInstance;
 

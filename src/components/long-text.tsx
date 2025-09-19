@@ -1,72 +1,41 @@
-import { useEffect, useRef, useState } from 'react';
-import { cn } from '@/lib/utils';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import * as React from 'react';
+import { ChevronDown, ChevronUp } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
-interface Props {
-  children: React.ReactNode;
+interface LongTextProps {
+  children: string;
+  maxLength?: number;
   className?: string;
-  contentClassName?: string;
 }
 
-export default function LongText({ children, className = '', contentClassName = '' }: Props) {
-  const ref = useRef<HTMLDivElement>(null);
-  const [isOverflown, setIsOverflown] = useState(false);
+export function LongText({ children, maxLength = 100, className }: LongTextProps) {
+  const [isExpanded, setIsExpanded] = React.useState(false);
 
-  useEffect(() => {
-    if (checkOverflow(ref.current)) {
-      setIsOverflown(true);
-      return;
-    }
+  if (children.length <= maxLength) {
+    return <span className={className}>{children}</span>;
+  }
 
-    setIsOverflown(false);
-  }, []);
-
-  if (!isOverflown)
-    return (
-      <div ref={ref} className={cn('truncate', className)}>
-        {children}
-      </div>
-    );
+  const truncatedText = children.slice(0, maxLength);
 
   return (
-    <>
-      <div className='hidden sm:block'>
-        <TooltipProvider delayDuration={0}>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <div ref={ref} className={cn('truncate', className)}>
-                {children}
-              </div>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p className={contentClassName}>{children}</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-      </div>
-      <div className='sm:hidden'>
-        <Popover>
-          <PopoverTrigger asChild>
-            <div ref={ref} className={cn('truncate', className)}>
-              {children}
-            </div>
-          </PopoverTrigger>
-          <PopoverContent className={cn('w-fit', contentClassName)}>
-            <p>{children}</p>
-          </PopoverContent>
-        </Popover>
-      </div>
-    </>
+    <div className={className}>
+      <span>{isExpanded ? children : `${truncatedText}...`}</span>
+      <Button
+        variant='ghost'
+        size='sm'
+        onClick={() => setIsExpanded(!isExpanded)}
+        className='ml-2 h-auto p-0 text-xs'
+      >
+        {isExpanded ? (
+          <>
+            Show less <ChevronUp className='ml-1 h-3 w-3' />
+          </>
+        ) : (
+          <>
+            Show more <ChevronDown className='ml-1 h-3 w-3' />
+          </>
+        )}
+      </Button>
+    </div>
   );
 }
-
-const checkOverflow = (textContainer: HTMLDivElement | null) => {
-  if (textContainer) {
-    return (
-      textContainer.offsetHeight < textContainer.scrollHeight ||
-      textContainer.offsetWidth < textContainer.scrollWidth
-    );
-  }
-  return false;
-};

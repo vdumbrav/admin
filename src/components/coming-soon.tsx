@@ -1,16 +1,24 @@
-import { IconPlanet } from '@tabler/icons-react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
-export default function ComingSoon() {
+interface ComingSoonProps {
+  title?: string;
+  description?: string;
+}
+
+export function ComingSoon({
+  title = 'Coming Soon',
+  description = 'This feature is coming soon! Stay tuned for updates.',
+}: ComingSoonProps) {
   return (
-    <div className='h-svh'>
-      <div className='m-auto flex h-full w-full flex-col items-center justify-center gap-2'>
-        <IconPlanet size={72} />
-        <h1 className='text-4xl leading-tight font-bold'>Coming Soon 👀</h1>
-        <p className='text-muted-foreground text-center'>
-          This page has not been created yet. <br />
-          Stay tuned though!
-        </p>
-      </div>
+    <div className='flex min-h-[50vh] items-center justify-center p-4'>
+      <Card className='w-full max-w-md text-center'>
+        <CardHeader>
+          <CardTitle className='text-2xl'>{title}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <CardDescription className='text-base'>{description}</CardDescription>
+        </CardContent>
+      </Card>
     </div>
   );
 }

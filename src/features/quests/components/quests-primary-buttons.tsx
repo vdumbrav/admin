@@ -1,6 +1,6 @@
 import { Link } from '@tanstack/react-router';
 import { IconPlus } from '@tabler/icons-react';
-import { useAppAuth } from '@/auth/provider';
+import { useAppAuth } from '@/auth/hooks';
 import { Button } from '@/components/ui/button';
 import { useQuestSearch } from '../use-quest-search';
 

@@ -1,6 +1,6 @@
 import { type ReactNode } from 'react';
 import { Navigate } from '@tanstack/react-router';
-import { useAppAuth } from '@/auth/provider';
+import { useAppAuth } from '@/auth/hooks';
 import { UserRole } from '@/auth/roles';
 
 interface RoleGuardProps {

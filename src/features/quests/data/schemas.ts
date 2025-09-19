@@ -4,7 +4,7 @@ import {
   AdminWaitlistTasksResponseDtoProvider,
   AdminWaitlistTasksResponseDtoStatus,
   AdminWaitlistTasksResponseDtoTypeItem,
-} from '@/lib/api/generated';
+} from '@/lib/api/generated/model';
 import type { Quest, Task } from './types';
 
 // ============================================================================

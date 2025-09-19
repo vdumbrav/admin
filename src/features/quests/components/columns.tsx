@@ -9,7 +9,7 @@ import { DataTableRowActions } from './data-table-row-actions';
 
 const VisibleCell = ({ row, isAdmin }: { row: Row<Quest>; isAdmin: boolean }) => {
   const toggle = useToggleVisibility();
-  const visible = row.getValue('visible') ?? true;
+  const visible = Boolean(row.getValue('visible') ?? true);
   if (!isAdmin) return <span>{visible ? 'Yes' : 'No'}</span>;
   return (
     <Switch
@@ -50,11 +50,11 @@ export const getColumns = (isAdmin: boolean): ColumnDef<Quest>[] => {
       header: ({ column }) => <DataTableColumnHeader column={column} title='Type' />,
       cell: ({ row }) => {
         const types = row.getValue('type');
-        return types?.join(', ') ?? '';
+        return Array.isArray(types) ? types.join(', ') : '';
       },
       filterFn: (row, id, value) => {
         const types = row.getValue(id);
-        return types?.some((type) => value.includes(type)) ?? false;
+        return Array.isArray(types) ? types.some((type: string) => value.includes(type)) : false;
       },
     },
     {

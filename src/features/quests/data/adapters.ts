@@ -10,7 +10,7 @@ import {
   AdminWaitlistTasksResponseDtoProvider as ApiProvider,
   AdminWaitlistTasksResponseDtoStatus as ApiStatus,
   AdminWaitlistTasksResponseDtoTypeItem as ApiTypeItem,
-} from '@/lib/api/generated';
+} from '@/lib/api/generated/model';
 import type { IteratorDaily, Quest, Resources, Task } from './types';
 
 // ============================================================================
@@ -39,15 +39,15 @@ function isValidApiStatus(status: string): status is AdminWaitlistTasksResponseD
 
 function adaptResourcesFromApi(
   resources: AdminWaitlistTasksResponseDtoResources | undefined,
-): Resources | null {
-  if (!resources || typeof resources !== 'object') return null;
+): Resources | undefined {
+  if (!resources || typeof resources !== 'object') return undefined;
 
   // TODO: Improve resource mapping when API provides detailed resource schema
   return resources as Resources;
 }
 
 function adaptResourcesToApi(
-  resources: Resources | null,
+  resources: Resources | undefined,
 ): AdminWaitlistTasksResponseDtoResources | undefined {
   if (!resources) return undefined;
 
@@ -57,15 +57,15 @@ function adaptResourcesToApi(
 
 function adaptIteratorFromApi(
   iterator: AdminWaitlistTasksResponseDtoIterator | undefined,
-): IteratorDaily | null {
-  if (!iterator || typeof iterator !== 'object') return null;
+): IteratorDaily | undefined {
+  if (!iterator || typeof iterator !== 'object') return undefined;
 
   // TODO: Improve iterator mapping when API provides detailed iterator schema
   return iterator as unknown as IteratorDaily;
 }
 
 function adaptIteratorToApi(
-  iterator: IteratorDaily | null,
+  iterator: IteratorDaily | undefined | null,
 ): AdminWaitlistTasksResponseDtoIterator | undefined {
   if (!iterator) return undefined;
 
@@ -97,22 +97,22 @@ export function adaptQuestToTask(quest: Quest): Task {
     id: quest.id,
     type: Array.isArray(quest.type) ? quest.type[0] : 'external',
     title: quest.title,
-    description: quest.description ?? null,
-    blocking_task: quest.blocking_task ?? null,
-    reward: quest.reward ?? undefined,
-    level: quest.level ?? undefined,
+    description: quest.description,
+    blocking_task: quest.blocking_task,
+    reward: quest.reward,
+    level: quest.level,
     group: quest.group as Task['group'],
     order_by: quest.order_by,
     provider: quest.provider,
-    uri: quest.uri ?? null,
+    uri: quest.uri,
     status: quest.status,
-    error: quest.error ?? null,
-    started_at: quest.started_at ?? null,
-    completed_at: quest.completed_at ?? null,
-    next_tick: quest.next_tick ?? null,
+    error: quest.error,
+    started_at: quest.started_at,
+    completed_at: quest.completed_at,
+    next_tick: quest.next_tick,
     resources: adaptResourcesFromApi(quest.resources),
-    child: quest.child ? quest.child.map(adaptQuestToTask) : null,
-    iterable: quest.iterable ?? null,
+    child: quest.child ? quest.child.map(adaptQuestToTask) : undefined,
+    iterable: quest.iterable,
     iterator: adaptIteratorFromApi(quest.iterator),
     visible: quest.visible,
   };
@@ -201,8 +201,8 @@ export function adaptTaskToQuest(task: Partial<Task>): Partial<Quest> {
     error: task.error ?? undefined,
     started_at: task.started_at ?? undefined,
     completed_at: task.completed_at ?? undefined,
-    resources: adaptResourcesToApi(task.resources ?? null),
-    iterator: adaptIteratorToApi(task.iterator ?? null),
+    resources: adaptResourcesToApi(task.resources ?? undefined),
+    iterator: adaptIteratorToApi(task.iterator),
     next_tick: task.next_tick ?? undefined,
     visible: task.visible,
   };

@@ -1,4 +1,4 @@
-import { useAppAuth } from '@/auth/provider';
+import { useAppAuth } from '@/auth/hooks';
 import { ChevronsUpDown, LogOut } from 'lucide-react';
 import { getUserDisplayData } from '@/utils/user';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -59,7 +59,7 @@ export function NavUser() {
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => auth.signoutRedirect()}>
+            <DropdownMenuItem onClick={() => void auth.signoutRedirect()}>
               <LogOut />
               Log out
             </DropdownMenuItem>

@@ -1,35 +1,19 @@
-import { type Content, type Root, type Trigger } from '@radix-ui/react-popover';
-import { IconQuestionMark } from '@tabler/icons-react';
-import { cn } from '@/lib/utils';
+import { ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
-interface Props extends React.ComponentProps<typeof Root> {
-  contentProps?: React.ComponentProps<typeof Content>;
-  triggerProps?: React.ComponentProps<typeof Trigger>;
+interface LearnMoreProps {
+  href: string;
+  children: React.ReactNode;
+  variant?: 'default' | 'outline' | 'ghost' | 'link';
 }
 
-export function LearnMore({ children, contentProps, triggerProps, ...props }: Props) {
+export function LearnMore({ href, children, variant = 'outline' }: LearnMoreProps) {
   return (
-    <Popover {...props}>
-      <PopoverTrigger
-        asChild
-        {...triggerProps}
-        className={cn('size-5 rounded-full', triggerProps?.className)}
-      >
-        <Button variant='outline' size='icon'>
-          <span className='sr-only'>Learn more</span>
-          <IconQuestionMark className='size-3' />
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent
-        side='top'
-        align='start'
-        {...contentProps}
-        className={cn('text-muted-foreground text-sm', contentProps?.className)}
-      >
+    <Button variant={variant} asChild>
+      <a href={href} target='_blank' rel='noopener noreferrer' className='inline-flex items-center'>
         {children}
-      </PopoverContent>
-    </Popover>
+        <ExternalLink className='ml-2 h-4 w-4' />
+      </a>
+    </Button>
   );
 }

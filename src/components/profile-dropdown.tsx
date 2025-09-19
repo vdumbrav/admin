@@ -1,4 +1,4 @@
-import { useAppAuth } from '@/auth/provider';
+import { useAppAuth } from '@/auth/hooks';
 import { getUserDisplayData } from '@/utils/user';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -32,7 +32,7 @@ export function ProfileDropdown() {
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={() => auth.signoutRedirect()}>Log out</DropdownMenuItem>
+        <DropdownMenuItem onClick={() => void auth.signoutRedirect()}>Log out</DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );

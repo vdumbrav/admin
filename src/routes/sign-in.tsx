@@ -1,6 +1,6 @@
 import { useCallback, useEffect } from 'react';
 import { createFileRoute, Navigate } from '@tanstack/react-router';
-import { useAppAuth } from '@/auth/provider';
+import { useAppAuth } from '@/auth/hooks';
 import { UserRole } from '@/auth/roles';
 import { Loader2 } from 'lucide-react';
 import { logError } from '@/utils/log';
@@ -74,7 +74,7 @@ function SignInPage() {
               Please contact your administrator to get the required permissions.
             </p>
             <div className='space-y-2'>
-              <Button onClick={signoutRedirect} variant='outline' className='w-full'>
+              <Button onClick={() => void signoutRedirect()} variant='outline' className='w-full'>
                 Try Different Account
               </Button>
             </div>

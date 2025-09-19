@@ -23,7 +23,7 @@ export interface KeycloakProfile {
 export interface AuthResult {
   isAuthenticated: boolean;
   isLoading: boolean;
-  user: User | null;
+  user: User | null | undefined;
   roles: string[];
   hasAllowedRole: boolean;
   isAdmin: boolean;

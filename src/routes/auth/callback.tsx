@@ -1,5 +1,5 @@
 import { createFileRoute, Navigate } from '@tanstack/react-router';
-import { useAppAuth } from '@/auth/provider';
+import { useAppAuth } from '@/auth/hooks';
 import { defaultQuestSearch } from '@/features/quests/default-search';
 
 export const Route = createFileRoute('/auth/callback')({

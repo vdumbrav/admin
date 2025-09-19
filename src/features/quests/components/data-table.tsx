@@ -153,7 +153,7 @@ export const QuestsDataTable = ({ columns, isAdmin }: DataTableProps) => {
       next.limit === searchParams.limit &&
       next.sort === searchParams.sort;
     if (!same) {
-      router.navigate({
+      void router.navigate({
         to: '/quests',
         search: next,
         replace: true,

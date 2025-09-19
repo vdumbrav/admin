@@ -2,7 +2,7 @@ import {
   AdminWaitlistTasksResponseDtoGroup,
   AdminWaitlistTasksResponseDtoProvider,
   AdminWaitlistTasksResponseDtoTypeItem,
-} from '@/lib/api/generated';
+} from '@/lib/api/generated/model';
 import { getAvailableApiGroups, getAvailableApiProviders, getAvailableApiTypes } from './adapters';
 import type { DropdownOption, UIGroup } from './types';
 

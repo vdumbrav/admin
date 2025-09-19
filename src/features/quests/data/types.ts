@@ -4,7 +4,7 @@ import type {
   AdminWaitlistTasksResponseDtoProvider,
   AdminWaitlistTasksResponseDtoStatus,
   AdminWaitlistTasksResponseDtoTypeItem,
-} from '@/lib/api/generated';
+} from '@/lib/api/generated/model';
 
 // ============================================================================
 // UI-specific types for form compatibility

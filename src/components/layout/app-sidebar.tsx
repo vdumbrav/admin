@@ -1,6 +1,6 @@
 import React from 'react';
 import { IconPlus } from '@tabler/icons-react';
-import { useAppAuth } from '@/auth/provider';
+import { useAppAuth } from '@/auth/hooks';
 import {
   Sidebar,
   SidebarContent,

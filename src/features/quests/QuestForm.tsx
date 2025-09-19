@@ -1,12 +1,10 @@
-'use client';
-
 import { useEffect, useMemo, useState } from 'react';
 import { z } from 'zod';
 import { useForm, useWatch } from 'react-hook-form';
 import { Spinner } from '@radix-ui/themes';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useBlocker } from '@tanstack/react-router';
-import { useAppAuth } from '@/auth/provider';
+import { useAppAuth } from '@/auth/hooks';
 import { mediaErrors } from '@/errors/media';
 import { toast } from 'sonner';
 import { replaceObjectUrl } from '@/utils/object-url';
@@ -136,7 +134,7 @@ export const QuestForm = ({
   onCancel,
 }: {
   initial?: Partial<Task>;
-  onSubmit: (v: FormValues) => void;
+  onSubmit: (v: FormValues) => void | Promise<void>;
   onCancel: () => void;
 }) => {
   const auth = useAppAuth();
@@ -277,7 +275,7 @@ export const QuestForm = ({
         }
       }
     };
-    load();
+    void load();
 
     return () => {
       controller.abort();
@@ -288,9 +286,10 @@ export const QuestForm = ({
   return (
     <Form {...form}>
       <form
-        onSubmit={form.handleSubmit((values) => {
+        // eslint-disable-next-line @typescript-eslint/no-misused-promises
+        onSubmit={form.handleSubmit(async (values) => {
           const v = { ...values };
-          onSubmit({
+          await onSubmit({
             ...v,
             child: v.child?.map((c, i) => ({ ...c, order_by: i })),
           });

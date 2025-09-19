@@ -33,7 +33,7 @@ export const QuestCreatePage = () => {
             <h2 className='text-2xl font-bold tracking-tight'>New Quest</h2>
             <p className='text-muted-foreground'>Create a new quest.</p>
           </div>
-          <Button variant='outline' onClick={() => nav({ to: '/quests', search })}>
+          <Button variant='outline' onClick={() => void nav({ to: '/quests', search })}>
             Back to list
           </Button>
         </div>
@@ -42,12 +42,12 @@ export const QuestCreatePage = () => {
             try {
               await create.mutateAsync(adaptTaskToQuest(v as Partial<Task>));
               toast.success('Saved');
-              nav({ to: '/quests', search });
+              void nav({ to: '/quests', search });
             } catch (e) {
               toast.error(e instanceof Error ? e.message : 'Failed to save');
             }
           }}
-          onCancel={() => nav({ to: '/quests', search })}
+          onCancel={() => void nav({ to: '/quests', search })}
         />
       </Main>
     </>
@@ -99,7 +99,7 @@ export const QuestEditPage = () => {
             <h2 className='text-2xl font-bold tracking-tight'>Edit Quest #{id}</h2>
             <p className='text-muted-foreground'>Update quest properties.</p>
           </div>
-          <Button variant='outline' onClick={() => nav({ to: '/quests', search })}>
+          <Button variant='outline' onClick={() => void nav({ to: '/quests', search })}>
             Back to list
           </Button>
         </div>
@@ -109,12 +109,12 @@ export const QuestEditPage = () => {
             try {
               await update.mutateAsync(adaptTaskToQuest(v as Partial<Task>));
               toast.success('Saved');
-              nav({ to: '/quests', search });
+              void nav({ to: '/quests', search });
             } catch (e) {
               toast.error(e instanceof Error ? e.message : 'Failed to save');
             }
           }}
-          onCancel={() => nav({ to: '/quests', search })}
+          onCancel={() => void nav({ to: '/quests', search })}
         />
       </Main>
     </>

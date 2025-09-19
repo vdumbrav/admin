@@ -12,7 +12,7 @@ const dropErrors: Record<FileError['code'], string> = {
 
 interface ImageDropzoneProps {
   preview?: string;
-  onFile: (file: File) => void;
+  onFile: (file: File) => void | Promise<void>;
   onClear: () => void;
   disabled?: boolean;
   loading?: boolean;
@@ -28,7 +28,7 @@ export const ImageDropzone = ({
   const { getRootProps, getInputProps, open, isDragActive } = useDropzone({
     onDrop: (accepted) => {
       const file = accepted[0];
-      if (file) onFile(file);
+      if (file) void onFile(file);
     },
     onDropRejected: (rejections) => {
       rejections[0]?.errors.forEach((e) => {
