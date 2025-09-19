@@ -1,43 +1,20 @@
 import { useMutation } from '@tanstack/react-query'
-import type { Task, TaskGroup, IteratorDaily } from '@/types/tasks'
 import { toast } from 'sonner'
 import {
   useAdminControllerGetWaitlistTasks,
   type AdminWaitlistTasksResponseDto,
+  type AdminWaitlistTasksResponseDtoGroup,
 } from '@/lib/api/generated'
+import { adaptAdminTaskToQuest, type Quest } from './data/schema'
 
 interface QuestsResponse {
-  items: Task[]
+  items: Quest[]
   total: number
 }
 
-const transformAdminTask = (task: AdminWaitlistTasksResponseDto): Task => ({
-  id: task.id,
-  title: task.title,
-  description: task.description,
-  type: task.type?.[0] || 'external',
-  provider: task.provider,
-  group: task.group,
-  reward: task.reward,
-  order_by: task.order_by,
-  status: task.status,
-  visible: true, // Assume all fetched tasks are visible
-  level: task.level,
-  uri: task.uri,
-  error: task.error,
-  started_at: task.started_at,
-  completed_at: task.completed_at,
-  next_tick: task.next_tick,
-  blocking_task: task.blocking_task,
-  child: task.child?.map(transformAdminTask) || [],
-  iterable: task.iterable,
-  resources: task.resources,
-  iterator: task.iterator as unknown as IteratorDaily | null,
-})
-
 export const useQuests = (query: {
   search?: string
-  group?: TaskGroup | 'all'
+  group?: AdminWaitlistTasksResponseDtoGroup | 'all'
   type?: string
   provider?: string
   visible?: string
@@ -53,10 +30,10 @@ export const useQuests = (query: {
     error,
   } = useAdminControllerGetWaitlistTasks()
 
-  // Transform admin tasks to match expected Quest format
+  // Transform admin tasks to Quest format with adapter
   const transformedData: QuestsResponse | undefined = adminTasks
     ? {
-        items: adminTasks.map(transformAdminTask),
+        items: adminTasks.map(adaptAdminTaskToQuest),
         total: adminTasks.length,
       }
     : undefined
@@ -73,7 +50,8 @@ export const useQuests = (query: {
 
           const matchesGroup =
             !query.group || query.group === 'all' || item.group === query.group
-          const matchesType = !query.type || item.type === query.type
+          const matchesType =
+            !query.type || item.type?.some((t) => t === query.type)
           const matchesProvider =
             !query.provider || item.provider === query.provider
 
@@ -112,13 +90,11 @@ export const useQuest = (id: number) => {
     error,
   } = useAdminControllerGetWaitlistTasks()
 
-  // Find specific task by ID
+  // Find specific task by ID and transform it
   const task = adminTasks?.find(
     (task: AdminWaitlistTasksResponseDto) => task.id === id
   )
-
-  // Transform single task to match expected Quest format using the same transformation
-  const transformedTask = task ? transformAdminTask(task) : undefined
+  const transformedTask = task ? adaptAdminTaskToQuest(task) : undefined
 
   return {
     data: transformedTask,
@@ -132,7 +108,7 @@ export const useQuest = (id: number) => {
 // Admin readonly mode - mutation operations are disabled for admin tasks view
 export const useCreateQuest = () => {
   return useMutation({
-    mutationFn: (_data: Partial<Task>) => {
+    mutationFn: (_data: Partial<Quest>) => {
       throw new Error(
         'Create operation not available for admin tasks (readonly mode)'
       )
@@ -144,7 +120,7 @@ export const useCreateQuest = () => {
 
 export const useUpdateQuest = (_id: number) => {
   return useMutation({
-    mutationFn: (_data: Partial<Task>) => {
+    mutationFn: (_data: Partial<Quest>) => {
       throw new Error(
         'Update operation not available for admin tasks (readonly mode)'
       )

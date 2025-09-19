@@ -53,7 +53,7 @@ export const DataTableToolbar = <TData,>({
               column={table.getColumn('type')}
               title='Type'
               options={types}
-              multiple={false}
+              multiple={true}
             />
           )}
           {table.getColumn('provider') && (

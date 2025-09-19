@@ -64,8 +64,14 @@ export const getColumns = (isAdmin: boolean): ColumnDef<Quest>[] => {
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title='Type' />
       ),
-      cell: ({ row }) => row.getValue('type'),
-      filterFn: (row, id, value) => value.includes(row.getValue(id)),
+      cell: ({ row }) => {
+        const types = row.getValue('type') as string[]
+        return types?.join(', ') || ''
+      },
+      filterFn: (row, id, value) => {
+        const types = row.getValue(id) as string[]
+        return types?.some((type) => value.includes(type)) || false
+      },
     },
     {
       accessorKey: 'provider',

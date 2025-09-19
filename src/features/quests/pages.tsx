@@ -9,6 +9,7 @@ import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
 import { QuestForm } from './QuestForm'
 import { useCreateQuest, useQuest, useUpdateQuest } from './api'
+import { adaptQuestToTask, adaptTaskToQuest } from './data/schema'
 import { useQuestSearch } from './use-quest-search'
 
 export const QuestCreatePage = () => {
@@ -42,7 +43,7 @@ export const QuestCreatePage = () => {
         <QuestForm
           onSubmit={async (v) => {
             try {
-              await create.mutateAsync(v as Partial<Task>)
+              await create.mutateAsync(adaptTaskToQuest(v as Partial<Task>))
               toast.success('Saved')
               nav({ to: '/quests', search })
             } catch (e) {
@@ -111,10 +112,10 @@ export const QuestEditPage = () => {
           </Button>
         </div>
         <QuestForm
-          initial={data}
+          initial={data ? adaptQuestToTask(data) : undefined}
           onSubmit={async (v) => {
             try {
-              await update.mutateAsync(v as unknown as Partial<Task>)
+              await update.mutateAsync(adaptTaskToQuest(v as Partial<Task>))
               toast.success('Saved')
               nav({ to: '/quests', search })
             } catch (e) {

@@ -31,12 +31,11 @@ This admin panel uses **OIDC (OpenID Connect)** with **role-based access control
 
 ### API Variables
 
-| Variable            | Example                         | Purpose                                    |
-| ------------------- | ------------------------------- | ------------------------------------------ |
-| `VITE_USE_FAKE_API` | `true` / `false`                | Mock vs real Waitlist API                  |
-| `VITE_API_URL`      | Backend API base URL (required) | Backend API base URL for requests          |
-| `VITE_SWAGGER_URL`  | Swagger JSON URL (required)     | Swagger JSON URL for API client generation |
-| `VITE_PUBLIC_BASE`  | `/admin/`                       | Vite base path for deployment              |
+| Variable           | Example                         | Purpose                                    |
+| ------------------ | ------------------------------- | ------------------------------------------ |
+| `VITE_API_URL`     | Backend API base URL (required) | Backend API base URL for requests          |
+| `VITE_SWAGGER_URL` | Swagger JSON URL (required)     | Swagger JSON URL for API client generation |
+| `VITE_PUBLIC_BASE` | `/admin/`                       | Vite base path for deployment              |
 
 ### Setup
 
@@ -57,7 +56,6 @@ This admin panel uses **OIDC (OpenID Connect)** with **role-based access control
    # API Configuration
    VITE_API_URL=https://waitlist.cedradev.xyz/api
    VITE_SWAGGER_URL=https://waitlist.cedradev.xyz/api/api-tools/docs-json
-   VITE_USE_FAKE_API=false
    ```
 
 3. Ensure your Keycloak client is configured with:
@@ -69,16 +67,10 @@ This admin panel uses **OIDC (OpenID Connect)** with **role-based access control
 
 ### Development Mode
 
-**Development with mock API:**
+**Start development server:**
 
 ```bash
-VITE_USE_FAKE_API=true npm run dev
-```
-
-**Development with real API:**
-
-```bash
-VITE_USE_FAKE_API=false npm run dev
+npm run dev
 ```
 
 **First time setup (generates API client automatically):**
@@ -224,9 +216,6 @@ VITE_SWAGGER_URL=https://waitlist.cedradev.xyz/api/api-tools/docs-json
 
 # Used by generated client
 VITE_API_URL=https://waitlist.cedradev.xyz/api
-
-# Toggle between real API and mocks
-VITE_USE_FAKE_API=false
 ```
 
 ## 🛠️ Development

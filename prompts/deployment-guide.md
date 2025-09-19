@@ -17,7 +17,6 @@ VITE_APP_BASE_URL=https://admin.yourdomain.com
 
 # API Configuration
 VITE_API_URL=https://api.yourdomain.com
-VITE_USE_FAKE_API=false
 
 # Build Configuration
 PUBLIC_BASE=/admin/
