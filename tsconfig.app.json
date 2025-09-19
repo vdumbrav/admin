@@ -43,7 +43,8 @@
     "allowUnusedLabels": false,
     "allowUnreachableCode": false,
     "exactOptionalPropertyTypes": false, // Disabled: Would require extensive changes to component props and API types
-    "noUncheckedIndexedAccess": false // Disabled: Would require null checks for all array/object access throughout codebase
+    "noUncheckedIndexedAccess": false, // Disabled: Would require null checks for all array/object access throughout codebase
+    "noPropertyAccessFromIndexSignature": false // Disabled: Would require bracket notation for many env vars and dynamic properties
   },
   "include": ["src", "vite.config.ts"]
 }

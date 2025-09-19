@@ -86,6 +86,13 @@ export default tseslint.config(
         },
       ],
 
+      // Phase 1: Easy implementation rules
+      '@typescript-eslint/no-unsafe-argument': 'warn', // Warn: Generated API code uses any types
+      '@typescript-eslint/no-unsafe-assignment': 'warn', // Warn: Generated API code and error handling use any
+      '@typescript-eslint/no-unsafe-call': 'warn', // Warn: Column formatters may use any types from table data
+      '@typescript-eslint/prefer-for-of': 'error',
+      '@typescript-eslint/consistent-type-definitions': ['error', 'interface'],
+
       // General code quality
       'no-console': 'off', // Allow console in admin tool
       'no-unused-vars': 'off',

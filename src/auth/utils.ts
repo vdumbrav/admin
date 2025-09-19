@@ -21,11 +21,11 @@ export const getRolesFromUser = (user: User | null | undefined): string[] => {
     const realmRoles: string[] = payload?.realm_access?.roles ?? [];
 
     // Extract client roles (secondary source)
-    const clientId = import.meta.env.VITE_OIDC_CLIENT_ID;
-    const clientRoles: string[] = payload?.resource_access?.[clientId]?.roles ?? [];
+    const clientId = import.meta.env['VITE_OIDC_CLIENT_ID'] as string | undefined;
+    const clientRoles: string[] = clientId ? payload?.resource_access?.[clientId]?.roles ?? [] : [];
 
     // Extract account roles (fallback)
-    const accountRoles: string[] = payload?.resource_access?.account?.roles ?? [];
+    const accountRoles: string[] = payload?.resource_access?.['account']?.roles ?? [];
 
     // Combine all roles
     const allRoles = [...realmRoles, ...clientRoles, ...accountRoles];
