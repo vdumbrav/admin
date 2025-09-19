@@ -10,13 +10,17 @@ export interface ApiError {
 export function normalizeApiError(error: unknown): ApiError {
   if (error instanceof AxiosError) {
     const status = error.response?.status;
-    const data = error.response?.data;
+    const data = error.response?.data as {
+      message?: string;
+      error?: string;
+      code?: string;
+    } | string | undefined;
 
     // Extract error message from response
     let message = error.message;
-    if (data?.message) {
+    if (typeof data === 'object' && data?.message) {
       message = data.message;
-    } else if (data?.error) {
+    } else if (typeof data === 'object' && data?.error) {
       message = data.error;
     } else if (typeof data === 'string') {
       message = data;
@@ -25,7 +29,7 @@ export function normalizeApiError(error: unknown): ApiError {
     return {
       message,
       status,
-      code: data?.code ?? error.code,
+      code: typeof data === 'object' ? data?.code ?? error.code : error.code,
       details: data,
     };
   }

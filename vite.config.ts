@@ -8,7 +8,7 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
 
   // Use VITE_PUBLIC_BASE for GH Pages builds
-  const base = env.VITE_PUBLIC_BASE ?? '/admin/';
+  const base = env.VITE_PUBLIC_BASE || '/admin/';
 
   return {
     base,

@@ -14,7 +14,7 @@ const createApiClient = (): AxiosInstance => {
   const isDevelopment = import.meta.env.DEV;
   const baseURL = isDevelopment
     ? '/' // Use Vite proxy in development (proxy handles /api prefix)
-    : import.meta.env.VITE_API_URL; // Use direct URL in production
+    : (import.meta.env.VITE_API_URL as string | undefined); // Use direct URL in production
 
   if (!baseURL) {
     throw new Error('API URL is not defined');
@@ -36,7 +36,7 @@ export async function orvalMutator<TResponse>(
   const client = options.client ?? createApiClient();
 
   try {
-    const { data, headers, ...restConfig } = config;
+    const { data, headers, ...restConfig } = config as AxiosRequestConfig & { data?: unknown; headers?: Record<string, string> };
 
     const resolvedHeaders = { ...(headers ?? {}) };
 
@@ -52,7 +52,7 @@ export async function orvalMutator<TResponse>(
 
     const requestConfig: AxiosRequestConfig = {
       ...restConfig,
-      data,
+      data: data as unknown,
       headers: resolvedHeaders,
       signal: config.signal,
     };
@@ -67,7 +67,8 @@ export async function orvalMutator<TResponse>(
   } catch (error) {
     // Simple error handling
     if (axios.isAxiosError(error)) {
-      throw new Error(error.response?.data?.message ?? error.message);
+      const message = (error.response?.data as { message?: string })?.message ?? error.message;
+      throw new Error(message);
     }
     throw error;
   }

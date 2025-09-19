@@ -16,7 +16,10 @@ export const getRolesFromUser = (user: User | null | undefined): string[] => {
     if (!tokenPart) {
       return [];
     }
-    const payload = JSON.parse(atob(tokenPart));
+    const payload = JSON.parse(atob(tokenPart)) as {
+      realm_access?: { roles?: string[] };
+      resource_access?: Record<string, { roles?: string[] }>;
+    };
 
     // Extract realm roles (primary source)
     const realmRoles: string[] = payload?.realm_access?.roles ?? [];
