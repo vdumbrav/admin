@@ -53,11 +53,9 @@ export interface IteratorDaily {
 // ============================================================================
 
 // Using API type directly where possible
-export type TaskType =
-  | AdminWaitlistTasksResponseDtoTypeItem
-  | 'partner_invite'
-  | 'external'
-export type TaskGroup = AdminWaitlistTasksResponseDtoGroup | 'all'
+export type TaskType = AdminWaitlistTasksResponseDtoTypeItem
+export type TaskGroup = AdminWaitlistTasksResponseDtoGroup
+export type UIGroup = AdminWaitlistTasksResponseDtoGroup | 'all' // UI-only type with 'all' option
 export type TaskProvider = AdminWaitlistTasksResponseDtoProvider
 export type TaskStatus = AdminWaitlistTasksResponseDtoStatus
 
@@ -114,13 +112,30 @@ export interface QuestsResponse {
 // Query types
 // ============================================================================
 
-export interface QuestQuery {
+// ============================================================================
+// Frontend-only query and sorting types (no server-side support needed)
+// ============================================================================
+
+export interface LocalSortConfig {
+  field: keyof Quest
+  direction: 'asc' | 'desc'
+}
+
+export interface LocalPaginationConfig {
+  page: number
+  limit: number
+}
+
+export interface LocalFilterConfig {
   search?: string
-  group?: AdminWaitlistTasksResponseDtoGroup | 'all'
+  group?: UIGroup
   type?: string
   provider?: string
-  visible?: string
-  page?: number
-  limit?: number
-  sort?: string
+  visible?: 'true' | 'false' | string
+}
+
+export interface QuestQuery
+  extends LocalFilterConfig,
+    Partial<LocalPaginationConfig> {
+  sort?: string // Format: "field:direction" e.g., "title:asc", "order_by:desc"
 }

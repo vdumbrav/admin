@@ -153,17 +153,8 @@ export function adaptTaskToQuest(task: Partial<Task>): Partial<Quest> {
   let apiType: AdminWaitlistTasksResponseDtoTypeItem[] | undefined
 
   if (task.type) {
-    // Map form-specific types to API types
-    let mappedType: string = task.type
-
-    // Handle form-specific types that don't exist in API
-    if (task.type === 'partner_invite') {
-      // TODO: Check if partner_invite should map to a different API type
-      mappedType = 'external' // Fallback for now
-    }
-
-    if (isValidApiTaskType(mappedType)) {
-      apiType = [mappedType]
+    if (isValidApiTaskType(task.type)) {
+      apiType = [task.type]
     } else {
       // eslint-disable-next-line no-console
       console.warn(

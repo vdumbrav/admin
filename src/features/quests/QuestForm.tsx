@@ -79,7 +79,6 @@ const baseSchema = withTwitterValidation(
         'multiple',
         'repeatable',
         'dummy',
-        'partner_invite',
         'external',
       ]),
       description: z.string().nullable().optional(),
@@ -221,41 +220,6 @@ export const QuestForm = ({
   )
 
   const popupField = (key: string) => `resources.ui['pop-up'].${key}` as const
-
-  useEffect(() => {
-    if (type !== 'partner_invite') return
-    const values = form.getValues()
-    if (!values.title) {
-      form.setValue('title', 'Would you like to become a partner?', {
-        shouldDirty: true,
-      })
-    }
-    if (!values.description) {
-      form.setValue(
-        'description',
-        'Fill out the partnership request form. <br />Our team will review it and get in touch.',
-        {
-          shouldDirty: true,
-        }
-      )
-    }
-    if (values.group === 'all') {
-      form.setValue('group', 'partner', { shouldDirty: true })
-    }
-    if (values.order_by === 0) {
-      form.setValue('order_by', 9999, {
-        shouldDirty: true,
-      })
-    }
-    if (!values.uri) {
-      form.setValue('uri', 'https://partners.walme.io/', { shouldDirty: true })
-    }
-    if (!values.resources?.ui?.button) {
-      form.setValue('resources.ui.button', 'Fill out the form', {
-        shouldDirty: true,
-      })
-    }
-  }, [type, form])
 
   useEffect(() => {
     if (adsgramType !== 'task') {

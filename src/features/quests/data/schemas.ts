@@ -105,7 +105,6 @@ const statusSchema = z
 // ============================================================================
 
 const taskTypeSchema = z.enum([
-  // API types
   AdminWaitlistTasksResponseDtoTypeItem.referral,
   AdminWaitlistTasksResponseDtoTypeItem.connect,
   AdminWaitlistTasksResponseDtoTypeItem.join,
@@ -116,18 +115,13 @@ const taskTypeSchema = z.enum([
   AdminWaitlistTasksResponseDtoTypeItem.repeatable,
   AdminWaitlistTasksResponseDtoTypeItem.dummy,
   AdminWaitlistTasksResponseDtoTypeItem.external,
-  // Form-specific types
-  'partner_invite',
 ])
 
 const taskGroupSchema = z.enum([
-  // API types
   AdminWaitlistTasksResponseDtoGroup.referral,
   AdminWaitlistTasksResponseDtoGroup.social,
   AdminWaitlistTasksResponseDtoGroup.daily,
   AdminWaitlistTasksResponseDtoGroup.partner,
-  // Form-specific types
-  'all',
 ])
 
 // ============================================================================
@@ -234,7 +228,7 @@ export const questQuerySchema = z.object({
   provider: z.string().optional(),
   visible: z.string().optional(),
   page: z.number().min(1).optional(),
-  limit: z.number().min(1).max(100).optional(),
+  limit: z.number().min(1).optional(),
   sort: z.string().optional(),
 })
 

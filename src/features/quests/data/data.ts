@@ -23,10 +23,7 @@ const GROUP_LABELS: Record<AdminWaitlistTasksResponseDtoGroup | 'all', string> =
     all: 'All Groups',
   }
 
-const TYPE_LABELS: Record<
-  AdminWaitlistTasksResponseDtoTypeItem | 'partner_invite',
-  string
-> = {
+const TYPE_LABELS: Record<AdminWaitlistTasksResponseDtoTypeItem, string> = {
   [AdminWaitlistTasksResponseDtoTypeItem.like]: 'Like',
   [AdminWaitlistTasksResponseDtoTypeItem.comment]: 'Comment',
   [AdminWaitlistTasksResponseDtoTypeItem.share]: 'Share',
@@ -37,8 +34,6 @@ const TYPE_LABELS: Record<
   [AdminWaitlistTasksResponseDtoTypeItem.dummy]: 'Dummy',
   [AdminWaitlistTasksResponseDtoTypeItem.referral]: 'Referral',
   [AdminWaitlistTasksResponseDtoTypeItem.external]: 'External',
-  // Form-specific types
-  partner_invite: 'Partner Invite',
 }
 
 const PROVIDER_LABELS: Record<AdminWaitlistTasksResponseDtoProvider, string> = {
@@ -58,7 +53,7 @@ const PROVIDER_LABELS: Record<AdminWaitlistTasksResponseDtoProvider, string> = {
 /**
  * Groups dropdown options (API-synced + form-specific)
  */
-export const groups: DropdownOption[] = [
+export const groups = [
   // Form-specific option
   { value: 'all', label: GROUP_LABELS.all },
   // API-based options
@@ -73,22 +68,17 @@ export const groups: DropdownOption[] = [
 /**
  * Types dropdown options (API-synced + form-specific)
  */
-export const types: DropdownOption[] = [
-  // API-based options
-  ...getAvailableApiTypes().map(
-    (type): DropdownOption => ({
-      value: type,
-      label: TYPE_LABELS[type],
-    })
-  ),
-  // Form-specific options (TODO: check if these should be removed or mapped differently)
-  { value: 'partner_invite', label: TYPE_LABELS.partner_invite },
-]
+export const types = getAvailableApiTypes().map(
+  (type): DropdownOption => ({
+    value: type,
+    label: TYPE_LABELS[type],
+  })
+)
 
 /**
  * Providers dropdown options (API-synced)
  */
-export const providers: DropdownOption[] = getAvailableApiProviders().map(
+export const providers = getAvailableApiProviders().map(
   (provider): DropdownOption => ({
     value: provider,
     label: PROVIDER_LABELS[provider],
@@ -98,7 +88,7 @@ export const providers: DropdownOption[] = getAvailableApiProviders().map(
 /**
  * Visibility dropdown options
  */
-export const visibilities: DropdownOption[] = [
+export const visibilities = [
   { value: 'true', label: 'Visible' },
   { value: 'false', label: 'Hidden' },
 ]
@@ -120,7 +110,7 @@ export function getGroupLabel(
  * Get display label for a type value
  */
 export function getTypeLabel(
-  value: AdminWaitlistTasksResponseDtoTypeItem | 'partner_invite'
+  value: AdminWaitlistTasksResponseDtoTypeItem
 ): string {
   return TYPE_LABELS[value] || value
 }

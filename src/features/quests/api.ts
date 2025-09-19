@@ -28,8 +28,7 @@ export const useQuests = (query: QuestQuery) => {
   const processedData = useMemo((): QuestsResponse | undefined => {
     if (!transformedQuests) return undefined
 
-    // Apply client-side filtering since API doesn't support all filter options
-    // TODO: Move filtering to server-side when API supports query parameters
+    // Apply client-side filtering (API returns full list of 50-200 items)
     let filteredItems = transformedQuests.filter((item: Quest) => {
       const matchesSearch =
         !query.search ||
@@ -60,8 +59,7 @@ export const useQuests = (query: QuestQuery) => {
       )
     })
 
-    // Apply sorting
-    // TODO: Move sorting to server-side when API supports it
+    // Apply client-side sorting (frontend-only for small lists)
     if (query.sort) {
       const [field, direction] = query.sort.split(':')
       const isAsc = direction !== 'desc'
@@ -78,8 +76,7 @@ export const useQuests = (query: QuestQuery) => {
       })
     }
 
-    // Apply client-side pagination
-    // TODO: Move pagination to server-side when API supports it
+    // Apply client-side pagination (frontend-only for small lists)
     const totalItems = filteredItems.length
     let paginatedItems = filteredItems
 
