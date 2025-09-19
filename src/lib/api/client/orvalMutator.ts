@@ -36,7 +36,10 @@ export async function orvalMutator<TResponse>(
   const client = options.client ?? createApiClient();
 
   try {
-    const { data, headers, ...restConfig } = config as AxiosRequestConfig & { data?: unknown; headers?: Record<string, string> };
+    const { data, headers, ...restConfig } = config as AxiosRequestConfig & {
+      data?: unknown;
+      headers?: Record<string, string>;
+    };
 
     const resolvedHeaders = { ...(headers ?? {}) };
 

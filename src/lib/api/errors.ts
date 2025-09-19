@@ -10,11 +10,14 @@ export interface ApiError {
 export function normalizeApiError(error: unknown): ApiError {
   if (error instanceof AxiosError) {
     const status = error.response?.status;
-    const data = error.response?.data as {
-      message?: string;
-      error?: string;
-      code?: string;
-    } | string | undefined;
+    const data = error.response?.data as
+      | {
+          message?: string;
+          error?: string;
+          code?: string;
+        }
+      | string
+      | undefined;
 
     // Extract error message from response
     let message = error.message;
@@ -29,7 +32,7 @@ export function normalizeApiError(error: unknown): ApiError {
     return {
       message,
       status,
-      code: typeof data === 'object' ? data?.code ?? error.code : error.code,
+      code: typeof data === 'object' ? (data?.code ?? error.code) : error.code,
       details: data,
     };
   }

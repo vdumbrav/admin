@@ -1,7 +1,4 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
-// @ts-nocheck
 import { useEffect, useMemo, useState } from 'react';
-import { z } from 'zod';
 import { useForm, useWatch } from 'react-hook-form';
 import { Spinner } from '@radix-ui/themes';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -28,69 +25,17 @@ import { ImageDropzone } from '@/components/image-dropzone';
 import { NoWheelNumber } from '@/components/no-wheel-number';
 import { SelectDropdown } from '@/components/select-dropdown';
 import { TwitterEmbed } from '@/components/twitter-embed';
+import { apiToForm, formToApi, getDefaultFormValues } from './adapters/form-api-adapter';
 import { uploadMedia } from './api';
-import { type Child, ChildrenEditor } from './components/children-editor';
+import { ChildrenEditor } from './components/children-editor';
 import { groups, providers, types } from './data/data';
 import type { Task } from './data/types';
-import { withTwitterValidation } from './validation';
+import { questFormSchema } from './types/form-schema';
+import type { QuestFormValues } from './types/form-types';
 
-const childSchema = withTwitterValidation(
-  z.object({
-    title: z.string().min(1),
-    type: z.enum(['like', 'share', 'comment', 'join', 'connect']),
-    provider: z
-      .enum(['twitter', 'telegram', 'discord', 'matrix', 'walme', 'monetag', 'adsgram'])
-      .optional(),
-    reward: z.coerce.number().int().nonnegative().optional(),
-    order_by: z.coerce.number().int().nonnegative(),
-    resources: z
-      .object({
-        tweetId: z.string().optional(),
-        username: z.string().optional(),
-      })
-      .optional(),
-  }),
-);
-
-// Simple form schema that works with react-hook-form
-const formSchema = z.object({
-  title: z.string().min(1),
-  type: z.string(),
-  description: z.string().nullable(),
-  group: z.string(),
-  order_by: z.number(),
-  provider: z.string().optional(),
-  uri: z.string().optional(),
-  reward: z.number().optional(),
-  visible: z.boolean().optional(),
-  resources: z.object({
-    icon: z.string().optional(),
-    username: z.string().optional(),
-    tweetId: z.string().optional(),
-    isNew: z.boolean().optional(),
-    block_id: z.string().optional(),
-    ui: z.object({
-      button: z.string(),
-      'pop-up': z.object({
-        name: z.string(),
-        button: z.string(),
-        description: z.string(),
-        static: z.string().optional(),
-        'additional-title': z.string().optional(),
-        'additional-description': z.string().optional(),
-      }).optional(),
-    }).passthrough().optional(),
-    adsgram: z.object({
-      type: z.enum(['task', 'reward']).optional(),
-      subtype: z.enum(['video-ad', 'post-style-image']).optional(),
-    }).optional(),
-  }).passthrough().optional(),
-  child: z.array(childSchema).optional(),
-});
-
-const schema = formSchema;
-
-type FormValues = z.infer<typeof schema>;
+// Use our clean form schema
+const schema = questFormSchema;
+type FormValues = QuestFormValues;
 
 export const QuestForm = ({
   initial,
@@ -106,29 +51,7 @@ export const QuestForm = ({
   const [isUploading, setIsUploading] = useState(false);
   const clearIconPreview = () => setIconPreview((old) => replaceObjectUrl(old));
   const initialValues = useMemo(
-    () => ({
-      title: initial?.title ?? '',
-      type: initial?.type ?? 'external',
-      description: initial?.description ?? null,
-      group: initial?.group ?? 'all',
-      order_by: initial?.order_by ?? 0,
-      provider: initial?.provider,
-      uri: initial?.uri ?? '',
-      reward: initial?.reward,
-      resources: initial?.resources ?? { ui: { button: '' } },
-      visible: initial?.visible ?? true,
-      child:
-        initial?.child?.map((c) => ({
-          title: c.title,
-          type: c.type as Child['type'],
-          provider: c.provider,
-          reward: c.reward,
-          order_by: c.order_by,
-          resources: c.resources
-            ? { tweetId: c.resources.tweetId, username: c.resources.username }
-            : undefined,
-        })) ?? [],
-    }),
+    () => (initial ? apiToForm(initial) : getDefaultFormValues()),
     [initial],
   );
 
@@ -148,8 +71,6 @@ export const QuestForm = ({
   const groupItems = useMemo(() => groups.map(({ label, value }) => ({ label, value })), []);
   const typeItems = useMemo(() => types.map(({ label, value }) => ({ label, value })), []);
   const providerItems = useMemo(() => providers.map(({ label, value }) => ({ label, value })), []);
-
-  const popupField = (key: string) => `resources.ui['pop-up'].${key}` as const;
 
   useEffect(() => {
     if (adsgramType !== 'task') {
@@ -252,11 +173,13 @@ export const QuestForm = ({
       <form
         // eslint-disable-next-line @typescript-eslint/no-misused-promises
         onSubmit={form.handleSubmit(async (values) => {
-          const v = { ...values };
-          await onSubmit({
-            ...v,
-            child: v.child?.map((c, i: number) => ({ ...c, order_by: i })),
-          });
+          // Convert form values to API format using adapter
+          const apiData = formToApi(values);
+          // Update child order_by values
+          if (apiData.child) {
+            apiData.child = apiData.child.map((c, i: number) => ({ ...c, order_by: i }));
+          }
+          await onSubmit(values);
         })}
         className='mx-auto max-w-5xl space-y-6'
       >
@@ -495,12 +418,12 @@ export const QuestForm = ({
                 <div className='text-sm font-medium'>Pop-up</div>
                 <FormField
                   control={form.control}
-                  name={popupField('name')}
+                  name={'resources.ui.pop-up.name' as never}
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Name</FormLabel>
                       <FormControl>
-                        <Input {...field} />
+                        <Input {...field} value={field.value ?? ''} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -508,12 +431,12 @@ export const QuestForm = ({
                 />
                 <FormField
                   control={form.control}
-                  name={popupField('button')}
+                  name={'resources.ui.pop-up.button' as never}
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Button</FormLabel>
                       <FormControl>
-                        <Input {...field} />
+                        <Input {...field} value={field.value ?? ''} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -521,12 +444,12 @@ export const QuestForm = ({
                 />
                 <FormField
                   control={form.control}
-                  name={popupField('description')}
+                  name={'resources.ui.pop-up.description' as never}
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Description</FormLabel>
                       <FormControl>
-                        <Textarea rows={4} {...field} />
+                        <Textarea rows={4} {...field} value={field.value ?? ''} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -534,12 +457,12 @@ export const QuestForm = ({
                 />
                 <FormField
                   control={form.control}
-                  name={popupField('static')}
+                  name={'resources.ui.pop-up.static' as never}
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Static</FormLabel>
                       <FormControl>
-                        <Input {...field} placeholder='https://…' />
+                        <Input {...field} value={field.value ?? ''} placeholder='https://…' />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -547,12 +470,12 @@ export const QuestForm = ({
                 />
                 <FormField
                   control={form.control}
-                  name={popupField('additional-title')}
+                  name={'resources.ui.pop-up.additional-title' as never}
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Additional title</FormLabel>
                       <FormControl>
-                        <Input {...field} />
+                        <Input {...field} value={field.value ?? ''} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -560,12 +483,12 @@ export const QuestForm = ({
                 />
                 <FormField
                   control={form.control}
-                  name={popupField('additional-description')}
+                  name={'resources.ui.pop-up.additional-description' as never}
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Additional description</FormLabel>
                       <FormControl>
-                        <Input {...field} />
+                        <Input {...field} value={field.value ?? ''} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -581,7 +504,7 @@ export const QuestForm = ({
                     <FormItem>
                       <FormLabel>AdsGram Block ID</FormLabel>
                       <FormControl>
-                        <Input {...field} />
+                        <Input {...field} value={field.value ?? ''} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
