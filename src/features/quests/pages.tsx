@@ -1,5 +1,4 @@
 import { useParams, useNavigate } from '@tanstack/react-router'
-import type { Task } from '@/types/tasks'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Header } from '@/components/layout/header'
@@ -9,6 +8,7 @@ import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
 import { QuestForm } from './QuestForm'
 import { useCreateQuest, useQuest, useUpdateQuest } from './api'
+import type { Task } from './data/schema'
 import { adaptQuestToTask, adaptTaskToQuest } from './data/schema'
 import { useQuestSearch } from './use-quest-search'
 

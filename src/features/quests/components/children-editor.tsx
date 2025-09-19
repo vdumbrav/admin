@@ -1,6 +1,5 @@
 import { useEffect, useRef } from 'react'
 import { useFieldArray, useFormContext, useWatch } from 'react-hook-form'
-import type { Task } from '@/types/tasks'
 import { DndContext, DragEndEvent } from '@dnd-kit/core'
 import {
   SortableContext,
@@ -19,6 +18,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { NoWheelNumber } from '@/components/no-wheel-number'
 import { SelectDropdown } from '@/components/select-dropdown'
+import type { Task } from '../data/schema'
 
 type ChildType = Extract<
   Task['type'],

@@ -8,7 +8,6 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useBlocker } from '@tanstack/react-router'
 import { useAppAuth } from '@/auth/provider'
 import { mediaErrors } from '@/errors/media'
-import { defaultPartnerTask, type Task } from '@/types/tasks'
 import { toast } from 'sonner'
 import { replaceObjectUrl } from '@/utils/object-url'
 import { Button } from '@/components/ui/button'
@@ -37,6 +36,7 @@ import { uploadMedia } from './api'
 import { ChildrenEditor } from './components/children-editor'
 import type { Child } from './components/children-editor'
 import { groups, types, providers } from './data/data'
+import type { Task } from './data/schema'
 import { withTwitterValidation } from './validation'
 
 const childSchema = withTwitterValidation(
@@ -226,30 +226,34 @@ export const QuestForm = ({
     if (type !== 'partner_invite') return
     const values = form.getValues()
     if (!values.title) {
-      form.setValue('title', defaultPartnerTask.title, { shouldDirty: true })
-    }
-    if (!values.description) {
-      form.setValue('description', defaultPartnerTask.description ?? '', {
+      form.setValue('title', 'Would you like to become a partner?', {
         shouldDirty: true,
       })
     }
+    if (!values.description) {
+      form.setValue(
+        'description',
+        'Fill out the partnership request form. <br />Our team will review it and get in touch.',
+        {
+          shouldDirty: true,
+        }
+      )
+    }
     if (values.group === 'all') {
-      form.setValue('group', defaultPartnerTask.group, { shouldDirty: true })
+      form.setValue('group', 'partner', { shouldDirty: true })
     }
     if (values.order_by === 0) {
-      form.setValue('order_by', defaultPartnerTask.order_by, {
+      form.setValue('order_by', 9999, {
         shouldDirty: true,
       })
     }
     if (!values.uri) {
-      form.setValue('uri', defaultPartnerTask.uri ?? '', { shouldDirty: true })
+      form.setValue('uri', 'https://partners.walme.io/', { shouldDirty: true })
     }
     if (!values.resources?.ui?.button) {
-      form.setValue(
-        'resources.ui.button',
-        defaultPartnerTask.resources?.ui?.button ?? '',
-        { shouldDirty: true }
-      )
+      form.setValue('resources.ui.button', 'Fill out the form', {
+        shouldDirty: true,
+      })
     }
   }, [type, form])
 

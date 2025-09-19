@@ -15,7 +15,6 @@ import {
   getSortedRowModel,
   useReactTable,
 } from '@tanstack/react-table'
-import type { TaskGroup } from '@/types/tasks'
 import {
   LS_TABLE_SIZE,
   LS_TABLE_SORT,
@@ -34,6 +33,7 @@ import {
 } from '@/components/ui/table'
 import { DataTablePagination } from '@/components/table/data-table-pagination'
 import { useQuests } from '../api'
+import type { TaskGroup } from '../data/schema'
 import type { Quest } from '../data/schema'
 import { DataTableToolbar } from './data-table-toolbar'
 
