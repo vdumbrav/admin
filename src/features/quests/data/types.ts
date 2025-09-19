@@ -1,9 +1,9 @@
 import type {
   AdminWaitlistTasksResponseDto,
-  AdminWaitlistTasksResponseDtoTypeItem,
-  AdminWaitlistTasksResponseDtoProvider,
   AdminWaitlistTasksResponseDtoGroup,
+  AdminWaitlistTasksResponseDtoProvider,
   AdminWaitlistTasksResponseDtoStatus,
+  AdminWaitlistTasksResponseDtoTypeItem,
 } from '@/lib/api/generated'
 
 // ============================================================================

@@ -10,12 +10,12 @@ export function TokenAutoRenew() {
       if (auth.activeNavigator) return
 
       // Log token expiration but don't automatically redirect/renew
-      // eslint-disable-next-line no-console
+       
       console.warn('[TokenAutoRenew] Access token expired')
 
       // Attempt silent renewal, but don't redirect on failure
       auth.signinSilent().catch((error) => {
-        // eslint-disable-next-line no-console
+         
         console.error('[TokenAutoRenew] Silent renewal failed:', error)
         // Don't redirect to login, just log the error
       })

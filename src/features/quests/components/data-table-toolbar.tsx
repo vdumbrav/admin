@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { DataTableFacetedFilter } from '@/components/table/data-table-faceted-filter'
 import { DataTableViewOptions } from '@/components/table/data-table-view-options'
-import { groups, types, providers, visibilities } from '../data/data'
+import { groups, providers, types, visibilities } from '../data/data'
 
 interface DataTableToolbarProps<TData> {
   table: Table<TData>

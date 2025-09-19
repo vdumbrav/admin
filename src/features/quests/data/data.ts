@@ -1,12 +1,12 @@
 import {
-  AdminWaitlistTasksResponseDtoTypeItem,
-  AdminWaitlistTasksResponseDtoProvider,
   AdminWaitlistTasksResponseDtoGroup,
+  AdminWaitlistTasksResponseDtoProvider,
+  AdminWaitlistTasksResponseDtoTypeItem,
 } from '@/lib/api/generated'
 import {
-  getAvailableApiTypes,
-  getAvailableApiProviders,
   getAvailableApiGroups,
+  getAvailableApiProviders,
+  getAvailableApiTypes,
 } from './adapters'
 import type { DropdownOption, UIGroup } from './types'
 
@@ -110,7 +110,7 @@ export function getGroupLabel(value: UIGroup): string {
 export function getTypeLabel(
   value: AdminWaitlistTasksResponseDtoTypeItem
 ): string {
-  return TYPE_LABELS[value] || value
+  return TYPE_LABELS[value] ?? value
 }
 
 /**

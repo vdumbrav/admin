@@ -17,11 +17,10 @@ export default tseslint.config(
     languageOptions: {
       ecmaVersion: 2020,
       globals: globals.browser,
-      // Remove project for now to avoid overwhelming errors - add gradually
-      // parserOptions: {
-      //   project: ['./tsconfig.app.json', './tsconfig.node.json'],
-      //   tsconfigRootDir: process.cwd(),
-      // },
+      parserOptions: {
+        project: ['./tsconfig.app.json', './tsconfig.node.json'],
+        tsconfigRootDir: process.cwd(),
+      },
     },
     plugins: {
       'react-hooks': reactHooks,
@@ -49,9 +48,9 @@ export default tseslint.config(
         },
       ],
       '@typescript-eslint/no-non-null-assertion': 'error',
-      // These rules require type information - enable when using project
-      // '@typescript-eslint/prefer-nullish-coalescing': 'error',
-      // '@typescript-eslint/prefer-optional-chain': 'error',
+      // Type-aware rules - now enabled with project config
+      '@typescript-eslint/prefer-nullish-coalescing': 'error',
+      '@typescript-eslint/prefer-optional-chain': 'error',
       '@typescript-eslint/consistent-type-imports': [
         'error',
         {
@@ -69,18 +68,29 @@ export default tseslint.config(
       'no-var': 'error',
       'no-unneeded-ternary': 'error',
 
-      // Relaxed API import restrictions - allow generated API imports
-      // 'no-restricted-imports': [
-      //   'warn',
-      //   {
-      //     paths: [
-      //       {
-      //         name: '@/lib/api/generated',
-      //         message: 'Consider importing from specific modules for better tree shaking.',
-      //       },
-      //     ],
-      //   },
-      // ],
+      // Import ordering - basic built-in rule
+      'sort-imports': [
+        'warn',
+        {
+          ignoreCase: true,
+          ignoreDeclarationSort: true, // Don't sort the import statements themselves
+          ignoreMemberSort: false, // Sort named imports within a statement
+          memberSyntaxSortOrder: ['none', 'all', 'multiple', 'single'],
+        },
+      ],
+
+      // API import restrictions as warnings
+      'no-restricted-imports': [
+        'warn',
+        {
+          paths: [
+            {
+              name: '@/lib/api/generated',
+              message: 'Consider importing from specific modules for better tree shaking.',
+            },
+          ],
+        },
+      ],
     },
   }
 )

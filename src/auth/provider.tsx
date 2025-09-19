@@ -43,7 +43,7 @@ export function useAppAuth(): AuthResult {
         const newToken = freshUser?.access_token
         return newToken
       } catch (error) {
-        // eslint-disable-next-line no-console
+         
         console.error('[AuthProvider] Token refresh failed:', error)
         // Return existing token instead of undefined to avoid immediate logout
         const fallbackToken = auth.user?.access_token

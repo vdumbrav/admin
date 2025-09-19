@@ -1,19 +1,19 @@
 import type {
   AdminWaitlistTasksResponseDto,
-  AdminWaitlistTasksResponseDtoTypeItem,
-  AdminWaitlistTasksResponseDtoProvider,
   AdminWaitlistTasksResponseDtoGroup,
-  AdminWaitlistTasksResponseDtoStatus,
-  AdminWaitlistTasksResponseDtoResources,
   AdminWaitlistTasksResponseDtoIterator,
+  AdminWaitlistTasksResponseDtoProvider,
+  AdminWaitlistTasksResponseDtoResources,
+  AdminWaitlistTasksResponseDtoStatus,
+  AdminWaitlistTasksResponseDtoTypeItem,
 } from '@/lib/api/generated'
 import {
-  AdminWaitlistTasksResponseDtoTypeItem as ApiTypeItem,
-  AdminWaitlistTasksResponseDtoProvider as ApiProvider,
   AdminWaitlistTasksResponseDtoGroup as ApiGroup,
+  AdminWaitlistTasksResponseDtoProvider as ApiProvider,
   AdminWaitlistTasksResponseDtoStatus as ApiStatus,
+  AdminWaitlistTasksResponseDtoTypeItem as ApiTypeItem,
 } from '@/lib/api/generated'
-import type { Quest, Task, Resources, IteratorDaily } from './types'
+import type { IteratorDaily, Quest, Resources, Task } from './types'
 
 // ============================================================================
 // Type Guards
@@ -156,7 +156,7 @@ export function adaptTaskToQuest(task: Partial<Task>): Partial<Quest> {
     if (isValidApiTaskType(task.type)) {
       apiType = [task.type]
     } else {
-      // eslint-disable-next-line no-console
+       
       console.warn(
         `Invalid task type for API: ${task.type}, using 'external' as fallback`
       )
@@ -170,7 +170,7 @@ export function adaptTaskToQuest(task: Partial<Task>): Partial<Quest> {
     if (isValidApiProvider(task.provider)) {
       apiProvider = task.provider
     } else {
-      // eslint-disable-next-line no-console
+       
       console.warn(`Invalid provider for API: ${task.provider}`)
       apiProvider = undefined
     }
@@ -182,7 +182,7 @@ export function adaptTaskToQuest(task: Partial<Task>): Partial<Quest> {
     if (isValidApiGroup(task.group)) {
       apiGroup = task.group
     } else {
-      // eslint-disable-next-line no-console
+       
       console.warn(`Invalid group for API: ${task.group}`)
       apiGroup = 'social' // Default fallback
     }
@@ -194,7 +194,7 @@ export function adaptTaskToQuest(task: Partial<Task>): Partial<Quest> {
     if (isValidApiStatus(task.status)) {
       apiStatus = task.status
     } else {
-      // eslint-disable-next-line no-console
+       
       console.warn(`Invalid status for API: ${task.status}`)
       apiStatus = undefined
     }

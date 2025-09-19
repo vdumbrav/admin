@@ -27,9 +27,9 @@ import {
 } from '../ui/dropdown-menu'
 import {
   type NavCollapsible,
+  type NavGroup,
   type NavItem,
   type NavLink,
-  type NavGroup,
 } from './types'
 
 export function NavGroup({ items }: NavGroup) {

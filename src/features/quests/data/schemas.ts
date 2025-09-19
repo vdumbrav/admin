@@ -1,9 +1,9 @@
 import { z } from 'zod'
 import {
-  AdminWaitlistTasksResponseDtoTypeItem,
-  AdminWaitlistTasksResponseDtoProvider,
   AdminWaitlistTasksResponseDtoGroup,
+  AdminWaitlistTasksResponseDtoProvider,
   AdminWaitlistTasksResponseDtoStatus,
+  AdminWaitlistTasksResponseDtoTypeItem,
 } from '@/lib/api/generated'
 import type { Quest, Task } from './types'
 

@@ -4,22 +4,22 @@ import { Link, useRouter, useSearch } from '@tanstack/react-router'
 import {
   type ColumnDef,
   type ColumnFiltersState,
-  type SortingState,
-  type VisibilityState,
-  type PaginationState,
   flexRender,
   getCoreRowModel,
   getFacetedRowModel,
   getFacetedUniqueValues,
   getFilteredRowModel,
   getSortedRowModel,
+  type PaginationState,
+  type SortingState,
   useReactTable,
+  type VisibilityState,
 } from '@tanstack/react-table'
 import {
+  loadJSON,
   LS_TABLE_SIZE,
   LS_TABLE_SORT,
   LS_TABLE_VIS,
-  loadJSON,
   saveJSON,
 } from '@/utils/persist'
 import { Button } from '@/components/ui/button'
@@ -33,7 +33,7 @@ import {
 } from '@/components/ui/table'
 import { DataTablePagination } from '@/components/table/data-table-pagination'
 import { useQuests } from '../api'
-import type { TaskGroup, Quest } from '../data/types'
+import type { Quest, TaskGroup } from '../data/types'
 import { DataTableToolbar } from './data-table-toolbar'
 
 interface DataTableProps {

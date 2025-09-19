@@ -1,6 +1,6 @@
 import { Spinner } from '@radix-ui/themes'
 import { mediaErrors } from '@/errors/media'
-import { useDropzone, type FileError } from 'react-dropzone'
+import { type FileError, useDropzone } from 'react-dropzone'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
