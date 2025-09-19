@@ -1,7 +1,7 @@
 import axios, {
   type AxiosInstance,
   type AxiosRequestConfig,
-  AxiosResponse,
+  type AxiosResponse,
 } from 'axios'
 import { useAppAuth } from '@/auth/provider'
 

@@ -68,7 +68,12 @@ export const useQuests = (query: QuestQuery) => {
         const aVal = (a as unknown as Record<string, unknown>)[field]
         const bVal = (b as unknown as Record<string, unknown>)[field]
 
-        if (aVal != null && bVal != null) {
+        if (
+          aVal !== null &&
+          aVal !== undefined &&
+          bVal !== null &&
+          bVal !== undefined
+        ) {
           if (aVal < bVal) return isAsc ? -1 : 1
           if (aVal > bVal) return isAsc ? 1 : -1
         }

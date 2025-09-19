@@ -2,11 +2,11 @@ import * as React from 'react'
 import { Spinner } from '@radix-ui/themes'
 import { Link, useRouter, useSearch } from '@tanstack/react-router'
 import {
-  ColumnDef,
-  ColumnFiltersState,
-  SortingState,
-  VisibilityState,
-  PaginationState,
+  type ColumnDef,
+  type ColumnFiltersState,
+  type SortingState,
+  type VisibilityState,
+  type PaginationState,
   flexRender,
   getCoreRowModel,
   getFacetedRowModel,

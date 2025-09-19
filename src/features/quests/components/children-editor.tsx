@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { useFieldArray, useFormContext, useWatch } from 'react-hook-form'
-import { DndContext, DragEndEvent } from '@dnd-kit/core'
+import { DndContext, type DragEndEvent } from '@dnd-kit/core'
 import {
   SortableContext,
   verticalListSortingStrategy,

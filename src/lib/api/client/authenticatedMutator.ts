@@ -1,4 +1,4 @@
-import { AxiosRequestConfig } from 'axios'
+import { type AxiosRequestConfig } from 'axios'
 import { orvalMutator } from './orvalMutator'
 
 // Global variable to store the authenticated mutator function

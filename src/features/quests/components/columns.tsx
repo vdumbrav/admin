@@ -1,5 +1,5 @@
 /* eslint-disable react-refresh/only-export-components */
-import { ColumnDef, Row } from '@tanstack/react-table'
+import { type ColumnDef, type Row } from '@tanstack/react-table'
 import { Badge } from '@/components/ui/badge'
 import { Switch } from '@/components/ui/switch'
 import { DataTableColumnHeader } from '@/components/table/data-table-column-header'

@@ -1,5 +1,5 @@
 import React from 'react'
-import { AxiosRequestConfig } from 'axios'
+import { type AxiosRequestConfig } from 'axios'
 import { useAuth } from 'react-oidc-context'
 import { setAuthenticatedMutator } from './authenticatedMutator'
 import { orvalMutator } from './orvalMutator'

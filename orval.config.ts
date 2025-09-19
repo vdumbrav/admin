@@ -3,7 +3,7 @@ import { defineConfig } from "orval";
 export default defineConfig({
   waitlistApi: {
     input: {
-      target: process.env.VITE_SWAGGER_URL!,
+      target: process.env.VITE_SWAGGER_URL || 'http://localhost:3000/api-json',
     },
     hooks: {
       afterAllFilesWrite: "tsx src/lib/api/scripts/post-orval.mjs",
