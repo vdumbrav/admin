@@ -54,8 +54,8 @@ export interface IteratorDaily {
 
 // Using API type directly where possible
 export type TaskType = AdminWaitlistTasksResponseDtoTypeItem
-export type TaskGroup = AdminWaitlistTasksResponseDtoGroup
-export type UIGroup = AdminWaitlistTasksResponseDtoGroup | 'all' // UI-only type with 'all' option
+export type TaskGroup = Exclude<AdminWaitlistTasksResponseDtoGroup, 'all'> // Form type excludes 'all'
+export type UIGroup = AdminWaitlistTasksResponseDtoGroup // UI type includes 'all' from API
 export type TaskProvider = AdminWaitlistTasksResponseDtoProvider
 export type TaskStatus = AdminWaitlistTasksResponseDtoStatus
 

@@ -178,13 +178,12 @@ export function adaptTaskToQuest(task: Partial<Task>): Partial<Quest> {
 
   // Handle group validation
   let apiGroup: AdminWaitlistTasksResponseDtoGroup | undefined
-  if (task.group && task.group !== 'all') {
+  if (task.group) {
     if (isValidApiGroup(task.group)) {
       apiGroup = task.group
     } else {
       // eslint-disable-next-line no-console
       console.warn(`Invalid group for API: ${task.group}`)
-      // TODO: Add proper group mapping when API supports more groups
       apiGroup = 'social' // Default fallback
     }
   }

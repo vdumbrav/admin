@@ -8,7 +8,7 @@ import {
   getAvailableApiProviders,
   getAvailableApiGroups,
 } from './adapters'
-import type { DropdownOption } from './types'
+import type { DropdownOption, UIGroup } from './types'
 
 // ============================================================================
 // UI Labels and Display Names
@@ -100,9 +100,7 @@ export const visibilities = [
 /**
  * Get display label for a group value
  */
-export function getGroupLabel(
-  value: AdminWaitlistTasksResponseDtoGroup | 'all'
-): string {
+export function getGroupLabel(value: UIGroup): string {
   return GROUP_LABELS[value] || value
 }
 

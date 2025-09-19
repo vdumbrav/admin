@@ -82,7 +82,7 @@ const baseSchema = withTwitterValidation(
         'external',
       ]),
       description: z.string().nullable().optional(),
-      group: z.enum(['social', 'daily', 'referral', 'partner', 'all']),
+      group: z.enum(['social', 'daily', 'referral', 'partner']),
       order_by: z.coerce.number().int().nonnegative(),
       provider: z
         .enum([
