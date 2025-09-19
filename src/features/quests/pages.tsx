@@ -8,8 +8,8 @@ import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
 import { QuestForm } from './QuestForm'
 import { useCreateQuest, useQuest, useUpdateQuest } from './api'
-import type { Task } from './data/schema'
-import { adaptQuestToTask, adaptTaskToQuest } from './data/schema'
+import { adaptQuestToTask, adaptTaskToQuest } from './data/adapters'
+import type { Task } from './data/types'
 import { useQuestSearch } from './use-quest-search'
 
 export const QuestCreatePage = () => {

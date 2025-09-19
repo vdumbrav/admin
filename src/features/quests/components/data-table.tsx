@@ -33,8 +33,7 @@ import {
 } from '@/components/ui/table'
 import { DataTablePagination } from '@/components/table/data-table-pagination'
 import { useQuests } from '../api'
-import type { TaskGroup } from '../data/schema'
-import type { Quest } from '../data/schema'
+import type { TaskGroup, Quest } from '../data/types'
 import { DataTableToolbar } from './data-table-toolbar'
 
 interface DataTableProps {

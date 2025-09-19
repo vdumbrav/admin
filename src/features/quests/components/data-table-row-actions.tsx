@@ -12,7 +12,8 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { useQuestsContext } from '../context/quests-context'
-import { questSchema, type Quest } from '../data/schema'
+import { questSchema } from '../data/schemas'
+import type { Quest } from '../data/types'
 import { useQuestSearch } from '../use-quest-search'
 
 interface DataTableRowActionsProps<TData> {

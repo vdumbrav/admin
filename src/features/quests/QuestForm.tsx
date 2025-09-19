@@ -36,7 +36,7 @@ import { uploadMedia } from './api'
 import { ChildrenEditor } from './components/children-editor'
 import type { Child } from './components/children-editor'
 import { groups, types, providers } from './data/data'
-import type { Task } from './data/schema'
+import type { Task } from './data/types'
 import { withTwitterValidation } from './validation'
 
 const childSchema = withTwitterValidation(
@@ -291,7 +291,7 @@ export const QuestForm = ({
     setIconPreview((old) => replaceObjectUrl(old, file))
     setIsUploading(true)
     try {
-      const { url } = await uploadMedia(file, await auth.getAccessToken())
+      const url = await uploadMedia(file, await auth.getAccessToken())
       form.setValue('resources.icon', url, { shouldDirty: true })
     } catch {
       toast.error(mediaErrors.upload)

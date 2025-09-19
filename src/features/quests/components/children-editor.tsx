@@ -18,7 +18,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { NoWheelNumber } from '@/components/no-wheel-number'
 import { SelectDropdown } from '@/components/select-dropdown'
-import type { Task } from '../data/schema'
+import type { Task } from '../data/types'
 
 type ChildType = Extract<
   Task['type'],

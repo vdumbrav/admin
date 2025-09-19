@@ -4,7 +4,7 @@ import { Badge } from '@/components/ui/badge'
 import { Switch } from '@/components/ui/switch'
 import { DataTableColumnHeader } from '@/components/table/data-table-column-header'
 import { useToggleVisibility } from '../api'
-import { Quest } from '../data/schema'
+import type { Quest } from '../data/types'
 import { DataTableRowActions } from './data-table-row-actions'
 
 const VisibleCell = ({

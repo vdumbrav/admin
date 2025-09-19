@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import useDialogState from '@/hooks/use-dialog-state'
-import { Quest } from '../data/schema'
+import type { Quest } from '../data/types'
 
 type QuestsDialogType = 'delete'
 
