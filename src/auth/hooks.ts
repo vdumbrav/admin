@@ -2,12 +2,15 @@ import React from 'react';
 import { useAuth } from 'react-oidc-context';
 import { toast } from 'sonner';
 import { logError } from '@/utils/log';
-import { extractRoles, hasAdminRole, hasAllowedRole, hasSupportRole } from './roles';
+import { hasAdminRoleFromUser, hasAllowedRoleFromUser, hasSupportRoleFromUser } from './roles';
 import type { AuthResult } from './types';
+import { getRolesFromUser } from './utils';
 
 export function useAppAuth(): AuthResult {
   const auth = useAuth();
-  const roles = extractRoles(auth.user?.profile);
+  const roles = React.useMemo(() => {
+    return auth.user ? getRolesFromUser(auth.user) : [];
+  }, [auth.user]);
 
   const getAccessToken = React.useCallback(async (): Promise<string | undefined> => {
     // Check for valid OIDC token first
@@ -38,16 +41,25 @@ export function useAppAuth(): AuthResult {
     });
   }, [auth]);
 
-  const hasAllowedRoleValue = hasAllowedRole(auth.user?.profile);
-  const isAdmin = hasAdminRole(auth.user?.profile);
-  const isSupport = hasSupportRole(auth.user?.profile);
+  const hasAllowedRoleValue = React.useMemo(() => {
+    return auth.user ? hasAllowedRoleFromUser(auth.user) : false;
+  }, [auth.user]);
+
+  const isAdmin = React.useMemo(() => {
+    return auth.user ? hasAdminRoleFromUser(auth.user) : false;
+  }, [auth.user]);
+
+  const isSupport = React.useMemo(() => {
+    return auth.user ? hasSupportRoleFromUser(auth.user) : false;
+  }, [auth.user]);
 
   return {
     isAuthenticated: auth.isAuthenticated,
     isLoading: auth.isLoading,
     user: auth.user,
-    // eslint-disable-next-line @typescript-eslint/no-misused-promises
-    signinRedirect: auth.signinRedirect,
+    signinRedirect: () => {
+      auth.signinRedirect().catch(logError);
+    },
     signoutRedirect,
     getAccessToken,
     roles,

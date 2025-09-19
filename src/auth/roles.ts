@@ -1,3 +1,6 @@
+import type { User } from 'oidc-client-ts';
+import { getRolesFromUser } from './utils';
+
 export enum UserRole {
   Admin = 'admin',
   Administrator = 'Administrator',
@@ -79,6 +82,22 @@ export const hasAllowedRole = (profile: unknown): boolean => {
   const roles = extractRoles(profile);
   const hasAccess = ALLOWED_ROLES.some((allowedRole) => roles.includes(allowedRole));
   return hasAccess;
+};
+
+// JWT-based role functions for User objects
+export const hasAllowedRoleFromUser = (user: User | null | undefined): boolean => {
+  const roles = getRolesFromUser(user);
+  return ALLOWED_ROLES.some((allowedRole) => roles.includes(allowedRole));
+};
+
+export const hasAdminRoleFromUser = (user: User | null | undefined): boolean => {
+  const roles = getRolesFromUser(user);
+  return roles.includes(UserRole.Admin) || roles.includes(UserRole.Administrator);
+};
+
+export const hasSupportRoleFromUser = (user: User | null | undefined): boolean => {
+  const roles = getRolesFromUser(user);
+  return roles.includes(UserRole.Moderator) || roles.includes(UserRole.Support);
 };
 
 export const hasRole = (profile: unknown, role: string): boolean =>
