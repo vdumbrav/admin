@@ -1,17 +1,17 @@
 import type {
   AdminWaitlistTasksResponseDto,
-  AdminWaitlistTasksResponseDtoGroup,
   AdminWaitlistTasksResponseDtoIterator,
-  AdminWaitlistTasksResponseDtoProvider,
   AdminWaitlistTasksResponseDtoResources,
-  AdminWaitlistTasksResponseDtoStatus,
-  AdminWaitlistTasksResponseDtoTypeItem,
 } from '@/lib/api/generated'
 import {
   AdminWaitlistTasksResponseDtoGroup as ApiGroup,
   AdminWaitlistTasksResponseDtoProvider as ApiProvider,
   AdminWaitlistTasksResponseDtoStatus as ApiStatus,
   AdminWaitlistTasksResponseDtoTypeItem as ApiTypeItem,
+  type AdminWaitlistTasksResponseDtoGroup,
+  type AdminWaitlistTasksResponseDtoProvider,
+  type AdminWaitlistTasksResponseDtoStatus,
+  type AdminWaitlistTasksResponseDtoTypeItem,
 } from '@/lib/api/generated'
 import type { IteratorDaily, Quest, Resources, Task } from './types'
 
@@ -156,7 +156,6 @@ export function adaptTaskToQuest(task: Partial<Task>): Partial<Quest> {
     if (isValidApiTaskType(task.type)) {
       apiType = [task.type]
     } else {
-       
       console.warn(
         `Invalid task type for API: ${task.type}, using 'external' as fallback`
       )
@@ -170,7 +169,6 @@ export function adaptTaskToQuest(task: Partial<Task>): Partial<Quest> {
     if (isValidApiProvider(task.provider)) {
       apiProvider = task.provider
     } else {
-       
       console.warn(`Invalid provider for API: ${task.provider}`)
       apiProvider = undefined
     }
@@ -182,7 +180,6 @@ export function adaptTaskToQuest(task: Partial<Task>): Partial<Quest> {
     if (isValidApiGroup(task.group)) {
       apiGroup = task.group
     } else {
-       
       console.warn(`Invalid group for API: ${task.group}`)
       apiGroup = 'social' // Default fallback
     }
@@ -194,7 +191,6 @@ export function adaptTaskToQuest(task: Partial<Task>): Partial<Quest> {
     if (isValidApiStatus(task.status)) {
       apiStatus = task.status
     } else {
-       
       console.warn(`Invalid status for API: ${task.status}`)
       apiStatus = undefined
     }

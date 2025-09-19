@@ -51,6 +51,13 @@ export default tseslint.config(
       // Type-aware rules - now enabled with project config
       '@typescript-eslint/prefer-nullish-coalescing': 'error',
       '@typescript-eslint/prefer-optional-chain': 'error',
+      '@typescript-eslint/no-unnecessary-condition': 'off', // Too strict for many valid cases
+      '@typescript-eslint/no-unnecessary-type-assertion': 'warn',
+      '@typescript-eslint/no-floating-promises': 'warn', // Warn instead of error
+      '@typescript-eslint/await-thenable': 'error',
+      '@typescript-eslint/no-misused-promises': 'warn', // Warn for event handlers
+      '@typescript-eslint/prefer-readonly': 'warn',
+      '@typescript-eslint/prefer-as-const': 'error',
       '@typescript-eslint/consistent-type-imports': [
         'error',
         {
@@ -79,6 +86,19 @@ export default tseslint.config(
         },
       ],
 
+      // Additional code quality rules
+      'no-duplicate-imports': 'error',
+      'no-unused-private-class-members': 'error',
+      'no-useless-assignment': 'error',
+      'no-array-constructor': 'error',
+      'no-new-object': 'error',
+      'array-callback-return': 'error',
+      'no-constructor-return': 'error',
+      'no-promise-executor-return': 'error',
+      'no-unreachable-loop': 'error',
+      'no-use-before-define': 'off', // Let TypeScript handle this
+      'default-case-last': 'error',
+
       // API import restrictions as warnings
       'no-restricted-imports': [
         'warn',
@@ -86,7 +106,8 @@ export default tseslint.config(
           paths: [
             {
               name: '@/lib/api/generated',
-              message: 'Consider importing from specific modules for better tree shaking.',
+              message:
+                'Consider importing from specific modules for better tree shaking.',
             },
           ],
         },
