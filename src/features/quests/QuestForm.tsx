@@ -28,6 +28,9 @@ import { TwitterEmbed } from '@/components/twitter-embed';
 import { apiToForm, formToApi, getDefaultFormValues } from './adapters/form-api-adapter';
 import { uploadMedia } from './api';
 import { ChildrenEditor } from './components/children-editor';
+import { TasksEditor } from './components/tasks-editor';
+import { DailyRewardsEditor } from './components/daily-rewards-editor';
+import { TwitterPreview } from './components/twitter-preview';
 import { groups, providers, types } from './data/data';
 import type { Task } from './data/types';
 import type { PresetConfig } from './presets';
@@ -280,7 +283,10 @@ function calculateTotalReward(
 
   switch (source) {
     case 'tasks':
-      // Sum rewards from child tasks
+      // Sum rewards from tasks (action-with-post preset) or child tasks (other presets)
+      if ((values as any).tasks && Array.isArray((values as any).tasks)) {
+        return (values as any).tasks.reduce((sum: number, task: any) => sum + (task.reward || 0), 0);
+      }
       if (values.child && Array.isArray(values.child)) {
         return values.child.reduce((sum, task) => sum + (task.reward || 0), 0);
       }
@@ -412,26 +418,38 @@ export const QuestForm = ({
     if (!presetConfig?.businessRules) return;
 
     const currentValues = form.getValues();
+    const dirtyFields = form.formState.dirtyFields;
     const updatedValues = applyBusinessRules(currentValues, presetConfig);
 
     // Only update if values actually changed
     if (JSON.stringify(currentValues) !== JSON.stringify(updatedValues)) {
-      // Update specific fields that might have changed
-      if (updatedValues.resources?.ui?.button !== currentValues.resources?.ui?.button) {
+      // Update specific fields that might have changed, but only if they haven't been manually modified
+
+      // Check resources.ui.button - don't override if user has manually changed it
+      if (
+        updatedValues.resources?.ui?.button !== currentValues.resources?.ui?.button &&
+        !dirtyFields.resources?.ui?.button
+      ) {
         form.setValue('resources.ui.button', updatedValues.resources?.ui?.button || '');
       }
+
+      // Check resources.ui.pop-up.button - don't override if user has manually changed it
       if (
         updatedValues.resources?.ui?.['pop-up']?.button !==
-        currentValues.resources?.ui?.['pop-up']?.button
+        currentValues.resources?.ui?.['pop-up']?.button &&
+        !dirtyFields.resources?.ui?.['pop-up']?.button
       ) {
         form.setValue(
           'resources.ui.pop-up.button',
           updatedValues.resources?.ui?.['pop-up']?.button || '',
         );
       }
+
+      // Check resources.ui.pop-up.name - don't override if user has manually changed it
       if (
         updatedValues.resources?.ui?.['pop-up']?.name !==
-        currentValues.resources?.ui?.['pop-up']?.name
+        currentValues.resources?.ui?.['pop-up']?.name &&
+        !dirtyFields.resources?.ui?.['pop-up']?.name
       ) {
         form.setValue(
           'resources.ui.pop-up.name',
@@ -821,7 +839,21 @@ export const QuestForm = ({
           />
           {type === 'multiple' && (
             <div className='sm:col-span-2'>
-              <ChildrenEditor />
+              {presetConfig?.id === 'action-with-post' ? (
+                <TasksEditor />
+              ) : (
+                <ChildrenEditor />
+              )}
+            </div>
+          )}
+          {presetConfig?.id === 'seven-day-challenge' && (
+            <div className='sm:col-span-2'>
+              <DailyRewardsEditor />
+            </div>
+          )}
+          {presetConfig?.id === 'action-with-post' && (
+            <div className='sm:col-span-2'>
+              <TwitterPreview />
             </div>
           )}
           <FormField
