@@ -133,17 +133,13 @@ src/lib/api/
 **Basic Query:**
 
 ```tsx
-import { useWaitlistControllerGetWaitlistTasks } from '@/lib/api/generated'
+import { useWaitlistControllerGetWaitlistTasks } from '@/lib/api/generated';
 
 function TasksList() {
-  const {
-    data: tasks,
-    isLoading,
-    error,
-  } = useWaitlistControllerGetWaitlistTasks()
+  const { data: tasks, isLoading, error } = useWaitlistControllerGetWaitlistTasks();
 
-  if (isLoading) return <div>Loading...</div>
-  if (error) return <div>Error: {error.message}</div>
+  if (isLoading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error.message}</div>;
 
   return (
     <div>
@@ -151,27 +147,27 @@ function TasksList() {
         <div key={task.id}>{task.title}</div>
       ))}
     </div>
-  )
+  );
 }
 ```
 
 **Mutation with Authentication:**
 
 ```tsx
-import { useWaitlistControllerPatchUserTask } from '@/lib/api/generated'
+import { useWaitlistControllerPatchUserTask } from '@/lib/api/generated';
 
 function TaskActions({ taskId }: { taskId: number }) {
-  const mutation = useWaitlistControllerPatchUserTask()
+  const mutation = useWaitlistControllerPatchUserTask();
 
   const handleStart = () => {
-    mutation.mutate({ id: taskId })
-  }
+    mutation.mutate({ id: taskId });
+  };
 
   return (
     <button onClick={handleStart} disabled={mutation.isPending}>
       {mutation.isPending ? 'Starting...' : 'Start Task'}
     </button>
-  )
+  );
 }
 ```
 
@@ -184,7 +180,7 @@ import type {
   WaitlistTasksResponseDto,
   UserProfileResponseDto,
   PremiumBundlesResponseDto,
-} from '@/lib/api/generated'
+} from '@/lib/api/generated';
 
 // Fully typed API responses
 const task: WaitlistTasksResponseDto = {
@@ -195,7 +191,7 @@ const task: WaitlistTasksResponseDto = {
   reward: 100,
   level: 1,
   // ... all other fields with proper types
-}
+};
 ```
 
 #### CI/CD Support
@@ -336,17 +332,17 @@ npm run api:ensure  # Regenerate with fallback if needed
 **Enable detailed OIDC logs:**
 
 ```javascript
-localStorage.setItem('debug', 'oidc-client:*')
+localStorage.setItem('debug', 'oidc-client:*');
 ```
 
 **Inspect token claims:**
 
 ```javascript
 // After authentication, decode JWT (for debugging only)
-const token = localStorage.getItem('oidc.user:authority:clientId')
+const token = localStorage.getItem('oidc.user:authority:clientId');
 if (token) {
-  const payload = JSON.parse(atob(token.split('.')[1]))
-  console.log('Token payload:', payload)
+  const payload = JSON.parse(atob(token.split('.')[1]));
+  console.log('Token payload:', payload);
 }
 ```
 
@@ -354,11 +350,11 @@ if (token) {
 
 ```javascript
 // Test role extraction manually
-import { extractRoles } from './src/auth/roles'
+import { extractRoles } from './src/auth/roles';
 
 const profile =
   /* your user profile */
-  console.log('Extracted roles:', extractRoles(profile))
+  console.log('Extracted roles:', extractRoles(profile));
 ```
 
 ## 🛡️ Security Guidelines

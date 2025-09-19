@@ -1,9 +1,9 @@
-import globals from 'globals'
-import js from '@eslint/js'
-import pluginQuery from '@tanstack/eslint-plugin-query'
-import reactHooks from 'eslint-plugin-react-hooks'
-import reactRefresh from 'eslint-plugin-react-refresh'
-import tseslint from 'typescript-eslint'
+import globals from 'globals';
+import js from '@eslint/js';
+import pluginQuery from '@tanstack/eslint-plugin-query';
+import reactHooks from 'eslint-plugin-react-hooks';
+import reactRefresh from 'eslint-plugin-react-refresh';
+import tseslint from 'typescript-eslint';
 
 export default tseslint.config(
   { ignores: ['dist', 'src/components/ui', 'src/lib/api/generated'] },
@@ -28,10 +28,7 @@ export default tseslint.config(
     },
     rules: {
       ...reactHooks.configs.recommended.rules,
-      'react-refresh/only-export-components': [
-        'warn',
-        { allowConstantExport: true },
-      ],
+      'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
 
       // Enhanced TypeScript rules
       '@typescript-eslint/no-explicit-any': 'warn',
@@ -99,6 +96,18 @@ export default tseslint.config(
       'no-use-before-define': 'off', // Let TypeScript handle this
       'default-case-last': 'error',
 
+      // Auto-fixable rules
+      'object-shorthand': ['error', 'always'],
+      'prefer-template': 'error',
+      yoda: 'error',
+      'prefer-arrow-callback': 'error',
+      'no-useless-concat': 'error',
+      'no-useless-return': 'error',
+      'no-else-return': 'error',
+      'no-lonely-if': 'error',
+      'prefer-exponentiation-operator': 'error',
+      'prefer-numeric-literals': 'error',
+
       // API import restrictions as warnings
       'no-restricted-imports': [
         'warn',
@@ -106,12 +115,11 @@ export default tseslint.config(
           paths: [
             {
               name: '@/lib/api/generated',
-              message:
-                'Consider importing from specific modules for better tree shaking.',
+              message: 'Consider importing from specific modules for better tree shaking.',
             },
           ],
         },
       ],
     },
-  }
-)
+  },
+);

@@ -1,20 +1,20 @@
-import * as React from 'react'
-import { useAppAuth } from '@/auth/provider'
-import { Header } from '@/components/layout/header'
-import { Main } from '@/components/layout/main'
-import { ProfileDropdown } from '@/components/profile-dropdown'
-import { Search } from '@/components/search'
-import { ThemeSwitch } from '@/components/theme-switch'
-import { getColumns } from './components/columns'
-import { QuestsDataTable } from './components/data-table'
-import { QuestsDialogs } from './components/quests-dialogs'
-import { QuestsPrimaryButtons } from './components/quests-primary-buttons'
-import { QuestsProvider } from './context/quests-context'
+import * as React from 'react';
+import { useAppAuth } from '@/auth/provider';
+import { Header } from '@/components/layout/header';
+import { Main } from '@/components/layout/main';
+import { ProfileDropdown } from '@/components/profile-dropdown';
+import { Search } from '@/components/search';
+import { ThemeSwitch } from '@/components/theme-switch';
+import { getColumns } from './components/columns';
+import { QuestsDataTable } from './components/data-table';
+import { QuestsDialogs } from './components/quests-dialogs';
+import { QuestsPrimaryButtons } from './components/quests-primary-buttons';
+import { QuestsProvider } from './context/quests-context';
 
 export const Quests = () => {
-  const auth = useAppAuth()
-  const isAdmin = auth.isAdmin
-  const columns = React.useMemo(() => getColumns(isAdmin), [isAdmin])
+  const auth = useAppAuth();
+  const isAdmin = auth.isAdmin;
+  const columns = React.useMemo(() => getColumns(isAdmin), [isAdmin]);
   return (
     <QuestsProvider>
       <Header fixed>
@@ -38,5 +38,5 @@ export const Quests = () => {
       </Main>
       <QuestsDialogs />
     </QuestsProvider>
-  )
-}
+  );
+};

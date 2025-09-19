@@ -1,41 +1,28 @@
-import { useEffect, useRef } from 'react'
-import { useFieldArray, useFormContext, useWatch } from 'react-hook-form'
-import { DndContext, type DragEndEvent } from '@dnd-kit/core'
-import {
-  SortableContext,
-  useSortable,
-  verticalListSortingStrategy,
-} from '@dnd-kit/sortable'
-import { CSS } from '@dnd-kit/utilities'
-import { Button } from '@/components/ui/button'
-import {
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
-import { NoWheelNumber } from '@/components/no-wheel-number'
-import { SelectDropdown } from '@/components/select-dropdown'
-import type { Task } from '../data/types'
+import { useEffect, useRef } from 'react';
+import { useFieldArray, useFormContext, useWatch } from 'react-hook-form';
+import { DndContext, type DragEndEvent } from '@dnd-kit/core';
+import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+import { Button } from '@/components/ui/button';
+import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { NoWheelNumber } from '@/components/no-wheel-number';
+import { SelectDropdown } from '@/components/select-dropdown';
+import type { Task } from '../data/types';
 
-type ChildType = Extract<
-  Task['type'],
-  'like' | 'share' | 'comment' | 'join' | 'connect'
->
+type ChildType = Extract<Task['type'], 'like' | 'share' | 'comment' | 'join' | 'connect'>;
 
 interface Child {
-  title: string
-  type: ChildType
-  provider?: Task['provider']
-  reward?: number
-  order_by: number
-  resources?: { tweetId?: string; username?: string }
+  title: string;
+  type: ChildType;
+  provider?: Task['provider'];
+  reward?: number;
+  order_by: number;
+  resources?: { tweetId?: string; username?: string };
 }
 
 interface FormValues {
-  child: Child[]
+  child: Child[];
 }
 
 const childTypes = [
@@ -44,7 +31,7 @@ const childTypes = [
   { value: 'comment', label: 'Comment' },
   { value: 'join', label: 'Join' },
   { value: 'connect', label: 'Connect' },
-]
+];
 
 const childProviders = [
   { value: 'twitter', label: 'Twitter' },
@@ -54,34 +41,34 @@ const childProviders = [
   { value: 'walme', label: 'Walme' },
   { value: 'monetag', label: 'Monetag' },
   { value: 'adsgram', label: 'AdsGram' },
-]
+];
 
 export const ChildrenEditor = () => {
-  const { control, setValue } = useFormContext<FormValues>()
+  const { control, setValue } = useFormContext<FormValues>();
   const { fields, append, remove, move } = useFieldArray({
     control,
     name: 'child',
-  })
-  const listRef = useRef<HTMLDivElement>(null)
+  });
+  const listRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     fields.forEach((_f, i) => {
-      setValue(`child.${i}.order_by`, i, { shouldDirty: true })
-    })
-  }, [fields, setValue])
+      setValue(`child.${i}.order_by`, i, { shouldDirty: true });
+    });
+  }, [fields, setValue]);
 
   useEffect(() => {
-    const el = listRef.current?.lastElementChild
-    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
-  }, [fields.length])
+    const el = listRef.current?.lastElementChild;
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }, [fields.length]);
 
   const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event
-    if (!over || active.id === over.id) return
-    const oldIndex = fields.findIndex((f) => f.id === active.id)
-    const newIndex = fields.findIndex((f) => f.id === over.id)
-    move(oldIndex, newIndex)
-  }
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    const oldIndex = fields.findIndex((f) => f.id === active.id);
+    const newIndex = fields.findIndex((f) => f.id === over.id);
+    move(oldIndex, newIndex);
+  };
 
   return (
     <div className='space-y-4'>
@@ -102,50 +89,36 @@ export const ChildrenEditor = () => {
         </Button>
       </div>
       <DndContext onDragEnd={handleDragEnd}>
-        <SortableContext
-          items={fields.map((f) => f.id)}
-          strategy={verticalListSortingStrategy}
-        >
+        <SortableContext items={fields.map((f) => f.id)} strategy={verticalListSortingStrategy}>
           <div ref={listRef} className='space-y-4'>
             {fields.map((field, index) => (
-              <ChildRow
-                key={field.id}
-                id={field.id}
-                index={index}
-                remove={remove}
-              />
+              <ChildRow key={field.id} id={field.id} index={index} remove={remove} />
             ))}
           </div>
         </SortableContext>
       </DndContext>
     </div>
-  )
-}
+  );
+};
 
 interface RowProps {
-  id: string
-  index: number
-  remove: (index: number) => void
+  id: string;
+  index: number;
+  remove: (index: number) => void;
 }
 
 const ChildRow = ({ id, index, remove }: RowProps) => {
-  const { control } = useFormContext<FormValues>()
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id })
+  const { control } = useFormContext<FormValues>();
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id,
+  });
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-  }
-  const type = useWatch({ control, name: `child.${index}.type` })
-  const provider = useWatch({ control, name: `child.${index}.provider` })
-  const showTweetFields =
-    ['like', 'share', 'comment'].includes(type) && provider === 'twitter'
+  };
+  const type = useWatch({ control, name: `child.${index}.type` });
+  const provider = useWatch({ control, name: `child.${index}.provider` });
+  const showTweetFields = ['like', 'share', 'comment'].includes(type) && provider === 'twitter';
 
   return (
     <div
@@ -225,9 +198,7 @@ const ChildRow = ({ id, index, remove }: RowProps) => {
                   value={field.value ?? ''}
                   onChange={(e) =>
                     field.onChange(
-                      Number.isNaN(e.target.valueAsNumber)
-                        ? undefined
-                        : e.target.valueAsNumber
+                      Number.isNaN(e.target.valueAsNumber) ? undefined : e.target.valueAsNumber,
                     )
                   }
                   min={0}
@@ -251,9 +222,7 @@ const ChildRow = ({ id, index, remove }: RowProps) => {
                   <Input
                     {...field}
                     placeholder='1234567890'
-                    onBlur={(e) =>
-                      field.onChange((e.target.value ?? '').trim())
-                    }
+                    onBlur={(e) => field.onChange((e.target.value ?? '').trim())}
                   />
                 </FormControl>
                 <FormMessage />
@@ -270,11 +239,7 @@ const ChildRow = ({ id, index, remove }: RowProps) => {
                   <Input
                     {...field}
                     placeholder='Enter username (e.g. waitlist)'
-                    onBlur={(e) =>
-                      field.onChange(
-                        (e.target.value ?? '').trim().replace(/^@/, '')
-                      )
-                    }
+                    onBlur={(e) => field.onChange((e.target.value ?? '').trim().replace(/^@/, ''))}
                   />
                 </FormControl>
                 <FormMessage />
@@ -284,7 +249,7 @@ const ChildRow = ({ id, index, remove }: RowProps) => {
         </div>
       )}
     </div>
-  )
-}
+  );
+};
 
-export type { Child }
+export type { Child };

@@ -1,21 +1,20 @@
-import { UserManager, WebStorageStateStore } from 'oidc-client-ts'
-import type { AuthProviderProps } from 'react-oidc-context'
+import { UserManager, WebStorageStateStore } from 'oidc-client-ts';
+import type { AuthProviderProps } from 'react-oidc-context';
 
-const rawBaseEnv = import.meta.env.VITE_APP_BASE_URL as string | undefined
-const rawBase = rawBaseEnv ?? window.location.origin
+const rawBaseEnv = import.meta.env.VITE_APP_BASE_URL as string | undefined;
+const rawBase = rawBaseEnv ?? window.location.origin;
 
 // Build base URL
-const baseUrl = rawBase.endsWith('/') ? rawBase.slice(0, -1) : rawBase
+const baseUrl = rawBase.endsWith('/') ? rawBase.slice(0, -1) : rawBase;
 
-const rawIssuer = import.meta.env.VITE_OIDC_AUTHORITY as string | undefined
+const rawIssuer = import.meta.env.VITE_OIDC_AUTHORITY as string | undefined;
 if (!rawIssuer) {
-  throw new Error('VITE_OIDC_AUTHORITY is not defined')
+  throw new Error('VITE_OIDC_AUTHORITY is not defined');
 }
-const authority = rawIssuer.endsWith('/') ? rawIssuer.slice(0, -1) : rawIssuer
+const authority = rawIssuer.endsWith('/') ? rawIssuer.slice(0, -1) : rawIssuer;
 
-const clientId = import.meta.env.VITE_OIDC_CLIENT_ID || 'waitlist-api'
-const scope =
-  import.meta.env.VITE_OIDC_SCOPE || 'openid profile email roles offline_access'
+const clientId = import.meta.env.VITE_OIDC_CLIENT_ID ?? 'waitlist-api';
+const scope = import.meta.env.VITE_OIDC_SCOPE ?? 'openid profile email roles offline_access';
 
 export const oidcConfig: AuthProviderProps = {
   authority,
@@ -36,8 +35,8 @@ export const oidcConfig: AuthProviderProps = {
     prefix: 'oidc.',
   }),
   onSigninCallback: () => {
-    window.history.replaceState({}, document.title, window.location.pathname)
+    window.history.replaceState({}, document.title, window.location.pathname);
   },
-}
+};
 
-export const userManager = new UserManager(oidcConfig)
+export const userManager = new UserManager(oidcConfig);

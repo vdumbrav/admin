@@ -1,6 +1,6 @@
-import { IconChecklist } from '@tabler/icons-react'
-import { Command } from 'lucide-react'
-import { type SidebarData } from '../types'
+import { IconChecklist } from '@tabler/icons-react';
+import { Command } from 'lucide-react';
+import { type SidebarData } from '../types';
 
 export const sidebarData: SidebarData = {
   user: {
@@ -28,4 +28,4 @@ export const sidebarData: SidebarData = {
       ],
     },
   ],
-}
+};

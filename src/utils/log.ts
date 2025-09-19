@@ -1,3 +1,3 @@
 export const logError = (...args: unknown[]) => {
-  globalThis['console']?.error?.(...args)
-}
+  globalThis['console']?.error?.(...args);
+};

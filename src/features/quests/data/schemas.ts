@@ -1,11 +1,11 @@
-import { z } from 'zod'
+import { z } from 'zod';
 import {
   AdminWaitlistTasksResponseDtoGroup,
   AdminWaitlistTasksResponseDtoProvider,
   AdminWaitlistTasksResponseDtoStatus,
   AdminWaitlistTasksResponseDtoTypeItem,
-} from '@/lib/api/generated'
-import type { Quest, Task } from './types'
+} from '@/lib/api/generated';
+import type { Quest, Task } from './types';
 
 // ============================================================================
 // Utility schemas
@@ -40,7 +40,7 @@ const resourcesSchema = z
       })
       .optional(),
   })
-  .optional()
+  .optional();
 
 const iteratorSchema = z
   .object({
@@ -51,7 +51,7 @@ const iteratorSchema = z
     reward: z.number(),
     tick: z.number().optional(),
   })
-  .optional()
+  .optional();
 
 // ============================================================================
 // API-based enum schemas (using generated types)
@@ -68,7 +68,7 @@ const adminTaskTypeSchema = z.enum([
   AdminWaitlistTasksResponseDtoTypeItem.repeatable,
   AdminWaitlistTasksResponseDtoTypeItem.dummy,
   AdminWaitlistTasksResponseDtoTypeItem.external,
-])
+]);
 
 const providerSchema = z
   .enum([
@@ -80,7 +80,7 @@ const providerSchema = z
     AdminWaitlistTasksResponseDtoProvider.adsgram,
     AdminWaitlistTasksResponseDtoProvider.monetag,
   ])
-  .optional()
+  .optional();
 
 const groupSchema = z.enum([
   AdminWaitlistTasksResponseDtoGroup.all,
@@ -88,7 +88,7 @@ const groupSchema = z.enum([
   AdminWaitlistTasksResponseDtoGroup.social,
   AdminWaitlistTasksResponseDtoGroup.daily,
   AdminWaitlistTasksResponseDtoGroup.partner,
-])
+]);
 
 const statusSchema = z
   .enum([
@@ -98,7 +98,7 @@ const statusSchema = z
     AdminWaitlistTasksResponseDtoStatus.failed,
     AdminWaitlistTasksResponseDtoStatus.locked,
   ])
-  .optional()
+  .optional();
 
 // ============================================================================
 // Form-compatible schemas (with extended types)
@@ -115,14 +115,14 @@ const taskTypeSchema = z.enum([
   AdminWaitlistTasksResponseDtoTypeItem.repeatable,
   AdminWaitlistTasksResponseDtoTypeItem.dummy,
   AdminWaitlistTasksResponseDtoTypeItem.external,
-])
+]);
 
 const taskGroupSchema = z.enum([
   AdminWaitlistTasksResponseDtoGroup.referral,
   AdminWaitlistTasksResponseDtoGroup.social,
   AdminWaitlistTasksResponseDtoGroup.daily,
   AdminWaitlistTasksResponseDtoGroup.partner,
-])
+]);
 
 // ============================================================================
 // Main schemas
@@ -151,7 +151,7 @@ export const questSchema: z.ZodType<Quest> = z.object({
   iterator: iteratorSchema,
   next_tick: z.string().optional(),
   visible: z.boolean().optional(),
-})
+});
 
 // Schema for Task (form validation)
 export const taskSchema: z.ZodType<Task> = z.object({
@@ -180,7 +180,7 @@ export const taskSchema: z.ZodType<Task> = z.object({
   iterator: iteratorSchema,
   providerCapitalized: z.string().optional(),
   visible: z.boolean().optional(),
-})
+});
 
 // ============================================================================
 // Form-specific schemas
@@ -215,7 +215,7 @@ export const questFormSchema = z.object({
   iterator: iteratorSchema,
   providerCapitalized: z.string().optional(),
   visible: z.boolean().optional(),
-})
+});
 
 // ============================================================================
 // Query schemas
@@ -230,11 +230,11 @@ export const questQuerySchema = z.object({
   page: z.number().min(1).optional(),
   limit: z.number().min(1).optional(),
   sort: z.string().optional(),
-})
+});
 
 // ============================================================================
 // Type exports
 // ============================================================================
 
-export type QuestFormData = z.infer<typeof questFormSchema>
-export type QuestQueryData = z.infer<typeof questQuerySchema>
+export type QuestFormData = z.infer<typeof questFormSchema>;
+export type QuestQueryData = z.infer<typeof questQuerySchema>;

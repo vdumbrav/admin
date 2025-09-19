@@ -1,23 +1,23 @@
-import { useNavigate, useParams } from '@tanstack/react-router'
-import { toast } from 'sonner'
-import { Button } from '@/components/ui/button'
-import { Header } from '@/components/layout/header'
-import { Main } from '@/components/layout/main'
-import { ProfileDropdown } from '@/components/profile-dropdown'
-import { Search } from '@/components/search'
-import { ThemeSwitch } from '@/components/theme-switch'
-import { QuestForm } from './QuestForm'
-import { useCreateQuest, useQuest, useUpdateQuest } from './api'
-import { adaptQuestToTask, adaptTaskToQuest } from './data/adapters'
-import type { Task } from './data/types'
-import { useQuestSearch } from './use-quest-search'
+import { useNavigate, useParams } from '@tanstack/react-router';
+import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
+import { Header } from '@/components/layout/header';
+import { Main } from '@/components/layout/main';
+import { ProfileDropdown } from '@/components/profile-dropdown';
+import { Search } from '@/components/search';
+import { ThemeSwitch } from '@/components/theme-switch';
+import { QuestForm } from './QuestForm';
+import { useCreateQuest, useQuest, useUpdateQuest } from './api';
+import { adaptQuestToTask, adaptTaskToQuest } from './data/adapters';
+import type { Task } from './data/types';
+import { useQuestSearch } from './use-quest-search';
 
 export const QuestCreatePage = () => {
-  const create = useCreateQuest()
-  const nav = useNavigate({})
+  const create = useCreateQuest();
+  const nav = useNavigate({});
   const search = useQuestSearch({
     from: '/_authenticated/quests/new' as const,
-  })
+  });
   return (
     <>
       <Header fixed>
@@ -33,39 +33,36 @@ export const QuestCreatePage = () => {
             <h2 className='text-2xl font-bold tracking-tight'>New Quest</h2>
             <p className='text-muted-foreground'>Create a new quest.</p>
           </div>
-          <Button
-            variant='outline'
-            onClick={() => nav({ to: '/quests', search })}
-          >
+          <Button variant='outline' onClick={() => nav({ to: '/quests', search })}>
             Back to list
           </Button>
         </div>
         <QuestForm
           onSubmit={async (v) => {
             try {
-              await create.mutateAsync(adaptTaskToQuest(v as Partial<Task>))
-              toast.success('Saved')
-              nav({ to: '/quests', search })
+              await create.mutateAsync(adaptTaskToQuest(v as Partial<Task>));
+              toast.success('Saved');
+              nav({ to: '/quests', search });
             } catch (e) {
-              toast.error(e instanceof Error ? e.message : 'Failed to save')
+              toast.error(e instanceof Error ? e.message : 'Failed to save');
             }
           }}
           onCancel={() => nav({ to: '/quests', search })}
         />
       </Main>
     </>
-  )
-}
+  );
+};
 
 export const QuestEditPage = () => {
-  const { id } = useParams({ from: '/_authenticated/quests/$id' })
-  const questId = Number(id)
-  const { data } = useQuest(questId)
-  const update = useUpdateQuest(questId)
-  const nav = useNavigate({})
+  const { id } = useParams({ from: '/_authenticated/quests/$id' });
+  const questId = Number(id);
+  const { data } = useQuest(questId);
+  const update = useUpdateQuest(questId);
+  const nav = useNavigate({});
   const search = useQuestSearch({
     from: '/_authenticated/quests/$id' as const,
-  })
+  });
 
   if (!data) {
     return (
@@ -85,7 +82,7 @@ export const QuestEditPage = () => {
           </div>
         </Main>
       </>
-    )
+    );
   }
   return (
     <>
@@ -99,15 +96,10 @@ export const QuestEditPage = () => {
       <Main>
         <div className='mb-4 flex items-center justify-between'>
           <div>
-            <h2 className='text-2xl font-bold tracking-tight'>
-              Edit Quest #{id}
-            </h2>
+            <h2 className='text-2xl font-bold tracking-tight'>Edit Quest #{id}</h2>
             <p className='text-muted-foreground'>Update quest properties.</p>
           </div>
-          <Button
-            variant='outline'
-            onClick={() => nav({ to: '/quests', search })}
-          >
+          <Button variant='outline' onClick={() => nav({ to: '/quests', search })}>
             Back to list
           </Button>
         </div>
@@ -115,16 +107,16 @@ export const QuestEditPage = () => {
           initial={data ? adaptQuestToTask(data) : undefined}
           onSubmit={async (v) => {
             try {
-              await update.mutateAsync(adaptTaskToQuest(v as Partial<Task>))
-              toast.success('Saved')
-              nav({ to: '/quests', search })
+              await update.mutateAsync(adaptTaskToQuest(v as Partial<Task>));
+              toast.success('Saved');
+              nav({ to: '/quests', search });
             } catch (e) {
-              toast.error(e instanceof Error ? e.message : 'Failed to save')
+              toast.error(e instanceof Error ? e.message : 'Failed to save');
             }
           }}
           onCancel={() => nav({ to: '/quests', search })}
         />
       </Main>
     </>
-  )
-}
+  );
+};

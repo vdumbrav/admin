@@ -1,30 +1,30 @@
-import React from 'react'
-import { type AxiosRequestConfig } from 'axios'
-import { useAuth } from 'react-oidc-context'
-import { setAuthenticatedMutator } from './authenticatedMutator'
-import { orvalMutator } from './orvalMutator'
+import React from 'react';
+import { type AxiosRequestConfig } from 'axios';
+import { useAuth } from 'react-oidc-context';
+import { setAuthenticatedMutator } from './authenticatedMutator';
+import { orvalMutator } from './orvalMutator';
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const auth = useAuth()
+  const auth = useAuth();
 
   React.useEffect(() => {
     // Set the global authenticated mutator
     const authenticatedMutator = async function <TResponse>(
-      config: AxiosRequestConfig
+      config: AxiosRequestConfig,
     ): Promise<TResponse> {
       // Add auth header if user is authenticated
       if (auth.user?.access_token) {
         config.headers = {
           ...config.headers,
           Authorization: `Bearer ${auth.user.access_token}`,
-        }
+        };
       }
 
-      return orvalMutator<TResponse>(config)
-    }
+      return orvalMutator<TResponse>(config);
+    };
 
-    setAuthenticatedMutator(authenticatedMutator)
-  }, [auth.user?.access_token])
+    setAuthenticatedMutator(authenticatedMutator);
+  }, [auth.user?.access_token]);
 
-  return <>{children}</>
+  return <>{children}</>;
 }

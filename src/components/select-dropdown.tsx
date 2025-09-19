@@ -1,23 +1,23 @@
-import { IconLoader } from '@tabler/icons-react'
-import { cn } from '@/lib/utils'
-import { FormControl } from '@/components/ui/form'
+import { IconLoader } from '@tabler/icons-react';
+import { cn } from '@/lib/utils';
+import { FormControl } from '@/components/ui/form';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
+} from '@/components/ui/select';
 
 interface SelectDropdownProps {
-  value?: string
-  defaultValue?: string
-  onValueChange?: (value: string) => void
-  placeholder?: string
-  isPending?: boolean
-  items: { label: string; value: string }[] | undefined
-  disabled?: boolean
-  className?: string
+  value?: string;
+  defaultValue?: string;
+  onValueChange?: (value: string) => void;
+  placeholder?: string;
+  isPending?: boolean;
+  items: { label: string; value: string }[] | undefined;
+  disabled?: boolean;
+  className?: string;
 }
 
 export function SelectDropdown({
@@ -31,11 +31,7 @@ export function SelectDropdown({
   className = '',
 }: SelectDropdownProps) {
   return (
-    <Select
-      value={value}
-      defaultValue={defaultValue}
-      onValueChange={onValueChange}
-    >
+    <Select value={value} defaultValue={defaultValue} onValueChange={onValueChange}>
       <FormControl>
         <SelectTrigger disabled={disabled} className={cn(className)}>
           <SelectValue placeholder={placeholder ?? 'Select'} />
@@ -59,5 +55,5 @@ export function SelectDropdown({
         )}
       </SelectContent>
     </Select>
-  )
+  );
 }

@@ -3,25 +3,23 @@ import {
   ChevronRightIcon,
   DoubleArrowLeftIcon,
   DoubleArrowRightIcon,
-} from '@radix-ui/react-icons'
-import { type Table } from '@tanstack/react-table'
-import { Button } from '@/components/ui/button'
+} from '@radix-ui/react-icons';
+import { type Table } from '@tanstack/react-table';
+import { Button } from '@/components/ui/button';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
+} from '@/components/ui/select';
 
 interface DataTablePaginationProps<TData> {
-  table: Table<TData>
+  table: Table<TData>;
 }
 
-export const DataTablePagination = <TData,>({
-  table,
-}: DataTablePaginationProps<TData>) => {
-  const pageCount = Math.max(table.getPageCount(), 1)
+export const DataTablePagination = <TData,>({ table }: DataTablePaginationProps<TData>) => {
+  const pageCount = Math.max(table.getPageCount(), 1);
 
   return (
     <div
@@ -34,9 +32,9 @@ export const DataTablePagination = <TData,>({
           <Select
             value={`${table.getState().pagination.pageSize}`}
             onValueChange={(value) => {
-              const size = Number(value)
-              if (size === table.getState().pagination.pageSize) return
-              table.setPageSize(size)
+              const size = Number(value);
+              if (size === table.getState().pagination.pageSize) return;
+              table.setPageSize(size);
             }}
           >
             <SelectTrigger className='h-8 w-[70px]'>
@@ -94,5 +92,5 @@ export const DataTablePagination = <TData,>({
         </div>
       </div>
     </div>
-  )
-}
+  );
+};

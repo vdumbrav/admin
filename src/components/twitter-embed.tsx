@@ -1,70 +1,70 @@
-'use client'
+'use client';
 
-import { useEffect, useRef, useState } from 'react'
-import { Spinner } from '@radix-ui/themes'
+import { useEffect, useRef, useState } from 'react';
+import { Spinner } from '@radix-ui/themes';
 
 interface TwitterEmbedProps {
-  username: string
-  tweetId: string
+  username: string;
+  tweetId: string;
 }
 
 interface Twttr {
-  widgets: { load: (element?: HTMLElement) => void }
+  widgets: { load: (element?: HTMLElement) => void };
 }
 
 declare global {
   interface Window {
-    twttr?: Twttr
+    twttr?: Twttr;
   }
 }
 
 export const TwitterEmbed = ({ username, tweetId }: TwitterEmbedProps) => {
-  const ref = useRef<HTMLDivElement>(null)
-  const [ready, setReady] = useState(false)
+  const ref = useRef<HTMLDivElement>(null);
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    if (typeof window === 'undefined') return
-    setReady(false)
-    const container = ref.current
-    if (!container) return
-    container.innerHTML = ''
+    if (typeof window === 'undefined') return;
+    setReady(false);
+    const container = ref.current;
+    if (!container) return;
+    container.innerHTML = '';
 
-    const blockquote = document.createElement('blockquote')
-    blockquote.className = 'twitter-tweet'
-    const link = document.createElement('a')
-    link.href = `https://twitter.com/${username}/status/${tweetId}`
-    blockquote.appendChild(link)
-    container.appendChild(blockquote)
+    const blockquote = document.createElement('blockquote');
+    blockquote.className = 'twitter-tweet';
+    const link = document.createElement('a');
+    link.href = `https://twitter.com/${username}/status/${tweetId}`;
+    blockquote.appendChild(link);
+    container.appendChild(blockquote);
 
-    const timeout = setTimeout(() => setReady(true), 7000)
+    const timeout = setTimeout(() => setReady(true), 7000);
 
     if (window.twttr?.widgets) {
-      window.twttr.widgets.load(container)
-      setReady(true)
-      return () => clearTimeout(timeout)
+      window.twttr.widgets.load(container);
+      setReady(true);
+      return () => clearTimeout(timeout);
     }
 
-    const scriptId = 'twitter-wjs'
-    const existing = document.getElementById(scriptId)
+    const scriptId = 'twitter-wjs';
+    const existing = document.getElementById(scriptId);
     const load = () => {
-      window.twttr?.widgets.load(container)
-      setReady(true)
-    }
+      window.twttr?.widgets.load(container);
+      setReady(true);
+    };
     if (!existing) {
-      const script = document.createElement('script')
-      script.id = scriptId
-      script.src = 'https://platform.twitter.com/widgets.js'
-      script.async = true
-      script.onload = load
-      container.appendChild(script)
+      const script = document.createElement('script');
+      script.id = scriptId;
+      script.src = 'https://platform.twitter.com/widgets.js';
+      script.async = true;
+      script.onload = load;
+      container.appendChild(script);
     } else {
-      load()
+      load();
     }
 
-    return () => clearTimeout(timeout)
-  }, [username, tweetId])
+    return () => clearTimeout(timeout);
+  }, [username, tweetId]);
 
-  if (typeof window === 'undefined') return <div />
+  if (typeof window === 'undefined') return <div />;
 
   return (
     <div>
@@ -75,5 +75,5 @@ export const TwitterEmbed = ({ username, tweetId }: TwitterEmbedProps) => {
       )}
       <div ref={ref} />
     </div>
-  )
-}
+  );
+};

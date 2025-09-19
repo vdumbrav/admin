@@ -2,26 +2,21 @@ import {
   AdminWaitlistTasksResponseDtoGroup,
   AdminWaitlistTasksResponseDtoProvider,
   AdminWaitlistTasksResponseDtoTypeItem,
-} from '@/lib/api/generated'
-import {
-  getAvailableApiGroups,
-  getAvailableApiProviders,
-  getAvailableApiTypes,
-} from './adapters'
-import type { DropdownOption, UIGroup } from './types'
+} from '@/lib/api/generated';
+import { getAvailableApiGroups, getAvailableApiProviders, getAvailableApiTypes } from './adapters';
+import type { DropdownOption, UIGroup } from './types';
 
 // ============================================================================
 // UI Labels and Display Names
 // ============================================================================
 
-const GROUP_LABELS: Record<AdminWaitlistTasksResponseDtoGroup | 'all', string> =
-  {
-    [AdminWaitlistTasksResponseDtoGroup.social]: 'Social',
-    [AdminWaitlistTasksResponseDtoGroup.daily]: 'Daily',
-    [AdminWaitlistTasksResponseDtoGroup.referral]: 'Referral',
-    [AdminWaitlistTasksResponseDtoGroup.partner]: 'Partner',
-    all: 'All Groups',
-  }
+const GROUP_LABELS: Record<AdminWaitlistTasksResponseDtoGroup | 'all', string> = {
+  [AdminWaitlistTasksResponseDtoGroup.social]: 'Social',
+  [AdminWaitlistTasksResponseDtoGroup.daily]: 'Daily',
+  [AdminWaitlistTasksResponseDtoGroup.referral]: 'Referral',
+  [AdminWaitlistTasksResponseDtoGroup.partner]: 'Partner',
+  all: 'All Groups',
+};
 
 const TYPE_LABELS: Record<AdminWaitlistTasksResponseDtoTypeItem, string> = {
   [AdminWaitlistTasksResponseDtoTypeItem.like]: 'Like',
@@ -34,7 +29,7 @@ const TYPE_LABELS: Record<AdminWaitlistTasksResponseDtoTypeItem, string> = {
   [AdminWaitlistTasksResponseDtoTypeItem.dummy]: 'Dummy',
   [AdminWaitlistTasksResponseDtoTypeItem.referral]: 'Referral',
   [AdminWaitlistTasksResponseDtoTypeItem.external]: 'External',
-}
+};
 
 const PROVIDER_LABELS: Record<AdminWaitlistTasksResponseDtoProvider, string> = {
   [AdminWaitlistTasksResponseDtoProvider.twitter]: 'Twitter',
@@ -44,7 +39,7 @@ const PROVIDER_LABELS: Record<AdminWaitlistTasksResponseDtoProvider, string> = {
   [AdminWaitlistTasksResponseDtoProvider.walme]: 'Walme',
   [AdminWaitlistTasksResponseDtoProvider.monetag]: 'Monetag',
   [AdminWaitlistTasksResponseDtoProvider.adsgram]: 'AdsGram',
-}
+};
 
 // ============================================================================
 // Dropdown Options (API-synced)
@@ -61,9 +56,9 @@ export const groups = [
     (group): DropdownOption => ({
       value: group,
       label: GROUP_LABELS[group],
-    })
+    }),
   ),
-]
+];
 
 /**
  * Types dropdown options (API-synced + form-specific)
@@ -72,8 +67,8 @@ export const types = getAvailableApiTypes().map(
   (type): DropdownOption => ({
     value: type,
     label: TYPE_LABELS[type],
-  })
-)
+  }),
+);
 
 /**
  * Providers dropdown options (API-synced)
@@ -82,8 +77,8 @@ export const providers = getAvailableApiProviders().map(
   (provider): DropdownOption => ({
     value: provider,
     label: PROVIDER_LABELS[provider],
-  })
-)
+  }),
+);
 
 /**
  * Visibility dropdown options
@@ -91,7 +86,7 @@ export const providers = getAvailableApiProviders().map(
 export const visibilities = [
   { value: 'true', label: 'Visible' },
   { value: 'false', label: 'Hidden' },
-]
+];
 
 // ============================================================================
 // Helper Functions
@@ -101,58 +96,48 @@ export const visibilities = [
  * Get display label for a group value
  */
 export function getGroupLabel(value: UIGroup): string {
-  return GROUP_LABELS[value] || value
+  return GROUP_LABELS[value] ?? value;
 }
 
 /**
  * Get display label for a type value
  */
-export function getTypeLabel(
-  value: AdminWaitlistTasksResponseDtoTypeItem
-): string {
-  return TYPE_LABELS[value] ?? value
+export function getTypeLabel(value: AdminWaitlistTasksResponseDtoTypeItem): string {
+  return TYPE_LABELS[value] ?? value;
 }
 
 /**
  * Get display label for a provider value
  */
-export function getProviderLabel(
-  value: AdminWaitlistTasksResponseDtoProvider
-): string {
-  return PROVIDER_LABELS[value] || value
+export function getProviderLabel(value: AdminWaitlistTasksResponseDtoProvider): string {
+  return PROVIDER_LABELS[value] ?? value;
 }
 
 /**
  * Check if a type value is valid for API
  */
-export function isApiType(
-  value: string
-): value is AdminWaitlistTasksResponseDtoTypeItem {
+export function isApiType(value: string): value is AdminWaitlistTasksResponseDtoTypeItem {
   return Object.values(AdminWaitlistTasksResponseDtoTypeItem).includes(
-    value as AdminWaitlistTasksResponseDtoTypeItem
-  )
+    value as AdminWaitlistTasksResponseDtoTypeItem,
+  );
 }
 
 /**
  * Check if a provider value is valid for API
  */
-export function isApiProvider(
-  value: string
-): value is AdminWaitlistTasksResponseDtoProvider {
+export function isApiProvider(value: string): value is AdminWaitlistTasksResponseDtoProvider {
   return Object.values(AdminWaitlistTasksResponseDtoProvider).includes(
-    value as AdminWaitlistTasksResponseDtoProvider
-  )
+    value as AdminWaitlistTasksResponseDtoProvider,
+  );
 }
 
 /**
  * Check if a group value is valid for API
  */
-export function isApiGroup(
-  value: string
-): value is AdminWaitlistTasksResponseDtoGroup {
+export function isApiGroup(value: string): value is AdminWaitlistTasksResponseDtoGroup {
   return Object.values(AdminWaitlistTasksResponseDtoGroup).includes(
-    value as AdminWaitlistTasksResponseDtoGroup
-  )
+    value as AdminWaitlistTasksResponseDtoGroup,
+  );
 }
 
 // ============================================================================
@@ -164,10 +149,7 @@ export function isApiGroup(
  * TODO: This should ideally come from API documentation or be configurable
  */
 export const TYPE_PROVIDER_REQUIREMENTS: Partial<
-  Record<
-    AdminWaitlistTasksResponseDtoTypeItem,
-    AdminWaitlistTasksResponseDtoProvider[]
-  >
+  Record<AdminWaitlistTasksResponseDtoTypeItem, AdminWaitlistTasksResponseDtoProvider[]>
 > = {
   [AdminWaitlistTasksResponseDtoTypeItem.like]: [
     AdminWaitlistTasksResponseDtoProvider.twitter,
@@ -177,9 +159,7 @@ export const TYPE_PROVIDER_REQUIREMENTS: Partial<
     AdminWaitlistTasksResponseDtoProvider.twitter,
     AdminWaitlistTasksResponseDtoProvider.telegram,
   ],
-  [AdminWaitlistTasksResponseDtoTypeItem.comment]: [
-    AdminWaitlistTasksResponseDtoProvider.twitter,
-  ],
+  [AdminWaitlistTasksResponseDtoTypeItem.comment]: [AdminWaitlistTasksResponseDtoProvider.twitter],
   [AdminWaitlistTasksResponseDtoTypeItem.join]: [
     AdminWaitlistTasksResponseDtoProvider.telegram,
     AdminWaitlistTasksResponseDtoProvider.discord,
@@ -188,13 +168,13 @@ export const TYPE_PROVIDER_REQUIREMENTS: Partial<
     AdminWaitlistTasksResponseDtoProvider.twitter,
     AdminWaitlistTasksResponseDtoProvider.telegram,
   ],
-}
+};
 
 /**
  * Get compatible providers for a given type
  */
 export function getCompatibleProviders(
-  type: AdminWaitlistTasksResponseDtoTypeItem
+  type: AdminWaitlistTasksResponseDtoTypeItem,
 ): AdminWaitlistTasksResponseDtoProvider[] {
-  return TYPE_PROVIDER_REQUIREMENTS[type] || getAvailableApiProviders()
+  return TYPE_PROVIDER_REQUIREMENTS[type] ?? getAvailableApiProviders();
 }

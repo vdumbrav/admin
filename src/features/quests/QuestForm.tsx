@@ -1,21 +1,17 @@
-'use client'
+'use client';
 
-import { useEffect, useMemo, useState } from 'react'
-import { z } from 'zod'
-import { useForm, useWatch } from 'react-hook-form'
-import { Spinner } from '@radix-ui/themes'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { useBlocker } from '@tanstack/react-router'
-import { useAppAuth } from '@/auth/provider'
-import { mediaErrors } from '@/errors/media'
-import { toast } from 'sonner'
-import { replaceObjectUrl } from '@/utils/object-url'
-import { Button } from '@/components/ui/button'
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from '@/components/ui/collapsible'
+import { useEffect, useMemo, useState } from 'react';
+import { z } from 'zod';
+import { useForm, useWatch } from 'react-hook-form';
+import { Spinner } from '@radix-ui/themes';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useBlocker } from '@tanstack/react-router';
+import { useAppAuth } from '@/auth/provider';
+import { mediaErrors } from '@/errors/media';
+import { toast } from 'sonner';
+import { replaceObjectUrl } from '@/utils/object-url';
+import { Button } from '@/components/ui/button';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import {
   Form,
   FormControl,
@@ -24,34 +20,26 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
-import { Switch } from '@/components/ui/switch'
-import { Textarea } from '@/components/ui/textarea'
-import { ImageDropzone } from '@/components/image-dropzone'
-import { NoWheelNumber } from '@/components/no-wheel-number'
-import { SelectDropdown } from '@/components/select-dropdown'
-import { TwitterEmbed } from '@/components/twitter-embed'
-import { uploadMedia } from './api'
-import { ChildrenEditor, type Child } from './components/children-editor'
-import { groups, providers, types } from './data/data'
-import type { Task } from './data/types'
-import { withTwitterValidation } from './validation'
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Switch } from '@/components/ui/switch';
+import { Textarea } from '@/components/ui/textarea';
+import { ImageDropzone } from '@/components/image-dropzone';
+import { NoWheelNumber } from '@/components/no-wheel-number';
+import { SelectDropdown } from '@/components/select-dropdown';
+import { TwitterEmbed } from '@/components/twitter-embed';
+import { uploadMedia } from './api';
+import { type Child, ChildrenEditor } from './components/children-editor';
+import { groups, providers, types } from './data/data';
+import type { Task } from './data/types';
+import { withTwitterValidation } from './validation';
 
 const childSchema = withTwitterValidation(
   z.object({
     title: z.string().min(1),
     type: z.enum(['like', 'share', 'comment', 'join', 'connect']),
     provider: z
-      .enum([
-        'twitter',
-        'telegram',
-        'discord',
-        'matrix',
-        'walme',
-        'monetag',
-        'adsgram',
-      ])
+      .enum(['twitter', 'telegram', 'discord', 'matrix', 'walme', 'monetag', 'adsgram'])
       .optional(),
     reward: z.coerce.number().int().nonnegative().optional(),
     order_by: z.coerce.number().int().nonnegative(),
@@ -61,8 +49,8 @@ const childSchema = withTwitterValidation(
         username: z.string().optional(),
       })
       .optional(),
-  })
-)
+  }),
+);
 
 const baseSchema = withTwitterValidation(
   z
@@ -84,15 +72,7 @@ const baseSchema = withTwitterValidation(
       group: z.enum(['social', 'daily', 'referral', 'partner']),
       order_by: z.coerce.number().int().nonnegative(),
       provider: z
-        .enum([
-          'twitter',
-          'telegram',
-          'discord',
-          'matrix',
-          'walme',
-          'monetag',
-          'adsgram',
-        ])
+        .enum(['twitter', 'telegram', 'discord', 'matrix', 'walme', 'monetag', 'adsgram'])
         .optional(),
       uri: z
         .union([z.url(), z.literal('')])
@@ -136,35 +116,33 @@ const baseSchema = withTwitterValidation(
                   code: 'custom',
                   message: "subtype allowed only when type is 'task'",
                   path: ['subtype'],
-                })
+                });
               }
             }),
         })
         .optional(),
       visible: z.boolean().optional(),
     })
-    .loose()
-)
+    .loose(),
+);
 
-const schema = baseSchema.and(
-  z.object({ child: z.array(childSchema).optional() })
-)
+const schema = baseSchema.and(z.object({ child: z.array(childSchema).optional() }));
 
-type FormValues = z.infer<typeof schema>
+type FormValues = z.infer<typeof schema>;
 
 export const QuestForm = ({
   initial,
   onSubmit,
   onCancel,
 }: {
-  initial?: Partial<Task>
-  onSubmit: (v: FormValues) => void
-  onCancel: () => void
+  initial?: Partial<Task>;
+  onSubmit: (v: FormValues) => void;
+  onCancel: () => void;
 }) => {
-  const auth = useAppAuth()
-  const [iconPreview, setIconPreview] = useState<string>()
-  const [isUploading, setIsUploading] = useState(false)
-  const clearIconPreview = () => setIconPreview((old) => replaceObjectUrl(old))
+  const auth = useAppAuth();
+  const [iconPreview, setIconPreview] = useState<string>();
+  const [isUploading, setIsUploading] = useState(false);
+  const clearIconPreview = () => setIconPreview((old) => replaceObjectUrl(old));
   const initialValues = useMemo(
     () => ({
       title: initial?.title ?? '',
@@ -172,7 +150,7 @@ export const QuestForm = ({
       description: initial?.description ?? '',
       group: (initial?.group as Task['group']) ?? 'all',
       order_by: initial?.order_by ?? 0,
-      provider: initial?.provider as Task['provider'],
+      provider: initial?.provider,
       uri: initial?.uri ?? '',
       reward: initial?.reward,
       resources: initial?.resources ?? { ui: { button: '' } },
@@ -189,142 +167,133 @@ export const QuestForm = ({
             : undefined,
         })) ?? [],
     }),
-    [initial]
-  )
+    [initial],
+  );
 
   const form = useForm({
     resolver: zodResolver(schema),
     defaultValues: initialValues,
-  })
+  });
 
-  const type = useWatch({ control: form.control, name: 'type' })
-  const icon = useWatch({ control: form.control, name: 'resources.icon' })
-  const isSubmitting = form.formState.isSubmitting
+  const type = useWatch({ control: form.control, name: 'type' });
+  const icon = useWatch({ control: form.control, name: 'resources.icon' });
+  const isSubmitting = form.formState.isSubmitting;
   const adsgramType = useWatch({
     control: form.control,
     name: 'resources.adsgram.type',
-  })
+  });
 
-  const groupItems = useMemo(
-    () => groups.map(({ label, value }) => ({ label, value })),
-    []
-  )
-  const typeItems = useMemo(
-    () => types.map(({ label, value }) => ({ label, value })),
-    []
-  )
-  const providerItems = useMemo(
-    () => providers.map(({ label, value }) => ({ label, value })),
-    []
-  )
+  const groupItems = useMemo(() => groups.map(({ label, value }) => ({ label, value })), []);
+  const typeItems = useMemo(() => types.map(({ label, value }) => ({ label, value })), []);
+  const providerItems = useMemo(() => providers.map(({ label, value }) => ({ label, value })), []);
 
-  const popupField = (key: string) => `resources.ui['pop-up'].${key}` as const
+  const popupField = (key: string) => `resources.ui['pop-up'].${key}` as const;
 
   useEffect(() => {
     if (adsgramType !== 'task') {
       form.setValue('resources.adsgram.subtype', undefined, {
         shouldDirty: true,
-      })
+      });
     }
-  }, [adsgramType, form])
+  }, [adsgramType, form]);
 
   const blocker = useBlocker({
     shouldBlockFn: () => form.formState.isDirty,
     withResolver: true,
-  })
+  });
 
   useEffect(() => {
     if (blocker.status === 'blocked') {
-      if (window.confirm('Discard changes?')) blocker.proceed?.()
-      else blocker.reset?.()
+      if (window.confirm('Discard changes?')) blocker.proceed?.();
+      else blocker.reset?.();
     }
-  }, [blocker])
+  }, [blocker]);
 
   useEffect(() => {
     const handler = (e: BeforeUnloadEvent) => {
-      if (!form.formState.isDirty) return
-      e.preventDefault()
-      e.returnValue = ''
-    }
-    window.addEventListener('beforeunload', handler)
-    return () => window.removeEventListener('beforeunload', handler)
-  }, [form.formState.isDirty])
+      if (!form.formState.isDirty) return;
+      e.preventDefault();
+      e.returnValue = '';
+    };
+    window.addEventListener('beforeunload', handler);
+    return () => window.removeEventListener('beforeunload', handler);
+  }, [form.formState.isDirty]);
 
   const handleUpload = async (file: File) => {
-    setIconPreview((old) => replaceObjectUrl(old, file))
-    setIsUploading(true)
+    setIconPreview((old) => replaceObjectUrl(old, file));
+    setIsUploading(true);
     try {
-      const url = await uploadMedia(file, await auth.getAccessToken())
-      form.setValue('resources.icon', url, { shouldDirty: true })
+      const url = await uploadMedia(file, await auth.getAccessToken());
+      form.setValue('resources.icon', url, { shouldDirty: true });
     } catch {
-      toast.error(mediaErrors.upload)
-      clearIconPreview()
+      toast.error(mediaErrors.upload);
+      clearIconPreview();
     } finally {
-      setIsUploading(false)
+      setIsUploading(false);
     }
-  }
+  };
 
   const handleClearIcon = () => {
-    form.setValue('resources.icon', undefined, { shouldDirty: true })
-    clearIconPreview()
-  }
+    form.setValue('resources.icon', undefined, { shouldDirty: true });
+    clearIconPreview();
+  };
 
   const handleReset = () => {
-    form.reset(initialValues)
+    form.reset(initialValues);
     if (initial?.resources?.icon) {
-      setIconPreview(initial.resources.icon)
+      setIconPreview(initial.resources.icon);
     } else {
-      clearIconPreview()
+      clearIconPreview();
     }
-  }
+  };
 
   useEffect(() => {
     if (!icon) {
-      clearIconPreview()
-      return
+      clearIconPreview();
+      return;
     }
-    if (iconPreview) return
+    if (iconPreview) return;
 
-    const controller = new AbortController()
-    let localUrl: string | undefined
+    const controller = new AbortController();
+    let localUrl: string | undefined;
 
     const load = async () => {
       try {
-        const token = await auth.getAccessToken()
+        const token = await auth.getAccessToken();
         const res = await fetch(icon, {
           headers: token ? { Authorization: `Bearer ${token}` } : {},
           signal: controller.signal,
-        })
-        if (!res.ok) throw new Error(String(res.status))
-        const blob = await res.blob()
+        });
+        if (!res.ok) throw new Error(String(res.status));
+        const blob = await res.blob();
         setIconPreview((oldUrl) => {
-          const newUrl = replaceObjectUrl(oldUrl, blob)
-          localUrl = newUrl
-          return newUrl
-        })
+          const newUrl = replaceObjectUrl(oldUrl, blob);
+          localUrl = newUrl;
+          return newUrl;
+        });
       } catch (e) {
         if (!(e instanceof DOMException && e.name === 'AbortError')) {
-          toast.error(mediaErrors.load)
+          toast.error(mediaErrors.load);
         }
       }
-    }
-    load()
+    };
+    load();
 
     return () => {
-      controller.abort()
-      if (localUrl) URL.revokeObjectURL(localUrl)
-    }
-  }, [icon, auth, iconPreview])
+      controller.abort();
+      if (localUrl) URL.revokeObjectURL(localUrl);
+    };
+  }, [icon, auth, iconPreview]);
 
   return (
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit((values) => {
-          const v = { ...values }
+          const v = { ...values };
           onSubmit({
             ...v,
             child: v.child?.map((c, i) => ({ ...c, order_by: i })),
-          })
+          });
         })}
         className='mx-auto max-w-5xl space-y-6'
       >
@@ -386,9 +355,7 @@ export const QuestForm = ({
                     value={field.value as number}
                     onChange={(e) =>
                       field.onChange(
-                        Number.isNaN(e.target.valueAsNumber)
-                          ? 0
-                          : e.target.valueAsNumber
+                        Number.isNaN(e.target.valueAsNumber) ? 0 : e.target.valueAsNumber,
                       )
                     }
                     min={0}
@@ -438,16 +405,10 @@ export const QuestForm = ({
                   <Input
                     {...field}
                     placeholder='Enter username (e.g. waitlist)'
-                    onBlur={(e) =>
-                      field.onChange(
-                        (e.target.value ?? '').trim().replace(/^@/, '')
-                      )
-                    }
+                    onBlur={(e) => field.onChange((e.target.value ?? '').trim().replace(/^@/, ''))}
                   />
                 </FormControl>
-                <FormDescription>
-                  Without @. Defaults to waitlist if empty
-                </FormDescription>
+                <FormDescription>Without @. Defaults to waitlist if empty</FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -462,22 +423,16 @@ export const QuestForm = ({
                   <Input
                     {...field}
                     placeholder='Enter Tweet ID (e.g. 1872110056027116095)'
-                    onBlur={(e) =>
-                      field.onChange((e.target.value ?? '').trim())
-                    }
+                    onBlur={(e) => field.onChange((e.target.value ?? '').trim())}
                   />
                 </FormControl>
-                <FormDescription>
-                  Only Tweet ID (the last part of the Twitter URL).
-                </FormDescription>
+                <FormDescription>Only Tweet ID (the last part of the Twitter URL).</FormDescription>
                 <FormMessage />
                 {field.value && (
                   <div className='mt-4'>
                     <TwitterEmbed
                       username={
-                        form
-                          .getValues('resources.username')
-                          ?.replace(/^@/, '') || 'waitlist'
+                        form.getValues('resources.username')?.replace(/^@/, '') ?? 'waitlist'
                       }
                       tweetId={field.value}
                     />
@@ -511,9 +466,7 @@ export const QuestForm = ({
                     value={(field.value as number | undefined) ?? ''}
                     onChange={(e) =>
                       field.onChange(
-                        Number.isNaN(e.target.valueAsNumber)
-                          ? undefined
-                          : e.target.valueAsNumber
+                        Number.isNaN(e.target.valueAsNumber) ? undefined : e.target.valueAsNumber,
                       )
                     }
                     min={0}
@@ -536,10 +489,7 @@ export const QuestForm = ({
               <FormItem className='flex items-center justify-between rounded-md border p-3'>
                 <FormLabel className='m-0'>Visible</FormLabel>
                 <FormControl>
-                  <Switch
-                    checked={!!field.value}
-                    onCheckedChange={field.onChange}
-                  />
+                  <Switch checked={!!field.value} onCheckedChange={field.onChange} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -552,10 +502,7 @@ export const QuestForm = ({
               <FormItem className='flex items-center justify-between rounded-md border p-3'>
                 <FormLabel className='m-0'>New badge</FormLabel>
                 <FormControl>
-                  <Switch
-                    checked={!!field.value}
-                    onCheckedChange={field.onChange}
-                  />
+                  <Switch checked={!!field.value} onCheckedChange={field.onChange} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -686,17 +633,12 @@ export const QuestForm = ({
                       <SelectDropdown
                         value={field.value ?? 'none'}
                         onValueChange={(v) => {
-                          const next =
-                            v === 'none' ? undefined : (v as 'task' | 'reward')
-                          field.onChange(next)
+                          const next = v === 'none' ? undefined : (v as 'task' | 'reward');
+                          field.onChange(next);
                           if (next !== 'task') {
-                            form.setValue(
-                              'resources.adsgram.subtype',
-                              undefined,
-                              {
-                                shouldDirty: true,
-                              }
-                            )
+                            form.setValue('resources.adsgram.subtype', undefined, {
+                              shouldDirty: true,
+                            });
                           }
                         }}
                         placeholder='Select type'
@@ -719,9 +661,7 @@ export const QuestForm = ({
                         <FormLabel>AdsGram Subtype</FormLabel>
                         <SelectDropdown
                           value={field.value ?? 'none'}
-                          onValueChange={(v) =>
-                            field.onChange(v === 'none' ? undefined : v)
-                          }
+                          onValueChange={(v) => field.onChange(v === 'none' ? undefined : v)}
                           placeholder='Select subtype'
                           items={[
                             { label: '—', value: 'none' },
@@ -760,16 +700,12 @@ export const QuestForm = ({
           <Button variant='outline' type='button' onClick={onCancel}>
             Cancel
           </Button>
-          <Button
-            type='submit'
-            disabled={isSubmitting}
-            aria-busy={isSubmitting}
-          >
+          <Button type='submit' disabled={isSubmitting} aria-busy={isSubmitting}>
             {isSubmitting && <Spinner className='mr-2' />}
             Save
           </Button>
         </div>
       </form>
     </Form>
-  )
-}
+  );
+};

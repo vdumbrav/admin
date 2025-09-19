@@ -1,16 +1,16 @@
-import { useCallback, useEffect } from 'react'
-import { createFileRoute, Navigate } from '@tanstack/react-router'
-import { useAppAuth } from '@/auth/provider'
-import { UserRole } from '@/auth/roles'
-import { Loader2 } from 'lucide-react'
-import { logError } from '@/utils/log'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { defaultQuestSearch } from '@/features/quests/default-search'
+import { useCallback, useEffect } from 'react';
+import { createFileRoute, Navigate } from '@tanstack/react-router';
+import { useAppAuth } from '@/auth/provider';
+import { UserRole } from '@/auth/roles';
+import { Loader2 } from 'lucide-react';
+import { logError } from '@/utils/log';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { defaultQuestSearch } from '@/features/quests/default-search';
 
 export const Route = createFileRoute('/sign-in')({
   component: SignInPage,
-})
+});
 
 function SignInPage() {
   const {
@@ -21,26 +21,26 @@ function SignInPage() {
     signinRedirect,
     signoutRedirect,
     error,
-  } = useAppAuth()
+  } = useAppAuth();
 
   const handleSignIn = useCallback(() => {
     try {
-      signinRedirect()
+      signinRedirect();
     } catch (e) {
-      logError('signinRedirect failed', e)
+      logError('signinRedirect failed', e);
     }
-  }, [signinRedirect])
+  }, [signinRedirect]);
 
   // Auto-redirect to sign in for unauthenticated users
   useEffect(() => {
     if (!isAuthenticated && !isLoading) {
-      handleSignIn()
+      handleSignIn();
     }
-  }, [isAuthenticated, isLoading, handleSignIn])
+  }, [isAuthenticated, isLoading, handleSignIn]);
 
   // Redirect if authenticated and has proper role
   if (isAuthenticated && hasAllowedRole) {
-    return <Navigate to='/quests' search={defaultQuestSearch} replace />
+    return <Navigate to='/quests' search={defaultQuestSearch} replace />;
   }
 
   if (isLoading) {
@@ -48,7 +48,7 @@ function SignInPage() {
       <div className='flex min-h-screen items-center justify-center'>
         <Loader2 className='h-8 w-8 animate-spin' />
       </div>
-    )
+    );
   }
 
   // Show role error if authenticated but insufficient role
@@ -57,29 +57,15 @@ function SignInPage() {
       <div className='flex min-h-screen items-center justify-center p-4'>
         <Card className='w-full max-w-md'>
           <CardHeader>
-            <CardTitle className='text-destructive text-center'>
-              Access Denied
-            </CardTitle>
+            <CardTitle className='text-destructive text-center'>Access Denied</CardTitle>
           </CardHeader>
           <CardContent className='space-y-4 text-center'>
             <p className='text-muted-foreground'>
-              You need{' '}
-              <span className='font-medium text-yellow-600'>
-                {UserRole.Admin}
-              </span>
-              ,{' '}
-              <span className='font-medium text-blue-600'>
-                {UserRole.Administrator}
-              </span>
-              ,{' '}
-              <span className='font-medium text-green-600'>
-                {UserRole.Moderator}
-              </span>
-              , or{' '}
-              <span className='font-medium text-sky-500'>
-                {UserRole.Support}
-              </span>{' '}
-              role to access the admin panel.
+              You need <span className='font-medium text-yellow-600'>{UserRole.Admin}</span>,{' '}
+              <span className='font-medium text-blue-600'>{UserRole.Administrator}</span>,{' '}
+              <span className='font-medium text-green-600'>{UserRole.Moderator}</span>, or{' '}
+              <span className='font-medium text-sky-500'>{UserRole.Support}</span> role to access
+              the admin panel.
             </p>
             <p className='text-muted-foreground text-sm'>
               Current role: {roles.includes('user') ? 'user' : 'unknown'}
@@ -88,18 +74,14 @@ function SignInPage() {
               Please contact your administrator to get the required permissions.
             </p>
             <div className='space-y-2'>
-              <Button
-                onClick={signoutRedirect}
-                variant='outline'
-                className='w-full'
-              >
+              <Button onClick={signoutRedirect} variant='outline' className='w-full'>
                 Try Different Account
               </Button>
             </div>
           </CardContent>
         </Card>
       </div>
-    )
+    );
   }
 
   // Show error if there was an auth error
@@ -108,9 +90,7 @@ function SignInPage() {
       <div className='flex min-h-screen items-center justify-center p-4'>
         <Card className='w-full max-w-md'>
           <CardHeader>
-            <CardTitle className='text-destructive text-center'>
-              Authentication Error
-            </CardTitle>
+            <CardTitle className='text-destructive text-center'>Authentication Error</CardTitle>
           </CardHeader>
           <CardContent className='space-y-4 text-center'>
             <p className='text-muted-foreground'>
@@ -123,7 +103,7 @@ function SignInPage() {
           </CardContent>
         </Card>
       </div>
-    )
+    );
   }
 
   // Show loading while redirecting
@@ -134,5 +114,5 @@ function SignInPage() {
         <p className='text-muted-foreground'>Redirecting to sign in...</p>
       </div>
     </div>
-  )
+  );
 }

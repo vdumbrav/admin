@@ -1,34 +1,31 @@
-import * as React from 'react'
-import { Cross2Icon } from '@radix-ui/react-icons'
-import { type Table } from '@tanstack/react-table'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { DataTableFacetedFilter } from '@/components/table/data-table-faceted-filter'
-import { DataTableViewOptions } from '@/components/table/data-table-view-options'
-import { groups, providers, types, visibilities } from '../data/data'
+import * as React from 'react';
+import { Cross2Icon } from '@radix-ui/react-icons';
+import { type Table } from '@tanstack/react-table';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { DataTableFacetedFilter } from '@/components/table/data-table-faceted-filter';
+import { DataTableViewOptions } from '@/components/table/data-table-view-options';
+import { groups, providers, types, visibilities } from '../data/data';
 
 interface DataTableToolbarProps<TData> {
-  table: Table<TData>
+  table: Table<TData>;
 }
 
-export const DataTableToolbar = <TData,>({
-  table,
-}: DataTableToolbarProps<TData>) => {
-  const isFiltered = table.getState().columnFilters.length > 0
-  const filterValue =
-    (table.getColumn('title')?.getFilterValue() as string) ?? ''
-  const [search, setSearch] = React.useState(filterValue)
+export const DataTableToolbar = <TData,>({ table }: DataTableToolbarProps<TData>) => {
+  const isFiltered = table.getState().columnFilters.length > 0;
+  const filterValue = (table.getColumn('title')?.getFilterValue() as string) ?? '';
+  const [search, setSearch] = React.useState(filterValue);
 
   React.useEffect(() => {
-    setSearch(filterValue)
-  }, [filterValue])
+    setSearch(filterValue);
+  }, [filterValue]);
 
   React.useEffect(() => {
     const id = setTimeout(() => {
-      table.getColumn('title')?.setFilterValue(search)
-    }, 250)
-    return () => clearTimeout(id)
-  }, [search, table])
+      table.getColumn('title')?.setFilterValue(search);
+    }, 250);
+    return () => clearTimeout(id);
+  }, [search, table]);
 
   return (
     <div className='flex items-center justify-between'>
@@ -88,5 +85,5 @@ export const DataTableToolbar = <TData,>({
         <DataTableViewOptions table={table} />
       </div>
     </div>
-  )
-}
+  );
+};

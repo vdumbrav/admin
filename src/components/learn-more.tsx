@@ -1,24 +1,15 @@
-import { type Content, type Root, type Trigger } from '@radix-ui/react-popover'
-import { IconQuestionMark } from '@tabler/icons-react'
-import { cn } from '@/lib/utils'
-import { Button } from '@/components/ui/button'
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover'
+import { type Content, type Root, type Trigger } from '@radix-ui/react-popover';
+import { IconQuestionMark } from '@tabler/icons-react';
+import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
 interface Props extends React.ComponentProps<typeof Root> {
-  contentProps?: React.ComponentProps<typeof Content>
-  triggerProps?: React.ComponentProps<typeof Trigger>
+  contentProps?: React.ComponentProps<typeof Content>;
+  triggerProps?: React.ComponentProps<typeof Trigger>;
 }
 
-export function LearnMore({
-  children,
-  contentProps,
-  triggerProps,
-  ...props
-}: Props) {
+export function LearnMore({ children, contentProps, triggerProps, ...props }: Props) {
   return (
     <Popover {...props}>
       <PopoverTrigger
@@ -40,5 +31,5 @@ export function LearnMore({
         {children}
       </PopoverContent>
     </Popover>
-  )
+  );
 }

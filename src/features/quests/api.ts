@@ -1,12 +1,12 @@
-import { useMemo } from 'react'
-import { useMutation } from '@tanstack/react-query'
-import { toast } from 'sonner'
+import { useMemo } from 'react';
+import { useMutation } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import {
   type AdminWaitlistTasksResponseDto,
   useAdminControllerGetWaitlistTasks,
-} from '@/lib/api/generated'
-import { adaptAdminTasksToQuests, adaptAdminTaskToQuest } from './data/adapters'
-import type { Quest, QuestQuery, QuestsResponse } from './data/types'
+} from '@/lib/api/generated';
+import { adaptAdminTasksToQuests, adaptAdminTaskToQuest } from './data/adapters';
+import type { Quest, QuestQuery, QuestsResponse } from './data/types';
 
 export const useQuests = (query: QuestQuery) => {
   // Use the generated API hook for admin access to waitlist tasks
@@ -16,86 +16,70 @@ export const useQuests = (query: QuestQuery) => {
     isFetching,
     error,
     refetch,
-  } = useAdminControllerGetWaitlistTasks()
+  } = useAdminControllerGetWaitlistTasks();
 
   // Memoize transformation to avoid unnecessary re-renders
   const transformedQuests = useMemo(() => {
-    if (!adminTasks) return undefined
-    return adaptAdminTasksToQuests(adminTasks)
-  }, [adminTasks])
+    if (!adminTasks) return undefined;
+    return adaptAdminTasksToQuests(adminTasks);
+  }, [adminTasks]);
 
   // Memoize filtering and pagination for performance
   const processedData = useMemo((): QuestsResponse | undefined => {
-    if (!transformedQuests) return undefined
+    if (!transformedQuests) return undefined;
 
     // Apply client-side filtering (API returns full list of 50-200 items)
     let filteredItems = transformedQuests.filter((item: Quest) => {
       const matchesSearch =
         !query.search ||
         item.title.toLowerCase().includes(query.search.toLowerCase()) ||
-        item.description?.toLowerCase().includes(query.search.toLowerCase())
+        item.description?.toLowerCase().includes(query.search.toLowerCase());
 
-      const matchesGroup =
-        !query.group || query.group === 'all' || item.group === query.group
+      const matchesGroup = !query.group || query.group === 'all' || item.group === query.group;
 
-      const matchesType =
-        !query.type || item.type?.some((t: string) => t === query.type)
+      const matchesType = !query.type || item.type?.some((t: string) => t === query.type);
 
-      const matchesProvider =
-        !query.provider || item.provider === query.provider
+      const matchesProvider = !query.provider || item.provider === query.provider;
 
       const matchesVisibility =
         !query.visible ||
-        (query.visible === 'true'
-          ? item.visible !== false
-          : item.visible === false)
+        (query.visible === 'true' ? item.visible !== false : item.visible === false);
 
-      return (
-        matchesSearch &&
-        matchesGroup &&
-        matchesType &&
-        matchesProvider &&
-        matchesVisibility
-      )
-    })
+      return matchesSearch && matchesGroup && matchesType && matchesProvider && matchesVisibility;
+    });
 
     // Apply client-side sorting (frontend-only for small lists)
     if (query.sort) {
-      const [field, direction] = query.sort.split(':')
-      const isAsc = direction !== 'desc'
+      const [field, direction] = query.sort.split(':');
+      const isAsc = direction !== 'desc';
 
       filteredItems = [...filteredItems].sort((a, b) => {
-        const aVal = (a as unknown as Record<string, unknown>)[field]
-        const bVal = (b as unknown as Record<string, unknown>)[field]
+        const aVal = (a as unknown as Record<string, unknown>)[field];
+        const bVal = (b as unknown as Record<string, unknown>)[field];
 
-        if (
-          aVal !== null &&
-          aVal !== undefined &&
-          bVal !== null &&
-          bVal !== undefined
-        ) {
-          if (aVal < bVal) return isAsc ? -1 : 1
-          if (aVal > bVal) return isAsc ? 1 : -1
+        if (aVal !== null && aVal !== undefined && bVal !== null && bVal !== undefined) {
+          if (aVal < bVal) return isAsc ? -1 : 1;
+          if (aVal > bVal) return isAsc ? 1 : -1;
         }
-        return 0
-      })
+        return 0;
+      });
     }
 
     // Apply client-side pagination (frontend-only for small lists)
-    const totalItems = filteredItems.length
-    let paginatedItems = filteredItems
+    const totalItems = filteredItems.length;
+    let paginatedItems = filteredItems;
 
     if (query.page && query.limit) {
-      const startIndex = (query.page - 1) * query.limit
-      const endIndex = startIndex + query.limit
-      paginatedItems = filteredItems.slice(startIndex, endIndex)
+      const startIndex = (query.page - 1) * query.limit;
+      const endIndex = startIndex + query.limit;
+      paginatedItems = filteredItems.slice(startIndex, endIndex);
     }
 
     return {
       items: paginatedItems,
       total: totalItems,
-    }
-  }, [transformedQuests, query])
+    };
+  }, [transformedQuests, query]);
 
   return {
     data: processedData,
@@ -103,28 +87,21 @@ export const useQuests = (query: QuestQuery) => {
     isFetching,
     error,
     refetch,
-  }
-}
+  };
+};
 
 export const useQuest = (id: number) => {
   // Use the base hook to get all tasks (leveraging React Query cache)
-  const {
-    data: adminTasks,
-    isLoading,
-    error,
-    isFetching,
-  } = useAdminControllerGetWaitlistTasks()
+  const { data: adminTasks, isLoading, error, isFetching } = useAdminControllerGetWaitlistTasks();
 
   // Memoize the specific task lookup and transformation
   const quest = useMemo(() => {
-    if (!adminTasks) return undefined
+    if (!adminTasks) return undefined;
 
-    const task = adminTasks.find(
-      (task: AdminWaitlistTasksResponseDto) => task.id === id
-    )
+    const task = adminTasks.find((task: AdminWaitlistTasksResponseDto) => task.id === id);
 
-    return task ? adaptAdminTaskToQuest(task) : undefined
-  }, [adminTasks, id])
+    return task ? adaptAdminTaskToQuest(task) : undefined;
+  }, [adminTasks, id]);
 
   return {
     data: quest,
@@ -133,8 +110,8 @@ export const useQuest = (id: number) => {
     isFetching,
     isSuccess: !!quest && !isLoading && !error,
     isError: !!error,
-  }
-}
+  };
+};
 
 // ============================================================================
 // Mutation Hooks (Currently in readonly mode)
@@ -152,20 +129,19 @@ export const useCreateQuest = () => {
       // TODO: Replace with actual API call when quest creation endpoint is available
       // Example: return await api.post('/api/quests', adaptTaskToQuest(data))
       throw new Error(
-        'Create operation not available for admin tasks (readonly mode). TODO: Implement quest creation API.'
-      )
+        'Create operation not available for admin tasks (readonly mode). TODO: Implement quest creation API.',
+      );
     },
     onSuccess: () => {
-      toast.success('Quest created successfully')
+      toast.success('Quest created successfully');
       // TODO: Invalidate and refetch quests list
     },
     onError: (error) => {
-      const message =
-        error instanceof Error ? error.message : 'Failed to create quest'
-      toast.error(message)
+      const message = error instanceof Error ? error.message : 'Failed to create quest';
+      toast.error(message);
     },
-  })
-}
+  });
+};
 
 /**
  * Update quest mutation
@@ -179,20 +155,19 @@ export const useUpdateQuest = (_id: number) => {
       // TODO: Replace with actual API call when quest update endpoint is available
       // Example: return await api.put(`/api/quests/${id}`, adaptTaskToQuest(data))
       throw new Error(
-        'Update operation not available for admin tasks (readonly mode). TODO: Implement quest update API.'
-      )
+        'Update operation not available for admin tasks (readonly mode). TODO: Implement quest update API.',
+      );
     },
     onSuccess: () => {
-      toast.success('Quest updated successfully')
+      toast.success('Quest updated successfully');
       // TODO: Invalidate and refetch quests list or update cache directly
     },
     onError: (error) => {
-      const message =
-        error instanceof Error ? error.message : 'Failed to update quest'
-      toast.error(message)
+      const message = error instanceof Error ? error.message : 'Failed to update quest';
+      toast.error(message);
     },
-  })
-}
+  });
+};
 
 /**
  * Delete quest mutation
@@ -206,20 +181,19 @@ export const useDeleteQuest = () => {
       // TODO: Replace with actual API call when quest deletion endpoint is available
       // Example: return await api.delete(`/api/quests/${id}`)
       throw new Error(
-        'Delete operation not available for admin tasks (readonly mode). TODO: Implement quest deletion API.'
-      )
+        'Delete operation not available for admin tasks (readonly mode). TODO: Implement quest deletion API.',
+      );
     },
     onSuccess: () => {
-      toast.success('Quest deleted successfully')
+      toast.success('Quest deleted successfully');
       // TODO: Remove from cache and refetch list
     },
     onError: (error) => {
-      const message =
-        error instanceof Error ? error.message : 'Failed to delete quest'
-      toast.error(message)
+      const message = error instanceof Error ? error.message : 'Failed to delete quest';
+      toast.error(message);
     },
-  })
-}
+  });
+};
 
 /**
  * Toggle quest visibility mutation
@@ -228,27 +202,23 @@ export const useDeleteQuest = () => {
  */
 export const useToggleVisibility = () => {
   return useMutation({
-    mutationFn: async (_data: {
-      id: number
-      visible: boolean
-    }): Promise<Quest> => {
+    mutationFn: async (_data: { id: number; visible: boolean }): Promise<Quest> => {
       // TODO: Replace with actual API call when visibility toggle endpoint is available
       // Example: return await api.patch(`/api/quests/${data.id}/visibility`, { visible: data.visible })
       throw new Error(
-        'Toggle visibility not available for admin tasks (readonly mode). TODO: Implement visibility toggle API.'
-      )
+        'Toggle visibility not available for admin tasks (readonly mode). TODO: Implement visibility toggle API.',
+      );
     },
     onSuccess: () => {
-      toast.success('Quest visibility updated successfully')
+      toast.success('Quest visibility updated successfully');
       // TODO: Update cache directly for immediate feedback
     },
     onError: (error) => {
-      const message =
-        error instanceof Error ? error.message : 'Failed to toggle visibility'
-      toast.error(message)
+      const message = error instanceof Error ? error.message : 'Failed to toggle visibility';
+      toast.error(message);
     },
-  })
-}
+  });
+};
 
 /**
  * Upload media for quest
@@ -257,10 +227,7 @@ export const useToggleVisibility = () => {
  * TODO: Add file type and size validation
  * TODO: Add image compression/optimization
  */
-export const uploadMedia = async (
-  _file: File,
-  _token: string | undefined
-): Promise<string> => {
+export const uploadMedia = async (_file: File, _token: string | undefined): Promise<string> => {
   // TODO: Replace with actual API call when media upload endpoint is available
   // Example:
   // const formData = new FormData()
@@ -271,9 +238,9 @@ export const uploadMedia = async (
   // return response.data.url
 
   throw new Error(
-    'Upload media not available for admin tasks (readonly mode). TODO: Implement media upload API.'
-  )
-}
+    'Upload media not available for admin tasks (readonly mode). TODO: Implement media upload API.',
+  );
+};
 
 // ============================================================================
 // Bulk Operations (Future Enhancement)
@@ -285,16 +252,11 @@ export const uploadMedia = async (
  */
 export const useBulkUpdateQuests = () => {
   return useMutation({
-    mutationFn: async (_data: {
-      ids: number[]
-      updates: Partial<Quest>
-    }): Promise<Quest[]> => {
-      throw new Error(
-        'Bulk update not implemented yet. TODO: Add bulk operations API.'
-      )
+    mutationFn: async (_data: { ids: number[]; updates: Partial<Quest> }): Promise<Quest[]> => {
+      throw new Error('Bulk update not implemented yet. TODO: Add bulk operations API.');
     },
-  })
-}
+  });
+};
 
 /**
  * Bulk delete quests
@@ -303,9 +265,7 @@ export const useBulkUpdateQuests = () => {
 export const useBulkDeleteQuests = () => {
   return useMutation({
     mutationFn: async (_ids: number[]): Promise<void> => {
-      throw new Error(
-        'Bulk delete not implemented yet. TODO: Add bulk operations API.'
-      )
+      throw new Error('Bulk delete not implemented yet. TODO: Add bulk operations API.');
     },
-  })
-}
+  });
+};

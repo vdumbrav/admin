@@ -1,4 +1,4 @@
-import { type IdTokenClaims } from 'oidc-client-ts'
+import { type IdTokenClaims } from 'oidc-client-ts';
 
 /**
  * Generate user initials from name or email
@@ -10,52 +10,50 @@ export const getUserInitials = (name?: string, email?: string): string => {
       .map((n) => n[0])
       .join('')
       .toUpperCase()
-      .slice(0, 2)
+      .slice(0, 2);
   }
   if (email && email.length > 0) {
-    return email.charAt(0).toUpperCase() + (email.charAt(1) || '').toUpperCase()
+    return email.charAt(0).toUpperCase() + (email.charAt(1) || '').toUpperCase();
   }
-  return ''
-}
+  return '';
+};
 
 /**
  * Get display name from user profile - prefer name or preferred_username, no fallback to email
  */
-export const getDisplayName = (
-  profile?: IdTokenClaims | null
-): string | undefined => {
-  if (!profile) return undefined
+export const getDisplayName = (profile?: IdTokenClaims | null): string | undefined => {
+  if (!profile) return undefined;
 
-  return profile.name || profile.preferred_username
-}
+  return profile.name ?? profile.preferred_username;
+};
 
 /**
  * Get user email - required field
  */
 export const getUserEmail = (profile?: IdTokenClaims | null): string => {
-  return profile?.email || ''
-}
+  return profile?.email ?? '';
+};
 
 /**
  * Get user name for display - prefer name/preferred_username, fallback to email
  */
 export const getUserShowName = (profile?: IdTokenClaims | null): string => {
-  const displayName = getDisplayName(profile)
-  const userEmail = getUserEmail(profile)
-  return displayName || userEmail
-}
+  const displayName = getDisplayName(profile);
+  const userEmail = getUserEmail(profile);
+  return displayName ?? userEmail;
+};
 
 /**
  * Get all user display data at once
  */
 export const getUserDisplayData = (profile?: IdTokenClaims | null) => {
-  const showName = getUserShowName(profile)
-  const userEmail = getUserEmail(profile)
-  const userInitials = getUserInitials(showName, userEmail)
+  const showName = getUserShowName(profile);
+  const userEmail = getUserEmail(profile);
+  const userInitials = getUserInitials(showName, userEmail);
 
   return {
     showName,
     userEmail,
     userInitials,
-  }
-}
+  };
+};

@@ -1,20 +1,16 @@
-import * as React from 'react'
-import {
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-} from '@/components/ui/sidebar'
+import * as React from 'react';
+import { SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 
 export function TeamSwitcher({
   teams,
 }: {
   teams: {
-    name: string
-    logo: React.ElementType
-    plan: string
-  }[]
+    name: string;
+    logo: React.ElementType;
+    plan: string;
+  }[];
 }) {
-  const [activeTeam] = React.useState(teams[0])
+  const [activeTeam] = React.useState(teams[0]);
 
   return (
     <SidebarMenu>
@@ -32,5 +28,5 @@ export function TeamSwitcher({
         </SidebarMenuButton>
       </SidebarMenuItem>
     </SidebarMenu>
-  )
+  );
 }

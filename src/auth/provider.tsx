@@ -1,74 +1,65 @@
-import React from 'react'
-import { AuthProvider, useAuth } from 'react-oidc-context'
-import { toast } from 'sonner'
-import { logError } from '@/utils/log'
-import { TokenAutoRenew } from './TokenAutoRenew'
-import { oidcConfig } from './oidc'
-import { type AuthResult } from './types'
-import {
-  getRolesFromUser,
-  userHasAllowedRole,
-  userIsAdmin,
-  userIsSupport,
-} from './utils'
+import React from 'react';
+import { AuthProvider, useAuth } from 'react-oidc-context';
+import { toast } from 'sonner';
+import { logError } from '@/utils/log';
+import { TokenAutoRenew } from './TokenAutoRenew';
+import { oidcConfig } from './oidc';
+import { type AuthResult } from './types';
+import { getRolesFromUser, userHasAllowedRole, userIsAdmin, userIsSupport } from './utils';
 
-export const AppAuthProvider: React.FC<React.PropsWithChildren> = ({
-  children,
-}) => {
+export const AppAuthProvider: React.FC<React.PropsWithChildren> = ({ children }) => {
   return (
     <AuthProvider {...oidcConfig}>
       <TokenAutoRenew />
       {children}
     </AuthProvider>
-  )
-}
+  );
+};
 
 export function useAppAuth(): AuthResult {
-  const auth = useAuth()
-  const roles = getRolesFromUser(auth.user || null)
+  const auth = useAuth();
+  const roles = getRolesFromUser(auth.user ?? null);
 
-  const getAccessToken = React.useCallback(async (): Promise<
-    string | undefined
-  > => {
+  const getAccessToken = React.useCallback(async (): Promise<string | undefined> => {
     // Check for valid OIDC token first
     if (auth.user && !auth.user.expired) {
-      const token = auth.user.access_token
-      return token
+      const token = auth.user.access_token;
+      return token;
     }
 
     // Try to refresh token if user exists but token is expired
     if (auth.user && !auth.activeNavigator) {
       try {
-        const freshUser = await auth.signinSilent()
-        const newToken = freshUser?.access_token
-        return newToken
+        const freshUser = await auth.signinSilent();
+        const newToken = freshUser?.access_token;
+        return newToken;
       } catch (error) {
-        console.error('[AuthProvider] Token refresh failed:', error)
+        console.error('[AuthProvider] Token refresh failed:', error);
         // Return existing token instead of undefined to avoid immediate logout
-        const fallbackToken = auth.user?.access_token
-        return fallbackToken
+        const fallbackToken = auth.user?.access_token;
+        return fallbackToken;
       }
     }
 
-    const token = auth.user?.access_token
-    return token
-  }, [auth])
+    const token = auth.user?.access_token;
+    return token;
+  }, [auth]);
 
   const signoutRedirect = React.useCallback(() => {
     Promise.resolve(auth.signoutRedirect()).catch((e: unknown) => {
-      logError(e)
-      toast.error('Failed to sign out')
-    })
-  }, [auth])
+      logError(e);
+      toast.error('Failed to sign out');
+    });
+  }, [auth]);
 
-  const hasAllowedRoleValue = userHasAllowedRole(auth.user || null)
-  const isAdmin = userIsAdmin(auth.user || null)
-  const isSupport = userIsSupport(auth.user || null)
+  const hasAllowedRoleValue = userHasAllowedRole(auth.user ?? null);
+  const isAdmin = userIsAdmin(auth.user ?? null);
+  const isSupport = userIsSupport(auth.user ?? null);
 
   return {
     isAuthenticated: auth.isAuthenticated,
     isLoading: auth.isLoading,
-    user: auth.user || null,
+    user: auth.user ?? null,
     signinRedirect: auth.signinRedirect,
     signoutRedirect,
     getAccessToken,
@@ -78,5 +69,5 @@ export function useAppAuth(): AuthResult {
     isAdmin,
     isSupport,
     error: auth.error,
-  }
+  };
 }

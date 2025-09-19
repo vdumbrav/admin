@@ -1,13 +1,13 @@
-import { createFileRoute, Navigate } from '@tanstack/react-router'
-import { useAppAuth } from '@/auth/provider'
-import { defaultQuestSearch } from '@/features/quests/default-search'
+import { createFileRoute, Navigate } from '@tanstack/react-router';
+import { useAppAuth } from '@/auth/provider';
+import { defaultQuestSearch } from '@/features/quests/default-search';
 
 export const Route = createFileRoute('/auth/callback')({
   component: CallbackPage,
-})
+});
 
 function CallbackPage() {
-  const { isAuthenticated, isLoading, hasAllowedRole, error } = useAppAuth()
+  const { isAuthenticated, isLoading, hasAllowedRole, error } = useAppAuth();
 
   if (isLoading) {
     return (
@@ -17,16 +17,16 @@ function CallbackPage() {
           <p className='text-muted-foreground'>Completing sign in...</p>
         </div>
       </div>
-    )
+    );
   }
 
   if (error) {
-    return <Navigate to='/sign-in' replace />
+    return <Navigate to='/sign-in' replace />;
   }
 
   if (isAuthenticated && hasAllowedRole) {
-    return <Navigate to='/quests' search={defaultQuestSearch} replace />
+    return <Navigate to='/quests' search={defaultQuestSearch} replace />;
   }
 
-  return <Navigate to='/sign-in' replace />
+  return <Navigate to='/sign-in' replace />;
 }

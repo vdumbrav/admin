@@ -7,7 +7,7 @@ export const defaultQuestSearch = {
   page: 1,
   limit: 20,
   sort: 'order_by:asc',
-} as const
+} as const;
 
 export const parseQuestSearch = (search: Record<string, unknown>) => ({
   search: (search.search as string) ?? defaultQuestSearch.search,
@@ -18,6 +18,6 @@ export const parseQuestSearch = (search: Record<string, unknown>) => ({
   page: Number(search.page ?? defaultQuestSearch.page),
   limit: Number(search.limit ?? defaultQuestSearch.limit),
   sort: (search.sort as string) ?? defaultQuestSearch.sort,
-})
+});
 
-export type QuestSearch = ReturnType<typeof parseQuestSearch>
+export type QuestSearch = ReturnType<typeof parseQuestSearch>;

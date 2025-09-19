@@ -1,10 +1,10 @@
-import { ConfirmDialog } from '@/components/confirm-dialog'
-import { useDeleteQuest } from '../api'
-import { useQuestsContext } from '../context/quests-context'
+import { ConfirmDialog } from '@/components/confirm-dialog';
+import { useDeleteQuest } from '../api';
+import { useQuestsContext } from '../context/quests-context';
 
 export const QuestsDialogs = () => {
-  const { open, setOpen, currentRow, setCurrentRow } = useQuestsContext()
-  const del = useDeleteQuest()
+  const { open, setOpen, currentRow, setCurrentRow } = useQuestsContext();
+  const del = useDeleteQuest();
   return (
     <>
       {currentRow && (
@@ -13,13 +13,13 @@ export const QuestsDialogs = () => {
           destructive
           open={open === 'delete'}
           onOpenChange={() => {
-            setOpen('delete')
-            setTimeout(() => setCurrentRow(null), 500)
+            setOpen('delete');
+            setTimeout(() => setCurrentRow(null), 500);
           }}
           handleConfirm={async () => {
-            await del.mutateAsync(currentRow.id)
-            setOpen(null)
-            setTimeout(() => setCurrentRow(null), 500)
+            await del.mutateAsync(currentRow.id);
+            setOpen(null);
+            setTimeout(() => setCurrentRow(null), 500);
           }}
           isLoading={del.isPending}
           title={`Delete quest: ${currentRow.id}?`}
@@ -29,5 +29,5 @@ export const QuestsDialogs = () => {
         />
       )}
     </>
-  )
-}
+  );
+};
