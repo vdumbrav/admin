@@ -155,6 +155,7 @@ export const QuestCreateWithPresetPage = () => {
           </Button>
         </div>
         <QuestForm
+          presetConfig={presetConfig}
           onSubmit={async (v) => {
             try {
               await create.mutateAsync(adaptTaskToQuest(v as Partial<Task>));

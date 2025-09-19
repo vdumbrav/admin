@@ -30,6 +30,7 @@ import { uploadMedia } from './api';
 import { ChildrenEditor } from './components/children-editor';
 import { groups, providers, types } from './data/data';
 import type { Task } from './data/types';
+import type { PresetConfig } from './presets';
 import { questFormSchema } from './types/form-schema';
 import type { QuestFormValues } from './types/form-types';
 
@@ -37,12 +38,162 @@ import type { QuestFormValues } from './types/form-types';
 const schema = questFormSchema;
 type FormValues = QuestFormValues;
 
+// ============================================================================
+// Field state management types
+// ============================================================================
+
+export interface FieldState {
+  visible: boolean;
+  disabled: boolean;
+  readonly: boolean;
+  tooltip?: string;
+}
+
+export type FieldStatesMatrix = Record<string, FieldState>;
+
+// ============================================================================
+// Helper functions
+// ============================================================================
+
+/**
+ * Create default form values with preset configuration
+ */
+function getPresetFormValues(presetConfig?: PresetConfig): QuestFormValues {
+  const defaultValues = getDefaultFormValues();
+
+  if (!presetConfig) {
+    return defaultValues;
+  }
+
+  // Start with defaults from preset config
+  const presetDefaults = presetConfig.defaults || {};
+
+  // Add automatic fields
+  const now = new Date();
+  const startTime = new Date(now.getTime() + 60 * 60 * 1000); // +1 hour
+
+  // Deep merge preset defaults with form defaults
+  const mergedValues = {
+    ...defaultValues,
+    ...presetDefaults,
+    start: startTime.toISOString(),
+  };
+
+  // Apply locked fields over everything
+  if (presetConfig.lockedFields) {
+    Object.assign(mergedValues, presetConfig.lockedFields);
+  }
+
+  return mergedValues as QuestFormValues;
+}
+
+/**
+ * Apply locked fields from preset configuration to final values
+ */
+function applyLockedFields(values: QuestFormValues, presetConfig?: PresetConfig): QuestFormValues {
+  if (!presetConfig?.lockedFields) {
+    return values;
+  }
+
+  // Apply locked fields over user inputs - preset truth wins
+  const finalValues = { ...values };
+  Object.assign(finalValues, presetConfig.lockedFields);
+
+  return finalValues;
+}
+
+/**
+ * Compute field visibility state based on preset configuration and current form values
+ */
+function computeFieldStates(
+  presetConfig?: PresetConfig,
+  currentValues?: Partial<QuestFormValues>,
+): FieldStatesMatrix {
+  const defaultState: FieldState = {
+    visible: true,
+    disabled: false,
+    readonly: false,
+  };
+
+  if (!presetConfig?.fieldVisibility) {
+    // No preset - all fields are visible and editable
+    return {};
+  }
+
+  const matrix: FieldStatesMatrix = {};
+  const { fieldVisibility } = presetConfig;
+
+  for (const [fieldName, visibility] of Object.entries(fieldVisibility)) {
+    const state: FieldState = { ...defaultState };
+
+    switch (visibility) {
+      case 'hidden':
+        state.visible = false;
+        break;
+
+      case 'locked':
+        state.visible = true;
+        state.disabled = true;
+        state.tooltip = 'Managed by preset';
+        break;
+
+      case 'readonly':
+        state.visible = true;
+        state.readonly = true;
+        state.tooltip = 'Managed by preset';
+        break;
+
+      case 'conditional':
+        // Handle conditional visibility based on field and current values
+        state.visible = evaluateConditionalVisibility(fieldName, currentValues);
+        break;
+
+      case 'visible':
+      default:
+        state.visible = true;
+        break;
+    }
+
+    matrix[fieldName] = state;
+  }
+
+  return matrix;
+}
+
+/**
+ * Evaluate conditional visibility for specific fields
+ */
+function evaluateConditionalVisibility(
+  fieldName: string,
+  currentValues?: Partial<QuestFormValues>,
+): boolean {
+  if (!currentValues) return false;
+
+  switch (fieldName) {
+    case 'partnerIcon':
+      // partnerIcon is visible only if group === 'partner'
+      return currentValues.group === 'partner';
+
+    default:
+      return false;
+  }
+}
+
+/**
+ * Get field state from matrix with fallback to default
+ */
+function getFieldState(fieldName: string, matrix: FieldStatesMatrix): FieldState {
+  return matrix[fieldName] || { visible: true, disabled: false, readonly: false };
+}
+
 export const QuestForm = ({
   initial,
+  presetConfig,
   onSubmit,
   onCancel,
 }: {
   initial?: Partial<Task>;
+  presetConfig?: PresetConfig;
   onSubmit: (v: FormValues) => void | Promise<void>;
   onCancel: () => void;
 }) => {
@@ -51,8 +202,8 @@ export const QuestForm = ({
   const [isUploading, setIsUploading] = useState(false);
   const clearIconPreview = () => setIconPreview((old) => replaceObjectUrl(old));
   const initialValues = useMemo(
-    () => (initial ? apiToForm(initial) : getDefaultFormValues()),
-    [initial],
+    () => (initial ? apiToForm(initial) : getPresetFormValues(presetConfig)),
+    [initial, presetConfig],
   );
 
   const form = useForm({
@@ -63,6 +214,16 @@ export const QuestForm = ({
   const type = useWatch({ control: form.control, name: 'type' });
   const icon = useWatch({ control: form.control, name: 'resources.icon' });
   const isSubmitting = form.formState.isSubmitting;
+
+  // Watch key fields for conditional visibility
+  const group = useWatch({ control: form.control, name: 'group' });
+  const provider = useWatch({ control: form.control, name: 'provider' });
+
+  // Compute field states matrix based on preset and current values
+  const fieldStates = useMemo(() => {
+    const currentValues = form.getValues();
+    return computeFieldStates(presetConfig, { ...currentValues, group, provider });
+  }, [presetConfig, group, provider, form]);
   const adsgramType = useWatch({
     control: form.control,
     name: 'resources.adsgram.type',
@@ -173,13 +334,16 @@ export const QuestForm = ({
       <form
         // eslint-disable-next-line @typescript-eslint/no-misused-promises
         onSubmit={form.handleSubmit(async (values) => {
+          // Apply locked fields from preset configuration
+          const finalValues = applyLockedFields(values, presetConfig);
+
           // Convert form values to API format using adapter
-          const apiData = formToApi(values);
+          const apiData = formToApi(finalValues);
           // Update child order_by values
           if (apiData.child) {
             apiData.child = apiData.child.map((c, i: number) => ({ ...c, order_by: i }));
           }
-          await onSubmit(values);
+          await onSubmit(finalValues);
         })}
         className='mx-auto max-w-5xl space-y-6'
       >
@@ -213,22 +377,35 @@ export const QuestForm = ({
               </FormItem>
             )}
           />
-          <FormField
-            control={form.control}
-            name='group'
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Group</FormLabel>
-                <SelectDropdown
-                  value={field.value}
-                  onValueChange={field.onChange}
-                  placeholder='Select group'
-                  items={groupItems}
-                />
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          {getFieldState('group', fieldStates).visible && (
+            <FormField
+              control={form.control}
+              name='group'
+              render={({ field }) => {
+                const state = getFieldState('group', fieldStates);
+                return (
+                  <FormItem>
+                    <FormLabel>
+                      Group
+                      {state.tooltip && (
+                        <span className='text-muted-foreground ml-1 text-xs'>
+                          ({state.tooltip})
+                        </span>
+                      )}
+                    </FormLabel>
+                    <SelectDropdown
+                      value={field.value}
+                      onValueChange={field.onChange}
+                      placeholder='Select group'
+                      items={groupItems}
+                      disabled={state.disabled || state.readonly}
+                    />
+                    <FormMessage />
+                  </FormItem>
+                );
+              }}
+            />
+          )}
           <FormField
             control={form.control}
             name='order_by'
@@ -265,22 +442,35 @@ export const QuestForm = ({
               </FormItem>
             )}
           />
-          <FormField
-            control={form.control}
-            name='provider'
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Provider</FormLabel>
-                <SelectDropdown
-                  value={field.value}
-                  onValueChange={(v) => field.onChange(v || undefined)}
-                  placeholder='Select provider'
-                  items={providerItems}
-                />
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          {getFieldState('provider', fieldStates).visible && (
+            <FormField
+              control={form.control}
+              name='provider'
+              render={({ field }) => {
+                const state = getFieldState('provider', fieldStates);
+                return (
+                  <FormItem>
+                    <FormLabel>
+                      Provider
+                      {state.tooltip && (
+                        <span className='text-muted-foreground ml-1 text-xs'>
+                          ({state.tooltip})
+                        </span>
+                      )}
+                    </FormLabel>
+                    <SelectDropdown
+                      value={field.value}
+                      onValueChange={(v) => field.onChange(v || undefined)}
+                      placeholder='Select provider'
+                      items={providerItems}
+                      disabled={state.disabled || state.readonly}
+                    />
+                    <FormMessage />
+                  </FormItem>
+                );
+              }}
+            />
+          )}
           <FormField
             control={form.control}
             name='resources.username'
