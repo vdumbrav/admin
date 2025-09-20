@@ -46,21 +46,16 @@ const PROVIDER_LABELS: Record<AdminWaitlistTasksResponseDtoProvider, string> = {
 // ============================================================================
 
 /**
- * Groups dropdown options (API-synced + form-specific)
+ * Groups dropdown options (API-synced)
  */
-export const groups = [
-  // Form-specific option
-  { value: 'all', label: GROUP_LABELS.all },
-  // API-based options (exclude 'all' to avoid duplicate key)
-  ...getAvailableApiGroups()
-    .filter((g) => g !== AdminWaitlistTasksResponseDtoGroup.all)
-    .map(
-      (group): DropdownOption => ({
-        value: group,
-        label: GROUP_LABELS[group],
-      }),
-    ),
-];
+export const groups = getAvailableApiGroups()
+  .filter((g) => g !== AdminWaitlistTasksResponseDtoGroup.all)
+  .map(
+    (group): DropdownOption => ({
+      value: group,
+      label: GROUP_LABELS[group],
+    }),
+  );
 
 /**
  * Types dropdown options (API-synced + form-specific)

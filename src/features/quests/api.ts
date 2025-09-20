@@ -39,16 +39,32 @@ export const useQuests = (query: QuestQuery) => {
         item.title.toLowerCase().includes(query.search.toLowerCase()) ||
         (item.description?.toLowerCase().includes(query.search.toLowerCase()) ?? false);
 
-      const matchesGroup = !query.group || item.group === query.group;
+      const matchesGroup =
+        !query.group ||
+        (() => {
+          const selectedGroups = query.group.split(',').filter(Boolean);
+          return selectedGroups.includes(item.group);
+        })();
 
       const matchesType =
         !query.type ||
         (() => {
           const selectedTypes = query.type.split(',').filter(Boolean);
-          return item.type?.some((t: string) => selectedTypes.includes(t));
+          // Handle both array and string types
+          if (Array.isArray(item.type)) {
+            return item.type.some((t: string) => selectedTypes.includes(t));
+          } else if (typeof item.type === 'string') {
+            return selectedTypes.includes(item.type);
+          }
+          return false;
         })();
 
-      const matchesProvider = !query.provider || item.provider === query.provider;
+      const matchesProvider =
+        !query.provider ||
+        (() => {
+          const selectedProviders = query.provider.split(',').filter(Boolean);
+          return item.provider ? selectedProviders.includes(item.provider) : false;
+        })();
 
       const matchesVisibility = query.visible === undefined || item.visible === query.visible;
 

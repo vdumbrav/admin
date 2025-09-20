@@ -75,7 +75,7 @@ export const QuestsDataTable = ({ columns, isAdmin }: DataTableProps) => {
 
   // Convert context values to API format
   const visible = visibleStr === 'true' ? true : visibleStr === 'false' ? false : undefined;
-  const groupForApi = group === 'all' ? undefined : (group as AdminWaitlistTasksResponseDtoGroup);
+  const groupForApi = group ? (group as AdminWaitlistTasksResponseDtoGroup) : undefined;
 
   const { data, isFetching, isLoading } = useQuests({
     search,

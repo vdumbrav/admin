@@ -52,7 +52,7 @@ export function FiltersProvider({ children }: Props) {
   // Immediate filter updates
   const setGroup = React.useCallback(
     (value: string) => {
-      updateFilters({ group: value === 'all' ? undefined : value, page: 1 });
+      updateFilters({ group: value || undefined, page: 1 });
     },
     [updateFilters],
   );
@@ -137,7 +137,7 @@ export function FiltersProvider({ children }: Props) {
   const value: FiltersContextType = {
     // Current values from URL
     search: searchValue, // Use local state for search input
-    group: searchParams.group ?? 'all',
+    group: searchParams.group ?? '',
     type: searchParams.type ?? '',
     provider: searchParams.provider ?? '',
     visible: searchParams.visible ?? '',

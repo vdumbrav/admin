@@ -7,6 +7,7 @@ import { DataTableViewOptions } from '@/components/table/data-table-view-options
 import { useQuests } from '../api';
 import { groups, providers, types, visibilities } from '../data/data';
 import { useFilters } from '../hooks/use-filters';
+import { createVirtualColumn } from '../utils/virtual-column-helper';
 
 interface DataTableToolbarProps<TData> {
   table: Table<TData>;
@@ -47,9 +48,6 @@ export const DataTableToolbar = <TData,>({ table }: DataTableToolbarProps<TData>
       counts.set(groupValue, (counts.get(groupValue) ?? 0) + 1);
     });
 
-    // Add 'all' count
-    counts.set('all', allData.items.length);
-
     return counts;
   }, [allData?.items]);
 
@@ -58,10 +56,14 @@ export const DataTableToolbar = <TData,>({ table }: DataTableToolbarProps<TData>
     const counts = new Map<string, number>();
 
     allData.items.forEach((item) => {
-      if (item.type && Array.isArray(item.type)) {
-        item.type.forEach((t) => {
-          counts.set(t, (counts.get(t) ?? 0) + 1);
-        });
+      if (item.type) {
+        if (Array.isArray(item.type)) {
+          item.type.forEach((t) => {
+            counts.set(t, (counts.get(t) ?? 0) + 1);
+          });
+        } else if (typeof item.type === 'string') {
+          counts.set(item.type, (counts.get(item.type) ?? 0) + 1);
+        }
       }
     });
 
@@ -96,72 +98,52 @@ export const DataTableToolbar = <TData,>({ table }: DataTableToolbarProps<TData>
     return counts;
   }, [allData?.items]);
 
-  // Create virtual columns for the filters
+  // Create virtual columns using the helper
   const virtualGroupColumn = React.useMemo(
-    () => ({
-      getFilterValue: () => (group === 'all' ? undefined : [group]),
-      setFilterValue: (value: unknown) => {
-        const arr = value as string[];
-        if (!arr || arr.length === 0) {
-          setGroup('all');
-        } else {
-          setGroup(arr[0]);
-        }
-      },
-      getFacetedUniqueValues: () => getGroupCounts,
-    }),
+    () =>
+      createVirtualColumn({
+        currentValue: group,
+        setValue: setGroup,
+        getCounts: () => getGroupCounts,
+        isMultiple: true,
+      }),
     [group, setGroup, getGroupCounts],
   );
 
   const virtualTypeColumn = React.useMemo(
-    () => ({
-      getFilterValue: () => (type ? type.split(',') : undefined),
-      setFilterValue: (value: unknown) => {
-        const arr = value as string[];
-        if (!arr || arr.length === 0) {
-          setType('');
-        } else {
-          setType(arr.join(','));
-        }
-      },
-      getFacetedUniqueValues: () => getTypeCounts,
-    }),
+    () =>
+      createVirtualColumn({
+        currentValue: type,
+        setValue: setType,
+        getCounts: () => getTypeCounts,
+        isMultiple: true,
+      }),
     [type, setType, getTypeCounts],
   );
 
   const virtualProviderColumn = React.useMemo(
-    () => ({
-      getFilterValue: () => (provider ? [provider] : undefined),
-      setFilterValue: (value: unknown) => {
-        const arr = value as string[];
-        if (!arr || arr.length === 0) {
-          setProvider('');
-        } else {
-          setProvider(arr[0]);
-        }
-      },
-      getFacetedUniqueValues: () => getProviderCounts,
-    }),
+    () =>
+      createVirtualColumn({
+        currentValue: provider,
+        setValue: setProvider,
+        getCounts: () => getProviderCounts,
+        isMultiple: true,
+      }),
     [provider, setProvider, getProviderCounts],
   );
 
   const virtualVisibleColumn = React.useMemo(
-    () => ({
-      getFilterValue: () => (visible ? [visible] : undefined),
-      setFilterValue: (value: unknown) => {
-        const arr = value as string[];
-        if (!arr || arr.length === 0) {
-          setVisible('');
-        } else {
-          setVisible(arr[0]);
-        }
-      },
-      getFacetedUniqueValues: () => getVisibleCounts,
-    }),
+    () =>
+      createVirtualColumn({
+        currentValue: visible,
+        setValue: setVisible,
+        getCounts: () => getVisibleCounts,
+        isMultiple: false,
+      }),
     [visible, setVisible, getVisibleCounts],
   );
 
-  const hasFilters = group !== 'all' || type || provider || visible;
+  const hasFilters = group || type || provider || visible;
 
   return (
     <div className='flex items-center justify-between'>
@@ -171,7 +153,7 @@ export const DataTableToolbar = <TData,>({ table }: DataTableToolbarProps<TData>
             column={virtualGroupColumn as Column<unknown, unknown>}
             title='Group'
             options={groups}
-            multiple={false}
+            multiple={true}
           />
           <DataTableFacetedFilter
             column={virtualTypeColumn as Column<unknown, unknown>}
@@ -183,7 +165,7 @@ export const DataTableToolbar = <TData,>({ table }: DataTableToolbarProps<TData>
             column={virtualProviderColumn as Column<unknown, unknown>}
             title='Provider'
             options={providers}
-            multiple={false}
+            multiple={true}
           />
           <DataTableFacetedFilter
             column={virtualVisibleColumn as Column<unknown, unknown>}

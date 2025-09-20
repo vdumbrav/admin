@@ -1,6 +1,6 @@
 export const defaultQuestSearch = {
   search: '',
-  group: 'all',
+  group: '',
   type: '',
   provider: '',
   visible: '',
