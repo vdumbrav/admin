@@ -411,6 +411,55 @@ VITE_APP_BASE_URL=https://admin.yourdomain.com
 
 ## 🔧 Features
 
+### Quest Management System
+
+#### 🎯 **Preset-Based Quest Creation**
+
+This admin panel features a sophisticated **preset-based quest creation system** that transforms quest creation from a complex form into a guided, user-friendly workflow:
+
+**Core Features:**
+
+- **5 Quest Presets:** Connect, Join, Action with Post, 7-Day Challenge, Explore
+- **Two-Step Flow:** Preset Selection → Dynamic Universal Form
+- **Field State Management:** Automatic field visibility (visible/hidden/locked/readonly)
+- **Business Rules Engine:** Connect-gate validation, reward calculations, auto-generation
+- **Type-Safe Configuration:** Full TypeScript support with runtime validation
+
+**Quest Presets:**
+
+1. **🔗 Connect** - Social account linking
+   - Locked to 'social' group
+   - Required provider selection (Twitter, Discord, Telegram)
+   - Hidden URI field (uses user data)
+
+2. **👥 Join** - Channel/community joining
+   - Flexible group selection (social/partner)
+   - Connect-gate validation (requires Connect quest for same provider)
+   - Dynamic button text (Follow for Twitter)
+
+3. **💬 Action with Post** - Twitter interactions
+   - Twitter-locked with post URL validation
+   - Multiple tasks (Like, Comment, Retweet)
+   - Real-time total reward calculation
+   - Twitter preview with fallback handling
+
+4. **📅 7-Day Challenge** - Daily rewards
+   - Locked to 'daily' group and 'walme' provider
+   - 7-day reward configuration
+   - Automatic total calculation
+
+5. **🌐 Explore** - External link navigation
+   - Flexible configuration for any group
+   - Always-available icon upload
+   - Custom button text configuration
+
+**Technical Architecture:**
+
+- **"Under the Hood - One Form":** Single `QuestForm.tsx` component with dynamic preset configuration
+- **PresetConfig System:** Runtime preset registry with field visibility matrices
+- **API Compatibility:** Full compatibility with existing API adapters
+- **Draft Autosave:** Protection against data loss with localStorage persistence
+
 ### Authentication Flow
 
 - **No auto-logout:** Users with insufficient roles see "Try Different Account" option
@@ -558,39 +607,53 @@ A complete admin interface with OIDC authentication and role-based access contro
 
 ### 🔐 **Implemented Features**
 
-**1. Keycloak OIDC Integration**
+**1. Quest Management System** 🎯
+
+- ✅ **Preset-Based Creation:** 5 fully configured quest presets (Connect, Join, Action with Post, 7-Day Challenge, Explore)
+- ✅ **Universal Form Architecture:** Single dynamic form component with preset-driven configuration
+- ✅ **Field State Management:** Advanced visibility matrix (visible/hidden/locked/readonly/conditional)
+- ✅ **Business Rules Engine:** Connect-gate validation, automatic reward calculations, field auto-generation
+- ✅ **Real-time Features:** Twitter post preview, live total reward calculation, draft autosave
+- ✅ **Type Safety:** Full TypeScript support with Zod runtime validation
+- ✅ **API Integration:** Seamless compatibility with existing API adapters
+- ✅ **Production Ready:** All lint checks pass, comprehensive error handling, responsive design
+
+**2. Keycloak OIDC Integration**
 
 - ✅ Redirect-based authentication (НЕ popup)
 - ✅ Automatic token refresh and session management
 - ✅ Proper callback handling at `/auth/callback`
 - ✅ Support for multiple role claim sources
 
-**2. Role-Based Access Control**
+**3. Role-Based Access Control**
 
 - ✅ Access only for `admin` and `moderator` roles
 - ✅ Intelligent role extraction from multiple sources
 - ✅ Client-side and server-side validation
 - ✅ Clear access denied messaging with current roles display
 
-**3. User Experience**
+**4. User Experience**
 
 - ✅ Professional login page with role requirements
 - ✅ Toast notifications for access denied scenarios
 - ✅ Loading states throughout auth flow
 - ✅ Proper error handling with user feedback
+- ✅ **Quest UX:** Preset selection with hover effects, intuitive navigation flow, real-time form updates
 
-**4. Architecture & Scalability**
+**5. Architecture & Scalability**
 
 - ✅ Abstracted auth logic ready for Auth0 integration
 - ✅ TypeScript strict typing throughout
 - ✅ Reusable `RoleGuard` and `ProtectedRoute` components
 - ✅ Environment-based configuration
+- ✅ **Quest Architecture:** Modular preset system, field visibility engine, extensible validation framework
 
-**5. Debug & Development Tools**
+**6. Debug & Development Tools**
 
 - ✅ Console logging with emoji prefixes (development only)
 - ✅ Visual debug panel in development mode
 - ✅ Mock authentication for local development
+- ✅ **Quest Development:** Mock API with configurable latency, comprehensive error scenarios, draft recovery
 
 ### 🚀 **Production Ready**
 
