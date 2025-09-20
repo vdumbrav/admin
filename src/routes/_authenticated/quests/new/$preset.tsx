@@ -1,23 +1,12 @@
-import { createFileRoute, redirect } from '@tanstack/react-router';
+import { createFileRoute } from '@tanstack/react-router';
 import { requireAdminBeforeLoad } from '@/auth/guards';
-import { toast } from 'sonner';
-import { defaultQuestSearch } from '@/features/quests/default-search';
 import { QuestCreateWithPresetPage } from '@/features/quests/pages';
-import { isValidPresetId } from '@/features/quests/presets';
+// Trust preset id; page will handle unknown ids via config lookup
 
 export const Route = createFileRoute('/_authenticated/quests/new/$preset')({
-  beforeLoad: async ({ params }) => {
+  beforeLoad: async () => {
     // First check auth
     await requireAdminBeforeLoad();
-
-    // Then validate preset
-    if (!isValidPresetId(params.preset)) {
-      toast.error('Unknown preset, please select from available options');
-      throw redirect({
-        to: '/quests/new',
-        search: defaultQuestSearch,
-      });
-    }
   },
   component: QuestCreateWithPresetPage,
   staticData: {

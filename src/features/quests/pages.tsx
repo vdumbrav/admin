@@ -1,11 +1,7 @@
-import { useNavigate, useParams } from '@tanstack/react-router';
+import { Outlet, useNavigate, useParams, useRouterState, useSearch } from '@tanstack/react-router';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
-import { Header } from '@/components/layout/header';
 import { Main } from '@/components/layout/main';
-import { ProfileDropdown } from '@/components/profile-dropdown';
-import { Search } from '@/components/search';
-import { ThemeSwitch } from '@/components/theme-switch';
 import { QuestForm } from './QuestForm';
 import { useCreateQuest, useQuest, useUpdateQuest } from './api';
 import { PresetSelection } from './components/preset-selection';
@@ -15,9 +11,16 @@ import { getPreset, type PresetId } from './presets';
 import type { QuestFormValues } from './types/form-types';
 
 export const QuestCreatePage = () => {
-  const showForm =
-    typeof window !== 'undefined' &&
-    new URLSearchParams(window.location.search).get('showForm') === 'true';
+  const hasPreset = useRouterState({
+    select: (s) => s.matches.some((m) => m.routeId === '/_authenticated/quests/new/$preset'),
+  });
+  // Read showForm from router search to stay reactive to URL changes
+  const searchObj = useSearch({ from: '/_authenticated/quests/new' as const }) as unknown;
+  let showForm = false;
+  if (typeof searchObj === 'object' && searchObj !== null && 'showForm' in (searchObj as Record<string, unknown>)) {
+    const v = (searchObj as Record<string, unknown>).showForm;
+    showForm = v === true || v === 'true';
+  }
   const create = useCreateQuest();
   const nav = useNavigate({});
   // No need to propagate table search params on create routes
@@ -35,25 +38,17 @@ export const QuestCreatePage = () => {
 
   return (
     <>
-      <Header fixed>
-        <Search />
-        <div className='ml-auto flex items-center space-x-4'>
-          <ThemeSwitch />
-          <ProfileDropdown />
-        </div>
-      </Header>
       <Main>
-        {showForm ? (
+        {hasPreset ? (
+          <Outlet />
+        ) : showForm ? (
           <div>
             <div className='mx-auto mb-4 flex max-w-5xl items-center justify-between'>
               <div>
                 <h2 className='text-2xl font-bold tracking-tight'>New Quest</h2>
                 <p className='text-muted-foreground'>Create a new quest without preset.</p>
               </div>
-              <Button
-                variant='outline'
-                onClick={() => void nav({ to: '/quests', search: listSearch })}
-              >
+              <Button variant='outline' onClick={() => void nav({ to: '/quests' } as any)}>
                 Back to list
               </Button>
             </div>
@@ -103,40 +98,24 @@ export const QuestEditPage = () => {
 
   if (!data) {
     return (
-      <>
-        <Header fixed>
-          <Search />
-          <div className='ml-auto flex items-center space-x-4'>
-            <ThemeSwitch />
-            <ProfileDropdown />
-          </div>
-        </Header>
-        <Main>
-          <div className='max-w-5xl space-y-3'>
-            <div className='bg-muted h-7 w-48 animate-pulse rounded' />
-            <div className='bg-muted h-5 w-80 animate-pulse rounded' />
-            <div className='bg-muted h-64 w-full animate-pulse rounded' />
-          </div>
-        </Main>
-      </>
+      <Main>
+        <div className='max-w-5xl space-y-3'>
+          <div className='bg-muted h-7 w-48 animate-pulse rounded' />
+          <div className='bg-muted h-5 w-80 animate-pulse rounded' />
+          <div className='bg-muted h-64 w-full animate-pulse rounded' />
+        </div>
+      </Main>
     );
   }
   return (
     <>
-      <Header fixed>
-        <Search />
-        <div className='ml-auto flex items-center space-x-4'>
-          <ThemeSwitch />
-          <ProfileDropdown />
-        </div>
-      </Header>
       <Main>
         <div className='mb-4 flex items-center justify-between'>
           <div>
             <h2 className='text-2xl font-bold tracking-tight'>Edit Quest #{id}</h2>
             <p className='text-muted-foreground'>Update quest properties.</p>
           </div>
-          <Button variant='outline' onClick={() => void nav({ to: '/quests', search: listSearch })}>
+          <Button variant='outline' onClick={() => void nav({ to: '/quests' } as any)}>
             Back to list
           </Button>
         </div>
@@ -156,7 +135,7 @@ export const QuestEditPage = () => {
               toast.error(e instanceof Error ? e.message : 'Failed to save');
             }
           }}
-          onCancel={() => void nav({ to: '/quests', search: listSearch })}
+          onCancel={() => void nav({ to: '/quests' } as any)}
         />
       </Main>
     </>
@@ -184,13 +163,6 @@ export const QuestCreateWithPresetPage = () => {
 
   return (
     <>
-      <Header fixed>
-        <Search />
-        <div className='ml-auto flex items-center space-x-4'>
-          <ThemeSwitch />
-          <ProfileDropdown />
-        </div>
-      </Header>
       <Main>
         <div className='mx-auto mb-4 flex max-w-5xl items-center justify-between'>
           <div>
@@ -199,7 +171,7 @@ export const QuestCreateWithPresetPage = () => {
             </h2>
             <p className='text-muted-foreground'>{presetConfig.description}</p>
           </div>
-          <Button variant='outline' onClick={() => void nav({ to: '/quests', search: listSearch })}>
+          <Button variant='outline' onClick={() => void nav({ to: '/quests' } as any)}>
             Back to list
           </Button>
         </div>
@@ -219,7 +191,7 @@ export const QuestCreateWithPresetPage = () => {
               toast.error(e instanceof Error ? e.message : 'Failed to save');
             }
           }}
-          onCancel={() => void nav({ to: '/quests', search: listSearch })}
+          onCancel={() => void nav({ to: '/quests' } as any)}
         />
       </Main>
     </>
