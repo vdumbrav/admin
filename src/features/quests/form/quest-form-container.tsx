@@ -94,6 +94,8 @@ export function QuestFormContainer({
         onSubmit={() => void handleSubmit()}
         onCancel={handleCancel}
         onReset={() => form.reset()}
+        isSubmitting={form.formState.isSubmitting}
+        isValid={form.formState.isValid}
       />
     </div>
   );

@@ -6,6 +6,7 @@ interface StickyActionsProps {
   onCancel: () => void;
   onSubmit: () => void;
   isSubmitting?: boolean;
+  isValid?: boolean;
   criticalErrors?: string[];
   className?: string;
 }
@@ -15,6 +16,7 @@ export const StickyActions = ({
   onCancel,
   onSubmit,
   isSubmitting = false,
+  isValid = true,
   criticalErrors = [],
   className = '',
 }: StickyActionsProps) => {
@@ -50,7 +52,7 @@ export const StickyActions = ({
           <Button
             type='button'
             onClick={onSubmit}
-            disabled={isSubmitting || hasErrors}
+            disabled={isSubmitting || hasErrors || !isValid}
             aria-busy={isSubmitting}
             className='w-full sm:w-auto'
           >

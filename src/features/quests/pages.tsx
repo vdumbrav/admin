@@ -46,8 +46,13 @@ export const QuestCreatePage = () => {
             <QuestForm
               onSubmit={async (v) => {
                 try {
-                  await create.mutateAsync(adaptTaskToQuest(v as Partial<Task>));
-                  toast.success('Saved');
+                  const withSchedule = {
+                    ...(v as unknown as Partial<Task>),
+                    started_at: (v as any).start,
+                    completed_at: (v as any).end,
+                  };
+                  await create.mutateAsync(adaptTaskToQuest(withSchedule));
+                  toast.success('Quest saved successfully');
                   void nav({ to: '/quests', search });
                 } catch (e) {
                   toast.error(e instanceof Error ? e.message : 'Failed to save');
@@ -117,8 +122,13 @@ export const QuestEditPage = () => {
           initial={data ? adaptQuestToTask(data) : undefined}
           onSubmit={async (v) => {
             try {
-              await update.mutateAsync(adaptTaskToQuest(v as Partial<Task>));
-              toast.success('Saved');
+              const withSchedule = {
+                ...(v as unknown as Partial<Task>),
+                started_at: (v as any).start,
+                completed_at: (v as any).end,
+              };
+              await update.mutateAsync(adaptTaskToQuest(withSchedule));
+              toast.success('Quest saved successfully');
               void nav({ to: '/quests', search });
             } catch (e) {
               toast.error(e instanceof Error ? e.message : 'Failed to save');
@@ -167,8 +177,13 @@ export const QuestCreateWithPresetPage = () => {
           presetConfig={presetConfig}
           onSubmit={async (v) => {
             try {
-              await create.mutateAsync(adaptTaskToQuest(v as Partial<Task>));
-              toast.success('Saved');
+              const withSchedule = {
+                ...(v as unknown as Partial<Task>),
+                started_at: (v as any).start,
+                completed_at: (v as any).end,
+              };
+              await create.mutateAsync(adaptTaskToQuest(withSchedule));
+              toast.success('Quest saved successfully');
               void nav({ to: '/quests', search });
             } catch (e) {
               toast.error(e instanceof Error ? e.message : 'Failed to save');

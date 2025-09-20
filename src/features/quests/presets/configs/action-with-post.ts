@@ -7,7 +7,7 @@ export const actionWithPostPresetConfig: PresetConfig = {
   icon: '💬',
 
   fieldVisibility: {
-    group: 'visible', // social OR partner
+    group: 'locked', // Always social per checklist
     provider: 'locked', // Always 'twitter'
     uri: 'hidden', // Not used for this type
     reward: 'hidden', // Use totalReward instead
@@ -23,6 +23,7 @@ export const actionWithPostPresetConfig: PresetConfig = {
   lockedFields: {
     provider: 'twitter',
     type: 'multiple',
+    group: 'social',
   },
 
   defaults: {

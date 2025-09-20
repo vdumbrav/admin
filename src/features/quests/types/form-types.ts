@@ -95,6 +95,14 @@ export interface QuestFormValues {
   icon?: string; // Quest icon URL
   resources?: FormResources;
   child?: ChildFormValues[];
+  // Scheduling
+  start?: string; // ISO string for start time
+  end?: string; // ISO string for end time
+  // Repeatable iterator (for 7-day and similar)
+  iterator?: {
+    days?: number;
+    reward_map: number[];
+  };
 }
 
 // ============================================================================

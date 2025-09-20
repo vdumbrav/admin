@@ -20,6 +20,7 @@ import {
   getPresetFormValues,
 } from './business-rules';
 import { computeFieldStates, type FieldStatesMatrix } from './field-state';
+import { useConnectGate } from './use-connect-gate';
 
 // ============================================================================
 // Hook Interface
@@ -132,6 +133,16 @@ export function useQuestForm({
     }
   }, [watchedValues, presetConfig, isDirty, form]);
 
+  // Initialize default start = now + 1h if not provided
+  useEffect(() => {
+    const currentStart = form.getValues('start');
+    if (!currentStart) {
+      const now = new Date();
+      const startTime = new Date(now.getTime() + 60 * 60 * 1000);
+      form.setValue('start', startTime.toISOString(), { shouldDirty: false, shouldValidate: true });
+    }
+  }, [form]);
+
   // ============================================================================
   // Connect Gate Warnings
   // ============================================================================
@@ -139,6 +150,83 @@ export function useQuestForm({
   const connectGateWarnings = useMemo(() => {
     return getConnectGateWarnings(presetConfig, watchedValues.provider, watchedValues.uri);
   }, [presetConfig, watchedValues.provider, watchedValues.uri]);
+
+  // Real connect-gate validation (blocks Save for Join/Action with Post)
+  const { hasRequiredConnect } = useConnectGate(watchedValues.provider);
+
+  useEffect(() => {
+    // Clear previous errors first
+    form.clearErrors(['provider', 'resources.tweetId', 'uri', 'resources.ui.button', 'icon']);
+
+    // Conditional required fields by preset
+    if (presetConfig?.id === 'connect') {
+      if (!watchedValues.provider) {
+        form.setError('provider', { type: 'required', message: 'Provider is required' });
+      }
+    }
+
+    if (presetConfig?.id === 'join') {
+      if (!watchedValues.provider) {
+        form.setError('provider', { type: 'required', message: 'Provider is required' });
+      }
+      if (!watchedValues.uri) {
+        form.setError('uri', { type: 'required', message: 'Join URL is required' });
+      }
+      // Connect-gate for Join
+      if (watchedValues.provider && hasRequiredConnect === false) {
+        form.setError('provider', {
+          type: 'custom',
+          message: `Requires Connect ${watchedValues.provider} quest`,
+        });
+      }
+    }
+
+    if (presetConfig?.id === 'action-with-post') {
+      if (watchedValues.group !== 'social') {
+        form.setValue('group', 'social', { shouldDirty: true, shouldValidate: true });
+      }
+      if (!watchedValues.resources?.username) {
+        form.setError('resources.username' as any, {
+          type: 'required',
+          message: 'Username is required',
+        });
+      }
+      const tid = watchedValues.resources?.tweetId?.trim();
+      if (!tid || !/^\d{5,20}$/.test(tid)) {
+        form.setError('resources.tweetId' as any, {
+          type: 'required',
+          message: 'Valid Tweet ID is required',
+        });
+      }
+      if (hasRequiredConnect === false) {
+        form.setError('provider', {
+          type: 'custom',
+          message: 'Requires Connect Twitter quest',
+        });
+      }
+    }
+
+    if (presetConfig?.id === 'seven-day-challenge') {
+      const map = (watchedValues as any).iterator?.reward_map;
+      if (!Array.isArray(map) || map.length < 1) {
+        form.setError('iterator' as any, {
+          type: 'required',
+          message: 'At least one daily reward is required',
+        });
+      }
+    }
+
+    if (presetConfig?.id === 'explore') {
+      if (!watchedValues.uri) {
+        form.setError('uri', { type: 'required', message: 'External URL is required' });
+      }
+      // Icon required for Explore
+      const icon = watchedValues.icon ?? watchedValues.resources?.icon;
+      if (!icon) {
+        form.setError('icon' as any, { type: 'required', message: 'Icon is required' });
+      }
+    }
+  }, [form, presetConfig, watchedValues, hasRequiredConnect]);
 
   // ============================================================================
   // Draft Autosave

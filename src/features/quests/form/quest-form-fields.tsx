@@ -134,6 +134,45 @@ export function QuestFormFields({
         />
       )}
 
+      {/* Start / End datetime */}
+      <div className='grid grid-cols-1 gap-4 sm:grid-cols-2'>
+        <FormField
+          control={form.control}
+          name='start'
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Start</FormLabel>
+              <FormControl>
+                <Input
+                  type='datetime-local'
+                  value={field.value ? new Date(field.value).toISOString().slice(0, 16) : ''}
+                  onChange={(e) => field.onChange(new Date(e.target.value).toISOString())}
+                />
+              </FormControl>
+              <FormDescription>Default is current time + 1 hour</FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name='end'
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>End</FormLabel>
+              <FormControl>
+                <Input
+                  type='datetime-local'
+                  value={field.value ? new Date(field.value).toISOString().slice(0, 16) : ''}
+                  onChange={(e) => field.onChange(new Date(e.target.value).toISOString())}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
+
       {/* Provider Field */}
       {isFieldVisible('provider', fieldStates) && (
         <FormField
@@ -400,6 +439,14 @@ export function QuestFormFields({
               )}
             />
           )}
+
+          {/* Button Text */}
+          <ManagedField
+            name='resources.ui.button'
+            label='Button text'
+            presetConfig={presetConfig}
+            placeholder='Override button label'
+          />
 
           {/* Children Editor for non-preset forms */}
           {!presetConfig && isFieldVisible('children', fieldStates) && <ChildrenEditor />}

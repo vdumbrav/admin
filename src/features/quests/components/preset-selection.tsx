@@ -1,8 +1,8 @@
 import { useNavigate } from '@tanstack/react-router';
 import { Button } from '@/components/ui/button';
+import { SelectDropdown } from '@/components/select-dropdown';
 import { listPresets } from '../presets';
 import { useQuestSearch } from '../use-quest-search';
-import { PresetCard } from './preset-card';
 
 export const PresetSelection = () => {
   const navigate = useNavigate();
@@ -11,6 +11,7 @@ export const PresetSelection = () => {
   });
 
   const presets = listPresets();
+  const presetItems = presets.map((p) => ({ value: p.id, label: `${p.icon} ${p.name}` }));
 
   return (
     <div className='mx-auto max-w-5xl space-y-6'>
@@ -41,31 +42,42 @@ export const PresetSelection = () => {
         </div>
       </div>
 
-      {/* Preset Grid */}
-      <div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-3'>
-        {presets.map((preset) => (
-          <PresetCard key={preset.id} preset={preset} />
-        ))}
+      {/* Preset Select */}
+      <div className='mx-auto max-w-md'>
+        <label htmlFor='preset-select' className='mb-2 block text-sm font-medium'>
+          Choose a quest preset…
+        </label>
+        <SelectDropdown
+          className='w-full'
+          placeholder='Select a preset'
+          items={presetItems}
+          onValueChange={(value) =>
+            void navigate({ to: '/quests/new/$preset', params: { preset: value }, search })
+          }
+        />
+        <p className='text-muted-foreground mt-2 text-sm' id='preset-help'>
+          Select one of the available presets to start with recommended defaults.
+        </p>
       </div>
 
-      {/* Help Text */}
+      {/* Quick Preset Descriptions */}
       <div className='bg-muted/50 mt-8 rounded-lg border p-4'>
-        <h3 className='mb-2 font-medium'>Need help choosing?</h3>
+        <h3 className='mb-2 font-medium'>Preset descriptions</h3>
         <ul className='text-muted-foreground space-y-1 text-sm'>
           <li>
-            <strong>Connect:</strong> For linking social media accounts
+            <strong>🔗 Connect:</strong> Link a social account
           </li>
           <li>
-            <strong>Join:</strong> For joining channels, groups or following accounts
+            <strong>👥 Join:</strong> Join channels/groups or follow
           </li>
           <li>
-            <strong>Action with Post:</strong> For Twitter interactions (like, comment, retweet)
+            <strong>💬 Action with Post:</strong> Like, comment, share on X/Twitter
           </li>
           <li>
-            <strong>7-Day Challenge:</strong> For daily reward campaigns
+            <strong>📅 7-Day Challenge:</strong> Daily rewards over multiple days
           </li>
           <li>
-            <strong>Explore:</strong> For external links and custom actions
+            <strong>🌐 Explore:</strong> External link with custom button
           </li>
         </ul>
       </div>

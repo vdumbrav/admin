@@ -183,6 +183,22 @@ export function adaptTaskToQuest(task: Partial<Task>): Partial<Quest> {
     }
   }
 
+  // Compute parent reward fallbacks for multiple/repeatable
+  let computedReward = task.reward ?? 0;
+  const isMultiple = Array.isArray(task.type)
+    ? task.type.includes('multiple')
+    : task.type === 'multiple';
+  const isRepeatable = Array.isArray(task.type)
+    ? task.type.includes('repeatable')
+    : task.type === 'repeatable';
+
+  if (isMultiple && task.child && task.child.length > 0) {
+    computedReward = task.child.reduce((sum, c) => sum + (c.reward ?? 0), 0);
+  }
+  if (isRepeatable && task.iterator?.reward_map && Array.isArray(task.iterator.reward_map)) {
+    computedReward = task.iterator.reward_map.reduce((s, r) => s + (r ?? 0), 0);
+  }
+
   return {
     id: task.id,
     type: apiType,
@@ -193,7 +209,7 @@ export function adaptTaskToQuest(task: Partial<Task>): Partial<Quest> {
     provider: apiProvider,
     uri: task.uri ?? undefined,
     blocking_task: task.blocking_task ?? 0,
-    reward: task.reward ?? 0,
+    reward: computedReward,
     level: task.level ?? 0,
     group: apiGroup ?? 'social',
     order_by: task.order_by ?? 0,

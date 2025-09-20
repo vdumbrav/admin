@@ -30,7 +30,7 @@ const formPopupResourcesSchema = z.object({
 });
 
 const formUIResourcesSchema = z.object({
-  button: z.string(),
+  button: z.string().optional(),
   'pop-up': formPopupResourcesSchema.optional(),
 });
 
@@ -41,9 +41,21 @@ const formAdsgramResourcesSchema = z.object({
 
 const formResourcesSchema = z
   .object({
-    icon: z.string().optional(),
+    icon: z.string().url().optional(),
     username: z.string().optional(),
-    tweetId: z.string().optional(),
+    // Accept raw ID or URL and normalize to digits-only ID in preprocess
+    tweetId: z
+      .preprocess((val) => {
+        if (typeof val !== 'string') return val;
+        const str = val.trim();
+        // Extract ID from URL if present
+        const match = /status\/(\d{5,20})/.exec(str);
+        if (match?.[1]) return match[1];
+        // If digits-only, keep as is
+        if (/^\d{5,20}$/.test(str)) return str;
+        return str; // let superRefine handle invalid values if needed
+      }, z.string())
+      .optional(),
     isNew: z.boolean().optional(),
     block_id: z.string().optional(),
     ui: formUIResourcesSchema.optional(),
@@ -73,19 +85,65 @@ const childFormSchema = z.object({
 // Main form schema
 // ============================================================================
 
-export const questFormSchema = z.object({
-  title: z.string().min(1, 'Title is required').max(100, 'Title too long'),
-  type: questTypeSchema,
-  description: z.string().max(500, 'Description too long'),
-  group: questGroupSchema,
-  order_by: z.number().min(0, 'Order must be positive'),
-  provider: providerSchema,
-  uri: z.string().optional(),
-  reward: z.number().min(0, 'Reward must be positive').optional(),
-  visible: z.boolean().optional(),
-  resources: formResourcesSchema,
-  child: z.array(childFormSchema).optional(),
-});
+const iteratorSchema = z
+  .object({
+    days: z.number().int().min(1).max(365).optional(),
+    reward_map: z.array(z.number().min(0)).min(1),
+  })
+  .optional();
+
+export const questFormSchema = z
+  .object({
+    title: z.string().min(1, 'Title is required').max(100, 'Title too long'),
+    type: questTypeSchema,
+    description: z.string().max(500, 'Description too long'),
+    group: questGroupSchema,
+    order_by: z.number().min(0, 'Order must be positive'),
+    provider: providerSchema,
+    // Strict URL validation (http/https)
+    uri: z
+      .string()
+      .url('URL must be valid and start with http(s)')
+      .refine((u) => /^https?:\/\//.test(u), 'URL must start with http(s)')
+      .optional(),
+    reward: z.number().min(0, 'Reward must be positive').optional(),
+    visible: z.boolean().optional(),
+    resources: formResourcesSchema,
+    child: z.array(childFormSchema).optional(),
+    // Calculated fields and schedulers
+    totalReward: z.number().min(0).optional(),
+    start: z.string().optional(),
+    end: z.string().optional(),
+    iterator: iteratorSchema,
+  })
+  .passthrough()
+  .superRefine((val, ctx) => {
+    // start/end validation
+    if (val.start && val.end) {
+      const s = Date.parse(val.start);
+      const e = Date.parse(val.end);
+      if (!Number.isNaN(s) && !Number.isNaN(e) && e < s) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'End date cannot be earlier than start date',
+          path: ['end'],
+        });
+      }
+    }
+
+    // If preset implies Twitter (action-with-post), enforce sanitized tweetId & username in runtime elsewhere.
+    // Global sanity: if resources.ui exists and button provided, ensure non-empty
+    if (val.resources?.ui && 'button' in val.resources.ui) {
+      const b = val.resources.ui.button as unknown as string | undefined;
+      if (b !== undefined && String(b).trim().length === 0) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'Button text cannot be empty',
+          path: ['resources', 'ui', 'button'],
+        });
+      }
+    }
+  });
 
 // ============================================================================
 // Type exports
