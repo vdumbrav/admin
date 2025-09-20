@@ -113,7 +113,7 @@ export function FiltersProvider({ children }: Props) {
       provider: undefined,
       visible: undefined,
       page: 1,
-      limit: 25, // Reset to default page size
+      limit: 20, // Reset to default page size
     });
   }, [updateFilters]);
 
@@ -142,7 +142,7 @@ export function FiltersProvider({ children }: Props) {
     provider: searchParams.provider ?? '',
     visible: searchParams.visible ?? '',
     page: searchParams.page ?? 1,
-    limit: searchParams.limit ?? 25,
+    limit: searchParams.limit ?? 20,
     sort: searchParams.sort ?? 'order_by:asc',
 
     // Actions
