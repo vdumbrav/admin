@@ -1,4 +1,4 @@
-import { useNavigate, useParams } from '@tanstack/react-router';
+import { useNavigate, useParams, useSearch } from '@tanstack/react-router';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Header } from '@/components/layout/header';
@@ -8,17 +8,20 @@ import { Search } from '@/components/search';
 import { ThemeSwitch } from '@/components/theme-switch';
 import { QuestForm } from './QuestForm';
 import { useCreateQuest, useQuest, useUpdateQuest } from './api';
+import { PresetSelection } from './components/preset-selection';
 import { adaptQuestToTask, adaptTaskToQuest } from './data/adapters';
 import type { Task } from './data/types';
 import { getPreset, type PresetId } from './presets';
 import { useQuestSearch } from './use-quest-search';
 
 export const QuestCreatePage = () => {
+  const { showForm } = useSearch({ from: '/_authenticated/quests/new' });
   const create = useCreateQuest();
   const nav = useNavigate({});
   const search = useQuestSearch({
     from: '/_authenticated/quests/new' as const,
   });
+
   return (
     <>
       <Header fixed>
@@ -29,27 +32,33 @@ export const QuestCreatePage = () => {
         </div>
       </Header>
       <Main>
-        <div className='mx-auto mb-4 flex max-w-5xl items-center justify-between'>
+        {showForm ? (
           <div>
-            <h2 className='text-2xl font-bold tracking-tight'>New Quest</h2>
-            <p className='text-muted-foreground'>Create a new quest.</p>
+            <div className='mx-auto mb-4 flex max-w-5xl items-center justify-between'>
+              <div>
+                <h2 className='text-2xl font-bold tracking-tight'>New Quest</h2>
+                <p className='text-muted-foreground'>Create a new quest without preset.</p>
+              </div>
+              <Button variant='outline' onClick={() => void nav({ to: '/quests', search })}>
+                Back to list
+              </Button>
+            </div>
+            <QuestForm
+              onSubmit={async (v) => {
+                try {
+                  await create.mutateAsync(adaptTaskToQuest(v as Partial<Task>));
+                  toast.success('Saved');
+                  void nav({ to: '/quests', search });
+                } catch (e) {
+                  toast.error(e instanceof Error ? e.message : 'Failed to save');
+                }
+              }}
+              onCancel={() => void nav({ to: '/quests', search })}
+            />
           </div>
-          <Button variant='outline' onClick={() => void nav({ to: '/quests', search })}>
-            Back to list
-          </Button>
-        </div>
-        <QuestForm
-          onSubmit={async (v) => {
-            try {
-              await create.mutateAsync(adaptTaskToQuest(v as Partial<Task>));
-              toast.success('Saved');
-              void nav({ to: '/quests', search });
-            } catch (e) {
-              toast.error(e instanceof Error ? e.message : 'Failed to save');
-            }
-          }}
-          onCancel={() => void nav({ to: '/quests', search })}
-        />
+        ) : (
+          <PresetSelection />
+        )}
       </Main>
     </>
   );
