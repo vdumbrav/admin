@@ -24,7 +24,7 @@ import { ImageDropzone } from '@/components/image-dropzone';
 import { NoWheelNumber } from '@/components/no-wheel-number';
 import { SelectDropdown } from '@/components/select-dropdown';
 import { TwitterEmbed } from '@/components/twitter-embed';
-import { apiToForm, formToApi, getDefaultFormValues } from './adapters/form-api-adapter';
+import { apiToForm, getDefaultFormValues } from './adapters/form-api-adapter';
 import { uploadMedia } from './api';
 import { ChildrenEditor } from './components/children-editor';
 import { DailyRewardsEditor } from './components/daily-rewards-editor';
@@ -387,7 +387,7 @@ export const QuestForm = ({
     defaultValues: initialValues,
   });
 
-  const type = useWatch({ control: form.control, name: 'type' });
+  const type = useWatch({ control: form.control, name: 'type' as const });
   const icon = useWatch({ control: form.control, name: 'resources.icon' });
   const isSubmitting = form.formState.isSubmitting;
 
@@ -398,8 +398,8 @@ export const QuestForm = ({
   // Watch child tasks for reward calculation and order_by updates
   const childTasks = useWatch({ control: form.control, name: 'child' });
 
-  // Watch iterator for daily rewards calculation
-  const iterator = useWatch({ control: form.control, name: 'iterator' as 'child' });
+  // Watch iterator.reward_map for daily rewards calculation via form values
+  const iteratorRewardMap = form.watch('iterator.reward_map' as keyof QuestFormValues);
 
   // Setup draft autosave (only for new quests, not editing existing)
   const { clearDraft } = useDraftAutosave({
@@ -413,7 +413,7 @@ export const QuestForm = ({
     if (!presetConfig?.rewardCalculation) return null;
     return calculateTotalReward(form.getValues(), presetConfig);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [presetConfig, childTasks, iterator]);
+  }, [presetConfig, childTasks, iteratorRewardMap]);
 
   // Watch URI for Connect-gate warnings
   const uri = useWatch({ control: form.control, name: 'uri' });
@@ -539,7 +539,7 @@ export const QuestForm = ({
   }, [presetConfig, childTasks, form]);
   const adsgramType = useWatch({
     control: form.control,
-    name: 'resources.adsgram.type',
+    name: 'resources.adsgram.type' as const,
   });
 
   const groupItems = useMemo(() => groups.map(({ label, value }) => ({ label, value })), []);
@@ -647,13 +647,6 @@ export const QuestForm = ({
     // Apply locked fields from preset configuration
     const finalValues = applyLockedFields(values, presetConfig);
 
-    // Convert form values to API format using adapter
-    const apiData = formToApi(finalValues);
-    // Update child order_by values
-    if (apiData.child) {
-      apiData.child = apiData.child.map((c, i: number) => ({ ...c, order_by: i }));
-    }
-
     // Clear draft on successful submission
     clearDraft();
 
@@ -740,7 +733,7 @@ export const QuestForm = ({
                         onValueChange={field.onChange}
                         placeholder='Select group'
                         items={groupItems}
-                        disabled={state.disabled ?? state.readonly}
+                        disabled={state.disabled || state.readonly}
                       />
                       <FormMessage />
                     </FormItem>
@@ -805,7 +798,7 @@ export const QuestForm = ({
                         onValueChange={(v) => field.onChange(v ?? undefined)}
                         placeholder='Select provider'
                         items={providerItems}
-                        disabled={state.disabled ?? state.readonly}
+                        disabled={state.disabled || state.readonly}
                       />
                       <FormMessage />
                     </FormItem>

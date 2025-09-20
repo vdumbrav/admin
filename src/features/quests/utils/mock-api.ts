@@ -149,11 +149,11 @@ export const mockUploadMedia = async (file: File): Promise<string> => {
       throw new Error('Invalid file type. Only images are allowed.');
     }
 
-    // Create a mock blob URL for the uploaded file
-    URL.createObjectURL(file);
+    // Create a real blob URL for the uploaded file
+    const url = URL.createObjectURL(file);
 
-    // In real implementation, this would be a permanent URL
-    return `blob:mock/${Date.now()}-${file.name}`;
+    // Return the actual object URL for preview functionality
+    return url;
   });
 };
 

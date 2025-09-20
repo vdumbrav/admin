@@ -24,7 +24,7 @@ export function useDraftAutosave({
   debounceMs = 2000,
   enabled = true,
 }: UseDraftAutosaveOptions) {
-  const timeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const storageKey = `quest-draft-${key}`;
 
   useEffect(() => {
