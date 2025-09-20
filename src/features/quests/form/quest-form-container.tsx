@@ -5,7 +5,7 @@
 import { useState } from 'react';
 import { Form } from '@/components/ui/form';
 import { ConfirmDialog } from '@/components/confirm-dialog';
-import { StickyActions } from '../components/sticky-actions';
+import { FormActions } from '../components/form-actions';
 import type { PresetConfig } from '../presets/types';
 import type { QuestFormValues } from '../types/form-types';
 import { QuestFormFields } from './quest-form-fields';
@@ -56,7 +56,7 @@ export function QuestFormContainer({
   });
 
   // ============================================================================
-  // Leave Confirmation (Shadcn modal)
+  // Leave Confirmation (Modal)
   // ============================================================================
 
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -91,13 +91,12 @@ export function QuestFormContainer({
         </form>
       </Form>
 
-      {/* Sticky Actions */}
-      <StickyActions
+      {/* Form Actions */}
+      <FormActions
         onSubmit={() => void handleSubmit()}
         onCancel={requestCancel}
         onReset={() => form.reset()}
         isSubmitting={form.formState.isSubmitting}
-        isValid={form.formState.isValid}
       />
 
       <ConfirmDialog

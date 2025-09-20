@@ -19,7 +19,7 @@ function QuestsContent() {
     <QuestsProvider>
       <div className='flex h-full flex-1 flex-col'>
         {/* Page Header */}
-        <div className='bg-background border-b px-6 py-4'>
+        <div className='bg-background px-6 py-4'>
           <div className='flex items-center justify-between gap-4'>
             {/* Left: Title + Description */}
             <div className='flex flex-col gap-1'>

@@ -18,6 +18,7 @@ import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { DatePicker } from '@/components/date-picker';
 import { ImageDropzone } from '@/components/image-dropzone';
 import { NoWheelNumber } from '@/components/no-wheel-number';
 import { SelectDropdown } from '@/components/select-dropdown';
@@ -162,10 +163,11 @@ export function QuestFormFields({
             <FormItem>
               <FormLabel>Start</FormLabel>
               <FormControl>
-                <Input
-                  type='datetime-local'
-                  value={field.value ? new Date(field.value).toISOString().slice(0, 16) : ''}
-                  onChange={(e) => field.onChange(new Date(e.target.value).toISOString())}
+                <DatePicker
+                  date={field.value ? new Date(field.value) : undefined}
+                  onSelect={(date) => field.onChange(date?.toISOString())}
+                  placeholder='Select start date'
+                  disabled={isFieldDisabled('start', fieldStates)}
                 />
               </FormControl>
               <FormDescription>Default is current time + 1 hour</FormDescription>
@@ -180,10 +182,11 @@ export function QuestFormFields({
             <FormItem>
               <FormLabel>End</FormLabel>
               <FormControl>
-                <Input
-                  type='datetime-local'
-                  value={field.value ? new Date(field.value).toISOString().slice(0, 16) : ''}
-                  onChange={(e) => field.onChange(new Date(e.target.value).toISOString())}
+                <DatePicker
+                  date={field.value ? new Date(field.value) : undefined}
+                  onSelect={(date) => field.onChange(date?.toISOString())}
+                  placeholder='Select end date'
+                  disabled={isFieldDisabled('end', fieldStates)}
                 />
               </FormControl>
               <FormMessage />

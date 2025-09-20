@@ -77,7 +77,7 @@ export function useQuestForm({
   const form = useForm<QuestFormValues>({
     resolver: zodResolver(zodSchema as never) as unknown as Resolver<QuestFormValues>,
     defaultValues,
-    mode: 'onChange',
+    mode: 'onSubmit', // Only validate on submit, not on change
   });
 
   // ============================================================================
@@ -144,93 +144,105 @@ export function useQuestForm({
   // Real connect-gate validation (blocks Save for Join/Action with Post)
   const { hasRequiredConnect } = useConnectGate(watchedValues.provider);
 
-  useEffect(() => {
-    // Clear previous errors first
-    form.clearErrors(['provider', 'resources.tweetId', 'uri', 'resources.ui.button', 'icon']);
+  // Custom validation for preset-specific rules (Zod handles basic validation)
+  const validateForm = (values: QuestFormValues) => {
+    const errors: Record<string, string> = {};
 
     // Conditional required fields by preset
     if (presetConfig?.id === 'connect') {
-      if (!watchedValues.provider) {
-        form.setError('provider', { type: 'required', message: 'Provider is required' });
+      if (!values.provider) {
+        errors.provider = 'Provider is required';
       }
     }
 
     if (presetConfig?.id === 'join') {
-      if (!watchedValues.provider) {
-        form.setError('provider', { type: 'required', message: 'Provider is required' });
+      if (!values.provider) {
+        errors.provider = 'Provider is required';
       }
-      if (!watchedValues.uri) {
-        form.setError('uri', { type: 'required', message: 'Join URL is required' });
+      if (!values.uri) {
+        errors.uri = 'Join URL is required';
       }
       // Connect-gate for Join
-      if (watchedValues.provider && hasRequiredConnect === false) {
-        form.setError('provider', {
-          type: 'custom',
-          message: `Requires Connect ${watchedValues.provider} quest`,
-        });
+      if (values.provider && hasRequiredConnect === false) {
+        errors.provider = `Requires Connect ${values.provider} quest`;
       }
     }
 
     if (presetConfig?.id === 'action-with-post') {
-      if (watchedValues.group !== 'social') {
-        form.setValue('group', 'social', { shouldDirty: true, shouldValidate: true });
+      if (!values.resources?.username) {
+        errors['resources.username'] = 'Username is required';
       }
-      if (!watchedValues.resources?.username) {
-        form.setError('resources.username' as never, {
-          type: 'required',
-          message: 'Username is required',
-        });
-      }
-      const tid = watchedValues.resources?.tweetId?.trim();
+      const tid = values.resources?.tweetId?.trim();
       if (!tid || !/^\d{19,20}$/.test(tid)) {
-        form.setError('resources.tweetId' as never, {
-          type: 'required',
-          message: 'Valid Tweet ID is required',
-        });
+        errors['resources.tweetId'] = 'Valid Tweet ID is required';
       }
       if (hasRequiredConnect === false) {
-        form.setError('provider', {
-          type: 'custom',
-          message: 'Requires Connect Twitter quest',
-        });
+        errors.provider = 'Requires Connect Twitter quest';
       }
     }
 
     if (presetConfig?.id === 'seven-day-challenge') {
-      const map = watchedValues?.iterator?.reward_map;
+      const map = values?.iterator?.reward_map;
       if (!Array.isArray(map) || map.length < 1) {
-        form.setError('iterator' as never, {
-          type: 'required',
-          message: 'At least one daily reward is required',
-        });
+        errors.iterator = 'At least one daily reward is required';
       }
     }
 
     if (presetConfig?.id === 'explore') {
-      if (!watchedValues.uri) {
-        form.setError('uri', { type: 'required', message: 'External URL is required' });
+      if (!values.uri) {
+        errors.uri = 'External URL is required';
       }
       // Icon required for Explore
-      const icon = watchedValues.icon ?? watchedValues.resources?.icon;
+      const icon = values.icon ?? values.resources?.icon;
       if (!icon) {
-        form.setError('icon' as never, { type: 'required', message: 'Icon is required' });
+        errors.icon = 'Icon is required';
       }
     }
-  }, [form, presetConfig, watchedValues, hasRequiredConnect]);
+
+    return errors;
+  };
+
+  // Auto-set group to social for action-with-post preset
+  useEffect(() => {
+    if (presetConfig?.id === 'action-with-post' && watchedValues.group !== 'social') {
+      form.setValue('group', 'social', { shouldDirty: true, shouldValidate: false });
+    }
+  }, [presetConfig?.id, watchedValues.group, form]);
 
   // ============================================================================
   // Form Handlers
   // ============================================================================
 
-  const handleSubmit = form.handleSubmit(async (values) => {
-    try {
-      const finalValues = applyLockedFields(values, presetConfig);
-      await onSubmit(finalValues);
-    } catch (error) {
-      console.error('Form submission error:', error);
-      toast.error(error instanceof Error ? error.message : 'Failed to save quest');
+  const handleSubmit = form.handleSubmit(
+    async (values) => {
+      // If Zod validation passes, run additional custom validation
+      const customValidationErrors = validateForm(values);
+
+      // If there are custom validation errors, set them and prevent submission
+      if (Object.keys(customValidationErrors).length > 0) {
+        Object.entries(customValidationErrors).forEach(([field, message]) => {
+          form.setError(field as keyof QuestFormValues, {
+            type: 'custom',
+            message,
+          });
+        });
+        return;
+      }
+
+      // If all validation passes, submit the form
+      try {
+        const finalValues = applyLockedFields(values, presetConfig);
+        await onSubmit(finalValues);
+      } catch (error) {
+        console.error('Form submission error:', error);
+        toast.error(error instanceof Error ? error.message : 'Failed to save quest');
+      }
+    },
+    (errors) => {
+      // This runs when Zod validation fails
+      console.log('Zod validation errors:', errors);
     }
-  });
+  );
 
   const handleCancel = () => {
     onCancel();
