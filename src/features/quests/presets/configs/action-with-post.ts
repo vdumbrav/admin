@@ -7,7 +7,7 @@ export const actionWithPostPresetConfig: PresetConfig = {
   icon: '💬',
 
   fieldVisibility: {
-    group: 'readonly', // Always social per checklist
+    group: 'visible', // social OR partner
     provider: 'readonly', // Always 'twitter'
     uri: 'hidden', // Not used for this type
     reward: 'hidden', // Use totalReward instead
