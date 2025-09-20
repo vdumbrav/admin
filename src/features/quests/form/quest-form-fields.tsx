@@ -17,6 +17,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { ImageDropzone } from '@/components/image-dropzone';
 import { NoWheelNumber } from '@/components/no-wheel-number';
 import { SelectDropdown } from '@/components/select-dropdown';
@@ -124,9 +125,18 @@ export function QuestFormFields({
                 <FormLabel>Group</FormLabel>
                 {(isFieldDisabled('group', fieldStates) ||
                   isFieldReadonly('group', fieldStates)) && (
-                  <Badge variant='secondary' className='text-xs'>
-                    Locked
-                  </Badge>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Badge variant='secondary' className='text-xs'>
+                          Locked by preset
+                        </Badge>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        This field is enforced by preset and cannot be changed.
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                 )}
               </div>
               <FormControl>
@@ -193,9 +203,18 @@ export function QuestFormFields({
                 <FormLabel>Provider</FormLabel>
                 {(isFieldDisabled('provider', fieldStates) ||
                   isFieldReadonly('provider', fieldStates)) && (
-                  <Badge variant='secondary' className='text-xs'>
-                    Locked
-                  </Badge>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Badge variant='secondary' className='text-xs'>
+                          Locked by preset
+                        </Badge>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        This field is enforced by preset and cannot be changed.
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                 )}
               </div>
               <FormControl>
@@ -247,19 +266,21 @@ export function QuestFormFields({
                   <FormLabel>Tweet URL or ID</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder='https://x.com/user/status/123… или только ID'
+                      placeholder='https://x.com/user/status/123… or just the ID'
                       disabled={isFieldDisabled('tweetId', fieldStates)}
                       value={field.value ?? ''}
                       onChange={(e) => {
                         const raw = e.target.value.trim();
-                        const m = /status\/(\d{19,20})/.exec(raw);
-                        const id = m?.[1] ?? (/^\d{19,20}$/.test(raw) ? raw : raw);
+                        // Only digits allowed in the final value
+                        const urlMatch = /status\/(\d{19,20})/.exec(raw);
+                        const digits = raw.replace(/\D/g, '');
+                        const id = urlMatch?.[1] ?? digits;
                         field.onChange(id);
-                        // Моментальная подсветка невалидного значения
-                        if (!/^\d{19,20}$/.test(id)) {
+                        // Immediate feedback only if invalid after processing
+                        if (id && !/^\d{19,20}$/.test(id)) {
                           form.setError('resources.tweetId' as never, {
                             type: 'custom',
-                            message: 'Введите валидный Tweet ID (19–20 цифр) или URL твита',
+                            message: 'Enter a valid Tweet ID (19–20 digits) or tweet URL',
                           });
                         } else {
                           form.clearErrors('resources.tweetId' as never);
@@ -267,7 +288,9 @@ export function QuestFormFields({
                       }}
                     />
                   </FormControl>
-                  <FormDescription>Full Twitter URL or just the tweet ID</FormDescription>
+                  <FormDescription>
+                    Tweet ID auto-extracted from URL (only digits kept)
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -338,6 +361,23 @@ export function QuestFormFields({
               )}
             />
           )}
+
+          {/* Domain Warning (non-blocking) */}
+          {(() => {
+            const uri = form.getValues('uri');
+            const isSocial =
+              typeof uri === 'string' &&
+              /(?:x\.com|twitter\.com|t\.me|discord\.(?:gg|com)|youtube\.com)/i.test(uri);
+            return isSocial ? (
+              <div className='rounded-md border border-yellow-200 bg-yellow-50 p-4'>
+                <h4 className='text-sm font-medium text-yellow-800'>Explore Link Notice</h4>
+                <p className='text-yellow-800'>
+                  This link looks like a social platform. Consider using a Connect or Join quest
+                  instead.
+                </p>
+              </div>
+            ) : null;
+          })()}
         </>
       )}
 
@@ -401,17 +441,49 @@ export function QuestFormFields({
             <FormItem>
               <FormLabel>Quest Icon</FormLabel>
               <FormControl>
-                <ImageDropzone
-                  preview={field.value}
-                  onFile={async (file) => {
-                    const url = await onImageUpload(file);
-                    field.onChange(url);
-                  }}
-                  onClear={() => field.onChange('')}
-                  disabled={isFieldDisabled('icon', fieldStates)}
-                />
+                <div className='flex items-center gap-3'>
+                  <div className='h-10 w-10 overflow-hidden rounded border bg-white'>
+                    {field.value ? (
+                      <img
+                        src={field.value}
+                        alt='Icon preview'
+                        className='h-10 w-10 object-cover'
+                      />
+                    ) : (
+                      <div className='text-muted-foreground flex h-full w-full items-center justify-center text-xs'>
+                        40×40
+                      </div>
+                    )}
+                  </div>
+                  <ImageDropzone
+                    preview={field.value}
+                    onFile={async (file) => {
+                      const allowed = ['image/png', 'image/jpeg', 'image/jpg', 'image/svg+xml'];
+                      if (!allowed.includes(file.type)) {
+                        form.setError('icon' as never, {
+                          type: 'custom',
+                          message: 'Invalid file type. Use PNG/JPG/SVG.',
+                        });
+                        return;
+                      }
+                      if (file.size > 1024 * 1024) {
+                        form.setError('icon' as never, {
+                          type: 'custom',
+                          message: 'File is too large. Max size is 1MB.',
+                        });
+                        return;
+                      }
+                      form.clearErrors('icon' as never);
+                      const url = await onImageUpload(file);
+                      field.onChange(url);
+                      // no explicit return
+                    }}
+                    onClear={() => field.onChange('')}
+                    disabled={isFieldDisabled('icon', fieldStates)}
+                  />
+                </div>
               </FormControl>
-              <FormDescription>Upload an icon for this quest (PNG/JPEG, max 1MB)</FormDescription>
+              <FormDescription>Upload square image ≤ 1MB (PNG/JPG/SVG).</FormDescription>
               <FormMessage />
             </FormItem>
           )}

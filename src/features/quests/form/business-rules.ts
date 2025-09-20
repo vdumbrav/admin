@@ -198,6 +198,13 @@ export function getConnectGateWarnings(
   return warnings;
 }
 
+// Helper: detect social platform link for Explore preset
+export function getExploreDomainWarning(uri?: string): string | null {
+  if (!uri) return null;
+  if (!isSocialDomain(uri)) return null;
+  return 'This link looks like a social platform. Consider using a Connect or Join quest instead.';
+}
+
 // ============================================================================
 // Constants
 // ============================================================================
