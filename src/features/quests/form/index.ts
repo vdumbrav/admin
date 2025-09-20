@@ -28,7 +28,6 @@ export type { FieldState, FieldStatesMatrix } from './field-state';
 // Business rules
 export {
   getPresetFormValues,
-  applyLockedFields,
   applyBusinessRules,
   calculateTotalReward,
   updateChildOrderBy,

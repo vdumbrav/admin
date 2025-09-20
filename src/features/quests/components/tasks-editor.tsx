@@ -31,7 +31,7 @@ const taskTypes = [
   { value: 'comment', label: 'Comment' },
 ];
 
-// Provider is locked to 'twitter' for action-with-post preset
+// Provider is readonly for action-with-post preset
 
 export const TasksEditor = () => {
   const { control, setValue } = useFormContext<FormValues>();

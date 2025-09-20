@@ -262,7 +262,7 @@ src/
 - Components: use Radix UI primitives and shadcn styles where available; prefer composition over prop flags.
 - Styling: Tailwind CSS v4; keep class lists readable, group by layout → spacing → color → state.
 - Accessibility: semantic HTML, keyboard focus states, `aria-*` only when necessary; ensure color contrast.
-- Consistency: use shared form controls and `QuestForm` modules; show clear field states (visible/hidden/locked/readonly).
+- Consistency: use shared form controls and `QuestForm` modules; show clear field states (visible/hidden/readonly/readonly).
 - Feedback: use toasts for async outcomes; show progress on long operations; avoid blocking modals without escape.
 - Responsiveness: target desktop first, ensure tablet and mobile breakpoints render cleanly.
 
@@ -419,7 +419,7 @@ This admin panel features a sophisticated **preset-based quest creation system**
 
 - **5 Quest Presets:** Connect, Join, Action with Post, 7-Day Challenge, Explore
 - **Two-Step Flow:** Preset Selection → Dynamic Universal Form
-- **Field State Management:** Automatic field visibility (visible/hidden/locked/readonly)
+- **Field State Management:** Automatic field visibility (visible/hidden/readonly/readonly)
 - **Business Rules Engine:** Connect-gate validation, reward calculations, auto-generation
 - **Type-Safe Configuration:** Full TypeScript support with runtime validation
 
@@ -436,7 +436,7 @@ This admin panel features a sophisticated **preset-based quest creation system**
    - Dynamic button text (Follow for Twitter)
 
 3. **💬 Action with Post** - Twitter interactions
-   - Twitter-locked with post URL validation
+   - Twitter-readonly with post URL validation
    - Multiple tasks (Like, Comment, Retweet)
    - Real-time total reward calculation
    - Twitter preview with fallback handling
@@ -615,9 +615,9 @@ A complete admin interface with OIDC authentication and role-based access contro
 
 - ✅ **Preset-Based Creation:** 5 fully configured quest presets (Connect, Join, Action with Post, 7-Day Challenge, Explore)
 - ✅ **Universal Form Architecture:** Single dynamic form component with preset-driven configuration
-- ✅ **Field State Management:** Advanced visibility matrix (visible/hidden/locked/readonly/conditional)
+- ✅ **Field State Management:** Advanced visibility matrix (visible/hidden/readonly/readonly/conditional)
 - ✅ **Business Rules Engine:** Connect-gate validation, automatic reward calculations, field auto-generation
-- ✅ **Real-time Features:** Twitter post preview, live total reward calculation, draft autosave
+- ✅ **Real-time Features:** Twitter post preview, live total reward calculation,
 - ✅ **Type Safety:** Full TypeScript support with Zod runtime validation
 - ✅ **API Integration:** Seamless compatibility with existing API adapters
 - ✅ **Enterprise UX:** Smart Tweet ID processing, live icon preview, domain warnings, professional tooltips
@@ -660,7 +660,7 @@ A complete admin interface with OIDC authentication and role-based access contro
 - ✅ Console logging with emoji prefixes (development only)
 - ✅ Visual debug panel in development mode
 - ✅ Mock authentication for local development
-- ✅ **Quest Development:** Mock API with configurable latency, comprehensive error scenarios, draft recovery
+- ✅ **Quest Development:** Mock API with configurable latency, comprehensive error scenarios, recovery
 
 ### 🚀 **Production Ready**
 

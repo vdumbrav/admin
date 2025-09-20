@@ -7,8 +7,8 @@ export const sevenDayChallengePresetConfig: PresetConfig = {
   icon: '📅',
 
   fieldVisibility: {
-    group: 'locked', // Always 'daily'
-    provider: 'locked', // Always 'walme'
+    group: 'readonly', // Always 'daily'
+    provider: 'readonly', // Always 'walme'
     uri: 'hidden', // Not used
     reward: 'hidden', // Use totalReward instead
     tasks: 'hidden',
@@ -18,12 +18,6 @@ export const sevenDayChallengePresetConfig: PresetConfig = {
     tweetId: 'hidden',
     icon: 'hidden',
     partnerIcon: 'hidden',
-  },
-
-  lockedFields: {
-    group: 'daily',
-    provider: 'walme',
-    type: 'repeatable',
   },
 
   defaults: {

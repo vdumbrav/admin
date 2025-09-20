@@ -48,11 +48,6 @@ export const ManagedField = ({
     isDirty && presetValue !== undefined && currentValue !== presetValue,
   );
 
-  // Detect locked by preset
-  const isLockedByPreset = Boolean(
-    presetConfig?.lockedFields && getNestedValue(presetConfig.lockedFields, name) !== undefined,
-  );
-
   const isDefaultedByPreset = Boolean(
     presetConfig?.defaults && presetValue !== undefined && currentValue === presetValue && !isDirty,
   );
@@ -72,20 +67,6 @@ export const ManagedField = ({
           <div className='flex items-center justify-between'>
             <FormLabel>{label}</FormLabel>
             <div className='flex items-center gap-2'>
-              {isLockedByPreset && (
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Badge variant='secondary' className='text-xs'>
-                        Locked by preset
-                      </Badge>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      Поле зафиксировано пресетом. Изменение недоступно.
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              )}
               {isDefaultedByPreset && (
                 <TooltipProvider>
                   <Tooltip>

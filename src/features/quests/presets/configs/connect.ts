@@ -7,7 +7,7 @@ export const connectPresetConfig: PresetConfig = {
   icon: '🔗',
 
   fieldVisibility: {
-    group: 'locked', // Always 'social'
+    group: 'readonly', // Always 'social'
     provider: 'visible', // telegram, discord, twitter
     uri: 'hidden', // Show static text "URL: User's data"
     reward: 'visible',
@@ -18,11 +18,6 @@ export const connectPresetConfig: PresetConfig = {
     tweetId: 'hidden',
     icon: 'hidden',
     partnerIcon: 'hidden',
-  },
-
-  lockedFields: {
-    group: 'social',
-    type: 'connect',
   },
 
   defaults: {

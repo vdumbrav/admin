@@ -9,7 +9,6 @@ import { useAppAuth } from '@/auth/hooks';
 import { toast } from 'sonner';
 import { replaceObjectUrl } from '@/utils/object-url';
 import { uploadMedia } from '../api';
-import { loadDraft, useDraftAutosave } from '../hooks/use-draft-autosave';
 import type { PresetConfig } from '../presets/types';
 import { buildQuestFormSchema } from '../types/form-schema';
 import type { QuestFormValues } from '../types/form-types';
@@ -47,9 +46,6 @@ export interface UseQuestFormReturn {
 
   // Business logic
   connectGateWarnings: string[];
-
-  // Draft management
-  clearDraft: () => void;
 }
 
 // ============================================================================
@@ -73,14 +69,7 @@ export function useQuestForm({
       return initial;
     }
 
-    // Try to load from draft first
-    const draftKey = presetConfig ? `quest-form-${presetConfig.id}` : 'quest-form';
-    const draft = loadDraft(draftKey);
-    if (draft) {
-      return draft;
-    }
-
-    // Fall back to preset defaults
+    // Use preset defaults
     return getPresetFormValues(presetConfig);
   }, [initial, presetConfig]);
 
@@ -230,24 +219,12 @@ export function useQuestForm({
   }, [form, presetConfig, watchedValues, hasRequiredConnect]);
 
   // ============================================================================
-  // Draft Autosave
-  // ============================================================================
-
-  const draftKey = presetConfig ? `quest-form-${presetConfig.id}` : 'quest-form';
-  const { clearDraft } = useDraftAutosave({
-    key: draftKey,
-    watch: form.watch,
-    enabled: isDirty,
-  });
-
-  // ============================================================================
   // Form Handlers
   // ============================================================================
 
   const handleSubmit = form.handleSubmit(async (values) => {
     try {
       const finalValues = applyLockedFields(values, presetConfig);
-      clearDraft();
       await onSubmit(finalValues);
     } catch (error) {
       console.error('Form submission error:', error);
@@ -256,9 +233,6 @@ export function useQuestForm({
   });
 
   const handleCancel = () => {
-    if (isDirty) {
-      clearDraft();
-    }
     onCancel();
   };
 
@@ -298,6 +272,5 @@ export function useQuestForm({
     handleCancel,
     handleImageUpload,
     connectGateWarnings,
-    clearDraft,
   };
 }

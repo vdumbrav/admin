@@ -55,12 +55,6 @@ export function computeFieldStates(
         state.visible = false;
         break;
 
-      case 'locked':
-        state.visible = true;
-        state.disabled = true;
-        state.tooltip = 'Managed by preset';
-        break;
-
       case 'readonly':
         state.visible = true;
         state.disabled = false;

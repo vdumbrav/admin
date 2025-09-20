@@ -16,13 +16,11 @@ import { DataTableRowActions } from './data-table-row-actions';
 const VisibleCell = ({ row, isAdmin }: { row: Row<Quest>; isAdmin: boolean }) => {
   const toggle = useToggleVisibility();
   const visible = Boolean(row.getValue('visible') ?? true);
-  const locked = Boolean(row.original.locked);
   if (!isAdmin) return <span>{visible ? 'Yes' : 'No'}</span>;
   return (
     <Switch
       checked={visible}
       onCheckedChange={(v) => toggle.mutate({ id: row.original.id, visible: v })}
-      disabled={locked}
       aria-label={`Toggle visibility for ${String(row.original.title ?? 'quest')}`}
     />
   );

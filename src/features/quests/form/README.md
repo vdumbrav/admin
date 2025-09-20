@@ -64,7 +64,6 @@ const total = calculateTotalReward(childTasks);
 **Функции:**
 
 - `getPresetFormValues()` - Создает дефолтные значения с учетом пресета
-- `applyLockedFields()` - Применяет заблокированные поля
 - `applyBusinessRules()` - Применяет бизнес-правила
 - `calculateTotalReward()` - Рассчитывает общую награду
 - `getConnectGateWarnings()` - Проверяет connect-gate требования
@@ -191,7 +190,7 @@ function CustomQuestForm() {
 Автоматические тесты не требуются. Проверяйте изменения вручную через UI:
 
 - Создание квеста из каждого пресета (валидные/невалидные данные)
-- Состояния полей: visible/hidden/locked/readonly
+- Состояния полей: visible/hidden/readonly
 - Бизнес-правила: авторасчёты, connect-gate предупреждения
 - Сохранение/редактирование и возврат к списку
 

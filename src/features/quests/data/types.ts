@@ -99,7 +99,6 @@ export type Quest = AdminWaitlistTasksResponseDto & {
   endDate?: string | null;
   webEnabled?: boolean;
   tmaEnabled?: boolean;
-  locked?: boolean;
 };
 
 // ============================================================================

@@ -8,7 +8,7 @@ import { z } from 'zod';
 // Field visibility and behavior types
 // ============================================================================
 
-export type FieldVisibility = 'visible' | 'hidden' | 'locked' | 'readonly' | 'conditional';
+export type FieldVisibility = 'visible' | 'hidden' | 'readonly' | 'conditional';
 
 export interface FieldVisibilityConfig {
   group?: FieldVisibility;
@@ -56,11 +56,7 @@ export const presetConfigSchema = z.object({
   icon: z.string().min(1),
 
   // Form behavior
-  fieldVisibility: z.record(
-    z.string(),
-    z.enum(['visible', 'hidden', 'locked', 'readonly', 'conditional']),
-  ),
-  lockedFields: z.record(z.string(), z.any()).optional(),
+  fieldVisibility: z.record(z.string(), z.enum(['visible', 'hidden', 'readonly', 'conditional'])),
   defaults: z.record(z.string(), z.any()),
 
   // Business logic

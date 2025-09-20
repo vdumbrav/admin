@@ -35,30 +35,18 @@ export function getPresetFormValues(presetConfig?: PresetConfig): QuestFormValue
   ) as unknown as QuestFormValues & { start?: string };
   (mergedValues as QuestFormValues & { start?: string }).start = startTime.toISOString();
 
-  // Apply locked fields over everything
-  if (presetConfig.lockedFields) {
-    return { ...mergedValues, ...presetConfig.lockedFields };
-  }
-
   return mergedValues;
 }
 
 /**
- * Apply locked fields from preset configuration to final values
+ * Apply default fields from preset configuration to final values
  */
 export function applyLockedFields(
   values: QuestFormValues,
-  presetConfig?: PresetConfig,
+  _presetConfig?: PresetConfig,
 ): QuestFormValues {
-  if (!presetConfig?.lockedFields) {
-    return values;
-  }
-
-  // Apply locked fields over user inputs - preset truth wins
-  const finalValues = { ...values };
-  Object.assign(finalValues, presetConfig.lockedFields);
-
-  return finalValues;
+  // No longer applying locked fields, just return values as-is
+  return values;
 }
 
 // ============================================================================

@@ -87,7 +87,6 @@ interface ExtendedAdminTask extends AdminWaitlistTasksResponseDto {
   totalXp?: number;
   webEnabled?: boolean;
   tmaEnabled?: boolean;
-  locked?: boolean;
 }
 
 /**
@@ -106,7 +105,6 @@ export function adaptAdminTaskToQuest(task: AdminWaitlistTasksResponseDto): Ques
     endDate: task.completed_at ?? null,
     webEnabled: extendedTask.webEnabled ?? false,
     tmaEnabled: extendedTask.tmaEnabled ?? false,
-    locked: extendedTask.locked ?? false,
   };
 }
 
