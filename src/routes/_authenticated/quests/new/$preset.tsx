@@ -1,7 +1,7 @@
 import { createFileRoute, redirect } from '@tanstack/react-router';
 import { requireAdminBeforeLoad } from '@/auth/guards';
 import { toast } from 'sonner';
-import { defaultQuestSearch, parseQuestSearch } from '@/features/quests/default-search';
+import { defaultQuestSearch } from '@/features/quests/default-search';
 import { QuestCreateWithPresetPage } from '@/features/quests/pages';
 import { isValidPresetId } from '@/features/quests/presets';
 
@@ -19,7 +19,6 @@ export const Route = createFileRoute('/_authenticated/quests/new/$preset')({
       });
     }
   },
-  validateSearch: parseQuestSearch,
   component: QuestCreateWithPresetPage,
   staticData: {
     title: 'New Quest',

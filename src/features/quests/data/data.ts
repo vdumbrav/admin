@@ -51,13 +51,15 @@ const PROVIDER_LABELS: Record<AdminWaitlistTasksResponseDtoProvider, string> = {
 export const groups = [
   // Form-specific option
   { value: 'all', label: GROUP_LABELS.all },
-  // API-based options
-  ...getAvailableApiGroups().map(
-    (group): DropdownOption => ({
-      value: group,
-      label: GROUP_LABELS[group],
-    }),
-  ),
+  // API-based options (exclude 'all' to avoid duplicate key)
+  ...getAvailableApiGroups()
+    .filter((g) => g !== AdminWaitlistTasksResponseDtoGroup.all)
+    .map(
+      (group): DropdownOption => ({
+        value: group,
+        label: GROUP_LABELS[group],
+      }),
+    ),
 ];
 
 /**

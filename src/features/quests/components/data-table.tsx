@@ -275,9 +275,7 @@ export const QuestsDataTable = ({ columns, isAdmin }: DataTableProps) => {
                       <p>No quests</p>
                       {isAdmin && (
                         <Button asChild size='sm'>
-                          <Link to='/quests/new' search={searchParams}>
-                            Create quest
-                          </Link>
+                          <Link to='/quests/new'>Create quest</Link>
                         </Button>
                       )}
                     </div>

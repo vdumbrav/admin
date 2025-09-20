@@ -2,13 +2,9 @@ import { useNavigate } from '@tanstack/react-router';
 import { Button } from '@/components/ui/button';
 import { SelectDropdown } from '@/components/select-dropdown';
 import { listPresets } from '../presets';
-import { useQuestSearch } from '../use-quest-search';
 
 export const PresetSelection = () => {
   const navigate = useNavigate();
-  const search = useQuestSearch({
-    from: '/_authenticated/quests/new' as const,
-  });
 
   const presets = listPresets();
   const presetItems = presets.map((p) => ({ value: p.id, label: `${p.icon} ${p.name}` }));
@@ -24,18 +20,30 @@ export const PresetSelection = () => {
           </p>
         </div>
         <div className='flex gap-3'>
-          <Button variant='outline' onClick={() => void navigate({ to: '/quests', search })}>
+          <Button
+            variant='outline'
+            onClick={() =>
+              void navigate({
+                to: '/quests',
+                search: {
+                  search: '',
+                  group: 'all',
+                  type: '',
+                  provider: '',
+                  visible: '',
+                  page: 1,
+                  limit: 20,
+                  sort: 'order_by:asc',
+                  showForm: false,
+                },
+              })
+            }
+          >
             Back to list
           </Button>
           <Button
             variant='ghost'
-            onClick={() =>
-              void navigate({
-                to: '/quests/new',
-                search: { ...search, showForm: true },
-                replace: true,
-              })
-            }
+            onClick={() => void navigate({ to: '/quests/new', search: { showForm: true } })}
           >
             Create without preset
           </Button>
@@ -52,7 +60,7 @@ export const PresetSelection = () => {
           placeholder='Select a preset'
           items={presetItems}
           onValueChange={(value) =>
-            void navigate({ to: '/quests/new/$preset', params: { preset: value }, search })
+            void navigate({ to: '/quests/new/$preset', params: { preset: value } })
           }
         />
         <p className='text-muted-foreground mt-2 text-sm' id='preset-help'>

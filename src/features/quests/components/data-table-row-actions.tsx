@@ -12,7 +12,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useQuestsContext } from '../context/quests-context';
-import { questSchema } from '../data/schemas';
+import type { Quest } from '../data/types';
 import { useQuestSearch } from '../use-quest-search';
 
 interface DataTableRowActionsProps<TData> {
@@ -20,7 +20,9 @@ interface DataTableRowActionsProps<TData> {
 }
 
 export const DataTableRowActions = <TData,>({ row }: DataTableRowActionsProps<TData>) => {
-  const quest = questSchema.parse(row.original);
+  // Be permissive here: backend data can be partial/inconsistent during migration.
+  // We only need id for link and the raw row for dialogs.
+  const quest = row.original as unknown as { id?: number | string } & Record<string, unknown>;
   const { setOpen, setCurrentRow } = useQuestsContext();
   const search = useQuestSearch({ from: '/_authenticated/quests/' as const });
   return (
@@ -40,7 +42,7 @@ export const DataTableRowActions = <TData,>({ row }: DataTableRowActionsProps<TD
         <DropdownMenuSeparator />
         <DropdownMenuItem
           onClick={() => {
-            setCurrentRow(quest);
+            setCurrentRow(quest as unknown as Quest);
             setOpen('delete');
           }}
         >

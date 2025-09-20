@@ -1,6 +1,5 @@
 import { IconLoader } from '@tabler/icons-react';
 import { cn } from '@/lib/utils';
-import { FormControl } from '@/components/ui/form';
 import {
   Select,
   SelectContent,
@@ -32,11 +31,9 @@ export function SelectDropdown({
 }: SelectDropdownProps) {
   return (
     <Select value={value} defaultValue={defaultValue} onValueChange={onValueChange}>
-      <FormControl>
-        <SelectTrigger disabled={disabled} className={cn(className)}>
-          <SelectValue placeholder={placeholder ?? 'Select'} />
-        </SelectTrigger>
-      </FormControl>
+      <SelectTrigger disabled={disabled} className={cn(className)}>
+        <SelectValue placeholder={placeholder ?? 'Select'} />
+      </SelectTrigger>
       <SelectContent>
         {isPending ? (
           <SelectItem disabled value='loading' className='h-14'>
