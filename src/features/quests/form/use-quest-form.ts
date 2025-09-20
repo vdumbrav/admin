@@ -257,10 +257,6 @@ export function useQuestForm({
 
   const handleCancel = () => {
     if (isDirty) {
-      const shouldDiscard = window.confirm(
-        'You have unsaved changes. Are you sure you want to discard them?',
-      );
-      if (!shouldDiscard) return;
       clearDraft();
     }
     onCancel();

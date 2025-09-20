@@ -2,13 +2,14 @@
  * Quest Form Container Component
  * Clean, focused form component using the new modular architecture
  */
-import { useBlocker } from '@tanstack/react-router';
+import { useState } from 'react';
 import { Form } from '@/components/ui/form';
 import { StickyActions } from '../components/sticky-actions';
 import type { PresetConfig } from '../presets/types';
 import type { QuestFormValues } from '../types/form-types';
 import { QuestFormFields } from './quest-form-fields';
 import { useQuestForm } from './use-quest-form';
+import { ConfirmDialog } from '@/components/confirm-dialog';
 
 // ============================================================================
 // Component Props
@@ -55,13 +56,14 @@ export function QuestFormContainer({
   });
 
   // ============================================================================
-  // Navigation Blocking
+  // Leave Confirmation (Shadcn modal)
   // ============================================================================
 
-  useBlocker(() => {
-    const shouldLeave = window.confirm('You have unsaved changes. Are you sure you want to leave?');
-    return shouldLeave;
-  }, isDirty);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const requestCancel = () => {
+    if (isDirty) setConfirmOpen(true);
+    else handleCancel();
+  };
 
   // ============================================================================
   // Render
@@ -92,10 +94,24 @@ export function QuestFormContainer({
       {/* Sticky Actions */}
       <StickyActions
         onSubmit={() => void handleSubmit()}
-        onCancel={handleCancel}
+        onCancel={requestCancel}
         onReset={() => form.reset()}
         isSubmitting={form.formState.isSubmitting}
         isValid={form.formState.isValid}
+      />
+
+      <ConfirmDialog
+        open={confirmOpen}
+        onOpenChange={setConfirmOpen}
+        title="Unsaved changes"
+        desc="You have unsaved changes. Are you sure you want to leave?"
+        cancelBtnText="Stay"
+        confirmText="Leave"
+        destructive
+        handleConfirm={() => {
+          setConfirmOpen(false);
+          handleCancel();
+        }}
       />
     </div>
   );
