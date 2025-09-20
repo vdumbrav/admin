@@ -56,3 +56,7 @@ export const QuestForm = ({ initial, presetConfig, onSubmit, onCancel }: QuestFo
 export type { QuestFormValues, ChildFormValues } from './types/form-types';
 export type { PresetConfig } from './presets/types';
 export type { FieldState, FieldStatesMatrix } from './form/field-state';
+/**
+ * Legacy wrapper component kept for backward compatibility.
+ * New code should import from `@/features/quests/form`.
+ */

@@ -1,67 +1,52 @@
 # Waitlist Admin
 
-Production-ready admin UI for managing the Waitlist service with OIDC authentication and role-based access control.
+Short technology overview and how we record technical decisions.
 
-## 🔒 Authentication & Authorization
+## Technologies
 
-This admin panel uses **OIDC (OpenID Connect)** with **role-based access control**. Only users with `admin` or `moderator` roles can access the application.
+- React 19 + Vite 7 (SWC)
+- TypeScript 5 (strict), path alias `@/*`
+- TanStack Router 1.131 (type-safe routing, guards)
+- React Query 5 (server state)
+- Tailwind CSS v4 + shadcn/ui + Radix UI
+- Zod (runtime validation)
+- OIDC via oidc-client-ts + react-oidc-context
+- Zustand (client state)
+- Axios + Orval (generated API client)
 
-### Supported OIDC Providers
+## Tech Decisions (ADRs)
 
-- ✅ **Keycloak** (primary)
-- 🚧 **Auth0** (planned)
+We document significant choices as lightweight Architecture Decision Records.
 
-### Access Control
+- Location: `docs/adr/`
+- Filename: `YYYY-MM-DD-title.md` (kebab-case)
+- Status: `proposed` → `accepted` (or `superseded by <id>`) → `deprecated`
 
-- **Required Roles:** `admin` or `moderator`
-- **Authentication Flow:** Redirect-based (not popup)
-- **Role Sources:** Keycloak realm roles, client roles, or direct claims
-- **Fallback:** Access denied page with clear messaging
+Template:
 
-## Configuration
+```
+# <Title>
+Date: YYYY-MM-DD
+Status: proposed | accepted | superseded by <id> | deprecated
 
-### Authentication Variables
+## Context
+Why we need this change; constraints and alternatives.
 
-| Variable              | Example                                               | Purpose                            |
-| --------------------- | ----------------------------------------------------- | ---------------------------------- |
-| `VITE_OIDC_AUTHORITY` | `https://keycloak.example.com/realms/your-realm`      | OIDC issuer/authority URL          |
-| `VITE_OIDC_CLIENT_ID` | `waitlist-api`                                        | OIDC client identifier             |
-| `VITE_OIDC_SCOPE`     | `openid profile email roles offline_access`           | Requested OIDC scopes              |
-| `VITE_APP_BASE_URL`   | `http://localhost:3000` or `https://admin.domain.com` | Application base URL for redirects |
+## Decision
+What we chose and why. Scope and ownership.
 
-### API Variables
+## Consequences
+Positive/negative outcomes, risks, and follow-ups.
 
-| Variable           | Example                         | Purpose                                    |
-| ------------------ | ------------------------------- | ------------------------------------------ |
-| `VITE_API_URL`     | Backend API base URL (required) | Backend API base URL for requests          |
-| `VITE_SWAGGER_URL` | Swagger JSON URL (required)     | Swagger JSON URL for API client generation |
-| `VITE_PUBLIC_BASE` | `/admin/`                       | Vite base path for deployment              |
+## Links
+Issues/PRs, benchmarks, references.
+```
 
-### Setup
+Guidelines:
 
-1. Copy `.env.example` to `.env`:
-
-   ```bash
-   cp .env.example .env
-   ```
-
-2. Configure your settings:
-
-   ```bash
-   # .env
-   VITE_OIDC_AUTHORITY=https://your-keycloak.com/realms/your-realm
-   VITE_OIDC_CLIENT_ID=waitlist-api
-   VITE_APP_BASE_URL=http://localhost:3000
-
-   # API Configuration
-   VITE_API_URL=https://waitlist.cedradev.xyz/api
-   VITE_SWAGGER_URL=https://waitlist.cedradev.xyz/api/api-tools/docs-json
-   ```
-
-3. Ensure your Keycloak client is configured with:
-   - **Valid Redirect URIs:** `http://localhost:3000/auth/callback`, `https://your-domain.com/auth/callback`
-   - **Valid Post Logout Redirect URIs:** `http://localhost:3000/`, `https://your-domain.com/`
-   - **Client roles:** `admin`, `moderator` (or use realm roles)
+- One decision per ADR; keep it concise (<= 1 page)
+- Prefer measurable criteria (DX, perf, reliability)
+- Link to relevant code (e.g., `src/lib/api/*`, `src/features/quests/form/*`)
 
 ## 🚀 Usage
 
@@ -127,6 +112,8 @@ src/lib/api/
 │   └── post-orval.mjs     # Post-generation processing
 └── errors.ts              # Error handling utilities
 ```
+
+Note: files under `src/lib/api/generated` are auto-generated. Do not edit them manually. Regenerate via `npm run generate:api` or adjust `orval.config.ts`.
 
 #### Usage Examples
 
@@ -240,6 +227,8 @@ npm run api:update          # Force update API client
 npm run api:ensure          # Ensure API files exist (with fallback)
 ```
 
+Note: pnpm is fully supported. Replace `npm run` with `pnpm` if preferred.
+
 ### Architecture
 
 ```text
@@ -267,6 +256,15 @@ src/
     │   └── callback.tsx    # OIDC callback handler
     └── _authenticated/     # Protected routes
 ```
+
+## 🎨 UI/UX Guidelines
+
+- Components: use Radix UI primitives and shadcn styles where available; prefer composition over prop flags.
+- Styling: Tailwind CSS v4; keep class lists readable, group by layout → spacing → color → state.
+- Accessibility: semantic HTML, keyboard focus states, `aria-*` only when necessary; ensure color contrast.
+- Consistency: use shared form controls and `QuestForm` modules; show clear field states (visible/hidden/locked/readonly).
+- Feedback: use toasts for async outcomes; show progress on long operations; avoid blocking modals without escape.
+- Responsiveness: target desktop first, ensure tablet and mobile breakpoints render cleanly.
 
 ## 🔧 Troubleshooting
 

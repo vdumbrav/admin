@@ -9,36 +9,46 @@
 - `.env.example` — reference for required environment variables.
 
 ## Build, Test, and Development Commands
-- `pnpm dev` — start Vite dev server (ensures API client is generated).
-- `pnpm build` — type-check, generate API, and build for production.
-- `pnpm preview` — serve the production build locally.
-- `pnpm typecheck` — run TypeScript checks without emitting.
-- `pnpm lint` — run ESLint across the repo.
-- `pnpm format` / `pnpm format:check` — apply/verify Prettier formatting.
-- `pnpm generate:api` — regenerate OpenAPI client via Orval.
+- `npm run dev` — start Vite dev server (ensures API client is generated).
+- `npm run build` — type-check, generate API, and build for production.
+- `npm run preview` — serve the production build locally.
+- `npm run typecheck` — run TypeScript checks without emitting.
+- `npm run lint` — run ESLint across the repo.
+- `npm run format` / `npm run format:check` — apply/verify Prettier formatting.
+- `npm run generate:api` — regenerate OpenAPI client via Orval.
+Note: pnpm is supported. Replace `npm run` with `pnpm` if using pnpm.
 
 ## Coding Style & Naming Conventions
 - TypeScript strict mode; no `any` without explicit justification. Prefer `interface` for object shapes.
 - No default exports; use named exports only. Files and symbols use `kebab-case` for files, `camelCase` for variables/functions, `PascalCase` for components/types.
 - Keep components small and side-effect free; put behavior in hooks. Avoid boolean control flags; prefer discriminated unions and exhaustiveness with `switch`.
 - Validate external input at runtime with `zod` at module boundaries (API, env, storage). Fail fast with clear errors.
-- Tools: ESLint (flat config), Prettier (with Tailwind/import sort plugins). Run `pnpm lint && pnpm format:check` before pushing.
+- Tools: ESLint (flat config), Prettier (with Tailwind/import sort plugins). Run `npm run lint && npm run format:check` before pushing.
 
-## Testing Guidelines
-- No test runner is configured yet. When adding tests, use Vitest + React Testing Library and MSW for API mocks.
-- Co-locate tests: `ComponentName.test.tsx` or `module.test.ts` next to source.
-- Test behavior over implementation; mock unstable deps; ensure subscriptions/intervals are cleaned up.
+## Testing
+Automated tests are not required for this project at this time. Validate changes manually via the UI and ensure core flows work end-to-end.
 
 ## Commit & Pull Request Guidelines
 - Use Conventional Commits via Commitizen (`cz.yaml`): `feat:`, `fix:`, `refactor:`, `chore:`. One task → one PR; prefer small diffs.
 - Branch from `main`; do not push directly to `main`.
 - PRs include: why, what, risks, tests; link issues; add screenshots/GIFs for UI changes.
-- Pre-PR checklist: `pnpm typecheck && pnpm lint && pnpm format:check && pnpm build`. Regenerate API if schema changed: `pnpm generate:api`.
+- Pre-PR checklist: `npm run typecheck && npm run lint && npm run format:check && npm run build`. Regenerate API if schema changed: `npm run generate:api`.
 
 ## Security & Configuration
 - Never commit secrets. Copy `.env.example` to `.env` and set OIDC and API endpoint values locally.
 - Generated API lives in `src/lib/api/generated`; do not edit by hand—use Orval (`orval.config.ts`).
 - Isolate side effects (HTTP, storage, timers) in `lib/` or feature services; UI remains pure.
+
+## Architecture Overview
+- Routing: TanStack Router with codegen route tree; keep routes thin, move behavior to hooks.
+- Data: React Query for server state; mutations and queries live near features; avoid global singletons.
+- Forms: Quest form is modular (`src/features/quests/form/*`); reuse hooks and field-state utilities.
+
+## UI/UX Guidelines
+- Use Radix primitives and shadcn components; prefer composition over boolean props.
+- Tailwind v4 for styling; group classes (layout → spacing → color → state) and avoid inline style objects.
+- Accessibility: semantic elements, visible focus, labels for inputs; add `aria-*` only when needed.
+- States: render explicit field states (visible/hidden/locked/readonly); provide clear error and loading feedback.
 ---
 
 ## 1. Mindset

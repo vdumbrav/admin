@@ -3,6 +3,8 @@
 ## Project Overview
 Internal admin UI for managing the Waitlist service with role-based access control, OIDC authentication, and modern shadcn/ui components.
 
+Note: pnpm is supported. Replace `npm run` with `pnpm` if preferred.
+
 ## Key Technologies
 - **TanStack Router**: Type-safe routing with authentication guards
 - **React OIDC Context**: Keycloak integration for authentication
@@ -206,16 +208,7 @@ VITE_APP_BASE_URL=http://localhost:3000
 - Test responsive breakpoints
 - Ensure proper contrast ratios
 
-## Testing Strategies
-
-### Manual Testing
-- Test with different user roles (admin, moderator, user)
-- Verify authentication flows work correctly
-- Test responsive design on various screen sizes
-- Check accessibility with screen readers
-
-### Development Testing
-- Use development server for rapid iteration
-- Test with real Keycloak authentication
-- Verify all routes are protected appropriately
-- Test error scenarios and edge cases
+## Manual Verification
+- Verify authentication flows and role-based access manually
+- Check responsive design across screen sizes
+- Validate accessibility (labels, focus states, contrast)

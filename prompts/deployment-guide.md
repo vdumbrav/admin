@@ -52,10 +52,10 @@ jobs:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm typecheck
-      - run: pnpm lint
-      - run: pnpm build
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm run build
         env:
           VITE_API_URL: "https://api.yourdomain.com"
           VITE_APP_BASE_URL: "https://yourusername.github.io/admin/"
@@ -127,10 +127,10 @@ jobs:
 # Build stage
 FROM node:18-alpine AS builder
 WORKDIR /app
-COPY package.json pnpm-lock.yaml ./
-RUN npm install -g pnpm && pnpm install --frozen-lockfile
+COPY package.json package-lock.json ./
+RUN npm ci
 COPY . .
-RUN pnpm build
+RUN npm run build
 
 # Production stage
 FROM nginx:alpine
@@ -193,9 +193,9 @@ services:
 
 ```json
 {
-  "buildCommand": "pnpm build",
+  "buildCommand": "npm run build",
   "outputDirectory": "dist",
-  "installCommand": "pnpm install --frozen-lockfile",
+  "installCommand": "npm ci",
   "framework": "vite",
   "rewrites": [
     {
@@ -220,7 +220,7 @@ Set in Vercel dashboard:
 
 ```toml
 [build]
-  command = "pnpm build"
+  command = "npm run build"
   publish = "dist"
 
 [[redirects]]
@@ -332,7 +332,7 @@ if (location.protocol !== 'https:' && location.hostname !== 'localhost') {
 **Build Failures:**
 - Check Node.js version compatibility
 - Verify all environment variables are set
-- Run `pnpm install --frozen-lockfile`
+- Run `npm ci`
 
 **Authentication Issues:**
 - Verify OIDC authority URL is accessible

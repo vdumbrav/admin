@@ -199,46 +199,14 @@ function CustomQuestForm() {
 - Оптимизированные ре-рендеры
 - Эффективное управление формой
 
-## 🧪 Тестирование
+## 🧪 Верификация
 
-### Unit тесты
+Автоматические тесты не требуются. Проверяйте изменения вручную через UI:
 
-```typescript
-// field-state.test.ts
-// business-rules.test.ts
-import { calculateTotalReward } from './business-rules';
-import { computeFieldStates } from './field-state';
-
-test('should hide URI field for Connect preset', () => {
-  const states = computeFieldStates(connectPreset);
-  expect(states.uri.visible).toBe(false);
-});
-
-test('should calculate total reward correctly', () => {
-  const total = calculateTotalReward([{ reward: 10 }, { reward: 20 }]);
-  expect(total).toBe(30);
-});
-```
-
-### Integration тесты
-
-```typescript
-// use-quest-form.test.ts
-import { renderHook } from '@testing-library/react';
-import { useQuestForm } from './use-quest-form';
-
-test('should apply business rules on form change', () => {
-  const { result } = renderHook(() =>
-    useQuestForm({
-      presetConfig: connectPreset,
-      onSubmit: jest.fn(),
-      onCancel: jest.fn(),
-    }),
-  );
-
-  // Test form behavior
-});
-```
+- Создание квеста из каждого пресета (валидные/невалидные данные)
+- Состояния полей: visible/hidden/locked/readonly
+- Бизнес-правила: авторасчёты, connect-gate предупреждения
+- Сохранение/редактирование и возврат к списку
 
 ## 📊 Метрики улучшения
 
