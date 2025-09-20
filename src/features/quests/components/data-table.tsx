@@ -143,7 +143,7 @@ export const QuestsDataTable = ({ columns, isAdmin }: DataTableProps) => {
       page: pagination.pageIndex + 1,
       limit: pagination.pageSize,
       sort,
-      showForm: false,
+      showForm: false, // Always false for data table navigation
     };
     const same =
       next.search === searchParams.search &&

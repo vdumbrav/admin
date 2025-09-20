@@ -10,6 +10,12 @@ export const defaultQuestSearch = {
   showForm: false,
 } as const;
 
+const parseBool = (v: unknown, def = false): boolean => {
+  if (v === true || v === 'true' || v === 1 || v === '1') return true;
+  if (v === false || v === 'false' || v === 0 || v === '0') return false;
+  return def;
+};
+
 export const parseQuestSearch = (search: Record<string, unknown>) => ({
   search: (search.search as string) ?? defaultQuestSearch.search,
   group: (search.group as string) ?? defaultQuestSearch.group,
@@ -19,7 +25,7 @@ export const parseQuestSearch = (search: Record<string, unknown>) => ({
   page: Number(search.page ?? defaultQuestSearch.page),
   limit: Number(search.limit ?? defaultQuestSearch.limit),
   sort: (search.sort as string) ?? defaultQuestSearch.sort,
-  showForm: Boolean(search.showForm ?? defaultQuestSearch.showForm),
+  showForm: parseBool(search.showForm, defaultQuestSearch.showForm),
 });
 
 export type QuestSearch = ReturnType<typeof parseQuestSearch>;

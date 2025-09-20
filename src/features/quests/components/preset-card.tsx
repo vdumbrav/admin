@@ -1,5 +1,6 @@
 import { Link } from '@tanstack/react-router';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { defaultQuestSearch } from '../default-search';
 import type { PresetConfig } from '../presets';
 
 interface PresetCardProps {
@@ -12,20 +13,11 @@ export const PresetCard = ({ preset, className }: PresetCardProps) => {
     <Link
       to='/quests/new/$preset'
       params={{ preset: preset.id }}
-      search={{
-        showForm: false,
-        search: '',
-        group: 'all',
-        type: '',
-        provider: '',
-        visible: '',
-        page: 1,
-        limit: 20,
-        sort: 'order_by:asc',
-      }}
+      search={{ ...defaultQuestSearch, showForm: false }}
+      aria-label={`Create quest with ${preset.name} preset`}
       className={className}
     >
-      <Card className='hover:border-primary/20 h-full cursor-pointer border-2 transition-all duration-200 hover:scale-[1.02] hover:shadow-md'>
+      <Card className='hover:border-primary/20 h-full transform-gpu cursor-pointer border-2 transition-all duration-200 hover:scale-[1.02] hover:shadow-md'>
         <CardHeader className='pb-3'>
           <div className='flex items-center gap-3'>
             <div className='text-3xl'>{preset.icon}</div>
