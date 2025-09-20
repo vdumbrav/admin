@@ -765,6 +765,13 @@ Connect-gate является **клиентским бизнес-правило
 ### 20.1 Реализованные компоненты
 ```typescript
 src/features/quests/
+├── form/                              ✅ Модульная архитектура формы
+│   ├── quest-form-container.tsx       ✅ Основной контейнер формы
+│   ├── quest-form-fields.tsx          ✅ UI компоненты полей
+│   ├── use-quest-form.ts              ✅ Централизованный хук состояния
+│   ├── field-state.ts                 ✅ Управление видимостью полей
+│   ├── business-rules.ts              ✅ Бизнес-логика и вычисления
+│   └── index.ts                       ✅ Clean API экспорты
 ├── components/
 │   ├── preset-selection.tsx           ✅ Экран выбора пресетов
 │   ├── preset-card.tsx                ✅ Карточка пресета
@@ -778,9 +785,20 @@ src/features/quests/
 │   ├── action-with-post.ts            ✅ Пресет Action with post
 │   ├── seven-day-challenge.ts         ✅ Пресет 7-day challenge
 │   └── explore.ts                     ✅ Пресет Explore
+├── adapters/
+│   └── form-api-adapter.ts            ✅ API-Form конвертеры с техдолгом анализом
 ├── pages.tsx                          ✅ Страницы создания/редактирования
-├── QuestForm.tsx                      ✅ Универсальная форма
+├── QuestForm.tsx                      ✅ Legacy wrapper (63 строки)
 └── default-search.ts                  ✅ Параметры поиска с фиксом boolean parsing
+
+src/utils/                             ✅ Shared utilities
+├── object/
+│   └── deep-merge.ts                  ✅ Deep merge функция
+├── domain/
+│   └── domain-matcher.ts              ✅ Connect-gate domain matching
+├── validation/
+│   └── index.ts                       ✅ Validation utilities (placeholder)
+└── index.ts                           ✅ Централизованные экспорты
 ```
 
 ### 20.2 Ключевые исправления
@@ -792,7 +810,14 @@ src/features/quests/
 - ✅ **Timeout в hooks**: Исправлена типизация setTimeout для браузера
 
 ### 20.3 Архитектурные достижения
-- ✅ **"Под капотом - одна форма"**: Единый `QuestForm.tsx` с динамической конфигурацией
+- ✅ **Модульная архитектура**: Рефакторинг из 1130-строчного монолита в чистые модули:
+  - `QuestForm.tsx` (63 строки) - Legacy wrapper для обратной совместимости
+  - `form/quest-form-container.tsx` - Основной контейнер с управлением состоянием
+  - `form/quest-form-fields.tsx` - UI компоненты полей
+  - `form/use-quest-form.ts` - Централизованный хук состояния формы
+  - `form/field-state.ts` - Управление матрицей видимости полей
+  - `form/business-rules.ts` - Бизнес-логика и вычисления
+- ✅ **Shared Utilities**: Вынесены общие функции в `src/utils/` для переиспользования
 - ✅ **Система пресетов**: 5 полностью настроенных пресетов с бизнес-правилами
 - ✅ **Field States Matrix**: visible/hidden/locked/readonly/conditional
 - ✅ **Connect-gate валидация**: Автоматическая проверка prerequisites
