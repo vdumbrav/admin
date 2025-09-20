@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { requireAdminBeforeLoad } from '@/auth/guards';
 import { QuestCreateWithPresetPage } from '@/features/quests/pages';
+
 // Trust preset id; page will handle unknown ids via config lookup
 
 export const Route = createFileRoute('/_authenticated/quests/new/$preset')({

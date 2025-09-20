@@ -4,12 +4,12 @@
  */
 import { useState } from 'react';
 import { Form } from '@/components/ui/form';
+import { ConfirmDialog } from '@/components/confirm-dialog';
 import { StickyActions } from '../components/sticky-actions';
 import type { PresetConfig } from '../presets/types';
 import type { QuestFormValues } from '../types/form-types';
 import { QuestFormFields } from './quest-form-fields';
 import { useQuestForm } from './use-quest-form';
-import { ConfirmDialog } from '@/components/confirm-dialog';
 
 // ============================================================================
 // Component Props
@@ -103,10 +103,10 @@ export function QuestFormContainer({
       <ConfirmDialog
         open={confirmOpen}
         onOpenChange={setConfirmOpen}
-        title="Unsaved changes"
-        desc="You have unsaved changes. Are you sure you want to leave?"
-        cancelBtnText="Stay"
-        confirmText="Leave"
+        title='Unsaved changes'
+        desc='You have unsaved changes. Are you sure you want to leave?'
+        cancelBtnText='Stay'
+        confirmText='Leave'
         destructive
         handleConfirm={() => {
           setConfirmOpen(false);

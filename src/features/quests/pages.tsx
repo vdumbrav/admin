@@ -17,7 +17,11 @@ export const QuestCreatePage = () => {
   // Read showForm from router search to stay reactive to URL changes
   const searchObj = useSearch({ from: '/_authenticated/quests/new' as const }) as unknown;
   let showForm = false;
-  if (typeof searchObj === 'object' && searchObj !== null && 'showForm' in (searchObj as Record<string, unknown>)) {
+  if (
+    typeof searchObj === 'object' &&
+    searchObj !== null &&
+    'showForm' in (searchObj as Record<string, unknown>)
+  ) {
     const v = (searchObj as Record<string, unknown>).showForm;
     showForm = v === true || v === 'true';
   }
@@ -48,7 +52,7 @@ export const QuestCreatePage = () => {
                 <h2 className='text-2xl font-bold tracking-tight'>New Quest</h2>
                 <p className='text-muted-foreground'>Create a new quest without preset.</p>
               </div>
-              <Button variant='outline' onClick={() => void nav({ to: '/quests' } as any)}>
+              <Button variant='outline' onClick={() => void nav({ to: '/quests' })}>
                 Back to list
               </Button>
             </div>
@@ -115,7 +119,7 @@ export const QuestEditPage = () => {
             <h2 className='text-2xl font-bold tracking-tight'>Edit Quest #{id}</h2>
             <p className='text-muted-foreground'>Update quest properties.</p>
           </div>
-          <Button variant='outline' onClick={() => void nav({ to: '/quests' } as any)}>
+          <Button variant='outline' onClick={() => void nav({ to: '/quests' })}>
             Back to list
           </Button>
         </div>
@@ -135,7 +139,7 @@ export const QuestEditPage = () => {
               toast.error(e instanceof Error ? e.message : 'Failed to save');
             }
           }}
-          onCancel={() => void nav({ to: '/quests' } as any)}
+          onCancel={() => void nav({ to: '/quests' })}
         />
       </Main>
     </>
@@ -171,7 +175,7 @@ export const QuestCreateWithPresetPage = () => {
             </h2>
             <p className='text-muted-foreground'>{presetConfig.description}</p>
           </div>
-          <Button variant='outline' onClick={() => void nav({ to: '/quests' } as any)}>
+          <Button variant='outline' onClick={() => void nav({ to: '/quests' })}>
             Back to list
           </Button>
         </div>
@@ -191,7 +195,7 @@ export const QuestCreateWithPresetPage = () => {
               toast.error(e instanceof Error ? e.message : 'Failed to save');
             }
           }}
-          onCancel={() => void nav({ to: '/quests' } as any)}
+          onCancel={() => void nav({ to: '/quests' })}
         />
       </Main>
     </>

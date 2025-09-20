@@ -28,6 +28,7 @@ import {
 import { DataTablePagination } from '@/components/table/data-table-pagination';
 import { useQuests } from '../api';
 import type { Quest, TaskGroup } from '../data/types';
+import type { QuestSearch } from '../default-search';
 import { DataTableToolbar } from './data-table-toolbar';
 
 interface DataTableProps {
@@ -47,7 +48,9 @@ export const QuestsDataTable = ({ columns, isAdmin }: DataTableProps) => {
   }, []);
 
   const router = useRouter();
-  const searchParams = useSearch({ from: '/_authenticated/quests/' as const });
+  const searchParams = useSearch({
+    from: '/_authenticated/quests/' as const,
+  }) as unknown as QuestSearch;
   const memoColumns = React.useMemo(() => columns, [columns]);
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>(() =>
     loadJSON(LS_TABLE_VIS, {}),

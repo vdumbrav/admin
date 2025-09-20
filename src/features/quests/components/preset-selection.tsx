@@ -20,7 +20,7 @@ export const PresetSelection = () => {
           </p>
         </div>
         <div className='flex gap-3'>
-          <Button variant='outline' onClick={() => void navigate({ to: '/quests' } as any)}>
+          <Button variant='outline' onClick={() => void navigate({ to: '/quests' })}>
             Back to list
           </Button>
           <Button
