@@ -82,6 +82,23 @@ export function applyBusinessRules(
     }
   }
 
+  // Auto-update button text for Connect preset with Matrix provider
+  if (presetConfig?.id === 'connect' && updatedValues.provider === 'matrix') {
+    updatedValues.resources = {
+      ...updatedValues.resources,
+      ui: {
+        ...updatedValues.resources?.ui,
+        button: 'Add',
+        'pop-up': {
+          name: updatedValues.resources?.ui?.['pop-up']?.name ?? 'Social Quests',
+          description: updatedValues.resources?.ui?.['pop-up']?.description ?? '',
+          ...updatedValues.resources?.ui?.['pop-up'],
+          button: 'Add',
+        },
+      },
+    };
+  }
+
   // Auto-update button text for Join preset with Twitter provider
   if (presetConfig?.id === 'join' && updatedValues.provider === 'twitter') {
     updatedValues.resources = {
@@ -97,6 +114,34 @@ export function applyBusinessRules(
         },
       },
     };
+  }
+
+  // Auto-fill Connect gate additional fields for Join and Action with Post
+  if (
+    (presetConfig?.id === 'join' || presetConfig?.id === 'action-with-post') &&
+    updatedValues.provider
+  ) {
+    const additionalTitle = PROVIDER_ADDITIONAL_TITLES[updatedValues.provider];
+    if (additionalTitle) {
+      updatedValues.resources = {
+        ...updatedValues.resources,
+        ui: {
+          button: updatedValues.resources?.ui?.button ?? 'Join',
+          ...updatedValues.resources?.ui,
+          'pop-up': {
+            name: updatedValues.resources?.ui?.['pop-up']?.name ?? 'Social Quests',
+            button: updatedValues.resources?.ui?.['pop-up']?.button ?? 'Join',
+            description: updatedValues.resources?.ui?.['pop-up']?.description ?? '',
+            ...updatedValues.resources?.ui?.['pop-up'],
+            'additional-title': additionalTitle,
+            'additional-description': CONNECT_GATE_DESCRIPTION.replace(
+              'X account',
+              `${updatedValues.provider === 'twitter' ? 'X' : updatedValues.provider} account`,
+            ),
+          },
+        },
+      };
+    }
   }
 
   // Calculate total reward for multi-task quests
@@ -226,6 +271,20 @@ const PROVIDER_CONNECT_MESSAGES: Record<string, string> = {
   monetag: 'Requires Connect Monetag quest',
   adsgram: 'Requires Connect Adsgram quest',
 };
+
+/**
+ * Provider-specific additional-title messages for Connect gate
+ */
+const PROVIDER_ADDITIONAL_TITLES: Record<string, string> = {
+  twitter: 'Connect your X',
+  discord: 'Connect your Discord',
+  telegram: 'Connect your Telegram',
+};
+
+/**
+ * Standard additional-description for Connect gate
+ */
+const CONNECT_GATE_DESCRIPTION = 'Before starting the quest, ensure you connected X account';
 
 // ============================================================================
 // Helper Functions

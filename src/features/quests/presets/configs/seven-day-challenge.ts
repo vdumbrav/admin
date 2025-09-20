@@ -34,6 +34,7 @@ export const sevenDayChallengePresetConfig: PresetConfig = {
         'pop-up': {
           name: 'Daily Quests',
           button: 'Boost XP',
+          description: '',
         },
       },
     },

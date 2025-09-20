@@ -29,12 +29,23 @@ export const connectPresetConfig: PresetConfig = {
         'pop-up': {
           name: 'Social Quests',
           button: 'Connect',
+          description: '',
         },
       },
     },
   },
 
   businessRules: [
+    {
+      condition: 'provider === "matrix"',
+      action: 'set resources.ui.button = "Add"',
+      description: 'For Matrix change button to Add',
+    },
+    {
+      condition: 'provider === "matrix"',
+      action: 'set resources.ui.pop-up.button = "Add"',
+      description: 'For Matrix change popup button to Add',
+    },
     {
       condition: 'group',
       action: 'auto-generate resources.ui.pop-up.name',

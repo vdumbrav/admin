@@ -28,6 +28,7 @@ export const explorePresetConfig: PresetConfig = {
         'pop-up': {
           name: 'Social Quests', // Will be auto-generated based on group
           button: 'Explore',
+          description: '',
         },
       },
     },

@@ -135,6 +135,19 @@ function evaluateConditionalVisibility(
     // Connect/7-day: hidden (default from preset config)
   }
 
+  // Username field visibility rules
+  if (fieldName === 'username') {
+    // Join: visible for telegram provider
+    if (presetConfig?.id === 'join') {
+      const isTelegramProvider = currentValues?.provider === 'telegram';
+      state.visible = isTelegramProvider;
+    }
+    // Action with Post: always visible (tweetId is required)
+    else if (presetConfig?.id === 'action-with-post') {
+      state.visible = true;
+    }
+  }
+
   // Legacy partnerIcon field (now replaced by icon)
   if (fieldName === 'partnerIcon') {
     const isPartnerGroup = currentValues?.group === 'partner';

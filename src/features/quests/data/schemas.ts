@@ -96,6 +96,7 @@ const statusSchema = z
     AdminWaitlistTasksResponseDtoStatus.started,
     AdminWaitlistTasksResponseDtoStatus.completed,
     AdminWaitlistTasksResponseDtoStatus.failed,
+    AdminWaitlistTasksResponseDtoStatus.locked,
   ])
   .optional();
 

@@ -29,9 +29,13 @@ export const actionWithPostPresetConfig: PresetConfig = {
         'pop-up': {
           name: 'Social Quests',
           button: 'Engage',
+          description: 'Engage with Walme`s Tweet to earn XP',
+          'additional-title': 'Connect your X',
+          'additional-description': 'Before starting the quest, ensure you connected X account',
         },
       },
-      username: 'walme_io',
+      username: '', // walme_io
+      // isNew: true,
     },
   },
 

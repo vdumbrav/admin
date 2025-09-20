@@ -14,7 +14,7 @@ export const joinPresetConfig: PresetConfig = {
     tasks: 'hidden',
     dailyRewards: 'hidden',
     totalReward: 'hidden',
-    username: 'hidden',
+    username: 'conditional', // visible for telegram
     tweetId: 'hidden',
     icon: 'conditional', // visible if group === 'partner'
     partnerIcon: 'hidden', // Icon field covers this
@@ -28,8 +28,12 @@ export const joinPresetConfig: PresetConfig = {
         'pop-up': {
           name: 'Social Quests',
           button: 'Join',
+          description: '',
+          'additional-title': '',
+          'additional-description': '',
         },
       },
+      // isNew: true,
     },
   },
 
