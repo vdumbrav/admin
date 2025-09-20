@@ -1,11 +1,11 @@
 import { UserManager, WebStorageStateStore } from 'oidc-client-ts';
 import type { AuthProviderProps } from 'react-oidc-context';
 
-const rawBaseEnv = import.meta.env['VITE_APP_BASE_URL'] as string | undefined;
-const rawBase = rawBaseEnv ?? window.location.origin;
-
-// Build base URL
-const baseUrl = rawBase.endsWith('/') ? rawBase.slice(0, -1) : rawBase;
+// Compute app base URL respecting subpath (e.g., /admin)
+const configuredBase = import.meta.env['VITE_APP_BASE_URL'] as string | undefined;
+const viteBase = (import.meta.env.BASE_URL as string | undefined) ?? '/';
+const appBase = configuredBase ?? new URL(viteBase, window.location.origin).toString();
+const baseUrl = appBase.endsWith('/') ? appBase.slice(0, -1) : appBase;
 
 const rawIssuer = import.meta.env['VITE_OIDC_AUTHORITY'] as string | undefined;
 if (!rawIssuer) {
