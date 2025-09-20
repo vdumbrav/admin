@@ -2,11 +2,12 @@ import { Outlet, useNavigate, useParams, useRouterState, useSearch } from '@tans
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Main } from '@/components/layout/main';
-import { QuestForm } from './QuestForm';
+import { apiToForm } from './adapters/form-api-adapter';
 import { useCreateQuest, useQuest, useUpdateQuest } from './api';
 import { PresetSelection } from './components/preset-selection';
 import { adaptQuestToTask, adaptTaskToQuest } from './data/adapters';
 import type { Task } from './data/types';
+import { QuestForm } from './form';
 import { getPreset, type PresetId } from './presets';
 import type { QuestFormValues } from './types/form-types';
 
@@ -124,7 +125,7 @@ export const QuestEditPage = () => {
           </Button>
         </div>
         <QuestForm
-          initial={data ? adaptQuestToTask(data) : undefined}
+          initial={data ? apiToForm(adaptQuestToTask(data)) : undefined}
           onSubmit={async (v: QuestFormValues) => {
             try {
               const withSchedule: Partial<Task> = {

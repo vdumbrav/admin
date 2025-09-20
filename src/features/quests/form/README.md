@@ -124,20 +124,7 @@ import { QuestForm } from './form';
 
 ## 🔄 Миграция
 
-### Существующий код (работает без изменений)
-
-```typescript
-import { QuestForm } from '@/features/quests/QuestForm';
-
-<QuestForm
-  initial={apiData}
-  presetConfig={preset}
-  onSubmit={handleSubmit}
-  onCancel={handleCancel}
-/>
-```
-
-### Новый код (рекомендуется)
+### Использование
 
 ```typescript
 import { QuestForm } from '@/features/quests/form';

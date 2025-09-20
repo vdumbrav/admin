@@ -1,6 +1,6 @@
 # Waitlist Admin
 
-Short technology overview and how we record technical decisions.
+Short technology overview and how to record technical decisions.
 
 ## Technologies
 
@@ -454,7 +454,6 @@ This admin panel features a sophisticated **preset-based quest creation system**
 **Technical Architecture:**
 
 - **Modular Form System:** Refactored from 1130-line monolith to clean, maintainable modules:
-  - `QuestForm.tsx` (58 lines) - Clean API wrapper with preset support
   - `form/quest-form-container.tsx` - Main container with state management
   - `form/quest-form-fields.tsx` - UI field components
   - `form/use-quest-form.ts` - Centralized form state hook

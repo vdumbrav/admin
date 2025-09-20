@@ -9,7 +9,7 @@
 ## 1. Технический контекст и анализ текущего состояния
 
 ### 1.1 Текущая реализация
-- **Компонент формы**: `src/features/quests/QuestForm.tsx` - комплексная форма со всеми полями
+- **Компонент формы**: модуль `src/features/quests/form/*` — универсальная форма с пресетами
 - **Система типов**: Хорошо структурированная с API адаптерами в `src/features/quests/adapters/form-api-adapter.ts`
 - **Модели данных**: API типы из `@/lib/api/generated/model` с UI-дружественными типами форм
 - **Навигация**: TanStack Router с маршрутами `/quests/new` и `/quests/$id`
@@ -54,7 +54,7 @@
 ## 3. Архитектура: "Под капотом - одна форма"
 
 ### 3.1 Основной принцип
-**Единый компонент формы** (`QuestForm.tsx`) получает объекты **PresetConfig**, которые управляют:
+**Единый компонент формы** (модуль `form/*`) получает объекты **PresetConfig**, которые управляют:
 - Видимостью/скрытием полей
 - Блокировкой/предзаполнением полей
 - Правилами валидации
@@ -353,7 +353,7 @@ interface PresetConfig {
 - [x] Добавить роутинг: `/quests/new` → выбор пресета, `/quests/new/:preset` → форма
 
 ### 7.2 Фаза 2: Улучшение формы ✅
-- [x] Модифицировать `QuestForm.tsx` для принятия `PresetConfig`
+- [x] Вынести публичный API формы в `src/features/quests/form/*` с поддержкой `PresetConfig`
 - [x] Реализовать логику видимости полей
 - [x] Добавить механизм блокировки полей
 - [x] Создать специальные компоненты (TwitterPreview, TasksEditor, DailyRewardsEditor)
@@ -403,7 +403,7 @@ src/features/quests/
 │   ├── action-with-post.ts        [НОВЫЙ]
 │   ├── seven-day-challenge.ts     [НОВЫЙ]
 │   └── explore.ts                 [НОВЫЙ]
-└── QuestForm.tsx                  [УЛУЧШИТЬ]
+└── form/*                         [ГОТОВО]
 ```
 
 ### 8.3 Поток данных
@@ -793,7 +793,7 @@ src/features/quests/
 ├── adapters/
 │   └── form-api-adapter.ts            ✅ API-Form конвертеры + reward calculation
 ├── pages.tsx                          ✅ Страницы с правильным маппингом
-├── QuestForm.tsx                      ✅ Чистый API wrapper
+├── form/index.ts                      ✅ Чистый публичный API
 └── validation.ts                      ✅ Twitter validation helpers
 ```
 

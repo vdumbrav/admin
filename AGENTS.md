@@ -44,6 +44,22 @@ Automated tests are not required for this project at this time. Validate changes
 - Data: React Query for server state; mutations and queries live near features; avoid global singletons.
 - Forms: Quest form is modular (`src/features/quests/form/*`); reuse hooks and field-state utilities.
 
+## Usage Example
+```tsx
+import { QuestForm } from '@/features/quests/form';
+
+export function NewQuest() {
+  return (
+    <QuestForm
+      initial={undefined}
+      presetConfig={/* preset object */}
+      onSubmit={(values) => {/* save */}}
+      onCancel={() => {/* navigate back */}}
+    />
+  );
+}
+```
+
 ## UI/UX Guidelines
 - Use Radix primitives and shadcn components; prefer composition over boolean props.
 - Tailwind v4 for styling; group classes (layout → spacing → color → state) and avoid inline style objects.
