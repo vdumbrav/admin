@@ -23,7 +23,7 @@ export const DataTableToolbar = <TData,>({ table }: DataTableToolbarProps<TData>
   React.useEffect(() => {
     const id = setTimeout(() => {
       table.getColumn('title')?.setFilterValue(search);
-    }, 250);
+    }, 300);
     return () => clearTimeout(id);
   }, [search, table]);
 
@@ -34,7 +34,8 @@ export const DataTableToolbar = <TData,>({ table }: DataTableToolbarProps<TData>
           placeholder='Search by title...'
           value={search}
           onChange={(event) => setSearch(event.target.value)}
-          className='h-8 w-[150px] lg:w-[250px]'
+          className='placeholder:text-muted-foreground h-8 w-[150px] text-sm leading-5 lg:w-[250px]'
+          aria-label='Search quests by title'
         />
         <div className='flex gap-x-2'>
           {table.getColumn('group') && (
@@ -74,7 +75,8 @@ export const DataTableToolbar = <TData,>({ table }: DataTableToolbarProps<TData>
           <Button
             variant='ghost'
             onClick={() => table.resetColumnFilters()}
-            className='h-8 px-2 lg:px-3'
+            className='h-8 px-2 text-sm leading-5 font-medium lg:px-3'
+            aria-label='Clear all filters'
           >
             Reset
             <Cross2Icon className='ml-2 h-4 w-4' />

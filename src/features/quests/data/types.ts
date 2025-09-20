@@ -92,6 +92,14 @@ export interface Task {
 // Extended Quest type with additional UI fields
 export type Quest = AdminWaitlistTasksResponseDto & {
   visible?: boolean; // UI-only field for visibility toggle
+  pinned?: boolean;
+  usersCount?: number;
+  totalXp?: number;
+  startDate?: string | null;
+  endDate?: string | null;
+  webEnabled?: boolean;
+  tmaEnabled?: boolean;
+  locked?: boolean;
 };
 
 // ============================================================================

@@ -27,8 +27,8 @@ export const Quests = () => {
       <Main>
         <div className='mb-2 flex flex-wrap items-center justify-between space-y-2 gap-x-4'>
           <div>
-            <h2 className='text-2xl font-bold tracking-tight'>Quests</h2>
-            <p className='text-muted-foreground'>Manage quests</p>
+            <h1 className='text-2xl leading-8 font-semibold'>Quests</h1>
+            <p className='text-muted-foreground text-sm leading-5'>Manage quests</p>
           </div>
           <QuestsPrimaryButtons />
         </div>

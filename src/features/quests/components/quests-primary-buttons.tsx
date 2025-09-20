@@ -18,9 +18,13 @@ export const QuestsPrimaryButtons = () => {
   } as const;
   if (!auth.isAdmin) return null;
   return (
-    <Button asChild className='space-x-1'>
+    <Button
+      asChild
+      className='space-x-1 text-sm leading-5 font-medium'
+      aria-label='Create new quest'
+    >
       <Link to='/quests/new' search={listSearch}>
-        <span>Create</span>
+        <span>Create New Quest</span>
         <IconPlus size={18} />
       </Link>
     </Button>

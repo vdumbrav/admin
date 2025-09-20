@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { Spinner } from '@radix-ui/themes';
 import { Link, useRouter, useSearch } from '@tanstack/react-router';
 import {
   type ColumnDef,
@@ -15,6 +14,7 @@ import {
   useReactTable,
   type VisibilityState,
 } from '@tanstack/react-table';
+import { Loader2 } from 'lucide-react';
 import { loadJSON, LS_TABLE_SIZE, LS_TABLE_SORT, LS_TABLE_VIS, saveJSON } from '@/utils/persist';
 import { Button } from '@/components/ui/button';
 import {
@@ -102,6 +102,18 @@ export const QuestsDataTable = ({ columns, isAdmin }: DataTableProps) => {
     sort,
   });
 
+  // Maintain current sort but move pinned items to the top while keeping relative order
+  const rows = React.useMemo(() => {
+    const items = data?.items ?? [];
+    const pinned: Quest[] = [];
+    const others: Quest[] = [];
+    for (const it of items) {
+      if (it.pinned) pinned.push(it);
+      else others.push(it);
+    }
+    return [...pinned, ...others];
+  }, [data?.items]);
+
   React.useEffect(() => {
     saveJSON(LS_TABLE_VIS, columnVisibility);
   }, [columnVisibility]);
@@ -167,7 +179,7 @@ export const QuestsDataTable = ({ columns, isAdmin }: DataTableProps) => {
   }, [search, group, type, provider, visible, pagination, sort, router, searchParams]);
 
   const table = useReactTable({
-    data: data?.items ?? [],
+    data: rows,
     columns: memoColumns,
     pageCount: getSafePageCount(data?.total, pagination.pageSize),
     state: { sorting, columnVisibility, columnFilters, pagination },
@@ -228,18 +240,18 @@ export const QuestsDataTable = ({ columns, isAdmin }: DataTableProps) => {
   return (
     <div className='space-y-4'>
       <DataTableToolbar table={table} />
-      <div className='relative overflow-hidden rounded-md border'>
+      <div className='relative overflow-hidden rounded-md border' aria-busy={isFetching}>
         {isFetching && (
           <div className='bg-background/50 absolute inset-0 z-10 flex items-center justify-center'>
-            <Spinner />
+            <Loader2 className='text-muted-foreground h-5 w-5 animate-spin' aria-hidden />
           </div>
         )}
         <Table>
-          <TableHeader>
+          <TableHeader className='bg-background sticky top-0 z-10'>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id} colSpan={header.colSpan}>
+                  <TableHead key={header.id} colSpan={header.colSpan} className='px-3 py-2'>
                     {header.isPlaceholder
                       ? null
                       : flexRender(header.column.columnDef.header, header.getContext())}
@@ -251,9 +263,12 @@ export const QuestsDataTable = ({ columns, isAdmin }: DataTableProps) => {
           <TableBody>
             {isLoading ? null : table.getRowModel().rows.length ? (
               table.getRowModel().rows.map((row) => (
-                <TableRow key={row.id}>
+                <TableRow
+                  key={row.id}
+                  className={`h-11 ${row.index % 2 === 0 ? 'bg-background' : 'bg-muted/20'} hover:bg-[--row-hover]`}
+                >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
+                    <TableCell key={cell.id} className='px-3 py-2'>
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </TableCell>
                   ))}
@@ -264,18 +279,18 @@ export const QuestsDataTable = ({ columns, isAdmin }: DataTableProps) => {
                 <TableCell colSpan={memoColumns.length} className='h-24 text-center'>
                   {table.getState().columnFilters.length ? (
                     <div className='flex flex-col items-center gap-2'>
-                      <p>No results match filters</p>
+                      <p>No results. Try clearing filters.</p>
                       <Button
                         variant='outline'
                         size='sm'
                         onClick={() => table.resetColumnFilters()}
                       >
-                        Clear filters
+                        Clear all
                       </Button>
                     </div>
                   ) : (
                     <div className='flex flex-col items-center gap-2'>
-                      <p>No quests</p>
+                      <p>No quests yet</p>
                       {isAdmin && (
                         <Button asChild size='sm'>
                           <Link to='/quests/new'>Create quest</Link>

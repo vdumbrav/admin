@@ -229,6 +229,27 @@ export const useToggleVisibility = () => {
 };
 
 /**
+ * Toggle quest pinned state (Mock implementation)
+ */
+export const useTogglePinned = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (data: { id: number; pinned: boolean }): Promise<Quest> => {
+      // Use mock update for now
+      return await mockUpdateQuest(data.id, { pinned: data.pinned } as Partial<Quest>);
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['waitlist-tasks'] });
+      toast.success('Updated pin state');
+    },
+    onError: (error) => {
+      const message = error instanceof Error ? error.message : 'Failed to update pin';
+      toast.error(message);
+    },
+  });
+};
+
+/**
  * Upload media for quest (Mock implementation)
  */
 export const uploadMedia = async (file: File, _token: string | undefined): Promise<string> => {

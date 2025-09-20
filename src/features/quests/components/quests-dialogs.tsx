@@ -22,7 +22,7 @@ export const QuestsDialogs = () => {
             setTimeout(() => setCurrentRow(null), 500);
           }}
           isLoading={del.isPending}
-          title={`Delete quest: ${currentRow.id}?`}
+          title='Delete quest?'
           desc='This action cannot be undone.'
           confirmText='Delete'
           className='max-w-md'

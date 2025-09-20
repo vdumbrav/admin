@@ -78,13 +78,35 @@ function adaptIteratorToApi(
 // ============================================================================
 
 /**
+ * Extended task type with UI-specific fields
+ */
+interface ExtendedAdminTask extends AdminWaitlistTasksResponseDto {
+  visible?: boolean;
+  pinned?: boolean;
+  usersCount?: number;
+  totalXp?: number;
+  webEnabled?: boolean;
+  tmaEnabled?: boolean;
+  locked?: boolean;
+}
+
+/**
  * Converts AdminWaitlistTasksResponseDto to Quest (UI format)
  * This is a simple adapter since Quest extends the API type
  */
 export function adaptAdminTaskToQuest(task: AdminWaitlistTasksResponseDto): Quest {
+  const extendedTask = task as ExtendedAdminTask;
   return {
     ...task,
-    visible: true, // Default to visible for admin view
+    visible: extendedTask.visible ?? true, // Default to visible for admin view
+    pinned: extendedTask.pinned ?? false,
+    usersCount: extendedTask.usersCount ?? undefined,
+    totalXp: extendedTask.totalXp ?? undefined,
+    startDate: task.started_at ?? null,
+    endDate: task.completed_at ?? null,
+    webEnabled: extendedTask.webEnabled ?? false,
+    tmaEnabled: extendedTask.tmaEnabled ?? false,
+    locked: extendedTask.locked ?? false,
   };
 }
 
