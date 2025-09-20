@@ -1,10 +1,6 @@
 /**
- * Quest Form Component - LEGACY WRAPPER
- *
- * This file provides backward compatibility for the old QuestForm API.
- * The actual implementation has been moved to a modular structure in ./form/
- *
- * @deprecated Use ./form/QuestFormContainer directly for new development
+ * Quest Form Component
+ * Modern modular quest form system with preset support
  */
 import { apiToForm } from './adapters/form-api-adapter';
 import type { Task } from './data/types';
@@ -13,7 +9,7 @@ import type { PresetConfig } from './presets';
 import type { QuestFormValues } from './types/form-types';
 
 // ============================================================================
-// Legacy Interface
+// Quest Form Interface
 // ============================================================================
 
 export interface QuestFormProps {
@@ -28,7 +24,7 @@ export interface QuestFormProps {
 }
 
 // ============================================================================
-// Legacy Component
+// Quest Form Component
 // ============================================================================
 
 export const QuestForm = ({ initial, presetConfig, onSubmit, onCancel }: QuestFormProps) => {
@@ -54,7 +50,7 @@ export const QuestForm = ({ initial, presetConfig, onSubmit, onCancel }: QuestFo
 };
 
 // ============================================================================
-// Re-exports for backward compatibility
+// Type Exports
 // ============================================================================
 
 export type { QuestFormValues, ChildFormValues } from './types/form-types';

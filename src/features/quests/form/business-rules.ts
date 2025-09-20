@@ -81,10 +81,13 @@ export function applyBusinessRules(
       updatedValues.resources = {
         ...updatedValues.resources,
         ui: {
+          button: updatedValues.resources?.ui?.button ?? 'Continue',
           ...updatedValues.resources?.ui,
           'pop-up': {
             ...updatedValues.resources?.ui?.['pop-up'],
             name: popupName,
+            button: updatedValues.resources?.ui?.['pop-up']?.button ?? 'Continue',
+            description: updatedValues.resources?.ui?.['pop-up']?.description ?? '',
           },
         },
       };
@@ -103,21 +106,29 @@ export function applyBusinessRules(
   }
 
   // Calculate total reward for multi-task quests
-  if (updatedValues.children && updatedValues.children.length > 0) {
-    updatedValues.totalReward = calculateTotalReward(updatedValues.children);
-  }
-
-  // Calculate total reward for 7-day challenge
-  if (updatedValues.iterator?.reward_map && Array.isArray(updatedValues.iterator.reward_map)) {
-    updatedValues.totalReward = updatedValues.iterator.reward_map.reduce(
-      (sum, reward) => sum + reward,
-      0,
+  if (updatedValues.child && updatedValues.child.length > 0) {
+    (updatedValues as QuestFormValues & { totalReward: number }).totalReward = calculateTotalReward(
+      updatedValues.child,
     );
   }
 
+  // Calculate total reward for 7-day challenge
+  if (
+    (updatedValues as QuestFormValues & { iterator: { reward_map: number[] } }).iterator
+      ?.reward_map &&
+    Array.isArray(
+      (updatedValues as QuestFormValues & { iterator: { reward_map: number[] } }).iterator
+        .reward_map,
+    )
+  ) {
+    (updatedValues as QuestFormValues & { totalReward: number }).totalReward = (
+      updatedValues as QuestFormValues & { iterator: { reward_map: number[] } }
+    ).iterator.reward_map.reduce((sum: number, reward: number) => sum + reward, 0);
+  }
+
   // Update child order_by indices
-  if (updatedValues.children) {
-    updatedValues.children = updateChildOrderBy(updatedValues.children);
+  if (updatedValues.child) {
+    updatedValues.child = updateChildOrderBy(updatedValues.child);
   }
 
   return updatedValues;
@@ -178,7 +189,7 @@ export function getConnectGateWarnings(
 
   // Check provider-based connect gate for Join and Action with Post
   if (connectGateRules.required && provider) {
-    const message = getConnectGateMessage(provider);
+    const message = PROVIDER_CONNECT_MESSAGES[provider];
     if (message) {
       warnings.push(message);
     }
@@ -188,6 +199,34 @@ export function getConnectGateWarnings(
 }
 
 // ============================================================================
+// Constants
+// ============================================================================
+
+/**
+ * Mapping of quest groups to popup names
+ * Centralized for easy product copy updates
+ */
+const GROUP_POPUP_NAMES: Record<string, string> = {
+  social: 'Social Quests',
+  daily: 'Daily Quests',
+  partner: 'Partner Quests',
+  referral: 'Referral Quests',
+};
+
+/**
+ * Provider-specific connect-gate warning messages
+ */
+const PROVIDER_CONNECT_MESSAGES: Record<string, string> = {
+  twitter: 'Requires Connect Twitter quest',
+  discord: 'Requires Connect Discord quest',
+  telegram: 'Requires Connect Telegram quest',
+  matrix: 'Requires Connect Matrix quest',
+  walme: 'Requires Connect Walme quest',
+  monetag: 'Requires Connect Monetag quest',
+  adsgram: 'Requires Connect Adsgram quest',
+};
+
+// ============================================================================
 // Helper Functions
 // ============================================================================
 
@@ -195,12 +234,5 @@ export function getConnectGateWarnings(
  * Get popup name based on quest group
  */
 function getPopupNameByGroup(group: string): string | null {
-  const groupToPopupName: Record<string, string> = {
-    social: 'Social Quests',
-    daily: 'Daily Quests',
-    partner: 'Partner Quests',
-    referral: 'Referral Quests',
-  };
-
-  return groupToPopupName[group] || null;
+  return GROUP_POPUP_NAMES[group] || null;
 }

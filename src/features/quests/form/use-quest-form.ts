@@ -6,7 +6,6 @@ import { useEffect, useMemo } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useAppAuth } from '@/auth/hooks';
-import { mediaErrors } from '@/errors/media';
 import { toast } from 'sonner';
 import { replaceObjectUrl } from '@/utils/object-url';
 import { uploadMedia } from '../api';
@@ -100,7 +99,7 @@ export function useQuestForm({
 
   // Compute field visibility states
   const fieldStates = useMemo(() => {
-    return computeFieldStates(presetConfig, watchedValues);
+    return computeFieldStates(presetConfig, watchedValues as Partial<QuestFormValues>);
   }, [presetConfig, watchedValues]);
 
   // ============================================================================
@@ -111,7 +110,7 @@ export function useQuestForm({
   useEffect(() => {
     if (!isDirty) return;
 
-    const updatedValues = applyBusinessRules(watchedValues, presetConfig);
+    const updatedValues = applyBusinessRules(watchedValues as QuestFormValues, presetConfig);
 
     // Only update if values actually changed to avoid infinite loops
     const hasChanges = Object.keys(updatedValues).some((key) => {
@@ -146,7 +145,11 @@ export function useQuestForm({
   // ============================================================================
 
   const draftKey = presetConfig ? `quest-form-${presetConfig.id}` : 'quest-form';
-  const { clearDraft } = useDraftAutosave(draftKey, watchedValues, isDirty);
+  const { clearDraft } = useDraftAutosave({
+    key: draftKey,
+    watch: form.watch,
+    enabled: isDirty,
+  });
 
   // ============================================================================
   // Form Handlers
@@ -180,7 +183,7 @@ export function useQuestForm({
     }
 
     try {
-      const result = await uploadMedia(file);
+      const result = await uploadMedia(file, undefined);
 
       // Replace existing object URL if needed
       if (result.startsWith('blob:')) {
@@ -191,12 +194,7 @@ export function useQuestForm({
     } catch (error) {
       console.error('Image upload error:', error);
 
-      // Handle specific media errors
-      const mediaError = mediaErrors.find(
-        (err) => error instanceof Error && error.message.includes(err.message),
-      );
-
-      const errorMessage = mediaError?.userMessage ?? 'Failed to upload image';
+      const errorMessage = error instanceof Error ? error.message : 'Failed to upload image';
       toast.error(errorMessage);
       throw new Error(errorMessage);
     }

@@ -90,7 +90,9 @@ export interface QuestFormValues {
   provider?: (typeof PROVIDERS)[number];
   uri?: string;
   reward?: number;
+  totalReward?: number; // Calculated from tasks or daily rewards
   visible?: boolean;
+  icon?: string; // Quest icon URL
   resources?: FormResources;
   child?: ChildFormValues[];
 }

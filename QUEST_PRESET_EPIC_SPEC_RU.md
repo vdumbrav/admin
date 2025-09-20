@@ -788,7 +788,7 @@ src/features/quests/
 ├── adapters/
 │   └── form-api-adapter.ts            ✅ API-Form конвертеры с техдолгом анализом
 ├── pages.tsx                          ✅ Страницы создания/редактирования
-├── QuestForm.tsx                      ✅ Legacy wrapper (63 строки)
+├── QuestForm.tsx                      ✅ Чистый API wrapper (58 строк)
 └── default-search.ts                  ✅ Параметры поиска с фиксом boolean parsing
 
 src/utils/                             ✅ Shared utilities
@@ -811,7 +811,7 @@ src/utils/                             ✅ Shared utilities
 
 ### 20.3 Архитектурные достижения
 - ✅ **Модульная архитектура**: Рефакторинг из 1130-строчного монолита в чистые модули:
-  - `QuestForm.tsx` (63 строки) - Legacy wrapper для обратной совместимости
+  - `QuestForm.tsx` (58 строк) - Чистый API wrapper с поддержкой пресетов
   - `form/quest-form-container.tsx` - Основной контейнер с управлением состоянием
   - `form/quest-form-fields.tsx` - UI компоненты полей
   - `form/use-quest-form.ts` - Централизованный хук состояния формы

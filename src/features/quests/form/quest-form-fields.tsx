@@ -25,7 +25,7 @@ import { DailyRewardsEditor } from '../components/daily-rewards-editor';
 import { ManagedField } from '../components/managed-field';
 import { TasksEditor } from '../components/tasks-editor';
 import { TwitterPreview } from '../components/twitter-preview';
-import { groups, providers, types } from '../data/data';
+import { groups, providers } from '../data/data';
 import type { PresetConfig } from '../presets/types';
 import type { QuestFormValues } from '../types/form-types';
 import {
@@ -114,56 +114,46 @@ export function QuestFormFields({
 
       {/* Group Field */}
       {isFieldVisible('group', fieldStates) && (
-        <ManagedField
-          isLocked={isFieldDisabled('group', fieldStates)}
-          tooltip={fieldStates.group?.tooltip}
-        >
-          <FormField
-            control={form.control}
-            name='group'
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Group</FormLabel>
-                <FormControl>
-                  <SelectDropdown
-                    options={groups}
-                    placeholder='Select group'
-                    disabled={isFieldDisabled('group', fieldStates)}
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </ManagedField>
+        <FormField
+          control={form.control}
+          name='group'
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Group</FormLabel>
+              <FormControl>
+                <SelectDropdown
+                  items={groups}
+                  placeholder='Select group'
+                  disabled={isFieldDisabled('group', fieldStates)}
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
       )}
 
       {/* Provider Field */}
       {isFieldVisible('provider', fieldStates) && (
-        <ManagedField
-          isLocked={isFieldDisabled('provider', fieldStates)}
-          tooltip={fieldStates.provider?.tooltip}
-        >
-          <FormField
-            control={form.control}
-            name='provider'
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Provider</FormLabel>
-                <FormControl>
-                  <SelectDropdown
-                    options={providers}
-                    placeholder='Select provider'
-                    disabled={isFieldDisabled('provider', fieldStates)}
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </ManagedField>
+        <FormField
+          control={form.control}
+          name='provider'
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Provider</FormLabel>
+              <FormControl>
+                <SelectDropdown
+                  items={providers}
+                  placeholder='Select provider'
+                  disabled={isFieldDisabled('provider', fieldStates)}
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
       )}
 
       {/* Twitter-specific Fields */}
@@ -214,13 +204,12 @@ export function QuestFormFields({
           )}
 
           {/* Twitter Preview */}
-          <TwitterPreview
-            username={form.watch('resources.username')}
-            tweetId={form.watch('resources.tweetId')}
-          />
+          {form.watch('resources.username') && form.watch('resources.tweetId') && (
+            <TwitterPreview />
+          )}
 
           {/* Tasks Editor */}
-          {isFieldVisible('tasks', fieldStates) && <TasksEditor form={form} />}
+          {isFieldVisible('tasks', fieldStates) && <TasksEditor />}
 
           {/* Tweet Embed Toggle */}
           <div className='flex items-center space-x-2'>
@@ -235,12 +224,14 @@ export function QuestFormFields({
           </div>
 
           {/* Tweet Embed */}
-          {showTweetEmbed && (
-            <TwitterEmbed
-              username={form.watch('resources.username')}
-              tweetId={form.watch('resources.tweetId')}
-            />
-          )}
+          {showTweetEmbed &&
+            form.watch('resources.username') &&
+            form.watch('resources.tweetId') && (
+              <TwitterEmbed
+                username={form.watch('resources.username') as string}
+                tweetId={form.watch('resources.tweetId') as string}
+              />
+            )}
         </>
       )}
 
@@ -248,7 +239,7 @@ export function QuestFormFields({
       {presetConfig?.id === 'seven-day-challenge' && (
         <>
           {/* Daily Rewards Editor */}
-          {isFieldVisible('dailyRewards', fieldStates) && <DailyRewardsEditor form={form} />}
+          {isFieldVisible('dailyRewards', fieldStates) && <DailyRewardsEditor />}
         </>
       )}
 
@@ -340,9 +331,12 @@ export function QuestFormFields({
               <FormLabel>Quest Icon</FormLabel>
               <FormControl>
                 <ImageDropzone
-                  value={field.value}
-                  onChange={field.onChange}
-                  onUpload={onImageUpload}
+                  preview={field.value}
+                  onFile={async (file) => {
+                    const url = await onImageUpload(file);
+                    field.onChange(url);
+                  }}
+                  onClear={() => field.onChange('')}
                   disabled={isFieldDisabled('icon', fieldStates)}
                 />
               </FormControl>
@@ -375,28 +369,12 @@ export function QuestFormFields({
           {/* Type Field */}
           {isFieldVisible('type', fieldStates) && (
             <ManagedField
-              isLocked={isFieldDisabled('type', fieldStates)}
-              tooltip={fieldStates.type?.tooltip}
-            >
-              <FormField
-                control={form.control}
-                name='type'
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Quest Type</FormLabel>
-                    <FormControl>
-                      <SelectDropdown
-                        options={types}
-                        placeholder='Select type'
-                        disabled={isFieldDisabled('type', fieldStates)}
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </ManagedField>
+              name='type'
+              label='Quest Type'
+              presetConfig={presetConfig}
+              disabled={isFieldDisabled('type', fieldStates)}
+              placeholder='Select type'
+            />
           )}
 
           {/* Visible Field */}
@@ -424,9 +402,7 @@ export function QuestFormFields({
           )}
 
           {/* Children Editor for non-preset forms */}
-          {!presetConfig && isFieldVisible('children', fieldStates) && (
-            <ChildrenEditor form={form} />
-          )}
+          {!presetConfig && isFieldVisible('children', fieldStates) && <ChildrenEditor />}
         </CollapsibleContent>
       </Collapsible>
     </div>

@@ -43,7 +43,6 @@ export function QuestFormContainer({
     form,
     fieldStates,
     isDirty,
-    isSubmitting,
     handleSubmit,
     handleCancel,
     handleImageUpload,
@@ -59,15 +58,10 @@ export function QuestFormContainer({
   // Navigation Blocking
   // ============================================================================
 
-  useBlocker({
-    shouldBlockFn: () => isDirty,
-    blockerFn: () => {
-      const shouldLeave = window.confirm(
-        'You have unsaved changes. Are you sure you want to leave?',
-      );
-      return shouldLeave;
-    },
-  });
+  useBlocker(() => {
+    const shouldLeave = window.confirm('You have unsaved changes. Are you sure you want to leave?');
+    return shouldLeave;
+  }, isDirty);
 
   // ============================================================================
   // Render
@@ -76,7 +70,13 @@ export function QuestFormContainer({
   return (
     <div className='relative'>
       <Form {...form}>
-        <form onSubmit={handleSubmit} className='space-y-6'>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            void handleSubmit();
+          }}
+          className='space-y-6'
+        >
           <div className='mx-auto max-w-2xl'>
             <QuestFormFields
               form={form}
@@ -91,11 +91,9 @@ export function QuestFormContainer({
 
       {/* Sticky Actions */}
       <StickyActions
-        form={form}
-        presetConfig={presetConfig}
-        onSubmit={handleSubmit}
+        onSubmit={() => void handleSubmit()}
         onCancel={handleCancel}
-        disabled={isSubmitting}
+        onReset={() => form.reset()}
       />
     </div>
   );
