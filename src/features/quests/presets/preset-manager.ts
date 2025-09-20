@@ -8,11 +8,11 @@ import { explorePresetConfig } from './configs/explore';
 import { joinPresetConfig } from './configs/join';
 import { sevenDayChallengePresetConfig } from './configs/seven-day-challenge';
 import {
-  presetConfigSchema,
-  PresetNotFoundError,
   InvalidPresetConfigError,
   type PresetConfig,
+  presetConfigSchema,
   type PresetId,
+  PresetNotFoundError,
 } from './types';
 
 // ============================================================================
@@ -31,7 +31,7 @@ const PRESET_REGISTRY = new Map<PresetId, PresetConfig>([
 for (const [id, config] of PRESET_REGISTRY.entries()) {
   const result = presetConfigSchema.safeParse(config);
   if (!result.success) {
-    const errors = result.error.issues.map((e: any) => `${e.path.join('.')}: ${e.message}`);
+    const errors = result.error.issues.map((e) => `${e.path.join('.')}: ${e.message}`);
     throw new InvalidPresetConfigError(id, errors);
   }
 }
@@ -101,7 +101,7 @@ export function getPresetSafe(presetId: string): PresetConfig | null {
 export function validatePresetConfig(config: unknown): PresetConfig {
   const result = presetConfigSchema.safeParse(config);
   if (!result.success) {
-    const errors = result.error.issues.map((e: any) => `${e.path.join('.')}: ${e.message}`);
+    const errors = result.error.issues.map((e) => `${e.path.join('.')}: ${e.message}`);
     throw new InvalidPresetConfigError('unknown', errors);
   }
   return result.data;

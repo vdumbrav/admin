@@ -1,7 +1,7 @@
 import { createFileRoute, redirect } from '@tanstack/react-router';
 import { requireAdminBeforeLoad } from '@/auth/guards';
 import { toast } from 'sonner';
-import { parseQuestSearch, defaultQuestSearch } from '@/features/quests/default-search';
+import { defaultQuestSearch, parseQuestSearch } from '@/features/quests/default-search';
 import { QuestCreateWithPresetPage } from '@/features/quests/pages';
 import { isValidPresetId } from '@/features/quests/presets';
 

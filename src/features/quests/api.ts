@@ -1,10 +1,16 @@
 import { useMemo } from 'react';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { useAdminControllerGetWaitlistTasks } from '@/lib/api/generated/admin/admin';
 import { type AdminWaitlistTasksResponseDto } from '@/lib/api/generated/model';
 import { adaptAdminTasksToQuests, adaptAdminTaskToQuest } from './data/adapters';
 import type { Quest, QuestQuery, QuestsResponse } from './data/types';
+import {
+  initializeMockStorage,
+  mockCreateQuest,
+  mockUpdateQuest,
+  mockUploadMedia,
+} from './utils/mock-api';
 
 export const useQuests = (query: QuestQuery) => {
   // Use the generated API hook for admin access to waitlist tasks
@@ -114,23 +120,22 @@ export const useQuest = (id: number) => {
 // ============================================================================
 
 /**
- * Create quest mutation
- * TODO: Implement actual quest creation API when available
- * TODO: Add proper validation using questFormSchema
- * TODO: Add optimistic updates for better UX
+ * Create quest mutation (Mock implementation)
  */
 export const useCreateQuest = () => {
+  const queryClient = useQueryClient();
+
+  // Initialize mock storage on first use
+  initializeMockStorage();
+
   return useMutation({
-    mutationFn: async (_data: Partial<Quest>): Promise<Quest> => {
-      // TODO: Replace with actual API call when quest creation endpoint is available
-      // Example: return await api.post('/api/quests', adaptTaskToQuest(data))
-      throw new Error(
-        'Create operation not available for admin tasks (readonly mode). TODO: Implement quest creation API.',
-      );
+    mutationFn: async (data: Partial<Quest>): Promise<Quest> => {
+      return await mockCreateQuest(data);
     },
     onSuccess: () => {
       toast.success('Quest created successfully');
-      // TODO: Invalidate and refetch quests list
+      // Invalidate and refetch quests list
+      void queryClient.invalidateQueries({ queryKey: ['waitlist-tasks'] });
     },
     onError: (error) => {
       const message = error instanceof Error ? error.message : 'Failed to create quest';
@@ -140,27 +145,34 @@ export const useCreateQuest = () => {
 };
 
 /**
- * Update quest mutation
- * TODO: Implement actual quest update API when available
- * TODO: Add partial update support
- * TODO: Add validation before sending to API
+ * Update quest mutation (Mock implementation)
  */
-export const useUpdateQuest = (_id: number) => {
+export const useUpdateQuest = (id: number) => {
+  const queryClient = useQueryClient();
+
   return useMutation({
-    mutationFn: async (_data: Partial<Quest>): Promise<Quest> => {
-      // TODO: Replace with actual API call when quest update endpoint is available
-      // Example: return await api.put(`/api/quests/${id}`, adaptTaskToQuest(data))
-      throw new Error(
-        'Update operation not available for admin tasks (readonly mode). TODO: Implement quest update API.',
-      );
+    mutationFn: async (data: Partial<Quest>): Promise<Quest> => {
+      return await mockUpdateQuest(id, data);
     },
     onSuccess: () => {
       toast.success('Quest updated successfully');
-      // TODO: Invalidate and refetch quests list or update cache directly
+      // Invalidate and refetch quests list
+      void queryClient.invalidateQueries({ queryKey: ['waitlist-tasks'] });
     },
     onError: (error) => {
       const message = error instanceof Error ? error.message : 'Failed to update quest';
-      toast.error(message);
+
+      // Handle conflict errors with special UI
+      if (message.includes('Conflict')) {
+        toast.error(message, {
+          action: {
+            label: 'Reload form',
+            onClick: () => window.location.reload(),
+          },
+        });
+      } else {
+        toast.error(message);
+      }
     },
   });
 };
@@ -217,25 +229,10 @@ export const useToggleVisibility = () => {
 };
 
 /**
- * Upload media for quest
- * TODO: Implement actual media upload API when available
- * TODO: Add progress tracking for file uploads
- * TODO: Add file type and size validation
- * TODO: Add image compression/optimization
+ * Upload media for quest (Mock implementation)
  */
-export const uploadMedia = async (_file: File, _token: string | undefined): Promise<string> => {
-  // TODO: Replace with actual API call when media upload endpoint is available
-  // Example:
-  // const formData = new FormData()
-  // formData.append('file', file)
-  // const response = await api.post('/api/media/upload', formData, {
-  //   headers: { Authorization: `Bearer ${token}` }
-  // })
-  // return response.data.url
-
-  throw new Error(
-    'Upload media not available for admin tasks (readonly mode). TODO: Implement media upload API.',
-  );
+export const uploadMedia = async (file: File, _token: string | undefined): Promise<string> => {
+  return await mockUploadMedia(file);
 };
 
 // ============================================================================

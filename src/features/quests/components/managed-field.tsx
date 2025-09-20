@@ -1,0 +1,99 @@
+import { useFormContext } from 'react-hook-form';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import type { PresetConfig } from '../presets';
+
+interface ManagedFieldProps {
+  name: string;
+  label: string;
+  presetConfig?: PresetConfig;
+  disabled?: boolean;
+  placeholder?: string;
+}
+
+/**
+ * Helper function to get nested value from object by path
+ */
+const getNestedValue = (obj: unknown, path: string): unknown => {
+  return path.split('.').reduce((current, key) => (current as Record<string, unknown>)?.[key], obj);
+};
+
+/**
+ * Field component that shows "overridden" badge and reset button for preset-managed fields
+ */
+export const ManagedField = ({
+  name,
+  label,
+  presetConfig,
+  disabled,
+  placeholder,
+}: ManagedFieldProps) => {
+  const { control, setValue, getValues, formState } = useFormContext();
+
+  // Check if field is dirty (manually changed by user)
+  const isDirty = getNestedValue(formState.dirtyFields, name);
+
+  // Get initial/preset value from preset config defaults
+  const getPresetValue = () => {
+    if (!presetConfig?.defaults) return undefined;
+    return getNestedValue(presetConfig.defaults, name);
+  };
+
+  const presetValue = getPresetValue();
+  const currentValue = getValues(name);
+  const isOverridden = Boolean(
+    isDirty && presetValue !== undefined && currentValue !== presetValue,
+  );
+
+  const handleReset = () => {
+    if (presetValue !== undefined) {
+      setValue(name, presetValue, { shouldDirty: false });
+    }
+  };
+
+  return (
+    <FormField
+      control={control}
+      name={name}
+      render={({ field }) => (
+        <FormItem>
+          <div className='flex items-center justify-between'>
+            <FormLabel>{label}</FormLabel>
+            {isOverridden && (
+              <div className='flex items-center gap-2'>
+                <Badge variant='secondary' className='text-xs'>
+                  Overridden
+                </Badge>
+                <Button
+                  type='button'
+                  variant='ghost'
+                  size='sm'
+                  onClick={handleReset}
+                  className='h-6 px-2 text-xs'
+                >
+                  Reset to preset
+                </Button>
+              </div>
+            )}
+          </div>
+          <FormControl>
+            <Input
+              {...field}
+              value={field.value ?? ''}
+              disabled={disabled}
+              placeholder={placeholder}
+            />
+          </FormControl>
+          {presetConfig && presetValue !== undefined && (
+            <div className='text-muted-foreground text-xs'>
+              Preset value: "{String(presetValue)}"
+            </div>
+          )}
+          <FormMessage />
+        </FormItem>
+      )}
+    />
+  );
+};

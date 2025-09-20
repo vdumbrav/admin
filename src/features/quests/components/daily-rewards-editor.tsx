@@ -10,9 +10,7 @@ interface FormValues {
   totalReward?: number;
 }
 
-const DAYS = [
-  'Day 1', 'Day 2', 'Day 3', 'Day 4', 'Day 5', 'Day 6', 'Day 7'
-];
+const DAYS = ['Day 1', 'Day 2', 'Day 3', 'Day 4', 'Day 5', 'Day 6', 'Day 7'];
 
 export const DailyRewardsEditor = () => {
   const { control, setValue } = useFormContext<FormValues>();
@@ -28,7 +26,7 @@ export const DailyRewardsEditor = () => {
       }, 0);
 
       // Update totalReward field (readonly in form)
-      (setValue as any)('totalReward', total, { shouldDirty: false });
+      setValue('totalReward', total, { shouldDirty: false });
     }
   }, [rewardMap, setValue]);
 
@@ -36,9 +34,7 @@ export const DailyRewardsEditor = () => {
     <div className='space-y-4'>
       <div>
         <h3 className='text-sm font-medium'>Daily Rewards</h3>
-        <p className='text-xs text-muted-foreground'>
-          Set reward amounts for each of the 7 days
-        </p>
+        <p className='text-muted-foreground text-xs'>Set reward amounts for each of the 7 days</p>
       </div>
 
       <div className='grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4'>
@@ -49,9 +45,7 @@ export const DailyRewardsEditor = () => {
             name={`iterator.reward_map.${index}`}
             render={({ field }) => (
               <FormItem>
-                <FormLabel className='text-xs font-medium'>
-                  {dayLabel}
-                </FormLabel>
+                <FormLabel className='text-xs font-medium'>{dayLabel}</FormLabel>
                 <FormControl>
                   <NoWheelNumber
                     {...field}
@@ -75,14 +69,14 @@ export const DailyRewardsEditor = () => {
 
       {rewardMap && Array.isArray(rewardMap) && (
         <div className='rounded-md border p-3 text-sm'>
-          <div className='flex justify-between items-center'>
+          <div className='flex items-center justify-between'>
             <span className='font-medium'>Total Reward:</span>
             <span className='font-mono'>
               {rewardMap.reduce((sum, reward) => sum + (reward || 0), 0)}
             </span>
           </div>
-          <div className='mt-2 text-xs text-muted-foreground'>
-            Distribution: {rewardMap.map(r => r || 0).join(' + ')}
+          <div className='text-muted-foreground mt-2 text-xs'>
+            Distribution: {rewardMap.map((r) => r || 0).join(' + ')}
           </div>
         </div>
       )}
