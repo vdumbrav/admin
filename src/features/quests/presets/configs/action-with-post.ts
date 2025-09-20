@@ -16,8 +16,8 @@ export const actionWithPostPresetConfig: PresetConfig = {
     totalReward: 'readonly', // Calculated from task rewards
     username: 'visible',
     tweetId: 'visible',
-    icon: 'hidden',
-    partnerIcon: 'conditional', // visible if group === 'partner'
+    icon: 'conditional', // visible if group === 'partner'
+    partnerIcon: 'hidden', // Icon field covers this
   },
 
   defaults: {

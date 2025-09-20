@@ -231,6 +231,38 @@ export function QuestFormFields({
         />
       )}
 
+      {/* Connect-specific Fields */}
+      {presetConfig?.id === 'connect' && (
+        <>
+          {/* URL Info */}
+          <div className='rounded-md border p-3'>
+            <div className='flex items-center space-x-2'>
+              <FormLabel>URL</FormLabel>
+              <Badge variant='secondary' className='text-xs'>
+                Auto-managed
+              </Badge>
+            </div>
+            <p className='text-muted-foreground mt-1 text-sm'>User's data</p>
+          </div>
+        </>
+      )}
+
+      {/* 7-day Challenge specific Fields */}
+      {presetConfig?.id === 'seven-day-challenge' && (
+        <>
+          {/* URL Info */}
+          <div className='rounded-md border p-3'>
+            <div className='flex items-center space-x-2'>
+              <FormLabel>URL</FormLabel>
+              <Badge variant='secondary' className='text-xs'>
+                Auto-managed
+              </Badge>
+            </div>
+            <p className='text-muted-foreground mt-1 text-sm'>User's data</p>
+          </div>
+        </>
+      )}
+
       {/* Twitter-specific Fields */}
       {presetConfig?.id === 'action-with-post' && (
         <>
@@ -544,13 +576,15 @@ export function QuestFormFields({
             />
           )}
 
-          {/* Button Text */}
-          <ManagedField
-            name='resources.ui.button'
-            label='Button text'
-            presetConfig={presetConfig}
-            placeholder='Override button label'
-          />
+          {/* Button Text - Only editable for Explore preset */}
+          {presetConfig?.id === 'explore' && (
+            <ManagedField
+              name='resources.ui.button'
+              label='Button text'
+              presetConfig={presetConfig}
+              placeholder='Override button label'
+            />
+          )}
 
           {/* Children Editor for non-preset forms */}
           {!presetConfig && isFieldVisible('children', fieldStates) && <ChildrenEditor />}

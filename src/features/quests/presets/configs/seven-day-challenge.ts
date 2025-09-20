@@ -8,7 +8,7 @@ export const sevenDayChallengePresetConfig: PresetConfig = {
 
   fieldVisibility: {
     group: 'readonly', // Always 'daily'
-    provider: 'readonly', // Always 'walme'
+    provider: 'readonly', // Always 'walme' (Internal)
     uri: 'hidden', // Not used
     reward: 'hidden', // Use totalReward instead
     tasks: 'hidden',

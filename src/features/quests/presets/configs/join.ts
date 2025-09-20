@@ -16,8 +16,8 @@ export const joinPresetConfig: PresetConfig = {
     totalReward: 'hidden',
     username: 'hidden',
     tweetId: 'hidden',
-    icon: 'hidden',
-    partnerIcon: 'conditional', // visible if group === 'partner'
+    icon: 'conditional', // visible if group === 'partner'
+    partnerIcon: 'hidden', // Icon field covers this
   },
 
   defaults: {

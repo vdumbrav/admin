@@ -89,6 +89,12 @@ export function applyBusinessRules(
       ui: {
         ...updatedValues.resources?.ui,
         button: 'Follow',
+        'pop-up': {
+          name: updatedValues.resources?.ui?.['pop-up']?.name ?? 'Social Quests',
+          description: updatedValues.resources?.ui?.['pop-up']?.description ?? '',
+          ...updatedValues.resources?.ui?.['pop-up'],
+          button: 'Follow',
+        },
       },
     };
   }
@@ -216,7 +222,7 @@ const PROVIDER_CONNECT_MESSAGES: Record<string, string> = {
   discord: 'Requires Connect Discord quest',
   telegram: 'Requires Connect Telegram quest',
   matrix: 'Requires Connect Matrix quest',
-  walme: 'Requires Connect Walme quest',
+  walme: 'Requires Connect Internal quest',
   monetag: 'Requires Connect Monetag quest',
   adsgram: 'Requires Connect Adsgram quest',
 };

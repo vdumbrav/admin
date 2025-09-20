@@ -57,7 +57,7 @@ export function computeFieldStates(
 
       case 'readonly':
         state.visible = true;
-        state.disabled = false;
+        state.disabled = true; // Treat readonly as disabled for selects
         state.readonly = true;
         state.tooltip = 'Managed by preset';
         break;
@@ -121,15 +121,24 @@ function evaluateConditionalVisibility(
 ): Partial<FieldState> {
   const state: Partial<FieldState> = {};
 
-  // Partner group shows icon upload for Join and Action with Post
+  // Icon field visibility rules
+  if (fieldName === 'icon') {
+    // Explore: always visible
+    if (presetConfig?.id === 'explore') {
+      state.visible = true;
+    }
+    // Join/Action with Post: visible if group === 'partner'
+    else if (presetConfig?.id === 'join' || presetConfig?.id === 'action-with-post') {
+      const isPartnerGroup = currentValues?.group === 'partner';
+      state.visible = isPartnerGroup;
+    }
+    // Connect/7-day: hidden (default from preset config)
+  }
+
+  // Legacy partnerIcon field (now replaced by icon)
   if (fieldName === 'partnerIcon') {
     const isPartnerGroup = currentValues?.group === 'partner';
     state.visible = isPartnerGroup;
-  }
-
-  // Icon field is always visible for Explore preset
-  if (fieldName === 'icon' && presetConfig?.id === 'explore') {
-    state.visible = true;
   }
 
   return state;

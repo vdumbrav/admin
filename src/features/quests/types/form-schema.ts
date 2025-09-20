@@ -227,7 +227,7 @@ export const buildQuestFormSchema = (presetId?: string): z.ZodTypeAny =>
           if (val.provider !== 'walme')
             ctx.addIssue({
               code: z.ZodIssueCode.custom,
-              message: 'Provider must be walme',
+              message: 'Provider must be walme (Internal)',
               path: ['provider'],
             });
           if (val.group !== 'daily')

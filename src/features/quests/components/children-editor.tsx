@@ -38,7 +38,7 @@ const childProviders = [
   { value: 'telegram', label: 'Telegram' },
   { value: 'discord', label: 'Discord' },
   { value: 'matrix', label: 'Matrix' },
-  { value: 'walme', label: 'Walme' },
+  { value: 'walme', label: 'Internal' },
   { value: 'monetag', label: 'Monetag' },
   { value: 'adsgram', label: 'AdsGram' },
 ];

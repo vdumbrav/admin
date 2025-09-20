@@ -8,7 +8,7 @@ export const explorePresetConfig: PresetConfig = {
 
   fieldVisibility: {
     group: 'visible', // Any group allowed
-    provider: 'visible', // Usually 'walme', but flexible
+    provider: 'visible', // Usually 'walme' (Internal), but flexible
     uri: 'visible', // Required external URL
     reward: 'visible',
     tasks: 'hidden',

@@ -36,7 +36,7 @@ const PROVIDER_LABELS: Record<AdminWaitlistTasksResponseDtoProvider, string> = {
   [AdminWaitlistTasksResponseDtoProvider.telegram]: 'Telegram',
   [AdminWaitlistTasksResponseDtoProvider.discord]: 'Discord',
   [AdminWaitlistTasksResponseDtoProvider.matrix]: 'Matrix',
-  [AdminWaitlistTasksResponseDtoProvider.walme]: 'Walme',
+  [AdminWaitlistTasksResponseDtoProvider.walme]: 'Internal',
   [AdminWaitlistTasksResponseDtoProvider.monetag]: 'Monetag',
   [AdminWaitlistTasksResponseDtoProvider.adsgram]: 'AdsGram',
 };
