@@ -4,6 +4,7 @@
  */
 import { useState } from 'react';
 import type { UseFormReturn } from 'react-hook-form';
+import { Badge } from '@/components/ui/badge';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import {
   FormControl,
@@ -119,7 +120,15 @@ export function QuestFormFields({
           name='group'
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Group</FormLabel>
+              <div className='flex items-center justify-between'>
+                <FormLabel>Group</FormLabel>
+                {(isFieldDisabled('group', fieldStates) ||
+                  isFieldReadonly('group', fieldStates)) && (
+                  <Badge variant='secondary' className='text-xs'>
+                    Locked
+                  </Badge>
+                )}
+              </div>
               <FormControl>
                 <SelectDropdown
                   items={groups}
@@ -180,7 +189,15 @@ export function QuestFormFields({
           name='provider'
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Provider</FormLabel>
+              <div className='flex items-center justify-between'>
+                <FormLabel>Provider</FormLabel>
+                {(isFieldDisabled('provider', fieldStates) ||
+                  isFieldReadonly('provider', fieldStates)) && (
+                  <Badge variant='secondary' className='text-xs'>
+                    Locked
+                  </Badge>
+                )}
+              </div>
               <FormControl>
                 <SelectDropdown
                   items={providers}
@@ -230,9 +247,24 @@ export function QuestFormFields({
                   <FormLabel>Tweet URL or ID</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder='https://x.com/user/status/1234567890 or 1234567890'
+                      placeholder='https://x.com/user/status/123… или только ID'
                       disabled={isFieldDisabled('tweetId', fieldStates)}
-                      {...field}
+                      value={field.value ?? ''}
+                      onChange={(e) => {
+                        const raw = e.target.value.trim();
+                        const m = /status\/(\d{19,20})/.exec(raw);
+                        const id = m?.[1] ?? (/^\d{19,20}$/.test(raw) ? raw : raw);
+                        field.onChange(id);
+                        // Моментальная подсветка невалидного значения
+                        if (!/^\d{19,20}$/.test(id)) {
+                          form.setError('resources.tweetId' as never, {
+                            type: 'custom',
+                            message: 'Введите валидный Tweet ID (19–20 цифр) или URL твита',
+                          });
+                        } else {
+                          form.clearErrors('resources.tweetId' as never);
+                        }
+                      }}
                     />
                   </FormControl>
                   <FormDescription>Full Twitter URL or just the tweet ID</FormDescription>

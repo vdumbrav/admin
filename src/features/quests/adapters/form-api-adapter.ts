@@ -59,6 +59,13 @@ export function apiToForm(apiData: Partial<Task>): QuestFormValues {
       ? convertApiResourcesToForm(apiData.resources as Record<string, unknown>)
       : DEFAULT_FORM_VALUES.resources,
     child: apiData.child ? apiData.child.map(convertApiChildToForm) : undefined,
+
+    // Schedule mapping for edit mode
+    start: apiData.started_at ?? undefined,
+    end: apiData.completed_at ?? undefined,
+
+    // Iterator passthrough if any (7-day challenge)
+    iterator: (apiData.iterator ?? undefined) as QuestFormValues['iterator'] | undefined,
   };
 }
 

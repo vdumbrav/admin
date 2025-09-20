@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react';
+import { useMemo } from 'react';
 import { useAdminControllerGetWaitlistTasks } from '@/lib/api/generated/admin/admin';
 
 export interface ConnectGateResult {

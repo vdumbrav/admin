@@ -12,6 +12,7 @@ import { PresetSelection } from './components/preset-selection';
 import { adaptQuestToTask, adaptTaskToQuest } from './data/adapters';
 import type { Task } from './data/types';
 import { getPreset, type PresetId } from './presets';
+import type { QuestFormValues } from './types/form-types';
 import { useQuestSearch } from './use-quest-search';
 
 export const QuestCreatePage = () => {
@@ -44,12 +45,12 @@ export const QuestCreatePage = () => {
               </Button>
             </div>
             <QuestForm
-              onSubmit={async (v) => {
+              onSubmit={async (v: QuestFormValues) => {
                 try {
-                  const withSchedule = {
-                    ...(v as unknown as Partial<Task>),
-                    started_at: (v as any).start,
-                    completed_at: (v as any).end,
+                  const withSchedule: Partial<Task> = {
+                    ...(v as Partial<Task>),
+                    started_at: v.start,
+                    completed_at: v.end,
                   };
                   await create.mutateAsync(adaptTaskToQuest(withSchedule));
                   toast.success('Quest saved successfully');
@@ -120,12 +121,12 @@ export const QuestEditPage = () => {
         </div>
         <QuestForm
           initial={data ? adaptQuestToTask(data) : undefined}
-          onSubmit={async (v) => {
+          onSubmit={async (v: QuestFormValues) => {
             try {
-              const withSchedule = {
-                ...(v as unknown as Partial<Task>),
-                started_at: (v as any).start,
-                completed_at: (v as any).end,
+              const withSchedule: Partial<Task> = {
+                ...(v as Partial<Task>),
+                started_at: v.start,
+                completed_at: v.end,
               };
               await update.mutateAsync(adaptTaskToQuest(withSchedule));
               toast.success('Quest saved successfully');
@@ -175,12 +176,12 @@ export const QuestCreateWithPresetPage = () => {
         </div>
         <QuestForm
           presetConfig={presetConfig}
-          onSubmit={async (v) => {
+          onSubmit={async (v: QuestFormValues) => {
             try {
-              const withSchedule = {
-                ...(v as unknown as Partial<Task>),
-                started_at: (v as any).start,
-                completed_at: (v as any).end,
+              const withSchedule: Partial<Task> = {
+                ...(v as Partial<Task>),
+                started_at: v.start,
+                completed_at: v.end,
               };
               await create.mutateAsync(adaptTaskToQuest(withSchedule));
               toast.success('Quest saved successfully');

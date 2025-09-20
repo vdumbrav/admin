@@ -3,7 +3,7 @@
  * Centralizes form state, validation, and business logic
  */
 import { useEffect, useMemo } from 'react';
-import { useForm, useWatch } from 'react-hook-form';
+import { type Resolver, useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useAppAuth } from '@/auth/hooks';
 import { toast } from 'sonner';
@@ -11,7 +11,7 @@ import { replaceObjectUrl } from '@/utils/object-url';
 import { uploadMedia } from '../api';
 import { loadDraft, useDraftAutosave } from '../hooks/use-draft-autosave';
 import type { PresetConfig } from '../presets/types';
-import { questFormSchema } from '../types/form-schema';
+import { buildQuestFormSchema } from '../types/form-schema';
 import type { QuestFormValues } from '../types/form-types';
 import {
   applyBusinessRules,
@@ -84,8 +84,9 @@ export function useQuestForm({
     return getPresetFormValues(presetConfig);
   }, [initial, presetConfig]);
 
+  const zodSchema = buildQuestFormSchema(presetConfig?.id);
   const form = useForm<QuestFormValues>({
-    resolver: zodResolver(questFormSchema),
+    resolver: zodResolver(zodSchema as never) as unknown as Resolver<QuestFormValues>,
     defaultValues,
     mode: 'onChange',
   });
@@ -186,14 +187,14 @@ export function useQuestForm({
         form.setValue('group', 'social', { shouldDirty: true, shouldValidate: true });
       }
       if (!watchedValues.resources?.username) {
-        form.setError('resources.username' as any, {
+        form.setError('resources.username' as never, {
           type: 'required',
           message: 'Username is required',
         });
       }
       const tid = watchedValues.resources?.tweetId?.trim();
-      if (!tid || !/^\d{5,20}$/.test(tid)) {
-        form.setError('resources.tweetId' as any, {
+      if (!tid || !/^\d{19,20}$/.test(tid)) {
+        form.setError('resources.tweetId' as never, {
           type: 'required',
           message: 'Valid Tweet ID is required',
         });
@@ -207,9 +208,9 @@ export function useQuestForm({
     }
 
     if (presetConfig?.id === 'seven-day-challenge') {
-      const map = (watchedValues as any).iterator?.reward_map;
+      const map = watchedValues?.iterator?.reward_map;
       if (!Array.isArray(map) || map.length < 1) {
-        form.setError('iterator' as any, {
+        form.setError('iterator' as never, {
           type: 'required',
           message: 'At least one daily reward is required',
         });
@@ -223,7 +224,7 @@ export function useQuestForm({
       // Icon required for Explore
       const icon = watchedValues.icon ?? watchedValues.resources?.icon;
       if (!icon) {
-        form.setError('icon' as any, { type: 'required', message: 'Icon is required' });
+        form.setError('icon' as never, { type: 'required', message: 'Icon is required' });
       }
     }
   }, [form, presetConfig, watchedValues, hasRequiredConnect]);

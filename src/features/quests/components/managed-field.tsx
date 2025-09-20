@@ -3,6 +3,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import type { PresetConfig } from '../presets';
 
 interface ManagedFieldProps {
@@ -47,6 +48,15 @@ export const ManagedField = ({
     isDirty && presetValue !== undefined && currentValue !== presetValue,
   );
 
+  // Detect locked by preset
+  const isLockedByPreset = Boolean(
+    presetConfig?.lockedFields && getNestedValue(presetConfig.lockedFields, name) !== undefined,
+  );
+
+  const isDefaultedByPreset = Boolean(
+    presetConfig?.defaults && presetValue !== undefined && currentValue === presetValue && !isDirty,
+  );
+
   const handleReset = () => {
     if (presetValue !== undefined) {
       setValue(name, presetValue, { shouldDirty: false });
@@ -61,22 +71,52 @@ export const ManagedField = ({
         <FormItem>
           <div className='flex items-center justify-between'>
             <FormLabel>{label}</FormLabel>
-            {isOverridden && (
-              <div className='flex items-center gap-2'>
-                <Badge variant='secondary' className='text-xs'>
-                  Overridden
-                </Badge>
-                <Button
-                  type='button'
-                  variant='ghost'
-                  size='sm'
-                  onClick={handleReset}
-                  className='h-6 px-2 text-xs'
-                >
-                  Reset to preset
-                </Button>
-              </div>
-            )}
+            <div className='flex items-center gap-2'>
+              {isLockedByPreset && (
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Badge variant='secondary' className='text-xs'>
+                        Locked by preset
+                      </Badge>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      Поле зафиксировано пресетом. Изменение недоступно.
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              )}
+              {isDefaultedByPreset && (
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Badge variant='secondary' className='text-xs'>
+                        Defaulted by preset
+                      </Badge>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      Значение подставлено из пресета. Вы можете переопределить его.
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              )}
+              {isOverridden && (
+                <>
+                  <Badge variant='secondary' className='text-xs'>
+                    Overridden
+                  </Badge>
+                  <Button
+                    type='button'
+                    variant='ghost'
+                    size='sm'
+                    onClick={handleReset}
+                    className='h-6 px-2 text-xs'
+                  >
+                    Reset to preset
+                  </Button>
+                </>
+              )}
+            </div>
           </div>
           <FormControl>
             <Input
