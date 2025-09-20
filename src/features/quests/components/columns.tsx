@@ -8,7 +8,7 @@ import { DataTableColumnHeader } from '@/components/table/data-table-column-head
 import { useToggleVisibility } from '../api';
 import type { Quest } from '../data/types';
 import { useQuestSearch } from '../use-quest-search';
-import { getBadgeClasses, getBadgeVariant } from '../utils/badge-variants';
+import { getBadgeClasses, getBadgeStyle, getBadgeVariant } from '../utils/badge-variants';
 import { formatDateDMY, formatNumberShort, formatXp } from '../utils/format';
 import { getProviderIcon } from '../utils/provider-icons';
 import { DataTableRowActions } from './data-table-row-actions';
@@ -64,7 +64,11 @@ export const getColumns = (isAdmin: boolean): ColumnDef<Quest>[] => {
       cell: ({ row }) => {
         const group = String(row.original.group);
         const variant = getBadgeVariant(group);
-        return <Badge className={getBadgeClasses(variant)}>{group}</Badge>;
+        return (
+          <Badge className={getBadgeClasses(variant)} style={getBadgeStyle(variant)}>
+            {group}
+          </Badge>
+        );
       },
       size: 120,
       minSize: 120,

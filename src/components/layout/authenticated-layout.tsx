@@ -1,13 +1,46 @@
 import Cookies from 'js-cookie';
 import { Outlet } from '@tanstack/react-router';
+import { Menu } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { SearchProvider } from '@/context/search-context';
-import { SidebarProvider } from '@/components/ui/sidebar';
+import { SidebarProvider, SidebarTrigger, useSidebar } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/layout/app-sidebar';
 import SkipToMain from '@/components/skip-to-main';
 
 interface Props {
   children?: React.ReactNode;
+}
+
+function MobileSidebarTrigger() {
+  return (
+    <div className='fixed top-4 left-4 z-50 lg:hidden'>
+      <SidebarTrigger
+        variant='outline'
+        className='bg-background/80 backdrop-blur-sm'
+        aria-label='Toggle sidebar'
+      >
+        <Menu className='h-4 w-4' />
+      </SidebarTrigger>
+    </div>
+  );
+}
+
+function CollapsedSidebarTrigger() {
+  const { state } = useSidebar();
+
+  if (state === 'expanded') return null;
+
+  return (
+    <div className='fixed bottom-4 left-4 z-50 hidden lg:block'>
+      <SidebarTrigger
+        variant='outline'
+        className='bg-background/80 shadow-lg backdrop-blur-sm'
+        aria-label='Open sidebar'
+      >
+        <Menu className='h-4 w-4' />
+      </SidebarTrigger>
+    </div>
+  );
 }
 
 export function AuthenticatedLayout({ children }: Props) {
@@ -17,6 +50,8 @@ export function AuthenticatedLayout({ children }: Props) {
       <SidebarProvider defaultOpen={defaultOpen}>
         <SkipToMain />
         <AppSidebar />
+        <MobileSidebarTrigger />
+        <CollapsedSidebarTrigger />
         <div
           id='content'
           className={cn(

@@ -16,18 +16,47 @@ export const getBadgeVariant = (group: string): BadgeVariant => {
 };
 
 export const getBadgeClasses = (variant: BadgeVariant): string => {
-  const baseClasses = 'text-xs font-semibold leading-4 rounded-full border';
+  const baseClasses =
+    'inline-flex items-center px-2.5 py-1 text-xs font-semibold leading-4 rounded-full border whitespace-nowrap transition-colors hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2';
 
   switch (variant) {
     case 'social':
-      return `${baseClasses} bg-[--badge-social] text-[--badge-social-foreground] border-[--badge-social]`;
     case 'daily':
-      return `${baseClasses} bg-[--badge-daily] text-[--badge-daily-foreground] border-[--badge-daily]`;
     case 'referral':
-      return `${baseClasses} bg-[--badge-referral] text-[--badge-referral-foreground] border-[--badge-referral]`;
     case 'partner':
-      return `${baseClasses} bg-[--badge-partner] text-[--badge-partner-foreground] border-[--badge-partner]`;
+      return `${baseClasses} badge-${variant}`;
     case 'default':
-      return `${baseClasses} bg-secondary text-secondary-foreground`;
+      return `${baseClasses} bg-secondary text-secondary-foreground border-border`;
+  }
+};
+
+export const getBadgeStyle = (variant: BadgeVariant): React.CSSProperties => {
+  switch (variant) {
+    case 'social':
+      return {
+        backgroundColor: 'var(--badge-social)',
+        color: 'var(--badge-social-foreground)',
+        borderColor: 'var(--badge-social-border)',
+      };
+    case 'daily':
+      return {
+        backgroundColor: 'var(--badge-daily)',
+        color: 'var(--badge-daily-foreground)',
+        borderColor: 'var(--badge-daily-border)',
+      };
+    case 'referral':
+      return {
+        backgroundColor: 'var(--badge-referral)',
+        color: 'var(--badge-referral-foreground)',
+        borderColor: 'var(--badge-referral-border)',
+      };
+    case 'partner':
+      return {
+        backgroundColor: 'var(--badge-partner)',
+        color: 'var(--badge-partner-foreground)',
+        borderColor: 'var(--badge-partner-border)',
+      };
+    case 'default':
+      return {};
   }
 };

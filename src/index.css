@@ -36,15 +36,19 @@
   --success-foreground: oklch(0.1 0.02 150);
   --row-hover: oklch(0.55 0.08 250 / 0.08);
 
-  /* Badge variants for Group */
-  --badge-social: oklch(0.9 0.03 240);
-  --badge-social-foreground: oklch(0.35 0.08 240);
-  --badge-daily: oklch(0.9 0.03 280);
-  --badge-daily-foreground: oklch(0.35 0.08 280);
-  --badge-referral: oklch(0.95 0.03 160);
-  --badge-referral-foreground: oklch(0.25 0.08 160);
-  --badge-partner: oklch(0.96 0.002 240);
-  --badge-partner-foreground: oklch(0.25 0.01 240);
+  /* Badge variants for Group - Light theme */
+  --badge-social: oklch(0.69 0.18 247);
+  --badge-social-foreground: oklch(1 0 0);
+  --badge-social-border: oklch(0.61 0.18 247);
+  --badge-daily: oklch(0.73 0.17 283);
+  --badge-daily-foreground: oklch(1 0 0);
+  --badge-daily-border: oklch(0.64 0.21 283);
+  --badge-referral: oklch(0.67 0.18 263);
+  --badge-referral-foreground: oklch(1 0 0);
+  --badge-referral-border: oklch(0.58 0.21 263);
+  --badge-partner: oklch(0.73 0.25 320);
+  --badge-partner-foreground: oklch(1 0 0);
+  --badge-partner-border: oklch(0.62 0.27 320);
 
   --sidebar: var(--background);
   --sidebar-foreground: var(--foreground);
@@ -89,14 +93,18 @@
   --row-hover: oklch(0.98 0.003 250 / 0.06);
 
   /* Badge variants for Group - Dark theme */
-  --badge-social: oklch(0.3 0.08 240);
-  --badge-social-foreground: oklch(0.8 0.03 240);
-  --badge-daily: oklch(0.25 0.08 280);
-  --badge-daily-foreground: oklch(0.85 0.03 280);
-  --badge-referral: oklch(0.2 0.08 160);
-  --badge-referral-foreground: oklch(0.8 0.03 160);
-  --badge-partner: oklch(0.15 0.01 240);
-  --badge-partner-foreground: oklch(0.8 0.002 240);
+  --badge-social: oklch(0.62 0.18 247);
+  --badge-social-foreground: oklch(1 0 0);
+  --badge-social-border: oklch(0.54 0.18 247);
+  --badge-daily: oklch(0.61 0.21 283);
+  --badge-daily-foreground: oklch(1 0 0);
+  --badge-daily-border: oklch(0.52 0.25 283);
+  --badge-referral: oklch(0.56 0.21 263);
+  --badge-referral-foreground: oklch(1 0 0);
+  --badge-referral-border: oklch(0.47 0.24 263);
+  --badge-partner: oklch(0.63 0.27 320);
+  --badge-partner-foreground: oklch(1 0 0);
+  --badge-partner-border: oklch(0.52 0.32 320);
 }
 
 @theme inline {

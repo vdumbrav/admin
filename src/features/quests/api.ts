@@ -37,11 +37,16 @@ export const useQuests = (query: QuestQuery) => {
       const matchesSearch =
         !query.search ||
         item.title.toLowerCase().includes(query.search.toLowerCase()) ||
-        item.description.toLowerCase().includes(query.search.toLowerCase());
+        (item.description?.toLowerCase().includes(query.search.toLowerCase()) ?? false);
 
-      const matchesGroup = !query.group || query.group === 'all' || item.group === query.group;
+      const matchesGroup = !query.group || item.group === query.group;
 
-      const matchesType = !query.type || item.type?.some((t: string) => t === query.type);
+      const matchesType =
+        !query.type ||
+        (() => {
+          const selectedTypes = query.type.split(',').filter(Boolean);
+          return item.type?.some((t: string) => selectedTypes.includes(t));
+        })();
 
       const matchesProvider = !query.provider || item.provider === query.provider;
 
