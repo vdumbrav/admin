@@ -229,6 +229,16 @@ npm run api:ensure          # Ensure API files exist (with fallback)
 
 Note: pnpm is fully supported. Replace `npm run` with `pnpm` if preferred.
 
+### CI/CD Commands
+
+```bash
+# CI-friendly linting (relaxed rules for generated API code)
+npm run lint:ci
+
+# Production build (used by Vercel)
+npm run build
+```
+
 ### Architecture
 
 ```text

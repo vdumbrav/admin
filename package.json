@@ -9,6 +9,7 @@
     "dev": "npm run api:ensure && vite",
     "build": "npm run api:ensure && tsc -b && vite build",
     "lint": "eslint .",
+    "lint:ci": "eslint . --config eslint.ci.config.js",
     "preview": "vite preview",
     "format:check": "prettier --check .",
     "format": "prettier --write .",

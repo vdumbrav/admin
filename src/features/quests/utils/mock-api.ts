@@ -48,7 +48,7 @@ export const mockCreateQuest = async (data: Partial<Quest>): Promise<Quest> => {
       id: nextId++,
       title: data.title ?? 'Untitled Quest',
       description: data.description ?? '',
-      type: (data.type ?? 'connect') as Quest['type'],
+      type: data.type ?? 'connect',
       group: data.group ?? 'social',
       provider: data.provider ?? 'twitter',
       uri: data.uri,

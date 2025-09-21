@@ -122,8 +122,7 @@ export const getColumns = (isAdmin: boolean): ColumnDef<Quest>[] => {
     {
       accessorKey: 'reward',
       header: ({ column }) => <DataTableColumnHeader column={column} title='Reward' />,
-      cell: ({ row }) =>
-        formatXp((row.original as Partial<Quest> & { reward?: number | null }).reward),
+      cell: ({ row }) => formatXp(row.original.reward),
       size: 100,
       minSize: 100,
       maxSize: 100,
