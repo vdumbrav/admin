@@ -1,6 +1,12 @@
 /**
  * Quest Form State Management Hook
- * Centralizes form state, validation, and business logic
+ *
+ * Features:
+ * - Type-safe form validation with Zod (no type assertions)
+ * - Real-time field visibility based on presets
+ * - Automatic business rules application
+ * - Connect-gate validation for provider dependencies
+ * - Image upload with object URL management
  */
 import { useEffect, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
@@ -83,7 +89,8 @@ export function useQuestForm({
   // Watched Values & State
   // ============================================================================
 
-  const watchedValues = form.watch(); // Returns full type, not partial!
+  // form.watch() returns full QuestFormValues (not partial like useWatch)
+  const watchedValues = form.watch();
   const isDirty = form.formState.isDirty;
   const isSubmitting = form.formState.isSubmitting;
 
@@ -96,7 +103,7 @@ export function useQuestForm({
   // Business Logic Effects
   // ============================================================================
 
-  // Apply business rules when form values change
+  // Auto-apply business rules when form changes (e.g., set group=social for action-with-post)
   useEffect(() => {
     if (!isDirty) return;
 
@@ -122,7 +129,7 @@ export function useQuestForm({
     }
   }, [watchedValues, presetConfig, isDirty, form]);
 
-  // Initialize default start = now + 1h if not provided
+  // Set default quest start time to 1 hour from now if not specified
   useEffect(() => {
     const currentStart = form.getValues('start');
     if (!currentStart) {
@@ -140,10 +147,10 @@ export function useQuestForm({
     return getConnectGateWarnings(presetConfig, watchedValues.provider, watchedValues.uri);
   }, [presetConfig, watchedValues.provider, watchedValues.uri]);
 
-  // Real connect-gate validation (blocks Save for Join/Action with Post)
+  // Validate provider dependencies - Join/Action quests need Connect quest first
   const { hasRequiredConnect } = useConnectGate(watchedValues.provider);
 
-  // Custom validation for preset-specific rules (Zod handles basic validation)
+  // Additional validation beyond Zod - preset-specific business rules
   const validateForm = (values: QuestFormValues) => {
     const errors: Record<string, string> = {};
 

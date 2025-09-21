@@ -5,9 +5,7 @@
  * Use the adapter layer to convert between form types and API types.
  */
 
-// ============================================================================
-// Form-specific enums and constants
-// ============================================================================
+// Form enums and constants
 
 export const QUEST_TYPES = [
   'referral',
@@ -36,9 +34,7 @@ export const PROVIDERS = [
 
 export const CHILD_TYPES = ['like', 'share', 'comment', 'join', 'connect'] as const;
 
-// ============================================================================
-// Form-specific interfaces
-// ============================================================================
+// Form interfaces
 
 export interface FormPopupResources {
   name?: string;
@@ -84,41 +80,35 @@ export interface ChildFormValues {
 export interface QuestFormValues {
   title: string;
   type: (typeof QUEST_TYPES)[number];
-  description: string; // Always string for form, never null
+  description: string;
   group: (typeof QUEST_GROUPS)[number];
   order_by: number;
   provider?: (typeof PROVIDERS)[number];
   uri?: string;
   reward?: number;
-  totalReward?: number; // Calculated from tasks or daily rewards
+  totalReward?: number;
   visible?: boolean;
-  icon?: string; // Quest icon URL
+  icon?: string;
   resources?: FormResources;
   child?: ChildFormValues[];
-  // Scheduling
-  start?: string; // ISO string for start time
-  end?: string; // ISO string for end time
-  // Repeatable iterator (for 7-day and similar)
+  start?: string;
+  end?: string;
   iterator?: {
     days?: number;
     reward_map: number[];
   };
-  // Index signature for Zod passthrough and dynamic access
+  // Index signature for Zod passthrough + dynamic property access
   [key: string]: unknown;
 }
 
-// ============================================================================
 // Utility types
-// ============================================================================
 
 export type QuestType = (typeof QUEST_TYPES)[number];
 export type QuestGroup = (typeof QUEST_GROUPS)[number];
 export type Provider = (typeof PROVIDERS)[number];
 export type ChildType = (typeof CHILD_TYPES)[number];
 
-// ============================================================================
-// Default values
-// ============================================================================
+// Default form values
 
 export const DEFAULT_FORM_VALUES: Partial<QuestFormValues> = {
   title: '',

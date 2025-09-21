@@ -10,9 +10,7 @@ const questGroupSchema = z.enum(QUEST_GROUPS);
 const providerSchema = z.enum(PROVIDERS).optional();
 const childTypeSchema = z.enum(CHILD_TYPES);
 
-// ============================================================================
-// Resource schemas - Exact match to form-types.ts interfaces
-// ============================================================================
+// Resource schemas - Type-synchronized with form-types.ts
 
 const formPopupResourcesSchema = z.object({
   name: z.string().optional(),
@@ -45,9 +43,7 @@ const formResourcesSchema = z
   })
   .optional();
 
-// ============================================================================
-// Child schema - Exact match to ChildFormValues interface
-// ============================================================================
+// Child quest schema for multi-step quests
 
 const childFormSchema = z.object({
   title: z.string(),
@@ -63,9 +59,7 @@ const childFormSchema = z.object({
     .optional(),
 });
 
-// ============================================================================
-// Iterator schema - Exact match to QuestFormValues.iterator
-// ============================================================================
+// Daily rewards iterator for challenge-type quests
 
 const iteratorSchema = z
   .object({
@@ -74,9 +68,7 @@ const iteratorSchema = z
   })
   .optional();
 
-// ============================================================================
-// Main form schema - Exact match to QuestFormValues interface
-// ============================================================================
+// Main quest form schema with preset-specific validation
 
 const baseQuestFormShape = {
   title: z.string(),
@@ -99,9 +91,9 @@ const baseQuestFormShape = {
 
 // Base schema is used in buildQuestFormSchema function
 
-// Schema types are now synchronized with form-types.ts
+// Types are synchronized - no type assertions needed
 
-// Export the existing type from form-types.ts
+// Re-export form types for consistency
 export type { QuestFormValues } from './form-types';
 
 export const buildQuestFormSchema = (presetId?: string) =>
