@@ -15,7 +15,7 @@ import { DataTableRowActions } from './data-table-row-actions';
 
 const VisibleCell = ({ row, isAdmin }: { row: Row<Quest>; isAdmin: boolean }) => {
   const toggle = useToggleVisibility();
-  const visible = Boolean(row.getValue('visible') ?? true);
+  const visible = row.getValue('visible') !== false;
   if (!isAdmin) return <span>{visible ? 'Yes' : 'No'}</span>;
   return (
     <Switch
@@ -79,7 +79,7 @@ export const getColumns = (isAdmin: boolean): ColumnDef<Quest>[] => {
       accessorKey: 'title',
       header: ({ column }) => <DataTableColumnHeader column={column} title='Title' />,
       cell: ({ row }) => <TitleCell row={row} />,
-      filterFn: (row, id, value) => value.includes(row.getValue(id)),
+      filterFn: (row, id, value: string[]) => value.includes(row.getValue(id)),
       size: 400,
       minSize: 320,
       maxSize: 500,
@@ -89,10 +89,10 @@ export const getColumns = (isAdmin: boolean): ColumnDef<Quest>[] => {
       accessorKey: 'type',
       header: ({ column }) => <DataTableColumnHeader column={column} title='Type' />,
       cell: ({ row }) => {
-        const types = row.original.type as unknown;
+        const types = row.original.type;
         return Array.isArray(types) ? types.join(', ') : String(types ?? '');
       },
-      filterFn: (row, id, value) => {
+      filterFn: (row, id, value: string[]) => {
         const types = row.getValue(id);
         return Array.isArray(types) ? types.some((type: string) => value.includes(type)) : false;
       },
@@ -113,7 +113,7 @@ export const getColumns = (isAdmin: boolean): ColumnDef<Quest>[] => {
           </div>
         );
       },
-      filterFn: (row, id, value) => value.includes(row.getValue(id)),
+      filterFn: (row, id, value: string[]) => value.includes(row.getValue(id)),
       size: 140,
       minSize: 140,
       maxSize: 140,
@@ -134,7 +134,7 @@ export const getColumns = (isAdmin: boolean): ColumnDef<Quest>[] => {
       header: ({ column }) => <DataTableColumnHeader column={column} title='Visible' />,
       cell: (ctx) => <VisibleCell row={ctx.row} isAdmin={isAdmin} />,
       enableSorting: false,
-      filterFn: (row, id, value) => {
+      filterFn: (row, id, value: string | string[]) => {
         const v = String(row.getValue(id) ?? true).toLowerCase();
         const selected = (Array.isArray(value) ? value : [value]).map((x) =>
           String(x).toLowerCase(),

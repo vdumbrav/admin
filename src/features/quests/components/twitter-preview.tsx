@@ -112,7 +112,7 @@ export const TwitterPreview = () => {
     }, 1500); // 1.5 second delay to simulate network
 
     return () => clearTimeout(timeoutId);
-  }, [hasTwitterData, tweetId, username]);
+  }, [hasTwitterData, tweetId]);
 
   if (!hasTwitterData) {
     return null;

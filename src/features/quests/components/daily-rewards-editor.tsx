@@ -91,7 +91,7 @@ export const DailyRewardsEditor = () => {
                 title={`Day ${idx + 1}`}
               >
                 <div className='font-medium'>D{idx + 1}</div>
-                <div className='font-mono'>{r || 0}</div>
+                <div className='font-mono'>{r ?? 0}</div>
               </div>
             ))}
           </div>
@@ -99,11 +99,11 @@ export const DailyRewardsEditor = () => {
             <div className='flex items-center justify-between'>
               <span className='font-medium'>Total Reward:</span>
               <span className='font-mono'>
-                {rewardMap.reduce((sum, reward) => sum + (reward || 0), 0)}
+                {rewardMap.reduce((sum, reward) => sum + (reward ?? 0), 0)}
               </span>
             </div>
             <div className='text-muted-foreground mt-2 text-xs'>
-              Distribution: {rewardMap.map((r) => r || 0).join(' + ')}
+              Distribution: {rewardMap.map((r) => r ?? 0).join(' + ')}
             </div>
           </div>
         </div>

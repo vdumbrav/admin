@@ -222,7 +222,7 @@ const ChildRow = ({ id, index, remove }: RowProps) => {
                   <Input
                     {...field}
                     placeholder='1234567890'
-                    onBlur={(e) => field.onChange((e.target.value ?? '').trim())}
+                    onBlur={(e) => field.onChange((e.target.value || '').trim())}
                   />
                 </FormControl>
                 <FormMessage />
@@ -239,7 +239,7 @@ const ChildRow = ({ id, index, remove }: RowProps) => {
                   <Input
                     {...field}
                     placeholder='Enter username (e.g. waitlist)'
-                    onBlur={(e) => field.onChange((e.target.value ?? '').trim().replace(/^@/, ''))}
+                    onBlur={(e) => field.onChange((e.target.value || '').trim().replace(/^@/, ''))}
                   />
                 </FormControl>
                 <FormMessage />

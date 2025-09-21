@@ -101,8 +101,8 @@ export function adaptAdminTaskToQuest(task: AdminWaitlistTasksResponseDto): Ques
     pinned: extendedTask.pinned ?? false,
     usersCount: extendedTask.usersCount ?? undefined,
     totalXp: extendedTask.totalXp ?? undefined,
-    startDate: task.started_at ?? null,
-    endDate: task.completed_at ?? null,
+    startDate: task.started_at,
+    endDate: task.completed_at,
     webEnabled: extendedTask.webEnabled ?? false,
     tmaEnabled: extendedTask.tmaEnabled ?? false,
   };

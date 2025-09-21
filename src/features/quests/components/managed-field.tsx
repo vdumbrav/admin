@@ -18,7 +18,12 @@ interface ManagedFieldProps {
  * Helper function to get nested value from object by path
  */
 const getNestedValue = (obj: unknown, path: string): unknown => {
-  return path.split('.').reduce((current, key) => (current as Record<string, unknown>)?.[key], obj);
+  return path.split('.').reduce((current, key) => {
+    if (current && typeof current === 'object' && key in current) {
+      return (current as Record<string, unknown>)[key];
+    }
+    return undefined;
+  }, obj);
 };
 
 /**
@@ -44,12 +49,13 @@ export const ManagedField = ({
 
   const presetValue = getPresetValue();
   const currentValue = getValues(name);
-  const isOverridden = Boolean(
-    isDirty && presetValue !== undefined && currentValue !== presetValue,
-  );
+  const isOverridden = !!(isDirty && presetValue !== undefined && currentValue !== presetValue);
 
-  const isDefaultedByPreset = Boolean(
-    presetConfig?.defaults && presetValue !== undefined && currentValue === presetValue && !isDirty,
+  const isDefaultedByPreset = !!(
+    presetConfig?.defaults &&
+    presetValue !== undefined &&
+    currentValue === presetValue &&
+    !isDirty
   );
 
   const handleReset = () => {

@@ -37,7 +37,8 @@ export const useQuests = (query: QuestQuery) => {
       const matchesSearch =
         !query.search ||
         item.title.toLowerCase().includes(query.search.toLowerCase()) ||
-        (item.description?.toLowerCase().includes(query.search.toLowerCase()) ?? false);
+        item.description?.toLowerCase().includes(query.search.toLowerCase()) ||
+        false;
 
       const matchesGroup =
         !query.group ||

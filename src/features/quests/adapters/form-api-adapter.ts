@@ -192,13 +192,13 @@ export function formToApi(formData: QuestFormValues): Partial<Task> {
     // Core required fields
     title: formData.title,
     type: formData.type,
-    description: formData.description ?? null, // API expects null for empty
+    description: formData.description || null, // API expects null for empty
     group: formData.group as Task['group'], // TODO: Remove casting when API fixed
     order_by: formData.order_by,
 
     // Optional fields
     provider: formData.provider,
-    uri: formData.uri ?? null,
+    uri: formData.uri,
     reward: formData.reward,
     visible: formData.visible,
 

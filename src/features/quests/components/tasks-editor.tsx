@@ -52,7 +52,7 @@ export const TasksEditor = () => {
     }, 100);
 
     return () => clearTimeout(timeoutId);
-  }, [fields.length, setValue]);
+  }, [fields, setValue]);
 
   // Scroll to new item
   useEffect(() => {

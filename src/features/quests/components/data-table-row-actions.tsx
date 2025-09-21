@@ -33,7 +33,7 @@ export const DataTableRowActions = <TData,>({ row }: DataTableRowActionsProps<TD
         <Button
           variant='ghost'
           className='data-[state=open]:bg-muted flex h-8 w-8 p-0'
-          aria-label={`Row actions for ${String(quest.title ?? 'quest')}`}
+          aria-label={`Row actions for ${String(quest.title || 'quest')}`}
         >
           <DotsHorizontalIcon className='h-4 w-4' />
           <span className='sr-only'>Open menu</span>
@@ -43,7 +43,7 @@ export const DataTableRowActions = <TData,>({ row }: DataTableRowActionsProps<TD
         {typeof quest.pinned !== 'undefined' && (
           <DropdownMenuItem
             onClick={() => togglePinned.mutate({ id: Number(quest.id), pinned: !quest.pinned })}
-            aria-label={`${quest.pinned ? 'Unpin' : 'Pin'} ${String(quest.title ?? 'quest')}`}
+            aria-label={`${quest.pinned ? 'Unpin' : 'Pin'} ${String(quest.title || 'quest')}`}
           >
             {quest.pinned ? 'Unpin' : 'Pin'}
             <DropdownMenuShortcut>
@@ -62,7 +62,7 @@ export const DataTableRowActions = <TData,>({ row }: DataTableRowActionsProps<TD
             setCurrentRow(quest);
             setOpen('delete');
           }}
-          aria-label={`Delete ${String(quest.title ?? 'quest')}`}
+          aria-label={`Delete ${String(quest.title || 'quest')}`}
         >
           Delete
           <DropdownMenuShortcut>

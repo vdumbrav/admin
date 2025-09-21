@@ -14,7 +14,7 @@ export function FiltersProvider({ children }: Props) {
   }) as unknown as QuestSearch;
 
   // Local state for search input with debounce
-  const [searchValue, setSearchValue] = React.useState(searchParams.search ?? '');
+  const [searchValue, setSearchValue] = React.useState(searchParams.search || '');
   const timeoutRef = React.useRef<NodeJS.Timeout | undefined>(undefined);
 
   // Update URL with all filters
@@ -119,7 +119,7 @@ export function FiltersProvider({ children }: Props) {
 
   // Sync search input with URL (only from external changes)
   React.useEffect(() => {
-    const urlSearch = searchParams.search ?? '';
+    const urlSearch = searchParams.search || '';
     if (!timeoutRef.current && urlSearch !== searchValue) {
       setSearchValue(urlSearch);
     }
@@ -137,13 +137,13 @@ export function FiltersProvider({ children }: Props) {
   const value: FiltersContextType = {
     // Current values from URL
     search: searchValue, // Use local state for search input
-    group: searchParams.group ?? '',
-    type: searchParams.type ?? '',
-    provider: searchParams.provider ?? '',
-    visible: searchParams.visible ?? '',
-    page: searchParams.page ?? 1,
-    limit: searchParams.limit ?? 20,
-    sort: searchParams.sort ?? 'order_by:asc',
+    group: searchParams.group || '',
+    type: searchParams.type || '',
+    provider: searchParams.provider || '',
+    visible: searchParams.visible || '',
+    page: searchParams.page || 1,
+    limit: searchParams.limit || 20,
+    sort: searchParams.sort || 'order_by:asc',
 
     // Actions
     setSearch,

@@ -294,5 +294,5 @@ const CONNECT_GATE_DESCRIPTION = 'Before starting the quest, ensure you connecte
  * Get popup name based on quest group
  */
 function getPopupNameByGroup(group: string): string | null {
-  return GROUP_POPUP_NAMES[group] || null;
+  return GROUP_POPUP_NAMES[group];
 }

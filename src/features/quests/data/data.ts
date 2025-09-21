@@ -93,21 +93,21 @@ export const visibilities = [
  * Get display label for a group value
  */
 export function getGroupLabel(value: UIGroup): string {
-  return GROUP_LABELS[value] ?? value;
+  return GROUP_LABELS[value] || value;
 }
 
 /**
  * Get display label for a type value
  */
 export function getTypeLabel(value: AdminWaitlistTasksResponseDtoTypeItem): string {
-  return TYPE_LABELS[value] ?? value;
+  return TYPE_LABELS[value] || value;
 }
 
 /**
  * Get display label for a provider value
  */
 export function getProviderLabel(value: AdminWaitlistTasksResponseDtoProvider): string {
-  return PROVIDER_LABELS[value] ?? value;
+  return PROVIDER_LABELS[value] || value;
 }
 
 /**

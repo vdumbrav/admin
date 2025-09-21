@@ -24,14 +24,15 @@ export function createVirtualColumn({
       if (typeof value === 'string') {
         // Single value (from single select)
         setValue(value);
-      } else {
+      } else if (Array.isArray(value)) {
         // Array of values (from multiple select or array input)
-        const arr = value as string[];
-        if (!arr || arr.length === 0) {
+        if (value.length === 0) {
           setValue('');
         } else {
-          setValue(isMultiple ? arr.join(',') : arr[0]);
+          setValue(isMultiple ? value.join(',') : value[0]);
         }
+      } else {
+        setValue('');
       }
     },
     getFacetedUniqueValues: getCounts,
