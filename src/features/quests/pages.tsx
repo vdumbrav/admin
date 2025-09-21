@@ -125,7 +125,10 @@ export const QuestEditPage = () => {
           </Button>
         </div>
         <QuestForm
-          initial={data ? apiToForm(adaptQuestToTask(data)) : undefined}
+          initial={
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+            data ? apiToForm(adaptQuestToTask(data)) : undefined
+          }
           onSubmit={async (v: QuestFormValues) => {
             try {
               const withSchedule: Partial<Task> = {

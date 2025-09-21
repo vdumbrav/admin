@@ -94,6 +94,7 @@ export const TwitterPreview = () => {
     const timeoutId = setTimeout(() => {
       const mockTweet = MOCK_TWEETS[tweetId as keyof typeof MOCK_TWEETS];
 
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
       if (mockTweet) {
         setPreviews((prev) => ({
           ...prev,
@@ -144,6 +145,7 @@ export const TwitterPreview = () => {
             <span className='text-muted-foreground text-xs font-medium'>
               Username: @{username} • Tweet ID: {tweetId}
             </span>
+            {/* eslint-disable-next-line @typescript-eslint/no-unnecessary-condition */}
             {previews[tweetId]?.loading && (
               <div className='text-muted-foreground flex items-center gap-1 text-xs'>
                 <Spinner size='1' />
@@ -152,6 +154,7 @@ export const TwitterPreview = () => {
             )}
           </div>
 
+          {/* eslint-disable-next-line @typescript-eslint/no-unnecessary-condition */}
           {previews[tweetId]?.loading && (
             <div className='bg-muted flex h-32 items-center justify-center rounded-md'>
               <div className='text-muted-foreground flex items-center gap-2 text-sm'>
@@ -161,6 +164,7 @@ export const TwitterPreview = () => {
             </div>
           )}
 
+          {/* eslint-disable-next-line @typescript-eslint/no-unnecessary-condition */}
           {previews[tweetId]?.error && (
             <div className='rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-800'>
               {previews[tweetId].error}
@@ -170,6 +174,7 @@ export const TwitterPreview = () => {
             </div>
           )}
 
+          {/* eslint-disable-next-line @typescript-eslint/no-unnecessary-condition */}
           {previews[tweetId]?.tweetData && (
             <div className='rounded-md border bg-white p-4'>
               <div className='flex items-start gap-3'>

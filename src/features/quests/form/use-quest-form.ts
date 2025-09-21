@@ -75,9 +75,9 @@ export function useQuestForm({
 
   const zodSchema = buildQuestFormSchema(presetConfig?.id);
   const form = useForm<QuestFormValues>({
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any
     resolver: zodResolver(zodSchema as any) as any,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any
     defaultValues: defaultValues as any,
     mode: 'onSubmit', // Only validate on submit, not on change
   });
@@ -92,7 +92,7 @@ export function useQuestForm({
 
   // Compute field visibility states
   const fieldStates = useMemo(() => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any
     return computeFieldStates(presetConfig, watchedValues as any);
   }, [presetConfig, watchedValues]);
 
@@ -108,9 +108,7 @@ export function useQuestForm({
 
     // Only update if values actually changed to avoid infinite loops
     const hasChanges = Object.keys(updatedValues).some((key) => {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const newValue = updatedValues[key as keyof QuestFormValues];
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const currentValue = watchedValues[key as keyof typeof watchedValues];
       return JSON.stringify(newValue) !== JSON.stringify(currentValue);
     });
@@ -222,7 +220,7 @@ export function useQuestForm({
   const handleSubmit = form.handleSubmit(
     async (values) => {
       // If Zod validation passes, run additional custom validation
-      const customValidationErrors = validateForm(values as QuestFormValues);
+      const customValidationErrors = validateForm(values);
 
       // If there are custom validation errors, set them and prevent submission
       if (Object.keys(customValidationErrors).length > 0) {
@@ -237,7 +235,7 @@ export function useQuestForm({
 
       // If all validation passes, submit the form
       try {
-        const finalValues = applyLockedFields(values as QuestFormValues, presetConfig);
+        const finalValues = applyLockedFields(values, presetConfig);
         await onSubmit(finalValues);
       } catch (error) {
         console.error('Form submission error:', error);
@@ -282,7 +280,7 @@ export function useQuestForm({
   // ============================================================================
 
   return {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any
     form: form as any,
     fieldStates,
     isDirty,

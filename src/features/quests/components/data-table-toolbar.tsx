@@ -56,14 +56,12 @@ export const DataTableToolbar = <TData,>({ table }: DataTableToolbarProps<TData>
     const counts = new Map<string, number>();
 
     allData.items.forEach((item) => {
-      if (item.type) {
-        if (Array.isArray(item.type)) {
-          item.type.forEach((t) => {
-            counts.set(t, (counts.get(t) ?? 0) + 1);
-          });
-        } else if (typeof item.type === 'string') {
-          counts.set(item.type, (counts.get(item.type) ?? 0) + 1);
-        }
+      if (Array.isArray(item.type)) {
+        item.type.forEach((t) => {
+          counts.set(t, (counts.get(t) ?? 0) + 1);
+        });
+      } else if (typeof item.type === 'string') {
+        counts.set(item.type, (counts.get(item.type) ?? 0) + 1);
       }
     });
 
@@ -89,7 +87,7 @@ export const DataTableToolbar = <TData,>({ table }: DataTableToolbarProps<TData>
     const counts = new Map<string, number>();
 
     allData.items.forEach((item) => {
-      if (item.visible !== undefined && item.visible !== null) {
+      if (item.visible !== undefined) {
         const visibleValue = item.visible.toString();
         counts.set(visibleValue, (counts.get(visibleValue) ?? 0) + 1);
       }

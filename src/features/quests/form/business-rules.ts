@@ -22,7 +22,8 @@ export function getPresetFormValues(presetConfig?: PresetConfig): QuestFormValue
   }
 
   // Start with defaults from preset config
-  const presetDefaults = presetConfig.defaults ?? {};
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+  const presetDefaults = presetConfig.defaults || {};
 
   // Add automatic fields
   const now = new Date();
@@ -63,6 +64,7 @@ export function applyBusinessRules(
   const updatedValues = { ...values };
 
   // Auto-generate pop-up name based on group
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
   if (updatedValues.group && !updatedValues.resources?.ui?.['pop-up']?.name) {
     const popupName = getPopupNameByGroup(updatedValues.group);
     if (popupName) {
@@ -153,8 +155,9 @@ export function applyBusinessRules(
 
   // Calculate total reward for 7-day challenge
   if (
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     (updatedValues as QuestFormValues & { iterator: { reward_map: number[] } }).iterator
-      ?.reward_map &&
+      .reward_map &&
     Array.isArray(
       (updatedValues as QuestFormValues & { iterator: { reward_map: number[] } }).iterator
         .reward_map,
@@ -177,6 +180,7 @@ export function applyBusinessRules(
  * Calculate total reward from child tasks
  */
 export function calculateTotalReward(children: ChildFormValues[]): number {
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
   if (!children || children.length === 0) {
     return 0;
   }

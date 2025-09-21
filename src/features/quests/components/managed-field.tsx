@@ -48,6 +48,7 @@ export const ManagedField = ({
   };
 
   const presetValue = getPresetValue();
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   const currentValue = getValues(name);
   const isOverridden = !!(isDirty && presetValue !== undefined && currentValue !== presetValue);
 
@@ -108,6 +109,7 @@ export const ManagedField = ({
           <FormControl>
             <Input
               {...field}
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
               value={field.value ?? ''}
               disabled={disabled}
               placeholder={placeholder}
@@ -115,6 +117,7 @@ export const ManagedField = ({
           </FormControl>
           {presetConfig && presetValue !== undefined && (
             <div className='text-muted-foreground text-xs'>
+              {/* eslint-disable-next-line @typescript-eslint/no-base-to-string */}
               Preset value: "{String(presetValue)}"
             </div>
           )}

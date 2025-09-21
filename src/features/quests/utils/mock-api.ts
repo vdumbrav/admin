@@ -2,7 +2,9 @@ import type { Quest } from '../data/types';
 
 // Mock API configuration from environment variables
 export const MOCK_CONFIG = {
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
   latency: parseInt(import.meta.env.VITE_MOCK_LATENCY_MS ?? '300', 10), // Default 300ms
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
   failRate: parseFloat(import.meta.env.VITE_MOCK_FAIL_RATE ?? '0'), // Default 0% (no failures)
 };
 

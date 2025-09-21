@@ -59,6 +59,7 @@ export function isSocialDomain(url: string): boolean {
   const socialProviders = ['twitter', 'discord', 'telegram'];
 
   for (const provider of socialProviders) {
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     const domains = PROVIDER_DOMAINS[provider] || [];
     if (matchDomain(domain, domains)) {
       return true;

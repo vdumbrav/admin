@@ -131,7 +131,7 @@ export function adaptQuestToTask(quest: Quest): Task {
     completed_at: quest.completed_at,
     next_tick: quest.next_tick,
     resources: adaptResourcesFromApi(quest.resources),
-    child: quest.child ? quest.child.map(adaptQuestToTask) : undefined,
+    child: quest.child.length > 0 ? quest.child.map(adaptQuestToTask) : undefined,
     iterable: quest.iterable,
     iterator: adaptIteratorFromApi(quest.iterator),
     visible: quest.visible,
@@ -197,6 +197,7 @@ export function adaptTaskToQuest(task: Partial<Task>): Partial<Quest> {
   if (task.child && task.child.length > 0) {
     for (const childTask of task.child) {
       const adaptedChild = adaptTaskToQuest(childTask) as AdminWaitlistTasksResponseDto;
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
       if (adaptedChild.id !== undefined) {
         apiChild.push(adaptedChild);
       }
@@ -216,7 +217,7 @@ export function adaptTaskToQuest(task: Partial<Task>): Partial<Quest> {
     computedReward = task.child.reduce((sum, c) => sum + (c.reward ?? 0), 0);
   }
   if (isRepeatable && task.iterator?.reward_map && Array.isArray(task.iterator.reward_map)) {
-    computedReward = task.iterator.reward_map.reduce((s, r) => s + (r ?? 0), 0);
+    computedReward = task.iterator.reward_map.reduce((s, r) => s + r, 0);
   }
 
   return {

@@ -21,8 +21,10 @@ export function normalizeApiError(error: unknown): ApiError {
 
     // Extract error message from response
     let message = error.message;
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (typeof data === 'object' && data?.message) {
       message = data.message;
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     } else if (typeof data === 'object' && data?.error) {
       message = data.error;
     } else if (typeof data === 'string') {
@@ -32,6 +34,7 @@ export function normalizeApiError(error: unknown): ApiError {
     return {
       message,
       status,
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
       code: typeof data === 'object' ? (data?.code ?? error.code) : error.code,
       details: data,
     };

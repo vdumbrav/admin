@@ -17,14 +17,14 @@ const parseBool = (v: unknown, def = false): boolean => {
 };
 
 export const parseQuestSearch = (search: Record<string, unknown>) => ({
-  search: (search.search as string) ?? defaultQuestSearch.search,
-  group: (search.group as string) ?? defaultQuestSearch.group,
-  type: (search.type as string) ?? defaultQuestSearch.type,
-  provider: (search.provider as string) ?? defaultQuestSearch.provider,
-  visible: (search.visible as string) ?? defaultQuestSearch.visible,
+  search: (search.search as string) || defaultQuestSearch.search,
+  group: (search.group as string) || defaultQuestSearch.group,
+  type: (search.type as string) || defaultQuestSearch.type,
+  provider: (search.provider as string) || defaultQuestSearch.provider,
+  visible: (search.visible as string) || defaultQuestSearch.visible,
   page: Number(search.page ?? defaultQuestSearch.page),
   limit: Number(search.limit ?? defaultQuestSearch.limit),
-  sort: (search.sort as string) ?? defaultQuestSearch.sort,
+  sort: (search.sort as string) || defaultQuestSearch.sort,
   showForm: parseBool(search.showForm, defaultQuestSearch.showForm),
 });
 

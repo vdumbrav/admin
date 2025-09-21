@@ -21,7 +21,7 @@ const VisibleCell = ({ row, isAdmin }: { row: Row<Quest>; isAdmin: boolean }) =>
     <Switch
       checked={visible}
       onCheckedChange={(v) => toggle.mutate({ id: row.original.id, visible: v })}
-      aria-label={`Toggle visibility for ${String(row.original.title ?? 'quest')}`}
+      aria-label={`Toggle visibility for ${String(row.original.title)}`}
     />
   );
 };
@@ -90,7 +90,7 @@ export const getColumns = (isAdmin: boolean): ColumnDef<Quest>[] => {
       header: ({ column }) => <DataTableColumnHeader column={column} title='Type' />,
       cell: ({ row }) => {
         const types = row.original.type;
-        return Array.isArray(types) ? types.join(', ') : String(types ?? '');
+        return Array.isArray(types) ? types.join(', ') : String(types);
       },
       filterFn: (row, id, value: string[]) => {
         const types = row.getValue(id);

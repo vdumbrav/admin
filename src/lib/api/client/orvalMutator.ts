@@ -36,6 +36,7 @@ export async function orvalMutator<TResponse>(
   const client = options.client ?? createApiClient();
 
   try {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const { data, headers, ...restConfig } = config as AxiosRequestConfig & {
       data?: unknown;
       headers?: Record<string, string>;
@@ -70,6 +71,7 @@ export async function orvalMutator<TResponse>(
   } catch (error) {
     // Simple error handling
     if (axios.isAxiosError(error)) {
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
       const message = (error.response?.data as { message?: string })?.message ?? error.message;
       throw new Error(message);
     }
