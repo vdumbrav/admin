@@ -225,7 +225,8 @@ export function QuestFormFields({
                   items={providers}
                   placeholder='Select provider'
                   disabled={isFieldDisabled('provider', fieldStates)}
-                  {...field}
+                  value={field.value}
+                  onValueChange={(value) => field.onChange(value === '' ? undefined : value)}
                 />
               </FormControl>
               <FormMessage />

@@ -30,7 +30,7 @@ export function SelectDropdown({
   className = '',
 }: SelectDropdownProps) {
   return (
-    <Select value={value} defaultValue={defaultValue} onValueChange={onValueChange}>
+    <Select value={value ?? ''} defaultValue={defaultValue} onValueChange={onValueChange}>
       <SelectTrigger disabled={disabled} className={cn(className)}>
         <SelectValue placeholder={placeholder ?? 'Select'} />
       </SelectTrigger>

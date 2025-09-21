@@ -308,7 +308,7 @@ export function getDefaultFormValues(): QuestFormValues {
     totalReward: undefined,
     uri: '',
     icon: '',
-    provider: undefined,
+    provider: '', // Empty string for controlled Select components
     child: [],
     start: '',
     end: '',

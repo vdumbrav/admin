@@ -61,7 +61,7 @@ export const DailyRewardsEditor = () => {
                 <FormControl>
                   <NoWheelNumber
                     {...field}
-                    value={field.value}
+                    value={field.value ?? 0}
                     onChange={(e) =>
                       field.onChange(
                         Number.isNaN(e.target.valueAsNumber) ? 0 : e.target.valueAsNumber,
