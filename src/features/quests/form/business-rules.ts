@@ -31,10 +31,12 @@ export function getPresetFormValues(presetConfig?: PresetConfig): QuestFormValue
 
   // Deep merge preset defaults with form defaults
   const mergedValues = deepMerge(
-    defaultValues as unknown as Record<string, unknown>,
-    presetDefaults,
-  ) as unknown as QuestFormValues & { start?: string };
-  (mergedValues as QuestFormValues & { start?: string }).start = startTime.toISOString();
+    defaultValues as Record<string, unknown>,
+    presetDefaults as Partial<Record<string, unknown>>,
+  ) as QuestFormValues;
+
+  // Add start time
+  mergedValues.start = startTime.toISOString();
 
   return mergedValues;
 }
@@ -148,24 +150,16 @@ export function applyBusinessRules(
 
   // Calculate total reward for multi-task quests
   if (updatedValues.child && updatedValues.child.length > 0) {
-    (updatedValues as QuestFormValues & { totalReward: number }).totalReward = calculateTotalReward(
-      updatedValues.child,
-    );
+    updatedValues.totalReward = calculateTotalReward(updatedValues.child);
   }
 
   // Calculate total reward for 7-day challenge
-  if (
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    (updatedValues as QuestFormValues & { iterator: { reward_map: number[] } }).iterator
-      .reward_map &&
-    Array.isArray(
-      (updatedValues as QuestFormValues & { iterator: { reward_map: number[] } }).iterator
-        .reward_map,
-    )
-  ) {
-    (updatedValues as QuestFormValues & { totalReward: number }).totalReward = (
-      updatedValues as QuestFormValues & { iterator: { reward_map: number[] } }
-    ).iterator.reward_map.reduce((sum: number, reward: number) => sum + reward, 0);
+  // iterator только для seven-day-challenge пресета, у других пресетов может быть undefined
+  if (updatedValues.iterator?.reward_map && Array.isArray(updatedValues.iterator.reward_map)) {
+    updatedValues.totalReward = updatedValues.iterator.reward_map.reduce(
+      (sum: number, reward: number) => sum + reward,
+      0,
+    );
   }
 
   // Update child order_by indices

@@ -117,9 +117,21 @@ export const DEFAULT_FORM_VALUES: Partial<QuestFormValues> = {
   group: 'all',
   order_by: 0,
   visible: true,
+  reward: undefined,
+  totalReward: undefined, // For controlled inputs - always defined value
+  uri: '', // Empty string instead of undefined for controlled input
+  icon: '', // Empty string instead of undefined
+  provider: undefined,
+  start: '', // Empty string for controlled input
+  end: '', // Empty string for controlled input
   resources: {
     ui: {
       button: '',
     },
+    username: '', // For controlled inputs
+    tweetId: '', // For controlled inputs
+    icon: '', // For controlled inputs
   },
+  child: [],
+  iterator: undefined,
 };

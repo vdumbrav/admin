@@ -303,6 +303,24 @@ export function getDefaultFormValues(): QuestFormValues {
     group: 'all',
     order_by: 0,
     visible: true,
+    // Ensure values for all possible fields to avoid uncontrolled->controlled warning
+    reward: undefined,
+    totalReward: undefined,
+    uri: '',
+    icon: '',
+    provider: undefined,
+    child: [],
+    start: '',
+    end: '',
+    iterator: undefined,
+    resources: {
+      ui: {
+        button: '',
+      },
+      username: '',
+      tweetId: '',
+      icon: '',
+    },
   } as QuestFormValues;
 }
 
