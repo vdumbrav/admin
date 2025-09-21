@@ -3,15 +3,14 @@
  * Centralizes form state, validation, and business logic
  */
 import { useEffect, useMemo } from 'react';
-import { useForm, useWatch } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useAppAuth } from '@/auth/hooks';
 import { toast } from 'sonner';
 import { replaceObjectUrl } from '@/utils/object-url';
 import { uploadMedia } from '../api';
 import type { PresetConfig } from '../presets/types';
-import { buildQuestFormSchema } from '../types/form-schema';
-import type { QuestFormValues } from '../types/form-types';
+import { buildQuestFormSchema, type QuestFormValues } from '../types/form-schema';
 import {
   applyBusinessRules,
   applyLockedFields,
@@ -75,10 +74,8 @@ export function useQuestForm({
 
   const zodSchema = buildQuestFormSchema(presetConfig?.id);
   const form = useForm<QuestFormValues>({
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any
-    resolver: zodResolver(zodSchema as any) as any,
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any
-    defaultValues: defaultValues as any,
+    resolver: zodResolver(zodSchema),
+    defaultValues,
     mode: 'onSubmit', // Only validate on submit, not on change
   });
 
@@ -86,14 +83,13 @@ export function useQuestForm({
   // Watched Values & State
   // ============================================================================
 
-  const watchedValues = useWatch({ control: form.control });
+  const watchedValues = form.watch(); // Returns full type, not partial!
   const isDirty = form.formState.isDirty;
   const isSubmitting = form.formState.isSubmitting;
 
   // Compute field visibility states
   const fieldStates = useMemo(() => {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any
-    return computeFieldStates(presetConfig, watchedValues as any);
+    return computeFieldStates(presetConfig, watchedValues);
   }, [presetConfig, watchedValues]);
 
   // ============================================================================
@@ -104,7 +100,7 @@ export function useQuestForm({
   useEffect(() => {
     if (!isDirty) return;
 
-    const updatedValues = applyBusinessRules(watchedValues as QuestFormValues, presetConfig);
+    const updatedValues = applyBusinessRules(watchedValues, presetConfig);
 
     // Only update if values actually changed to avoid infinite loops
     const hasChanges = Object.keys(updatedValues).some((key) => {
@@ -117,10 +113,9 @@ export function useQuestForm({
       // Use setTimeout to avoid updating during render
       setTimeout(() => {
         Object.entries(updatedValues).forEach(([key, value]) => {
-          const currentValue = form.getValues(key as keyof QuestFormValues);
+          const currentValue = form.getValues(key);
           if (JSON.stringify(value) !== JSON.stringify(currentValue)) {
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-            form.setValue(key as keyof QuestFormValues, value, { shouldDirty: true });
+            form.setValue(key, value, { shouldDirty: true });
           }
         });
       }, 0);
@@ -225,7 +220,7 @@ export function useQuestForm({
       // If there are custom validation errors, set them and prevent submission
       if (Object.keys(customValidationErrors).length > 0) {
         Object.entries(customValidationErrors).forEach(([field, message]) => {
-          form.setError(field as keyof QuestFormValues, {
+          form.setError(field, {
             type: 'custom',
             message,
           });
@@ -280,8 +275,7 @@ export function useQuestForm({
   // ============================================================================
 
   return {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any
-    form: form as any,
+    form,
     fieldStates,
     isDirty,
     isSubmitting,

@@ -41,16 +41,16 @@ export const CHILD_TYPES = ['like', 'share', 'comment', 'join', 'connect'] as co
 // ============================================================================
 
 export interface FormPopupResources {
-  name: string;
-  button: string;
-  description: string;
+  name?: string;
+  button?: string;
+  description?: string;
   static?: string;
   'additional-title'?: string;
   'additional-description'?: string;
 }
 
 export interface FormUIResources {
-  button: string;
+  button?: string;
   'pop-up'?: FormPopupResources;
 }
 
@@ -103,6 +103,8 @@ export interface QuestFormValues {
     days?: number;
     reward_map: number[];
   };
+  // Index signature for Zod passthrough and dynamic access
+  [key: string]: unknown;
 }
 
 // ============================================================================
