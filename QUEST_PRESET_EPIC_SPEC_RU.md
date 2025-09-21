@@ -829,7 +829,8 @@ src/features/quests/
 
 ### 20.2 РЕВОЛЮЦИОННЫЕ УЛУЧШЕНИЯ ✅
 
-#### ✅ **Enterprise-Grade UX**
+#### ✅ **Enterprise-Grade UX + Type Safety**
+- **Zero Type Assertions**: Современные паттерны React Hook Form v7 без casting
 - **Smart Tweet ID Processing**: Автоматическое извлечение ID из любых Twitter URL
 - **Live Icon Preview**: Предварительный просмотр 40×40 с валидацией типов/размера
 - **Domain Smart Warnings**: Автоматическое предупреждение для соцсетей в Explore
