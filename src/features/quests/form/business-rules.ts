@@ -38,7 +38,9 @@ export function getPresetFormValues(presetConfig?: PresetConfig): QuestFormValue
   }
 
   // Auto-set preset ID from preset config
-  mergedValues.preset ??= presetConfig?.id;
+  if (presetConfig?.id && typeof presetConfig.id === 'string') {
+    mergedValues.preset ??= presetConfig.id;
+  }
 
   return mergedValues;
 }

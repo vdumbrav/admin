@@ -61,7 +61,7 @@ export interface QuestFormValues {
   twa?: boolean;
   pinned?: boolean;
   icon?: string;
-  preset?: string; // Auto-generated preset ID
+  preset?: string | null; // Auto-generated preset ID (can be null for old quests)
   block_id?: number; // Auto-selected parent quest ID
   resources?: ResourcesDto;
   child?: ChildFormValues[];

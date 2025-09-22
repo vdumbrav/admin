@@ -27,7 +27,7 @@ import { DailyRewardsEditor } from '../components/daily-rewards-editor';
 import { ManagedField } from '../components/managed-field';
 import { TasksEditor } from '../components/tasks-editor';
 import { TwitterPreview } from '../components/twitter-preview';
-import { groups, providers } from '../data/data';
+import { groups, providers, types } from '../data/data';
 import type { PresetConfig } from '../presets/types';
 import type { QuestFormValues } from '../types/form-types';
 import {
@@ -461,6 +461,10 @@ export function QuestFormFields({
                   disabled={isFieldDisabled('reward', fieldStates)}
                   readOnly={isFieldReadonly('reward', fieldStates)}
                   {...field}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    field.onChange(value === '' ? undefined : Number(value));
+                  }}
                 />
               </FormControl>
               <FormMessage />
@@ -547,12 +551,41 @@ export function QuestFormFields({
         <h3 className='text-lg font-medium'>Advanced Settings</h3>
         {/* Type Field */}
         {isFieldVisible('type', fieldStates) && (
-          <ManagedField
+          <FormField
+            control={form.control}
             name='type'
-            label='Quest Type'
-            presetConfig={presetConfig}
-            disabled={isFieldDisabled('type', fieldStates)}
-            placeholder='Select type'
+            render={({ field }) => (
+              <FormItem>
+                <div className='flex items-center justify-between'>
+                  <FormLabel>Quest Type</FormLabel>
+                  {(isFieldDisabled('type', fieldStates) ||
+                    isFieldReadonly('type', fieldStates)) && (
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Badge variant='secondary' className='text-xs'>
+                            Locked by preset
+                          </Badge>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          This field is enforced by preset and cannot be changed.
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  )}
+                </div>
+                <FormControl>
+                  <SelectDropdown
+                    value={field.value ?? ''}
+                    onValueChange={field.onChange}
+                    items={types}
+                    placeholder='Select quest type'
+                    disabled={isFieldDisabled('type', fieldStates) || isFieldReadonly('type', fieldStates)}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
         )}
 

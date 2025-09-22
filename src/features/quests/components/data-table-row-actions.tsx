@@ -14,7 +14,6 @@ import {
 import { useTogglePinned } from '../api';
 import { useQuestsContext } from '../context/quests-context';
 import type { Quest } from '../data/types';
-import { useQuestSearch } from '../use-quest-search';
 
 interface DataTableRowActionsProps<TData> {
   row: Row<TData>;
@@ -26,7 +25,6 @@ export const DataTableRowActions = <TData,>({ row }: DataTableRowActionsProps<TD
   const quest = row.original as Quest;
   const { setOpen, setCurrentRow } = useQuestsContext();
   const togglePinned = useTogglePinned();
-  const search = useQuestSearch({ from: '/_authenticated/quests/' as const });
   return (
     <DropdownMenu modal={false}>
       <DropdownMenuTrigger asChild>
@@ -52,7 +50,21 @@ export const DataTableRowActions = <TData,>({ row }: DataTableRowActionsProps<TD
           </DropdownMenuItem>
         )}
         <DropdownMenuItem asChild>
-          <Link to='/quests/$id' params={{ id: String(quest.id) }} search={search}>
+          <Link
+            to='/quests/$id'
+            params={{ id: String(quest.id) }}
+            search={{
+              search: '',
+              group: '',
+              type: '',
+              provider: '',
+              enabled: '',
+              page: 1,
+              limit: 20,
+              sort: '',
+              showForm: false,
+            }}
+          >
             Edit
           </Link>
         </DropdownMenuItem>

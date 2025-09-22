@@ -10,10 +10,8 @@ import {
   useAdminWaitlistTasksControllerUpdateTask,
 } from '@/lib/api/generated/admin/admin';
 import {
-  type CreateTaskDto,
   type TaskResponseDto,
   type UpdateTaskDto,
-  type UploadFileDto,
 } from '@/lib/api/generated/model';
 import { validateAndConvertToApi } from './adapters/form-api-adapter';
 import type { QuestQuery, QuestsResponse } from './data/types';
@@ -148,10 +146,9 @@ export const useCreateQuest = () => {
 
   return useMutation({
     mutationFn: async (data: Partial<TaskResponseDto>): Promise<TaskResponseDto> => {
-      // TODO: Remove casting when validateAndConvertToApi returns proper CreateTaskDto (P2)
-      // Currently needed due to TaskResponseDto vs CreateTaskDto structural differences
-      const apiData = validateAndConvertToApi(data) as unknown as CreateTaskDto;
-      const result = await createTaskMutation.mutateAsync({ data: apiData });
+      const apiData = validateAndConvertToApi(data);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const result = await createTaskMutation.mutateAsync({ data: apiData as any });
       return result;
     },
     onSuccess: () => {
@@ -277,9 +274,7 @@ export const useTogglePinned = () => {
 export const uploadMedia = async (file: File): Promise<string> => {
   try {
     // Upload file using API endpoint
-    const uploadFileDto: UploadFileDto = { file };
-
-    const response = await filesControllerUploadFile(uploadFileDto);
+    const response = await filesControllerUploadFile({ file });
 
     if (response.url) {
       return response.url;

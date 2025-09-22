@@ -7,7 +7,6 @@ import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { DataTableColumnHeader } from '@/components/table/data-table-column-header';
 import { useToggleEnabled } from '../api';
-import { useQuestSearch } from '../use-quest-search';
 import { getBadgeClasses, getBadgeStyle, getBadgeVariant } from '../utils/badge-variants';
 import { formatDateDMY, formatNumberShort, formatXp } from '../utils/format';
 import { getProviderIcon } from '../utils/provider-icons';
@@ -28,12 +27,21 @@ const EnabledCell = ({ row, isAdmin }: { row: Row<TaskResponseDto>; isAdmin: boo
 
 export const getColumns = (isAdmin: boolean): ColumnDef<TaskResponseDto>[] => {
   const TitleCell = ({ row }: { row: Row<TaskResponseDto> }) => {
-    const search = useQuestSearch({ from: '/_authenticated/quests/' as const });
     return (
       <Link
         to='/quests/$id'
         params={{ id: String(row.original.id) }}
-        search={search}
+        search={{
+          search: '',
+          group: '',
+          type: '',
+          provider: '',
+          enabled: '',
+          page: 1,
+          limit: 20,
+          sort: '',
+          showForm: false,
+        }}
         title={`Edit ${String(row.original.title)}`}
         className='line-clamp-1 font-medium'
       >

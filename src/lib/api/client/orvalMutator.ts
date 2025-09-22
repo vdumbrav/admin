@@ -23,9 +23,9 @@ const createApiClient = (): AxiosInstance => {
   return axios.create({
     baseURL,
     timeout: 30000,
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    // Don't set default Content-Type - let axios handle it automatically
+    // For JSON: axios will set application/json
+    // For FormData: axios will set multipart/form-data with boundary
   });
 };
 
@@ -44,14 +44,18 @@ export async function orvalMutator<TResponse>(
 
     const resolvedHeaders = { ...(headers ?? {}) };
 
-    // Handle FormData content type
+    // Handle content type based on data type
     if (data instanceof FormData) {
+      // Remove any Content-Type headers to let axios set multipart/form-data with boundary
       const headerKeys = Object.keys(resolvedHeaders);
       headerKeys.forEach((key) => {
         if (key.toLowerCase() === 'content-type') {
           delete resolvedHeaders[key];
         }
       });
+    } else if (data && typeof data === 'object') {
+      // For JSON data, ensure Content-Type is set
+      resolvedHeaders['Content-Type'] = 'application/json';
     }
 
     const requestConfig: AxiosRequestConfig = {

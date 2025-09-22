@@ -139,7 +139,7 @@ export function formToApi(formData: QuestFormValues): Partial<TaskResponseDto> {
   return {
     // Core required fields
     title: formData.title,
-    type: [formData.type], // TODO: Simplify when API uses single type instead of array (P2)
+    type: [formData.type], // TaskResponseDto.type is array
     description: formData.description || undefined,
     group: formData.group,
     order_by: formData.order_by,
@@ -149,7 +149,7 @@ export function formToApi(formData: QuestFormValues): Partial<TaskResponseDto> {
     uri: formData.uri,
     reward: formData.reward,
     enabled: formData.enabled,
-    preset: formData.preset,
+    preset: formData.preset ?? undefined,
     blocking_task: formData.block_id ? { id: formData.block_id } : undefined,
     web: formData.web ?? true, // Default web enabled for admin-created tasks
     twa: formData.twa ?? false, // Default TWA disabled for admin-created tasks
@@ -274,3 +274,4 @@ export function validateAndConvertToApi(formData: unknown): Partial<TaskResponse
   const validatedData = questFormSchema.parse(formData);
   return formToApi(validatedData as QuestFormValues); // TODO: Remove casting when Zod types align better (P2)
 }
+
