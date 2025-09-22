@@ -15,11 +15,16 @@
     "format": "prettier --write .",
     "knip": "knip",
     "typecheck": "npm run api:ensure && tsc --build --force --noEmit",
-    "typecheck:strict": "npm run api:ensure && tsc --noEmit --strict --noUnusedLocals --noUnusedParameters",
+    "typecheck:strict": "npm run api:ensure && tsc --noEmit --project tsconfig.app.json",
+    "typecheck:strict:fast": "tsc --noEmit --project tsconfig.app.json",
+    "typecheck:fast": "tsc --build --force --noEmit",
     "generate:api": "orval --config orval.config.ts",
     "update:api:barrel": "tsx src/lib/api/scripts/update-api-barrel.ts",
     "api:update": "tsx src/lib/api/scripts/update-api.ts",
     "api:ensure": "tsx src/lib/api/scripts/ensure-api.ts",
+    "check": "npm run lint -- --fix --quiet && npm run typecheck:fast && npm run format",
+    "generate:api:full": "npm run generate:api && npm run update:api:barrel",
+    "check:full": "npm run generate:api:full && npm run lint -- --fix --quiet && npm run typecheck:strict:fast && npm run format",
     "postinstall": "npm run api:ensure"
   },
   "dependencies": {
