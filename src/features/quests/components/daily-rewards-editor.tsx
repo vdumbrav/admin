@@ -6,9 +6,9 @@ import { NoWheelNumber } from '@/components/no-wheel-number';
 
 interface FormValues {
   iterator?: {
-    reward_map?: number[];
+    reward_map?: number[]; // 7-Day Challenge: Daily rewards array [10, 20, 30...]
   };
-  totalReward?: number;
+  totalReward?: number; // Auto-calculated sum of reward_map
   start?: string;
 }
 
@@ -35,6 +35,7 @@ export const DailyRewardsEditor = () => {
   };
 
   // Auto-calculate total reward when reward map changes
+  // This provides real-time feedback in UI while editing 7-day challenge
   useEffect(() => {
     if (rewardMap && Array.isArray(rewardMap)) {
       const total = rewardMap.reduce((sum, reward) => {

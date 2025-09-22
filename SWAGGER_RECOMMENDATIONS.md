@@ -1063,3 +1063,89 @@ const resources: ResourcesDto = apiData.resources;
 ```
 
 **Результат**: Удаление 8 TODO пунктов и всех type assertions в adapter слое.
+
+### 🔄 **Особенности 7-Day Challenge: API vs UI**
+
+**Проблема**: Iterator данные разделены на 3 поля в API, но UI ожидает простую структуру.
+
+#### **UI структура (форма)**
+```typescript
+interface QuestFormValues {
+  iterator?: {
+    days?: number;              // 3-10 дней
+    reward_map: number[];       // [10, 20, 30, 40, 50, 70, 100]
+  };
+  totalReward?: number;         // Автовычисляемая сумма: 320
+}
+```
+
+#### **API структура (3 поля)**
+```typescript
+interface TaskResponseDto {
+  // 1. Основная конфигурация
+  iterator?: {
+    days: number;               // 7
+    reward_map: number[];       // [10, 20, 30, 40, 50, 70, 100]
+    reward_max: number;         // 100 (максимальная награда)
+    reward: number;             // 10 (базовая награда)
+    day: number;                // 2 (текущий день пользователя)
+    tick?: number;              // Таймер
+  };
+
+  // 2. Награды как строки (дублирование)
+  iterator_reward?: string[];   // ["10", "20", "30", "40", "50", "70", "100"]
+
+  // 3. UI ресурсы для календаря
+  iterator_resource?: {
+    icons?: string[];           // ["day1.png", "day2.png", ...]
+    titles?: string[];          // ["День 1", "День 2", ...]
+    descriptions?: string[];    // ["Начало", "Продолжаем", ...]
+    background_color?: string;  // "#ff6b6b"
+    completion_message?: string; // "Челлендж завершен!"
+  };
+}
+```
+
+#### **Adapter конвертация**
+```typescript
+// API → Form: Упрощаем для UI
+apiToForm: {
+  iterator: apiData.iterator ? {
+    days: apiData.iterator.days,
+    reward_map: apiData.iterator.reward_map  // Берем числа из iterator
+  } : undefined
+}
+
+// Form → API: Генерируем все поля
+formToApi: {
+  iterator: {
+    days: formData.iterator.days,
+    reward_map: formData.iterator.reward_map,
+    reward_max: Math.max(...formData.iterator.reward_map),
+    reward: formData.iterator.reward_map[0]
+  },
+  iterator_reward: formData.iterator.reward_map.map(r => r.toString()),
+  iterator_resource: null  // Генерируется на бэке
+}
+```
+
+#### **Компонент DailyRewardsEditor**
+```typescript
+// UI показывает:
+Day 1: [10] Day 2: [20] Day 3: [30] ...
+Total Reward: 320
+Distribution: 10 + 20 + 30 + 40 + 50 + 70 + 100
+
+// Автовычисления в реальном времени
+useEffect(() => {
+  const total = rewardMap.reduce((sum, reward) => sum + reward, 0);
+  setValue('totalReward', total);
+}, [rewardMap]);
+```
+
+**Зачем 3 поля в API**:
+- `iterator` - основная бизнес-логика
+- `iterator_reward` - совместимость с мобильными клиентами
+- `iterator_resource` - UI данные генерируются бэком
+
+**После улучшения схем**: Adapter станет type-safe без `Record<string, unknown>` casting.

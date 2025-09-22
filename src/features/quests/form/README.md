@@ -8,10 +8,10 @@
 
 ### ✅ **Completed (80%)**
 
-- ✅ Real API integration for all CRUD operations
+- ✅ API integration for all CRUD operations
 - ✅ Type-safe form handling with Quest types
 - ✅ Basic adapter layer for form-API compatibility
-- ✅ All 5 quest presets functional with real API
+- ✅ All 5 quest presets functional with API
 - ✅ Production-ready error handling
 
 ### ⚠️ **Remaining Issues (20%)**
@@ -21,6 +21,61 @@
 - ⚠️ **Legacy partnerIcon field** still present
 - ⚠️ **Hardcoded fallback values** for child tasks
 - ⚠️ **Missing Zod validation** in adapter layer
+
+### 🔄 **Iterator Mapping Complexity (7-Day Challenge)**
+
+**Проблема**: API использует 3 поля для iterator, форма ожидает 1 простое поле.
+
+#### **API структура**
+
+```typescript
+// API возвращает 3 отдельных поля:
+{
+  iterator: {                    // Основная конфигурация
+    days: 7,
+    reward_map: [10, 20, 30, 40, 50, 70, 100],
+    reward_max: 100,
+    reward: 10,
+    day: 2                       // Текущий день пользователя
+  },
+  iterator_reward: ["10", "20", "30", "40", "50", "70", "100"], // Дублирование
+  iterator_resource: {           // UI ресурсы
+    icons: ["day1.png", "day2.png", ...],
+    titles: ["День 1", "День 2", ...],
+    background_color: "#ff6b6b"
+  }
+}
+```
+
+#### **UI структура (упрощенная)**
+
+```typescript
+// Форма использует простую структуру:
+{
+  iterator: {
+    days: 7,                     // 3-10 дней
+    reward_map: [10, 20, 30, 40, 50, 70, 100]  // Числа для удобства
+  },
+  totalReward: 320               // Автовычисляется: sum(reward_map)
+}
+```
+
+#### **Adapter конвертация**
+
+```typescript
+// API → Form (упрощаем)
+iterator: apiData.iterator ? {
+  days: apiData.iterator.days,
+  reward_map: apiData.iterator.reward_map  // Берем числа из iterator
+} : undefined
+
+// Form → API (генерируем все поля)
+iterator: formData.iterator,
+iterator_reward: formData.iterator?.reward_map.map(r => r.toString()),
+iterator_resource: null          // Генерируется на бэке
+```
+
+**Зачем такая сложность**: API поддерживает runtime состояние (день пользователя), мобильные клиенты (строки), UI ресурсы. Форма фокусируется только на редактировании наград.
 
 ## 🏗️ Architecture Status
 

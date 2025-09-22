@@ -260,7 +260,7 @@ export function useQuestForm({
     }
 
     try {
-      const result = await uploadMedia(file, undefined);
+      const result = await uploadMedia(file);
 
       // Replace existing object URL if needed
       if (result.startsWith('blob:')) {

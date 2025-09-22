@@ -103,7 +103,7 @@ export interface LocalPaginationConfig {
 
 export interface LocalFilterConfig {
   search?: string;
-  group?: UIGroup;
+  group?: string;
   type?: string;
   provider?: string;
   enabled?: boolean;

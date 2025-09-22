@@ -49,10 +49,6 @@ export const QuestsDataTable = ({ columns, isAdmin }: DataTableProps) => {
     page,
     limit,
     sort,
-    setGroup: _setGroup,
-    setType: _setType,
-    setProvider: _setProvider,
-    setEnabled: _setVisible,
     setPage,
     setLimit,
     setSort,
@@ -74,11 +70,10 @@ export const QuestsDataTable = ({ columns, isAdmin }: DataTableProps) => {
 
   // Convert context values to API format
   const enabled = visibleStr === 'true' ? true : visibleStr === 'false' ? false : undefined;
-  const groupForApi = group || undefined;
 
   const { data, isFetching, isLoading } = useQuests({
     search,
-    group: groupForApi as string,
+    group,
     type: type || undefined,
     provider: provider || undefined,
     enabled,

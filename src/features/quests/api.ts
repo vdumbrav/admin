@@ -14,7 +14,6 @@ import {
   type UploadFileDto,
 } from '@/lib/api/generated/model';
 import { validateAndConvertToApi } from './adapters/form-api-adapter';
-import { adaptAdminTaskToQuest } from './data/adapters';
 import type { Quest, QuestQuery, QuestsResponse } from './data/types';
 
 export const useQuests = (query: QuestQuery) => {
@@ -145,11 +144,11 @@ export const useQuest = (id: number) => {
 };
 
 // ============================================================================
-// Mutation Hooks (Currently in readonly mode)
+// Mutation Hooks
 // ============================================================================
 
 /**
- * Create quest mutation (Real API implementation)
+ * Create quest mutation
  */
 export const useCreateQuest = () => {
   const queryClient = useQueryClient();
@@ -178,7 +177,7 @@ export const useCreateQuest = () => {
 };
 
 /**
- * Update quest mutation (Real API implementation)
+ * Update quest mutation
  */
 export const useUpdateQuest = (id: number) => {
   const queryClient = useQueryClient();
@@ -218,7 +217,7 @@ export const useUpdateQuest = (id: number) => {
 };
 
 /**
- * Delete quest mutation (Real API implementation)
+ * Delete quest mutation
  */
 export const useDeleteQuest = () => {
   const queryClient = useQueryClient();
@@ -271,7 +270,7 @@ export const useToggleEnabled = () => {
 };
 
 /**
- * Toggle quest pinned state (Real API implementation)
+ * Toggle quest pinned state
  */
 export const useTogglePinned = () => {
   const queryClient = useQueryClient();
@@ -299,67 +298,22 @@ export const useTogglePinned = () => {
 };
 
 /**
- * Upload media for quest (Real API implementation)
+ * Upload media for quest
  */
-export const uploadMedia = async (file: File, _token: string | undefined): Promise<string> => {
-  // Use real API endpoint for file upload
-  const uploadFileDto: UploadFileDto = { file };
+export const uploadMedia = async (file: File): Promise<string> => {
+  try {
+    // Upload file using API endpoint
+    const uploadFileDto: UploadFileDto = { file };
 
-  const result = await filesControllerUploadFile(uploadFileDto);
+    const response = await filesControllerUploadFile(uploadFileDto);
 
-  return result.url;
-};
+    if (response.url) {
+      return response.url;
+    }
 
-// ============================================================================
-// Bulk Operations (Future Enhancement)
-// ============================================================================
-
-/**
- * Bulk update quests (Using individual API calls)
- * TODO: Implement true bulk operations when API supports them
- */
-export const useBulkUpdateQuests = () => {
-  const queryClient = useQueryClient();
-  const updateTaskMutation = useAdminWaitlistTasksControllerUpdateTask();
-
-  return useMutation({
-    mutationFn: async (data: { ids: number[]; updates: Partial<Quest> }): Promise<Quest[]> => {
-      // Convert form data to API format
-      const apiData = validateAndConvertToApi(data.updates) as UpdateTaskDto;
-
-      // Execute all updates in parallel
-      const promises = data.ids.map(async (id) =>
-        updateTaskMutation.mutateAsync({ id, data: apiData }),
-      );
-
-      const results = await Promise.all(promises);
-
-      // Convert all API responses back to Quest format
-      return results.map((result) => adaptAdminTaskToQuest(result));
-    },
-    onSuccess: () => {
-      toast.success('Quests updated successfully');
-      void queryClient.invalidateQueries({ queryKey: ['api', 'admin', 'tasks'] });
-    },
-    onError: (error) => {
-      const message = error instanceof Error ? error.message : 'Failed to update quests';
-      toast.error(message);
-    },
-  });
-};
-
-/**
- * Bulk delete quests - NOT NEEDED
- * Individual delete operations are sufficient for admin interface
- */
-export const useBulkDeleteQuests = () => {
-  return useMutation({
-    mutationFn: async (_ids: number[]): Promise<void> => {
-      throw new Error('Bulk delete not needed - use individual delete operations');
-    },
-    onError: (error) => {
-      const message = error instanceof Error ? error.message : 'Bulk delete not available';
-      toast.error(message);
-    },
-  });
+    throw new Error('Invalid response: missing URL');
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'File upload failed';
+    throw new Error(`Upload failed: ${message}`);
+  }
 };
