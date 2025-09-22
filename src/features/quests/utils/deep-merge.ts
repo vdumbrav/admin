@@ -12,10 +12,7 @@ function isPlainObject(value: unknown): value is Record<string, unknown> {
   );
 }
 
-export function deepMerge<T extends Record<string, unknown>>(
-  target: T,
-  source: Partial<T>
-): T {
+export function deepMerge<T extends Record<string, unknown>>(target: T, source: Partial<T>): T {
   // TODO P3: Fix generic type constraints to avoid index assignment issues
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const result = { ...target } as any;

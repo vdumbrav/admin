@@ -129,21 +129,21 @@ export function getProviderLabel(value: TaskResponseDtoProvider): string {
  * Check if a type value is valid for API
  */
 export function isApiType(value: string): value is TaskResponseDtoTypeItem {
-  return (Object.values(TaskResponseDtoTypeItem)).includes(value); // TODO: Improve when TS supports better enum typing (P3)
+  return Object.values(TaskResponseDtoTypeItem).includes(value as TaskResponseDtoTypeItem); // TODO: Improve when TS supports better enum typing (P3)
 }
 
 /**
  * Check if a provider value is valid for API
  */
 export function isApiProvider(value: string): value is TaskResponseDtoProvider {
-  return (Object.values(TaskResponseDtoProvider)).includes(value); // TODO: Improve when TS supports better enum typing (P3)
+  return Object.values(TaskResponseDtoProvider).includes(value as TaskResponseDtoProvider); // TODO: Improve when TS supports better enum typing (P3)
 }
 
 /**
  * Check if a group value is valid for API
  */
 export function isApiGroup(value: string): value is TaskResponseDtoGroup {
-  return (Object.values(TaskResponseDtoGroup)).includes(value); // TODO: Improve when TS supports better enum typing (P3)
+  return Object.values(TaskResponseDtoGroup).includes(value as TaskResponseDtoGroup); // TODO: Improve when TS supports better enum typing (P3)
 }
 
 // ============================================================================

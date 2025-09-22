@@ -50,6 +50,8 @@ export function apiToForm(apiData: Partial<TaskResponseDto>): QuestFormValues {
     uri: apiData.uri ?? undefined,
     reward: apiData.reward,
     enabled: apiData.enabled ?? true,
+    preset: apiData.preset,
+    block_id: apiData.blocking_task?.id,
 
     // Resources directly from API
     resources: apiData.resource ?? apiData.resources ?? DEFAULT_FORM_VALUES.resources, // TODO: Unify resource vs resources field naming (P1)
@@ -96,7 +98,7 @@ function extractChildResources(resourceData: unknown): ChildFormValues['resource
   const tweetId = typeof data.tweetId === 'string' ? data.tweetId : undefined;
   const username = typeof data.username === 'string' ? data.username : undefined;
 
-  return (tweetId || username) ? { tweetId, username } : undefined;
+  return tweetId || username ? { tweetId, username } : undefined;
 }
 
 /**
@@ -147,6 +149,8 @@ export function formToApi(formData: QuestFormValues): Partial<TaskResponseDto> {
     uri: formData.uri,
     reward: formData.reward,
     enabled: formData.enabled,
+    preset: formData.preset,
+    blocking_task: formData.block_id ? { id: formData.block_id } : undefined,
     web: formData.web ?? true, // Default web enabled for admin-created tasks
     twa: formData.twa ?? false, // Default TWA disabled for admin-created tasks
     pinned: formData.pinned ?? false, // Default not pinned
@@ -158,6 +162,7 @@ export function formToApi(formData: QuestFormValues): Partial<TaskResponseDto> {
     // Iterator mapping for 7-day challenge (Form → API)
     iterator: formData.iterator
       ? {
+          id: 0, // Will be assigned by API
           days: formData.iterator.days ?? 7,
           reward_map: formData.iterator.reward_map.map(String), // TODO: Remove .map(String) when API uses number[] (P0)
           reward_max: Math.max(...formData.iterator.reward_map),

@@ -94,6 +94,8 @@ const baseQuestFormShape = {
   twa: z.boolean().optional(),
   pinned: z.boolean().optional(),
   icon: z.string().optional(),
+  preset: z.string().optional(), // Auto-generated preset ID
+  block_id: z.number().optional(), // Auto-selected parent quest ID
   resources: formResourcesSchema,
   child: z.array(childFormSchema).optional(),
   start: z.string().optional(),

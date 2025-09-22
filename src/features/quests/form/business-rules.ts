@@ -37,6 +37,9 @@ export function getPresetFormValues(presetConfig?: PresetConfig): QuestFormValue
     mergedValues.start = startTime.toISOString();
   }
 
+  // Auto-set preset ID from preset config
+  mergedValues.preset ??= presetConfig?.id;
+
   return mergedValues;
 }
 
@@ -61,6 +64,7 @@ export function applyLockedFields(
 export function applyBusinessRules(
   values: QuestFormValues,
   presetConfig?: PresetConfig,
+  _findConnectQuestByProvider?: (provider: string) => number | null,
 ): QuestFormValues {
   const updatedValues = { ...values };
 
@@ -158,6 +162,19 @@ export function applyBusinessRules(
       (sum: number, reward: number) => sum + reward,
       0,
     );
+  }
+
+  // Auto-select block_id for quests that need Connect gate
+  if (
+    updatedValues.provider &&
+    updatedValues.type !== 'connect' &&
+    !updatedValues.block_id &&
+    _findConnectQuestByProvider
+  ) {
+    const connectQuestId = _findConnectQuestByProvider(updatedValues.provider);
+    if (connectQuestId) {
+      updatedValues.block_id = connectQuestId;
+    }
   }
 
   // Update child order_by indices
