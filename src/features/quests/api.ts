@@ -1,16 +1,18 @@
 import { useMemo } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { useAdminControllerGetWaitlistTasks } from '@/lib/api/generated/admin/admin';
-import { type AdminWaitlistTasksResponseDto } from '@/lib/api/generated/model';
-import { adaptAdminTasksToQuests, adaptAdminTaskToQuest } from './data/adapters';
-import type { Quest, QuestQuery, QuestsResponse } from './data/types';
 import {
-  initializeMockStorage,
-  mockCreateQuest,
-  mockUpdateQuest,
-  mockUploadMedia,
-} from './utils/mock-api';
+  useAdminWaitlistTasksControllerGetWaitlistTasks,
+  useAdminWaitlistTasksControllerCreateTask,
+  useAdminWaitlistTasksControllerUpdateTask,
+  useAdminWaitlistTasksControllerDeleteTask,
+  useFilesControllerUploadFile,
+  filesControllerUploadFile
+} from '@/lib/api/generated/admin/admin';
+import { type TaskResponseDto, type CreateTaskDto, type UpdateTaskDto, type UploadFileDto } from '@/lib/api/generated/model';
+import { adaptAdminTasksToQuests, adaptAdminTaskToQuest } from './data/adapters';
+import { formToApi, validateAndConvertToApi } from './adapters/form-api-adapter';
+import type { Quest, QuestQuery, QuestsResponse } from './data/types';
 
 export const useQuests = (query: QuestQuery) => {
   // Use the generated API hook for admin access to waitlist tasks
@@ -20,7 +22,7 @@ export const useQuests = (query: QuestQuery) => {
     isFetching,
     error,
     refetch,
-  } = useAdminControllerGetWaitlistTasks();
+  } = useAdminWaitlistTasksControllerGetWaitlistTasks();
 
   // Memoize transformation to avoid unnecessary re-renders
   const transformedQuests = useMemo(() => {
@@ -67,7 +69,7 @@ export const useQuests = (query: QuestQuery) => {
           return item.provider ? selectedProviders.includes(item.provider) : false;
         })();
 
-      const matchesVisibility = query.visible === undefined || item.visible === query.visible;
+      const matchesVisibility = query.enabled === undefined || item.enabled === query.enabled;
 
       return matchesSearch && matchesGroup && matchesType && matchesProvider && matchesVisibility;
     });
@@ -116,13 +118,13 @@ export const useQuests = (query: QuestQuery) => {
 
 export const useQuest = (id: number) => {
   // Use the base hook to get all tasks (leveraging React Query cache)
-  const { data: adminTasks, isLoading, error, isFetching } = useAdminControllerGetWaitlistTasks();
+  const { data: adminTasks, isLoading, error, isFetching } = useAdminWaitlistTasksControllerGetWaitlistTasks();
 
   // Memoize the specific task lookup and transformation
   const quest = useMemo(() => {
     if (!adminTasks) return undefined;
 
-    const task = adminTasks.find((task: AdminWaitlistTasksResponseDto) => task.id === id);
+    const task = adminTasks.find((task) => task.id === id);
 
     return task ? adaptAdminTaskToQuest(task) : undefined;
   }, [adminTasks, id]);
@@ -142,22 +144,26 @@ export const useQuest = (id: number) => {
 // ============================================================================
 
 /**
- * Create quest mutation (Mock implementation)
+ * Create quest mutation (Real API implementation)
  */
 export const useCreateQuest = () => {
   const queryClient = useQueryClient();
-
-  // Initialize mock storage on first use
-  initializeMockStorage();
+  const createTaskMutation = useAdminWaitlistTasksControllerCreateTask();
 
   return useMutation({
     mutationFn: async (data: Partial<Quest>): Promise<Quest> => {
-      return await mockCreateQuest(data);
+      // Convert form data to API format using adapter
+      const apiData = validateAndConvertToApi(data) as CreateTaskDto;
+
+      const result = await createTaskMutation.mutateAsync({ data: apiData });
+
+      // Convert API response back to Quest format
+      return adaptAdminTaskToQuest(result);
     },
     onSuccess: () => {
       toast.success('Quest created successfully');
       // Invalidate and refetch quests list
-      void queryClient.invalidateQueries({ queryKey: ['waitlist-tasks'] });
+      void queryClient.invalidateQueries({ queryKey: ['api', 'admin', 'tasks'] });
     },
     onError: (error) => {
       const message = error instanceof Error ? error.message : 'Failed to create quest';
@@ -167,19 +173,26 @@ export const useCreateQuest = () => {
 };
 
 /**
- * Update quest mutation (Mock implementation)
+ * Update quest mutation (Real API implementation)
  */
 export const useUpdateQuest = (id: number) => {
   const queryClient = useQueryClient();
+  const updateTaskMutation = useAdminWaitlistTasksControllerUpdateTask();
 
   return useMutation({
     mutationFn: async (data: Partial<Quest>): Promise<Quest> => {
-      return await mockUpdateQuest(id, data);
+      // Convert form data to API format using adapter
+      const apiData = validateAndConvertToApi(data) as UpdateTaskDto;
+
+      const result = await updateTaskMutation.mutateAsync({ id, data: apiData });
+
+      // Convert API response back to Quest format
+      return adaptAdminTaskToQuest(result);
     },
     onSuccess: () => {
       toast.success('Quest updated successfully');
       // Invalidate and refetch quests list
-      void queryClient.invalidateQueries({ queryKey: ['waitlist-tasks'] });
+      void queryClient.invalidateQueries({ queryKey: ['api', 'admin', 'tasks'] });
     },
     onError: (error) => {
       const message = error instanceof Error ? error.message : 'Failed to update quest';
@@ -200,23 +213,20 @@ export const useUpdateQuest = (id: number) => {
 };
 
 /**
- * Delete quest mutation
- * TODO: Implement actual quest deletion API when available
- * TODO: Add confirmation dialog before deletion
- * TODO: Add soft delete option if supported by API
+ * Delete quest mutation (Real API implementation)
  */
 export const useDeleteQuest = () => {
+  const queryClient = useQueryClient();
+  const deleteTaskMutation = useAdminWaitlistTasksControllerDeleteTask();
+
   return useMutation({
-    mutationFn: async (_id: number): Promise<void> => {
-      // TODO: Replace with actual API call when quest deletion endpoint is available
-      // Example: return await api.delete(`/api/quests/${id}`)
-      throw new Error(
-        'Delete operation not available for admin tasks (readonly mode). TODO: Implement quest deletion API.',
-      );
+    mutationFn: async (id: number): Promise<void> => {
+      await deleteTaskMutation.mutateAsync({ id });
     },
     onSuccess: () => {
       toast.success('Quest deleted successfully');
-      // TODO: Remove from cache and refetch list
+      // Invalidate and refetch quests list
+      void queryClient.invalidateQueries({ queryKey: ['api', 'admin', 'tasks'] });
     },
     onError: (error) => {
       const message = error instanceof Error ? error.message : 'Failed to delete quest';
@@ -226,42 +236,59 @@ export const useDeleteQuest = () => {
 };
 
 /**
- * Toggle quest visibility mutation
- * TODO: Implement actual visibility toggle API when available
- * TODO: Consider if this should be part of update quest instead
+ * Toggle quest enabled status mutation (Using PUT as PATCH)
  */
-export const useToggleVisibility = () => {
+export const useToggleEnabled = () => {
+  const queryClient = useQueryClient();
+  const updateTaskMutation = useAdminWaitlistTasksControllerUpdateTask();
+
   return useMutation({
-    mutationFn: async (_data: { id: number; visible: boolean }): Promise<Quest> => {
-      // TODO: Replace with actual API call when visibility toggle endpoint is available
-      // Example: return await api.patch(`/api/quests/${data.id}/visibility`, { visible: data.visible })
-      throw new Error(
-        'Toggle visibility not available for admin tasks (readonly mode). TODO: Implement visibility toggle API.',
-      );
+    mutationFn: async (data: { id: number; enabled: boolean }): Promise<Quest> => {
+      // Use PUT endpoint which works as PATCH for enabled updates
+      const result = await updateTaskMutation.mutateAsync({
+        id: data.id,
+        data: { enabled: data.enabled } as UpdateTaskDto
+      });
+
+      // Convert API response back to Quest format
+      return adaptAdminTaskToQuest(result);
     },
     onSuccess: () => {
-      toast.success('Quest visibility updated successfully');
-      // TODO: Update cache directly for immediate feedback
+      toast.success('Quest status updated successfully');
+      // Invalidate and refetch quests list
+      void queryClient.invalidateQueries({ queryKey: ['api', 'admin', 'tasks'] });
     },
     onError: (error) => {
-      const message = error instanceof Error ? error.message : 'Failed to toggle visibility';
+      const message = error instanceof Error ? error.message : 'Failed to toggle status';
       toast.error(message);
     },
   });
 };
 
 /**
- * Toggle quest pinned state (Mock implementation)
+ * @deprecated Use useToggleEnabled instead
+ */
+export const useToggleVisibility = useToggleEnabled;
+
+/**
+ * Toggle quest pinned state (Real API implementation)
  */
 export const useTogglePinned = () => {
   const queryClient = useQueryClient();
+  const updateTaskMutation = useAdminWaitlistTasksControllerUpdateTask();
+
   return useMutation({
     mutationFn: async (data: { id: number; pinned: boolean }): Promise<Quest> => {
-      // Use mock update for now
-      return await mockUpdateQuest(data.id, { pinned: data.pinned } as Partial<Quest>);
+      const result = await updateTaskMutation.mutateAsync({
+        id: data.id,
+        data: { pinned: data.pinned } as UpdateTaskDto
+      });
+
+      // Convert API response back to Quest format
+      return adaptAdminTaskToQuest(result);
     },
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['waitlist-tasks'] });
+      void queryClient.invalidateQueries({ queryKey: ['api', 'admin', 'tasks'] });
       toast.success('Updated pin state');
     },
     onError: (error) => {
@@ -272,10 +299,15 @@ export const useTogglePinned = () => {
 };
 
 /**
- * Upload media for quest (Mock implementation)
+ * Upload media for quest (Real API implementation)
  */
 export const uploadMedia = async (file: File, _token: string | undefined): Promise<string> => {
-  return await mockUploadMedia(file);
+  // Use real API endpoint for file upload
+  const uploadFileDto: UploadFileDto = { file };
+
+  const result = await filesControllerUploadFile(uploadFileDto);
+
+  return result.url;
 };
 
 // ============================================================================
@@ -283,25 +315,51 @@ export const uploadMedia = async (file: File, _token: string | undefined): Promi
 // ============================================================================
 
 /**
- * Bulk update quests
- * TODO: Implement when API supports bulk operations
+ * Bulk update quests (Using individual API calls)
+ * TODO: Implement true bulk operations when API supports them
  */
 export const useBulkUpdateQuests = () => {
+  const queryClient = useQueryClient();
+  const updateTaskMutation = useAdminWaitlistTasksControllerUpdateTask();
+
   return useMutation({
-    mutationFn: async (_data: { ids: number[]; updates: Partial<Quest> }): Promise<Quest[]> => {
-      throw new Error('Bulk update not implemented yet. TODO: Add bulk operations API.');
+    mutationFn: async (data: { ids: number[]; updates: Partial<Quest> }): Promise<Quest[]> => {
+      // Convert form data to API format
+      const apiData = validateAndConvertToApi(data.updates) as UpdateTaskDto;
+
+      // Execute all updates in parallel
+      const promises = data.ids.map(id =>
+        updateTaskMutation.mutateAsync({ id, data: apiData })
+      );
+
+      const results = await Promise.all(promises);
+
+      // Convert all API responses back to Quest format
+      return results.map(result => adaptAdminTaskToQuest(result));
+    },
+    onSuccess: () => {
+      toast.success('Quests updated successfully');
+      void queryClient.invalidateQueries({ queryKey: ['api', 'admin', 'tasks'] });
+    },
+    onError: (error) => {
+      const message = error instanceof Error ? error.message : 'Failed to update quests';
+      toast.error(message);
     },
   });
 };
 
 /**
- * Bulk delete quests
- * TODO: Implement when API supports bulk operations
+ * Bulk delete quests - NOT NEEDED
+ * Individual delete operations are sufficient for admin interface
  */
 export const useBulkDeleteQuests = () => {
   return useMutation({
     mutationFn: async (_ids: number[]): Promise<void> => {
-      throw new Error('Bulk delete not implemented yet. TODO: Add bulk operations API.');
+      throw new Error('Bulk delete not needed - use individual delete operations');
+    },
+    onError: (error) => {
+      const message = error instanceof Error ? error.message : 'Bulk delete not available';
+      toast.error(message);
     },
   });
 };

@@ -5,7 +5,7 @@ import { IconCheck, IconStar, IconStarFilled } from '@tabler/icons-react';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { DataTableColumnHeader } from '@/components/table/data-table-column-header';
-import { useToggleVisibility } from '../api';
+import { useToggleEnabled } from '../api';
 import type { Quest } from '../data/types';
 import { useQuestSearch } from '../use-quest-search';
 import { getBadgeClasses, getBadgeStyle, getBadgeVariant } from '../utils/badge-variants';
@@ -13,15 +13,15 @@ import { formatDateDMY, formatNumberShort, formatXp } from '../utils/format';
 import { getProviderIcon } from '../utils/provider-icons';
 import { DataTableRowActions } from './data-table-row-actions';
 
-const VisibleCell = ({ row, isAdmin }: { row: Row<Quest>; isAdmin: boolean }) => {
-  const toggle = useToggleVisibility();
-  const visible = row.getValue('visible') !== false;
-  if (!isAdmin) return <span>{visible ? 'Yes' : 'No'}</span>;
+const EnabledCell = ({ row, isAdmin }: { row: Row<Quest>; isAdmin: boolean }) => {
+  const toggle = useToggleEnabled();
+  const enabled = row.getValue('enabled') !== false;
+  if (!isAdmin) return <span>{enabled ? 'Yes' : 'No'}</span>;
   return (
     <Switch
-      checked={visible}
-      onCheckedChange={(v) => toggle.mutate({ id: row.original.id, visible: v })}
-      aria-label={`Toggle visibility for ${String(row.original.title)}`}
+      checked={enabled}
+      onCheckedChange={(v) => toggle.mutate({ id: row.original.id, enabled: v })}
+      aria-label={`Toggle enabled status for ${String(row.original.title)}`}
     />
   );
 };
@@ -127,11 +127,11 @@ export const getColumns = (isAdmin: boolean): ColumnDef<Quest>[] => {
       minSize: 100,
       maxSize: 100,
     },
-    // 7. Visible (switch)
+    // 7. Enabled (switch)
     {
-      accessorKey: 'visible',
-      header: ({ column }) => <DataTableColumnHeader column={column} title='Visible' />,
-      cell: (ctx) => <VisibleCell row={ctx.row} isAdmin={isAdmin} />,
+      accessorKey: 'enabled',
+      header: ({ column }) => <DataTableColumnHeader column={column} title='Enabled' />,
+      cell: (ctx) => <EnabledCell row={ctx.row} isAdmin={isAdmin} />,
       enableSorting: false,
       filterFn: (row, id, value: string | string[]) => {
         const v = String(row.getValue(id) ?? true).toLowerCase();

@@ -6,7 +6,7 @@ export interface FiltersContextType {
   group: string;
   type: string;
   provider: string;
-  visible: string;
+  enabled: string;
   page: number;
   limit: number;
   sort: string;
@@ -16,7 +16,7 @@ export interface FiltersContextType {
   setGroup: (value: string) => void;
   setType: (value: string) => void;
   setProvider: (value: string) => void;
-  setVisible: (value: string) => void;
+  setEnabled: (value: string) => void;
   setPage: (value: number) => void;
   setLimit: (value: number) => void;
   setSort: (value: string) => void;

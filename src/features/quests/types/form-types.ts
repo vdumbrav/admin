@@ -87,7 +87,10 @@ export interface QuestFormValues {
   uri?: string;
   reward?: number;
   totalReward?: number;
-  visible?: boolean;
+  enabled?: boolean;
+  web?: boolean;
+  twa?: boolean;
+  pinned?: boolean;
   icon?: string;
   resources?: FormResources;
   child?: ChildFormValues[];
@@ -116,7 +119,10 @@ export const DEFAULT_FORM_VALUES: Partial<QuestFormValues> = {
   description: '',
   group: 'all',
   order_by: 0,
-  visible: true,
+  enabled: true,
+  web: true,
+  twa: false,
+  pinned: false,
   reward: undefined,
   totalReward: undefined, // For controlled inputs - always defined value
   uri: '', // Empty string instead of undefined for controlled input

@@ -73,9 +73,9 @@ export function FiltersProvider({ children }: Props) {
     [updateFilters],
   );
 
-  const setVisible = React.useCallback(
+  const setEnabled = React.useCallback(
     (value: string) => {
-      updateFilters({ visible: value || undefined, page: 1 });
+      updateFilters({ enabled: value || undefined, page: 1 });
     },
     [updateFilters],
   );
@@ -111,7 +111,7 @@ export function FiltersProvider({ children }: Props) {
       group: undefined,
       type: undefined,
       provider: undefined,
-      visible: undefined,
+      enabled: undefined,
       page: 1,
       limit: 20, // Reset to default page size
     });
@@ -140,7 +140,7 @@ export function FiltersProvider({ children }: Props) {
     group: searchParams.group || '',
     type: searchParams.type || '',
     provider: searchParams.provider || '',
-    visible: searchParams.visible || '',
+    enabled: searchParams.enabled || '',
     page: searchParams.page || 1,
     limit: searchParams.limit || 20,
     sort: searchParams.sort || 'order_by:asc',
@@ -150,7 +150,7 @@ export function FiltersProvider({ children }: Props) {
     setGroup,
     setType,
     setProvider,
-    setVisible,
+    setEnabled,
     setPage,
     setLimit,
     setSort,

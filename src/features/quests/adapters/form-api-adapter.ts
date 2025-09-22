@@ -52,7 +52,7 @@ export function apiToForm(apiData: Partial<Task>): QuestFormValues {
     provider: apiData.provider,
     uri: apiData.uri ?? undefined,
     reward: apiData.reward,
-    visible: apiData.visible ?? (DEFAULT_FORM_VALUES.visible as boolean),
+    enabled: apiData.enabled ?? (DEFAULT_FORM_VALUES.enabled as boolean),
 
     // Complex nested structures requiring conversion
     resources: apiData.resources
@@ -200,7 +200,10 @@ export function formToApi(formData: QuestFormValues): Partial<Task> {
     provider: formData.provider,
     uri: formData.uri,
     reward: formData.reward,
-    visible: formData.visible,
+    enabled: formData.enabled,
+    web: formData.web ?? true, // Default web enabled for admin-created tasks
+    twa: formData.twa ?? false, // Default TWA disabled for admin-created tasks
+    pinned: formData.pinned ?? false, // Default not pinned
 
     // Complex nested structures
     resources: formData.resources ? convertFormResourcesToApi(formData.resources) : null,
@@ -302,7 +305,10 @@ export function getDefaultFormValues(): QuestFormValues {
     description: '',
     group: 'all',
     order_by: 0,
-    visible: true,
+    enabled: true,
+    web: true,
+    twa: false,
+    pinned: false,
     // Ensure values for all possible fields to avoid uncontrolled->controlled warning
     reward: undefined,
     totalReward: undefined,

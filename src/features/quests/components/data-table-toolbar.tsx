@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { DataTableFacetedFilter } from '@/components/table/data-table-faceted-filter';
 import { DataTableViewOptions } from '@/components/table/data-table-view-options';
 import { useQuests } from '../api';
-import { groups, providers, types, visibilities } from '../data/data';
+import { groups, providers, types, enabledOptions } from '../data/data';
 import { useFilters } from '../hooks/use-filters';
 import { createVirtualColumn } from '../utils/virtual-column-helper';
 
@@ -18,12 +18,12 @@ export const DataTableToolbar = <TData,>({ table }: DataTableToolbarProps<TData>
     group,
     type,
     provider,
-    visible,
+    enabled,
     resetFilters,
     setGroup,
     setType,
     setProvider,
-    setVisible,
+    setEnabled,
   } = useFilters();
 
   // Get all data without filters for counting
@@ -32,7 +32,7 @@ export const DataTableToolbar = <TData,>({ table }: DataTableToolbarProps<TData>
     group: undefined,
     type: undefined,
     provider: undefined,
-    visible: undefined,
+    enabled: undefined,
     page: 1,
     limit: 1000, // Get all items for counting
     sort: 'order_by:asc',
@@ -82,14 +82,14 @@ export const DataTableToolbar = <TData,>({ table }: DataTableToolbarProps<TData>
     return counts;
   }, [allData?.items]);
 
-  const getVisibleCounts = React.useMemo(() => {
+  const getEnabledCounts = React.useMemo(() => {
     if (!allData?.items) return new Map();
     const counts = new Map<string, number>();
 
     allData.items.forEach((item) => {
-      if (item.visible !== undefined) {
-        const visibleValue = item.visible.toString();
-        counts.set(visibleValue, (counts.get(visibleValue) ?? 0) + 1);
+      if (item.enabled !== undefined) {
+        const enabledValue = item.enabled.toString();
+        counts.set(enabledValue, (counts.get(enabledValue) ?? 0) + 1);
       }
     });
 
@@ -130,18 +130,18 @@ export const DataTableToolbar = <TData,>({ table }: DataTableToolbarProps<TData>
     [provider, setProvider, getProviderCounts],
   );
 
-  const virtualVisibleColumn = React.useMemo(
+  const virtualEnabledColumn = React.useMemo(
     () =>
       createVirtualColumn({
-        currentValue: visible,
-        setValue: setVisible,
-        getCounts: () => getVisibleCounts,
+        currentValue: enabled,
+        setValue: setEnabled,
+        getCounts: () => getEnabledCounts,
         isMultiple: false,
       }),
-    [visible, setVisible, getVisibleCounts],
+    [enabled, setEnabled, getEnabledCounts],
   );
 
-  const hasFilters = group || type || provider || visible;
+  const hasFilters = group || type || provider || enabled;
 
   return (
     <div className='flex items-center justify-between'>
@@ -166,9 +166,9 @@ export const DataTableToolbar = <TData,>({ table }: DataTableToolbarProps<TData>
             multiple={true}
           />
           <DataTableFacetedFilter
-            column={virtualVisibleColumn as Column<unknown, unknown>}
-            title='Visible'
-            options={visibilities}
+            column={virtualEnabledColumn as Column<unknown, unknown>}
+            title='Enabled'
+            options={enabledOptions}
             multiple={false}
           />
         </div>

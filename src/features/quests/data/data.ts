@@ -78,12 +78,17 @@ export const providers = getAvailableApiProviders().map(
 );
 
 /**
- * Visibility dropdown options
+ * Enabled status dropdown options
  */
-export const visibilities = [
-  { value: 'true', label: 'Visible' },
-  { value: 'false', label: 'Hidden' },
+export const enabledOptions = [
+  { value: 'true', label: 'Enabled' },
+  { value: 'false', label: 'Disabled' },
 ];
+
+/**
+ * @deprecated Use enabledOptions instead
+ */
+export const visibilities = enabledOptions;
 
 // ============================================================================
 // Helper Functions

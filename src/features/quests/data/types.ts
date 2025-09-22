@@ -1,9 +1,9 @@
 import type {
-  AdminWaitlistTasksResponseDto,
-  AdminWaitlistTasksResponseDtoGroup,
-  AdminWaitlistTasksResponseDtoProvider,
-  AdminWaitlistTasksResponseDtoStatus,
-  AdminWaitlistTasksResponseDtoTypeItem,
+  TaskResponseDto,
+  TaskResponseDtoGroup,
+  TaskResponseDtoProvider,
+  TaskResponseDtoStatus,
+  TaskResponseDtoTypeItem,
 } from '@/lib/api/generated/model';
 
 // ============================================================================
@@ -53,11 +53,11 @@ export interface IteratorDaily {
 // ============================================================================
 
 // Using API type directly where possible
-export type TaskType = AdminWaitlistTasksResponseDtoTypeItem;
-export type TaskGroup = Exclude<AdminWaitlistTasksResponseDtoGroup, 'all'>; // Form type excludes 'all'
-export type UIGroup = AdminWaitlistTasksResponseDtoGroup; // UI type includes 'all' from API
-export type TaskProvider = AdminWaitlistTasksResponseDtoProvider;
-export type TaskStatus = AdminWaitlistTasksResponseDtoStatus;
+export type TaskType = TaskResponseDtoTypeItem;
+export type TaskGroup = Exclude<TaskResponseDtoGroup, 'all'>; // Form type excludes 'all'
+export type UIGroup = TaskResponseDtoGroup; // UI type includes 'all' from API
+export type TaskProvider = TaskResponseDtoProvider;
+export type TaskStatus = TaskResponseDtoStatus;
 
 // Form-compatible Task interface (mixing API types with form requirements)
 export interface Task {
@@ -82,7 +82,6 @@ export interface Task {
   iterable?: boolean | null;
   iterator?: IteratorDaily | null;
   providerCapitalized?: string;
-  visible?: boolean;
 }
 
 // ============================================================================
@@ -90,15 +89,11 @@ export interface Task {
 // ============================================================================
 
 // Extended Quest type with additional UI fields
-export type Quest = AdminWaitlistTasksResponseDto & {
-  visible?: boolean; // UI-only field for visibility toggle
-  pinned?: boolean;
+export type Quest = TaskResponseDto & {
   usersCount?: number;
   totalXp?: number;
   startDate?: string | null;
   endDate?: string | null;
-  webEnabled?: boolean;
-  tmaEnabled?: boolean;
 };
 
 // ============================================================================
@@ -138,7 +133,7 @@ export interface LocalFilterConfig {
   group?: UIGroup;
   type?: string;
   provider?: string;
-  visible?: boolean;
+  enabled?: boolean;
 }
 
 export interface QuestQuery extends LocalFilterConfig, Partial<LocalPaginationConfig> {

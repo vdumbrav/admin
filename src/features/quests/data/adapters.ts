@@ -1,15 +1,15 @@
 import {
-  type AdminWaitlistTasksResponseDto,
-  type AdminWaitlistTasksResponseDtoGroup,
-  type AdminWaitlistTasksResponseDtoIterator,
-  type AdminWaitlistTasksResponseDtoProvider,
-  type AdminWaitlistTasksResponseDtoResources,
-  type AdminWaitlistTasksResponseDtoStatus,
-  type AdminWaitlistTasksResponseDtoTypeItem,
-  AdminWaitlistTasksResponseDtoGroup as ApiGroup,
-  AdminWaitlistTasksResponseDtoProvider as ApiProvider,
-  AdminWaitlistTasksResponseDtoStatus as ApiStatus,
-  AdminWaitlistTasksResponseDtoTypeItem as ApiTypeItem,
+  type TaskResponseDto,
+  type TaskResponseDtoGroup,
+  type TaskResponseDtoIterator,
+  type TaskResponseDtoProvider,
+  type TaskResponseDtoResources,
+  type TaskResponseDtoStatus,
+  type TaskResponseDtoTypeItem,
+  TaskResponseDtoGroup as ApiGroup,
+  TaskResponseDtoProvider as ApiProvider,
+  TaskResponseDtoStatus as ApiStatus,
+  TaskResponseDtoTypeItem as ApiTypeItem,
 } from '@/lib/api/generated/model';
 import type { IteratorDaily, Quest, Resources, Task } from './types';
 
@@ -17,20 +17,20 @@ import type { IteratorDaily, Quest, Resources, Task } from './types';
 // Type Guards
 // ============================================================================
 
-function isValidApiTaskType(type: string): type is AdminWaitlistTasksResponseDtoTypeItem {
-  return Object.values(ApiTypeItem).includes(type as AdminWaitlistTasksResponseDtoTypeItem);
+function isValidApiTaskType(type: string): type is TaskResponseDtoTypeItem {
+  return Object.values(ApiTypeItem).includes(type as TaskResponseDtoTypeItem);
 }
 
-function isValidApiProvider(provider: string): provider is AdminWaitlistTasksResponseDtoProvider {
-  return Object.values(ApiProvider).includes(provider as AdminWaitlistTasksResponseDtoProvider);
+function isValidApiProvider(provider: string): provider is TaskResponseDtoProvider {
+  return Object.values(ApiProvider).includes(provider as TaskResponseDtoProvider);
 }
 
-function isValidApiGroup(group: string): group is AdminWaitlistTasksResponseDtoGroup {
-  return Object.values(ApiGroup).includes(group as AdminWaitlistTasksResponseDtoGroup);
+function isValidApiGroup(group: string): group is TaskResponseDtoGroup {
+  return Object.values(ApiGroup).includes(group as TaskResponseDtoGroup);
 }
 
-function isValidApiStatus(status: string): status is AdminWaitlistTasksResponseDtoStatus {
-  return Object.values(ApiStatus).includes(status as AdminWaitlistTasksResponseDtoStatus);
+function isValidApiStatus(status: string): status is TaskResponseDtoStatus {
+  return Object.values(ApiStatus).includes(status as TaskResponseDtoStatus);
 }
 
 // ============================================================================
@@ -38,7 +38,7 @@ function isValidApiStatus(status: string): status is AdminWaitlistTasksResponseD
 // ============================================================================
 
 function adaptResourcesFromApi(
-  resources: AdminWaitlistTasksResponseDtoResources | undefined,
+  resources: TaskResponseDtoResources | undefined,
 ): Resources | undefined {
   if (!resources || typeof resources !== 'object') return undefined;
 
@@ -48,15 +48,15 @@ function adaptResourcesFromApi(
 
 function adaptResourcesToApi(
   resources: Resources | undefined,
-): AdminWaitlistTasksResponseDtoResources | undefined {
+): TaskResponseDtoResources | undefined {
   if (!resources) return undefined;
 
   // TODO: Add proper resource validation and transformation
-  return resources as AdminWaitlistTasksResponseDtoResources;
+  return resources as TaskResponseDtoResources;
 }
 
 function adaptIteratorFromApi(
-  iterator: AdminWaitlistTasksResponseDtoIterator | undefined,
+  iterator: TaskResponseDtoIterator | undefined,
 ): IteratorDaily | undefined {
   if (!iterator || typeof iterator !== 'object') return undefined;
 
@@ -66,11 +66,11 @@ function adaptIteratorFromApi(
 
 function adaptIteratorToApi(
   iterator: IteratorDaily | undefined | null,
-): AdminWaitlistTasksResponseDtoIterator | undefined {
+): TaskResponseDtoIterator | undefined {
   if (!iterator) return undefined;
 
   // TODO: Add proper iterator validation and transformation
-  return iterator as unknown as AdminWaitlistTasksResponseDtoIterator;
+  return iterator as unknown as TaskResponseDtoIterator;
 }
 
 // ============================================================================
@@ -78,33 +78,16 @@ function adaptIteratorToApi(
 // ============================================================================
 
 /**
- * Extended task type with UI-specific fields
+ * Converts TaskResponseDto to Quest (UI format)
+ * Now we use API fields directly without conversion
  */
-interface ExtendedAdminTask extends AdminWaitlistTasksResponseDto {
-  visible?: boolean;
-  pinned?: boolean;
-  usersCount?: number;
-  totalXp?: number;
-  webEnabled?: boolean;
-  tmaEnabled?: boolean;
-}
-
-/**
- * Converts AdminWaitlistTasksResponseDto to Quest (UI format)
- * This is a simple adapter since Quest extends the API type
- */
-export function adaptAdminTaskToQuest(task: AdminWaitlistTasksResponseDto): Quest {
-  const extendedTask = task as ExtendedAdminTask;
+export function adaptAdminTaskToQuest(task: TaskResponseDto): Quest {
   return {
     ...task,
-    visible: extendedTask.visible ?? true, // Default to visible for admin view
-    pinned: extendedTask.pinned ?? false,
-    usersCount: extendedTask.usersCount ?? undefined,
-    totalXp: extendedTask.totalXp ?? undefined,
+    usersCount: undefined,
+    totalXp: undefined,
     startDate: task.started_at,
     endDate: task.completed_at,
-    webEnabled: extendedTask.webEnabled ?? false,
-    tmaEnabled: extendedTask.tmaEnabled ?? false,
   };
 }
 
@@ -134,7 +117,6 @@ export function adaptQuestToTask(quest: Quest): Task {
     child: quest.child.length > 0 ? quest.child.map(adaptQuestToTask) : undefined,
     iterable: quest.iterable,
     iterator: adaptIteratorFromApi(quest.iterator),
-    visible: quest.visible,
   };
 }
 
@@ -148,19 +130,19 @@ export function adaptQuestToTask(quest: Quest): Task {
  */
 export function adaptTaskToQuest(task: Partial<Task>): Partial<Quest> {
   // Handle type conversion with validation
-  let apiType: AdminWaitlistTasksResponseDtoTypeItem[] | undefined;
+  let apiType: TaskResponseDtoTypeItem[] | undefined;
 
   if (task.type) {
     if (isValidApiTaskType(task.type)) {
       apiType = [task.type];
     } else {
       console.warn(`Invalid task type for API: ${task.type}, using 'external' as fallback`);
-      apiType = ['external' as AdminWaitlistTasksResponseDtoTypeItem];
+      apiType = ['external' as TaskResponseDtoTypeItem];
     }
   }
 
   // Handle provider validation
-  let apiProvider: AdminWaitlistTasksResponseDtoProvider | undefined;
+  let apiProvider: TaskResponseDtoProvider | undefined;
   if (task.provider) {
     if (isValidApiProvider(task.provider)) {
       apiProvider = task.provider;
@@ -171,7 +153,7 @@ export function adaptTaskToQuest(task: Partial<Task>): Partial<Quest> {
   }
 
   // Handle group validation
-  let apiGroup: AdminWaitlistTasksResponseDtoGroup | undefined;
+  let apiGroup: TaskResponseDtoGroup | undefined;
   if (task.group) {
     if (isValidApiGroup(task.group)) {
       apiGroup = task.group;
@@ -182,7 +164,7 @@ export function adaptTaskToQuest(task: Partial<Task>): Partial<Quest> {
   }
 
   // Handle status validation
-  let apiStatus: AdminWaitlistTasksResponseDtoStatus | undefined;
+  let apiStatus: TaskResponseDtoStatus | undefined;
   if (task.status) {
     if (isValidApiStatus(task.status)) {
       apiStatus = task.status;
@@ -193,10 +175,10 @@ export function adaptTaskToQuest(task: Partial<Task>): Partial<Quest> {
   }
 
   // Handle child tasks recursively
-  const apiChild: AdminWaitlistTasksResponseDto[] = [];
+  const apiChild: TaskResponseDto[] = [];
   if (task.child && task.child.length > 0) {
     for (const childTask of task.child) {
-      const adaptedChild = adaptTaskToQuest(childTask) as AdminWaitlistTasksResponseDto;
+      const adaptedChild = adaptTaskToQuest(childTask) as TaskResponseDto;
       // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
       if (adaptedChild.id !== undefined) {
         apiChild.push(adaptedChild);
@@ -241,7 +223,6 @@ export function adaptTaskToQuest(task: Partial<Task>): Partial<Quest> {
     resources: adaptResourcesToApi(task.resources ?? undefined),
     iterator: adaptIteratorToApi(task.iterator),
     next_tick: task.next_tick ?? undefined,
-    visible: task.visible,
   };
 }
 
@@ -250,9 +231,9 @@ export function adaptTaskToQuest(task: Partial<Task>): Partial<Quest> {
 // ============================================================================
 
 /**
- * Converts array of AdminWaitlistTasksResponseDto to Quest array
+ * Converts array of TaskResponseDto to Quest array
  */
-export function adaptAdminTasksToQuests(tasks: AdminWaitlistTasksResponseDto[]): Quest[] {
+export function adaptAdminTasksToQuests(tasks: TaskResponseDto[]): Quest[] {
   return tasks.map(adaptAdminTaskToQuest);
 }
 
@@ -299,20 +280,20 @@ export function validateTaskForApi(task: Partial<Task>): string[] {
 /**
  * Gets available API types that can be used in forms
  */
-export function getAvailableApiTypes(): AdminWaitlistTasksResponseDtoTypeItem[] {
+export function getAvailableApiTypes(): TaskResponseDtoTypeItem[] {
   return Object.values(ApiTypeItem);
 }
 
 /**
  * Gets available API providers that can be used in forms
  */
-export function getAvailableApiProviders(): AdminWaitlistTasksResponseDtoProvider[] {
+export function getAvailableApiProviders(): TaskResponseDtoProvider[] {
   return Object.values(ApiProvider);
 }
 
 /**
  * Gets available API groups that can be used in forms
  */
-export function getAvailableApiGroups(): AdminWaitlistTasksResponseDtoGroup[] {
+export function getAvailableApiGroups(): TaskResponseDtoGroup[] {
   return Object.values(ApiGroup);
 }
