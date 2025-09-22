@@ -59,16 +59,13 @@ const PROVIDER_LABELS: Record<TaskResponseDtoProvider, string> = {
 
 /**
  * Groups dropdown options (API-synced)
- * Excludes 'all' as it's used for filtering, not as a quest group
  */
-export const groups = getAvailableApiGroups()
-  .filter((g) => g !== TaskResponseDtoGroup.all)
-  .map(
-    (group): DropdownOption => ({
-      value: group,
-      label: GROUP_LABELS[group],
-    }),
-  );
+export const groups = getAvailableApiGroups().map(
+  (group): DropdownOption => ({
+    value: group,
+    label: GROUP_LABELS[group],
+  }),
+);
 
 /**
  * Types dropdown options (API-synced)

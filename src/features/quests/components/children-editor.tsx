@@ -8,40 +8,18 @@ import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/comp
 import { Input } from '@/components/ui/input';
 import { NoWheelNumber } from '@/components/no-wheel-number';
 import { SelectDropdown } from '@/components/select-dropdown';
-import type { Quest } from '../data/types';
-
-type ChildType = Extract<Quest['type'][number], 'like' | 'share' | 'comment' | 'join' | 'connect'>;
-
-interface Child {
-  title: string;
-  type: ChildType;
-  provider?: Quest['provider'];
-  reward?: number;
-  order_by: number;
-  resources?: { tweetId?: string; username?: string };
-}
+import { providers, types } from '../data/data';
+import type { ChildFormValues } from '../types/form-types';
 
 interface FormValues {
-  child: Child[];
+  child: ChildFormValues[];
 }
 
-const childTypes = [
-  { value: 'like', label: 'Like' },
-  { value: 'share', label: 'Share' },
-  { value: 'comment', label: 'Comment' },
-  { value: 'join', label: 'Join' },
-  { value: 'connect', label: 'Connect' },
-];
+const childTypes = types.filter((type) =>
+  ['like', 'share', 'comment', 'join'].includes(type.value),
+);
 
-const childProviders = [
-  { value: 'twitter', label: 'Twitter' },
-  { value: 'telegram', label: 'Telegram' },
-  { value: 'discord', label: 'Discord' },
-  { value: 'matrix', label: 'Matrix' },
-  { value: 'walme', label: 'Internal' },
-  { value: 'monetag', label: 'Monetag' },
-  { value: 'adsgram', label: 'AdsGram' },
-];
+const childProviders = providers;
 
 export const ChildrenEditor = () => {
   const { control, setValue } = useFormContext<FormValues>();
@@ -80,6 +58,7 @@ export const ChildrenEditor = () => {
             append({
               title: '',
               type: 'like',
+              group: 'social',
               provider: 'twitter',
               order_by: fields.length,
             })
@@ -251,5 +230,3 @@ const ChildRow = ({ id, index, remove }: RowProps) => {
     </div>
   );
 };
-
-export type { Child };
