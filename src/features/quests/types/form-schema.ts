@@ -47,7 +47,9 @@ const formResourcesSchema = z
 
 const childFormSchema = z.object({
   title: z.string(),
+  description: z.string().optional(),
   type: childTypeSchema,
+  group: questGroupSchema,
   provider: providerSchema,
   reward: z.number().optional(),
   order_by: z.number(),

@@ -96,9 +96,11 @@ export function apiToForm(apiData: Partial<Quest>): QuestFormValues {
 function convertApiChildToForm(apiChild: Quest): ChildFormValues {
   return {
     title: apiChild.title,
+    description: apiChild.description,
     type: (Array.isArray(apiChild.type) && apiChild.type.length > 0
       ? apiChild.type[0]
       : 'external') as ChildFormValues['type'],
+    group: apiChild.group,
     provider: apiChild.provider,
     reward: apiChild.reward,
     order_by: apiChild.order_by,
@@ -244,10 +246,6 @@ export function formToApi(formData: QuestFormValues): Partial<Quest> {
 /**
  * Convert form child to API child
  *
- * ISSUE: Hardcoded defaults due to incomplete child form model
- * - group: 'social' is hardcoded (should be configurable)
- * - description: null is assumed (child forms don't capture this)
- *
  * @param formChild - Child form values
  * @returns Complete Task object for API
  */
@@ -256,8 +254,8 @@ function convertFormChildToApi(formChild: ChildFormValues): Quest {
     id: 0, // Will be assigned by API
     title: formChild.title,
     type: [formChild.type] as Quest['type'], // API expects array
-    description: undefined, // TODO: Add description field to child form - UX decision needed
-    group: 'social' as Quest['group'], // TODO: Make group configurable - requires API schema for child.group field
+    description: formChild.description,
+    group: formChild.group,
     order_by: formChild.order_by,
     provider: formChild.provider,
     reward: formChild.reward,

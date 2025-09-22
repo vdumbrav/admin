@@ -67,7 +67,9 @@ export interface FormResources {
 
 export interface ChildFormValues {
   title: string;
+  description?: string;
   type: (typeof CHILD_TYPES)[number];
+  group: (typeof QUEST_GROUPS)[number];
   provider?: (typeof PROVIDERS)[number];
   reward?: number;
   order_by: number;
