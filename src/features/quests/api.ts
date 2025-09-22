@@ -101,7 +101,7 @@ export const useQuests = (query: QuestQuery) => {
       items: paginatedItems,
       total: totalItems,
     };
-  }, [transformedQuests, query]);
+  }, [questsData, query]);
 
   return {
     data: processedData,
