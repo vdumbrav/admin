@@ -7,6 +7,7 @@ This project uses shadcn/ui components with dark theme customization. All compon
 ### Form Components
 
 #### Button
+
 ```tsx
 import { Button } from "@/components/ui/button"
 
@@ -25,6 +26,7 @@ import { Button } from "@/components/ui/button"
 ```
 
 #### Input
+
 ```tsx
 import { Input } from "@/components/ui/input"
 
@@ -44,6 +46,7 @@ import { Input } from "@/components/ui/input"
 ```
 
 #### Label
+
 ```tsx
 import { Label } from "@/components/ui/label"
 
@@ -55,6 +58,7 @@ import { Label } from "@/components/ui/label"
 ### Layout Components
 
 #### Card
+
 ```tsx
 import { 
   Card, 
@@ -80,6 +84,7 @@ import {
 ```
 
 #### Separator
+
 ```tsx
 import { Separator } from "@/components/ui/separator"
 
@@ -91,6 +96,7 @@ import { Separator } from "@/components/ui/separator"
 ```
 
 #### Tabs
+
 ```tsx
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
@@ -111,6 +117,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 ### Feedback Components
 
 #### Alert
+
 ```tsx
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { CheckCircle, AlertTriangle } from "lucide-react"
@@ -133,6 +140,7 @@ import { CheckCircle, AlertTriangle } from "lucide-react"
 ```
 
 #### Badge
+
 ```tsx
 import { Badge } from "@/components/ui/badge"
 
@@ -143,6 +151,7 @@ import { Badge } from "@/components/ui/badge"
 ```
 
 #### Toast (with Sonner)
+
 ```tsx
 import { toast } from "sonner"
 
@@ -165,6 +174,7 @@ toast("Custom message", {
 ### Navigation Components
 
 #### Avatar
+
 ```tsx
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
@@ -175,6 +185,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 ```
 
 #### Dropdown Menu
+
 ```tsx
 import {
   DropdownMenu,
@@ -203,6 +214,7 @@ import {
 ### Data Display Components
 
 #### Table
+
 ```tsx
 import {
   Table,
@@ -236,6 +248,7 @@ import {
 ### Overlay Components
 
 #### Dialog
+
 ```tsx
 import {
   Dialog,
@@ -266,6 +279,7 @@ import {
 ```
 
 #### Tooltip
+
 ```tsx
 import {
   Tooltip,
@@ -289,6 +303,7 @@ import {
 ## Dark Theme Customization
 
 ### Color Variables
+
 All components use CSS variables that adapt to dark theme:
 
 ```css
@@ -306,6 +321,7 @@ All components use CSS variables that adapt to dark theme:
 ```
 
 ### Custom Styling
+
 ```tsx
 // Extending component styles
 <Button className="bg-blue-600 hover:bg-blue-700 text-white">
@@ -323,6 +339,7 @@ All components use CSS variables that adapt to dark theme:
 ## Common Patterns
 
 ### Form with Validation
+
 ```tsx
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -366,6 +383,7 @@ function UserForm() {
 ```
 
 ### Loading States
+
 ```tsx
 import { Skeleton } from "@/components/ui/skeleton"
 
@@ -385,6 +403,7 @@ function LoadingCard() {
 ```
 
 ### User Actions
+
 ```tsx
 function UserActions({ user }: { user: User }) {
   const handleDelete = async () => {
@@ -436,6 +455,7 @@ Use natural language with Claude Code:
 ## Accessibility
 
 All components include:
+
 - Proper ARIA attributes
 - Keyboard navigation
 - Focus management

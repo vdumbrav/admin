@@ -7,6 +7,7 @@ This admin panel uses OpenID Connect (OIDC) with Keycloak for authentication and
 ## Architecture
 
 ### Authentication Provider
+
 The `AppAuthProvider` wraps the application and provides authentication context:
 
 ```tsx
@@ -20,6 +21,7 @@ export const AppAuthProvider: React.FC<React.PropsWithChildren> = ({ children })
 ```
 
 ### OIDC Configuration
+
 ```tsx
 // src/auth/oidc.ts
 export const oidcConfig: AuthProviderProps = {
@@ -39,6 +41,7 @@ export const oidcConfig: AuthProviderProps = {
 ## Role-Based Access Control
 
 ### Supported Roles
+
 ```tsx
 // src/auth/roles.ts
 export enum UserRole {
@@ -50,6 +53,7 @@ export const ALLOWED_ROLES = [UserRole.Admin, UserRole.Moderator]
 ```
 
 ### Role Extraction
+
 The system extracts roles from multiple JWT claim locations:
 
 ```tsx
@@ -75,6 +79,7 @@ export function getRolesFromUser(user: User | null): string[] {
 ```
 
 ### Access Validation
+
 ```tsx
 export function userHasAllowedRole(user: User | null): boolean {
   const roles = getRolesFromUser(user)
@@ -90,6 +95,7 @@ export function userIsAdmin(user: User | null): boolean {
 ## Route Protection
 
 ### Authentication Guards
+
 ```tsx
 // src/auth/guards.ts
 export const requireAuthBeforeLoad = async () => {
@@ -113,6 +119,7 @@ export const requireAuthBeforeLoad = async () => {
 ```
 
 ### Route Implementation
+
 ```tsx
 // Protected route example
 export const Route = createFileRoute('/_authenticated/quests/')({
@@ -124,11 +131,13 @@ export const Route = createFileRoute('/_authenticated/quests/')({
 ## Authentication Flow
 
 ### 1. Initial Access
+
 - User visits protected route
 - Guard checks authentication status
 - Redirects to `/sign-in` if not authenticated
 
 ### 2. Sign-In Process
+
 ```tsx
 // src/routes/sign-in.tsx
 function SignInPage() {
@@ -149,6 +158,7 @@ function SignInPage() {
 ```
 
 ### 3. Callback Handling
+
 ```tsx
 // src/routes/auth/callback.tsx
 export const Route = createFileRoute('/auth/callback')({
@@ -169,6 +179,7 @@ export const Route = createFileRoute('/auth/callback')({
 ## Error Handling
 
 ### Access Denied UI
+
 When users lack required roles, they see a clear message:
 
 ```tsx
@@ -197,11 +208,13 @@ if (isAuthenticated && !hasAllowedRole) {
 ## Session Management
 
 ### Automatic Token Refresh
+
 - Configured with `automaticSilentRenew: true`
 - Handles token expiration automatically
 - Maintains user session without interruption
 
 ### Manual Sign Out
+
 ```tsx
 const { signoutRedirect } = useAppAuth()
 
@@ -213,6 +226,7 @@ const handleSignOut = () => {
 ## Configuration
 
 ### Environment Variables
+
 ```bash
 # Required OIDC settings
 VITE_OIDC_AUTHORITY=https://keycloak.example.com/realms/your-realm
@@ -222,6 +236,7 @@ VITE_APP_BASE_URL=http://localhost:3000
 ```
 
 ### Keycloak Client Setup
+
 1. **Client Type**: Public (for SPA)
 2. **Valid Redirect URIs**: `http://localhost:3000/auth/callback`
 3. **Valid Post Logout URIs**: `http://localhost:3000/`
@@ -231,6 +246,7 @@ VITE_APP_BASE_URL=http://localhost:3000
 ## Debugging
 
 ### Console Logging
+
 All authentication operations are logged for debugging:
 
 ```tsx
@@ -245,17 +261,20 @@ const logError = (message: string, error?: unknown) => {
 ### Common Issues
 
 **"Access Denied" despite correct role:**
+
 1. Check role extraction logs in console
 2. Verify `VITE_OIDC_CLIENT_ID` matches Keycloak client
 3. Ensure roles are in correct token location
 4. Verify role mappers include roles in token
 
 **Redirect loops:**
+
 1. Check `VITE_APP_BASE_URL` matches actual domain
 2. Verify `/auth/callback` is in valid redirect URIs
 3. Test OIDC authority URL accessibility
 
 **Token issues:**
+
 1. Check token expiration settings in Keycloak
 2. Verify automatic refresh is working
 3. Monitor network requests for token refresh calls

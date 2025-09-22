@@ -1,11 +1,13 @@
 # Admin Panel Development Guide
 
 ## Project Overview
+
 Internal admin UI for managing the Waitlist service with role-based access control, OIDC authentication, and modern shadcn/ui components.
 
 Note: pnpm is supported. Replace `npm run` with `pnpm` if preferred.
 
 ## Key Technologies
+
 - **TanStack Router**: Type-safe routing with authentication guards
 - **React OIDC Context**: Keycloak integration for authentication
 - **shadcn/ui**: Modern component library with dark theme
@@ -17,6 +19,7 @@ Note: pnpm is supported. Replace `npm run` with `pnpm` if preferred.
 ## Architecture
 
 ### Authentication Flow
+
 1. **Unauthenticated users** → Redirect to `/sign-in`
 2. **Sign-in page** → Redirect to Keycloak for authentication
 3. **After authentication** → Role validation (admin/moderator required)
@@ -24,6 +27,7 @@ Note: pnpm is supported. Replace `npm run` with `pnpm` if preferred.
 5. **Session management** → Automatic token refresh
 
 ### File Structure
+
 ```
 src/
 ├── auth/                  # Authentication system
@@ -44,6 +48,7 @@ src/
 ```
 
 ### Role-Based Access Control
+
 - **Admin**: Full access to all features
 - **Moderator**: Standard admin interface access
 - **Other roles**: Access denied with clear messaging
@@ -73,6 +78,7 @@ npm run preview
 ## Component Development
 
 ### Using shadcn/ui components
+
 ```tsx
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -97,6 +103,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 ```
 
 ### Authentication Integration
+
 ```tsx
 import { useAppAuth } from "@/auth/provider"
 
@@ -117,6 +124,7 @@ function ProtectedComponent() {
 ```
 
 ### Route Guards
+
 ```tsx
 import { createFileRoute } from '@tanstack/react-router'
 import { requireModeratorOrAdminBeforeLoad } from '@/auth/guards'
@@ -128,6 +136,7 @@ export const Route = createFileRoute('/_authenticated/admin')({
 ```
 
 ## Color System (Dark Theme)
+
 ```css
 --background: 222.2 84% 4.9%        /* Very dark background */
 --foreground: 210 40% 98%           /* Light text */
@@ -142,24 +151,28 @@ export const Route = createFileRoute('/_authenticated/admin')({
 ## Best Practices
 
 ### State Management
+
 - Use React Query for server state
 - Use Zustand for complex client state
 - Prefer React's built-in state for simple component state
 - Implement proper loading and error states
 
 ### Error Handling
+
 - Wrap async operations in try-catch blocks
 - Display user-friendly error messages
 - Log errors for debugging (development only)
 - Implement error boundaries for crash recovery
 
 ### Performance
+
 - Implement proper memoization with React.memo
 - Use React.useCallback for event handlers
 - Lazy load routes and components when appropriate
 - Optimize bundle size with tree shaking
 
 ### Security
+
 - Never expose sensitive data in client code
 - Validate user permissions on both client and server
 - Use HTTPS in production environments
@@ -168,12 +181,14 @@ export const Route = createFileRoute('/_authenticated/admin')({
 ## Common Tasks
 
 ### Adding a new protected route
+
 1. Create component in appropriate feature directory
 2. Add route file with authentication guard
 3. Update navigation if needed
 4. Test with different user roles
 
 ### Adding OIDC configuration
+
 ```typescript
 // Environment variables
 VITE_OIDC_AUTHORITY=https://keycloak.example.com/realms/your-realm
@@ -183,6 +198,7 @@ VITE_APP_BASE_URL=http://localhost:3000
 ```
 
 ### Customizing theme colors
+
 1. Update CSS variables in global styles
 2. Modify `tailwind.config.js` if needed
 3. Test with both light and dark theme preferences
@@ -191,24 +207,28 @@ VITE_APP_BASE_URL=http://localhost:3000
 ## Troubleshooting
 
 ### Authentication Issues
+
 - Check OIDC configuration variables
 - Verify Keycloak client settings
 - Test redirect URIs match exactly
 - Check browser console for auth errors
 
 ### Build/Development Issues
+
 - Clear node_modules and reinstall dependencies
 - Check TypeScript errors with `npm run typecheck`
 - Validate code style with `npm run lint`
 - Test production build with `npm run build`
 
 ### Styling Problems
+
 - Verify Tailwind classes are applied correctly
 - Check CSS variable definitions
 - Test responsive breakpoints
 - Ensure proper contrast ratios
 
 ## Manual Verification
+
 - Verify authentication flows and role-based access manually
 - Check responsive design across screen sizes
 - Validate accessibility (labels, focus states, contrast)

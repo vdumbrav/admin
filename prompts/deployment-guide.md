@@ -103,6 +103,7 @@ jobs:
    - `moderator` - Standard admin interface access
 
 2. **Role Mappers**:
+
    ```json
    {
      "name": "client-roles",
@@ -209,6 +210,7 @@ services:
 ### Environment Variables
 
 Set in Vercel dashboard:
+
 - `VITE_OIDC_AUTHORITY`
 - `VITE_OIDC_CLIENT_ID`
 - `VITE_APP_BASE_URL`
@@ -330,21 +332,25 @@ if (location.protocol !== 'https:' && location.hostname !== 'localhost') {
 ### Common Deployment Issues
 
 **Build Failures:**
+
 - Check Node.js version compatibility
 - Verify all environment variables are set
 - Run `npm ci`
 
 **Authentication Issues:**
+
 - Verify OIDC authority URL is accessible
 - Check redirect URIs match exactly
 - Validate client configuration in Keycloak
 
 **CORS Errors:**
+
 - Configure web origins in Keycloak client
 - Check API server CORS settings
 - Verify protocol matches (HTTP/HTTPS)
 
 **Routing Issues:**
+
 - Configure server to handle SPA routing
 - Check base path configuration
 - Verify PUBLIC_BASE environment variable
