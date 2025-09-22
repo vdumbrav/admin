@@ -45,7 +45,7 @@ export const QuestsDataTable = ({ columns, isAdmin }: DataTableProps) => {
     group,
     type,
     provider,
-    enabled: visibleStr,
+    enabled,
     page,
     limit,
     sort,
@@ -68,15 +68,15 @@ export const QuestsDataTable = ({ columns, isAdmin }: DataTableProps) => {
     pageSize: 25,
   });
 
-  // Convert context values to API format
-  const enabled = visibleStr === 'true' ? true : visibleStr === 'false' ? false : undefined;
+  // Convert enabled string to boolean for API
+  const enabledFilter = enabled === 'true' ? true : enabled === 'false' ? false : undefined;
 
   const { data, isFetching, isLoading } = useQuests({
     search,
     group,
-    type: type || undefined,
-    provider: provider || undefined,
-    enabled,
+    type,
+    provider,
+    enabled: enabledFilter,
     page,
     limit,
     sort,

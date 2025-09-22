@@ -14,9 +14,9 @@ import {
   type UploadFileDto,
 } from '@/lib/api/generated/model';
 import { validateAndConvertToApi } from './adapters/form-api-adapter';
-import type { Quest, QuestQuery, QuestsResponse } from './data/types';
+import type { Quest, QuestApiQuery, QuestsResponse } from './data/types';
 
-export const useQuests = (query: QuestQuery) => {
+export const useQuests = (query: QuestApiQuery) => {
   // Use the generated API hook for admin access to waitlist tasks
   const {
     data: adminTasks,

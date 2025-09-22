@@ -40,12 +40,12 @@ export interface Resources {
 }
 
 export interface IteratorDaily {
-  day: number;
   days: number;
   reward_map: number[];
   reward_max: number;
   reward: number;
-  tick?: number;
+  day?: number; // Current day - managed by backend
+  tick?: number; // Optional tick count
 }
 
 // ============================================================================
@@ -106,9 +106,15 @@ export interface LocalFilterConfig {
   group?: string;
   type?: string;
   provider?: string;
-  enabled?: boolean;
+  enabled?: string;
 }
 
 export interface QuestQuery extends LocalFilterConfig, Partial<LocalPaginationConfig> {
   sort?: string; // Format: "field:direction" e.g., "title:asc", "order_by:desc"
+}
+
+// API query with proper types for filtering
+export interface QuestApiQuery extends Omit<LocalFilterConfig, 'enabled'>, Partial<LocalPaginationConfig> {
+  enabled?: boolean;
+  sort?: string;
 }
