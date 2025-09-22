@@ -146,58 +146,97 @@ components:
               enum: [video-ad, post-style-image]
 ```
 
-### **2. IteratorDto - Proper Iterator Schema** ✅ Partially Fixed
+### **2. IteratorDto - Proper Iterator Schema** ⚠️ High Priority
 
-**Status**: Using TaskResponseDtoIterator directly, but still untyped
+**Текущая проблема**: `TaskResponseDtoIterator: { [key: string]: unknown }` - полностью нетипизированный
 
-**Current**: `iterator: { [key: string]: unknown }`
+**Воздействие**: Нет типизации для 7-Day Challenge квестов, приходится использовать unsafe casting
 
-**Solution**: Define proper IteratorDto schema
+**Решение для API схемы:**
 
 ```yaml
-# Required API schema:
-IteratorDto:
+# В OpenAPI/Swagger схеме обновить:
+TaskResponseDtoIterator:
   type: object
+  description: "Итератор для ежедневных наград в челленджах (7-Day Challenge)"
   properties:
+    # Основные поля для фронтенда
     days:
       type: number
       minimum: 3
       maximum: 10
-      description: Number of days (3-10)
+      description: "Количество дней челленджа"
+      example: 7
     reward_map:
       type: array
       items:
         type: number
         minimum: 0
-      description: Daily reward amounts
-    reward_max:
-      type: number
-      description: Maximum reward
-    reward:
-      type: number
-      description: Base reward
-    day:
-      type: number
-      description: Current day (runtime)
-    tick:
-      type: number
-      description: Tick counter (optional)
+      description: "Массив наград за каждый день"
+      example: [10, 20, 30, 40, 50, 70, 100]
 
-# Backend-generated fields:
-IteratorResourceDto:
+    # Поля, управляемые бэкендом (readOnly)
+    iterator_reward:
+      type: array
+      items:
+        type: string
+      description: "Массив строк наград (генерируется бэкендом)"
+      readOnly: true
+    iterator_resource:
+      $ref: '#/components/schemas/TaskResponseDtoIteratorResource'
+      description: "Ресурсы итератора (генерируется бэкендом)"
+      readOnly: true
+  required:
+    - reward_map
+
+# Также обновить IteratorResource:
+TaskResponseDtoIteratorResource:
   type: object
+  description: "Ресурсы для ежедневных заданий"
   properties:
     icons:
       type: array
-      items: { type: string, format: uri }
-      description: Daily icons
+      items:
+        type: string
+        format: uri
+      description: "Иконки для каждого дня"
     titles:
       type: array
-      items: { type: string }
-      description: Daily titles
+      items:
+        type: string
+      description: "Заголовки для каждого дня"
+    descriptions:
+      type: array
+      items:
+        type: string
+      description: "Описания для каждого дня"
     background_color:
       type: string
-      description: Background color
+      description: "Цвет фона"
+```
+
+**TypeScript интерфейс для замены:**
+
+```typescript
+// Заменить { [key: string]: unknown } на:
+export interface IteratorDto {
+  /** Количество дней челленджа (3-10) */
+  days?: number;
+
+  /** Массив ежедневных наград */
+  reward_map: number[];
+
+  /** Строки наград (управляется бэкендом) */
+  iterator_reward?: string[];
+
+  /** Ресурсы итератора (управляется бэкендом) */
+  iterator_resource?: {
+    icons?: string[];
+    titles?: string[];
+    descriptions?: string[];
+    background_color?: string;
+  };
+}
 ```
 
 ### **3. Enhanced List Fields - Display Metadata** ⚠️ Medium Priority
