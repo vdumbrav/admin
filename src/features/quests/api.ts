@@ -10,6 +10,7 @@ import {
   useAdminWaitlistTasksControllerUpdateTask,
 } from '@/lib/api/generated/admin/admin';
 import {
+  type CreateTaskDto,
   type TaskResponseDto,
   type UpdateTaskDto,
 } from '@/lib/api/generated/model';
@@ -147,8 +148,8 @@ export const useCreateQuest = () => {
   return useMutation({
     mutationFn: async (data: Partial<TaskResponseDto>): Promise<TaskResponseDto> => {
       const apiData = validateAndConvertToApi(data);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const result = await createTaskMutation.mutateAsync({ data: apiData as any });
+      // validateAndConvertToApi returns TaskResponseDto structure but API expects CreateTaskDto
+      const result = await createTaskMutation.mutateAsync({ data: apiData as unknown as CreateTaskDto });
       return result;
     },
     onSuccess: () => {
@@ -169,8 +170,7 @@ export const useUpdateQuest = (id: number) => {
 
   return useMutation({
     mutationFn: async (data: Partial<TaskResponseDto>): Promise<TaskResponseDto> => {
-      // TODO: Remove casting when validateAndConvertToApi returns proper UpdateTaskDto (P2)
-      // Currently needed due to TaskResponseDto vs UpdateTaskDto structural differences
+      // validateAndConvertToApi returns TaskResponseDto structure but API expects UpdateTaskDto
       const apiData = validateAndConvertToApi(data) as unknown as UpdateTaskDto;
       const result = await updateTaskMutation.mutateAsync({ id, data: apiData });
       return result;

@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import type { TaskResponseDto } from '@/lib/api/generated/model';
 import {
   TaskResponseDtoGroup,
   TaskResponseDtoProvider,
@@ -131,10 +132,7 @@ const taskGroupSchema = z.enum([
 // ============================================================================
 
 // Schema for Quest (API response validation)
-// TODO: Replace z.ZodType<any> with proper TaskResponseDto when IteratorDto is fixed (P0)
-// Currently any due to iterator_resource/resource type mismatches
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const questSchema: z.ZodType<any> = z.object({
+export const questSchema: z.ZodType<TaskResponseDto> = z.object({
   id: z.number(),
   type: z.array(adminTaskTypeSchema),
   provider: providerSchema,
@@ -158,8 +156,7 @@ export const questSchema: z.ZodType<any> = z.object({
   resource: resourcesSchema,
   iterator: iteratorSchema,
   iterable: z.boolean(),
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  child: z.array(z.lazy((): z.ZodType<any> => questSchema)), // TODO: Fix when questSchema is properly typed (P0)
+  child: z.array(z.lazy((): z.ZodType<TaskResponseDto> => questSchema)),
   blocking_task_id: z.number(),
   order_by: z.number(),
   status: statusSchema,
@@ -195,9 +192,7 @@ export const questFormSchema = z.object({
   next_tick: z.string().nullable().optional(),
   resources: resourcesSchema,
   child: z
-    // TODO: Fix when questSchema is properly typed (P0)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    .array(z.lazy((): z.ZodType<any> => questSchema))
+    .array(z.lazy((): z.ZodType<TaskResponseDto> => questSchema))
     .nullable()
     .optional(),
   iterable: z.boolean().nullable().optional(),
