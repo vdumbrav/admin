@@ -1,11 +1,11 @@
 # Swagger/OpenAPI Migration Status and Recommendations
 
-## 🎉 Migration Completed Successfully
+## ⚠️ Migration 80% Complete - API Schema Improvements Needed
 
 **Date**: December 2024
-**Status**: ✅ **PRODUCTION READY** - All CRUD operations migrated to real API endpoints
+**Status**: ⚠️ **80% COMPLETE** - Real API integration with remaining type safety issues
 
-### ✅ **Completed Migration**
+### ✅ **Completed Migration (80%)**
 All quest management operations now use **real API endpoints** instead of mocks:
 
 - **✅ GET** `/api/admin/tasks` - List all tasks
@@ -13,13 +13,20 @@ All quest management operations now use **real API endpoints** instead of mocks:
 - **✅ GET** `/api/admin/tasks/{id}` - Get task by ID
 - **✅ PUT** `/api/admin/tasks/{id}` - Update task
 - **✅ DELETE** `/api/admin/tasks/{id}` - Delete task
-- **✅ PATCH** `/api/admin/tasks/{id}/visibility` - Toggle visibility
+- **✅ PUT** `/api/admin/tasks/{id}` - Toggle enabled (uses PUT as PATCH)
 - **✅ POST** `/api/admin/files/upload` - File upload (real endpoint)
 
+### ⚠️ **Remaining Issues (20%)**
+- **8 TODO items** requiring API schema improvements
+- **Type safety compromises** with `Record<string, unknown>` casting
+- **Legacy partnerIcon field** still present in form
+- **Hardcoded fallback values** for child task configuration
+- **Missing Zod validation** in adapter layer
+
 ### 🔧 **Current Architecture**
-- **Form-API Adapter**: Maintained for type compatibility
-- **Quest Preset System**: 100% functional with real API
-- **Type Safety**: Comprehensive with runtime validation
+- **Form-API Adapter**: Required for type compatibility (temporary solution)
+- **Quest Preset System**: Functional with type safety workarounds
+- **Type Safety**: Partial - using type assertions and unknown castings
 - **Error Handling**: Production-grade with proper user feedback
 
 ### 📊 **Migration Benefits Achieved**
@@ -35,22 +42,23 @@ All quest management operations now use **real API endpoints** instead of mocks:
 - Parallel bulk operations using real API calls
 - Proper invalidation strategies for consistent UI state
 
-**✅ Developer Experience:**
-- Type-safe API calls with generated TypeScript interfaces
-- Consistent error handling across all operations
-- Comprehensive toast notifications for user feedback
+**⚠️ Developer Experience:**
+- ⚠️ Type-safe API calls with workarounds for schema gaps
+- ✅ Consistent error handling across all operations
+- ✅ Comprehensive toast notifications for user feedback
+- ⚠️ 8 TODO items requiring manual maintenance until API improves
 
 ## Legacy Quest Preset System (Maintained)
 
-### 🎯 **Preset System Status: 100% COMPLETE & MIGRATED**
+### 🎯 **Preset System Status: 80% COMPLETE - FUNCTIONAL WITH WORKAROUNDS**
 
-The quest preset system is **fully functional with real API integration** featuring:
+The quest preset system is **functional with real API integration** but requires type safety improvements:
 - ✅ **5 Quest Presets**: Connect, Join, Action with Post, 7-Day Challenge, Explore
 - ✅ **Real API Integration**: All operations use production endpoints
-- ✅ **Type Safety**: Form-API adapter ensures compatibility
+- ⚠️ **Type Safety**: Form-API adapter with `Record<string, unknown>` workarounds
 - ✅ **Enterprise UX**: Smart Tweet ID processing, live icon preview, domain warnings
 - ✅ **Real-time Features**: Twitter preview, total reward calculation, calendar visualization
-- ✅ **Production Ready**: Zero technical debt, comprehensive error handling
+- ⚠️ **Production Ready**: Functional but with technical debt from type compromises
 
 ### Preset-Specific API Requirements
 
@@ -136,21 +144,22 @@ ChildTaskSchema:
 
 ## Current Status: Post-Migration Assessment
 
-### ✅ **Working Successfully with Current API**
-All features are **fully operational** with the existing Swagger schema:
-- CRUD operations work flawlessly with real API endpoints
-- Form-API adapter handles type compatibility effectively
-- Quest preset system functions perfectly with current backend
+### ⚠️ **Working with Type Safety Compromises**
+All features are **functional** but with technical debt from API schema gaps:
+- ✅ CRUD operations work with real API endpoints
+- ⚠️ Form-API adapter uses `Record<string, unknown>` workarounds
+- ⚠️ Quest preset system functional but with type assertions
+- ⚠️ 8 TODO items tracking missing API fields and type definitions
 
-### 🔄 **Optional Future Optimizations**
+### 🔧 **Required API Schema Improvements**
 
-While the system works perfectly, these schema improvements would reduce adapter complexity:
+These schema improvements are needed to achieve 100% type safety:
 
 ### 1. Resources Schema Definition
-**Current Status**: ✅ **Working** - Adapter handles type conversion safely
-**Future Enhancement**: Direct type mapping without adapter layer
+**Current Status**: ⚠️ **Type Unsafe** - Using `Record<string, unknown>` casting
+**Required Fix**: Proper schema definition to eliminate type assertions
 
-**Proposed Swagger Schema Enhancement**:
+**Required Swagger Schema Enhancement**:
 ```yaml
 ResourcesSchema:
   type: object
@@ -222,8 +231,8 @@ AdsgramResourcesSchema:
 ```
 
 ### 2. Task Type Consistency
-**Current Status**: ✅ **Working** - Form adapter handles type differences
-**Future Enhancement**: Unified type system reducing casting
+**Current Status**: ⚠️ **Type Unsafe** - Form adapter uses type assertions
+**Required Fix**: Unified type system eliminating casting workarounds
 
 **Proposed Solution**:
 ```yaml
@@ -254,8 +263,8 @@ ChildTaskSchema:
 ```
 
 ### 3. Group Type Alignment
-**Current Status**: ✅ **Working** - New API includes 'all' group type
-**Achievement**: ✅ **RESOLVED** - API now supports all required group types
+**Current Status**: ✅ **Working** - API supports all required group types
+**Status**: ✅ **RESOLVED** - No action needed
 
 **Current Implementation**:
 ```yaml
@@ -274,8 +283,8 @@ TaskSchema:
 ```
 
 ### 4. Nullable Fields Consistency
-**Current Status**: ✅ **Working** - Adapter normalizes null/undefined handling
-**Future Enhancement**: Consistent nullability in API schema
+**Current Status**: ⚠️ **Workaround** - Adapter normalizes null/undefined handling
+**Required Fix**: Consistent nullability in API schema to eliminate workarounds
 
 **Current Working Solution**:
 ```yaml
@@ -361,7 +370,7 @@ ValidationErrorResponse:
             type: string
 ```
 
-## ✅ Migration Successfully Completed
+## ⚠️ Migration 80% Complete - API Schema Work Needed
 
 ### ✅ **Phase 1: API Integration** - **COMPLETE**
 1. ✅ All CRUD endpoints integrated with real API
@@ -369,148 +378,158 @@ ValidationErrorResponse:
 3. ✅ Bulk operations using parallel API calls
 4. ✅ Proper error handling and user feedback
 
-### 🔄 **Optional Phase 2: Schema Optimization** - **Future Enhancement**
-1. Enhanced ResourcesSchema (optional - adapter works well)
-2. Unified TaskTypeEnum schemas (optional - current types sufficient)
-3. Consistent nullable field definitions (optional - adapter handles it)
+### ⚠️ **Phase 2: Type Safety** - **80% COMPLETE**
+1. ⚠️ Enhanced ResourcesSchema (REQUIRED - currently using `Record<string, unknown>`)
+2. ⚠️ Unified TaskTypeEnum schemas (REQUIRED - currently using type assertions)
+3. ⚠️ Consistent nullable field definitions (REQUIRED - adapter workarounds)
+4. ⚠️ Zod validation implementation (MISSING - adapter lacks validation)
 
-### 🔄 **Optional Phase 3: Adapter Removal** - **Future Consideration**
-1. **Current Status**: Adapter provides value and maintainability
-2. **Recommendation**: Keep adapter unless API schema is completely overhauled
-3. **Reason**: Small adapter layer vs. major API breaking changes trade-off
+### 🎯 **Phase 3: Adapter Minimization** - **BLOCKED**
+1. **Current Status**: Adapter required due to API schema gaps
+2. **Requirement**: API schema improvements to enable adapter removal
+3. **Timeline**: Blocked until API provides proper type definitions
 
-## ✅ Code Generation Benefits (Achieved)
+## ⚠️ Code Generation Benefits (Partial)
 
-The current implementation already provides:
+The current implementation provides:
 1. ✅ **Auto-generated TypeScript types** - Using Orval with OpenAPI
-2. ✅ **Type-safe API calls** - Generated React Query hooks
+2. ⚠️ **Type-safe API calls** - Generated React Query hooks with workarounds
 3. ✅ **Consistent client interface** - Generated SDK for all endpoints
-4. ✅ **Self-documenting API** - Types reflect current API state
-5. ✅ **Runtime validation** - Form adapter ensures data integrity
+4. ⚠️ **Self-documenting API** - Types incomplete due to schema gaps
+5. ⚠️ **Runtime validation** - Form adapter with `Record<string, unknown>` fallbacks
 
-## ✅ Implementation Status: MISSION ACCOMPLISHED
+## ⚠️ Implementation Status: 80% COMPLETE
 
-### 🎉 **Current State (Post-Migration Success)**
+### ⚠️ **Current State (Functional with Technical Debt)**
 
 **✅ Complete API Integration:**
 - ✅ All CRUD operations using real API endpoints
 - ✅ File upload integrated with production backend
-- ✅ Quest preset system fully operational with real data
-- ✅ Type-safe operations with generated client SDK
+- ⚠️ Quest preset system operational with type safety workarounds
+- ⚠️ Type operations with adapter layer and assertions
 - ✅ Production-ready error handling and user feedback
 - ✅ Eliminated 200+ lines of mock code
 
-**✅ System Architecture:**
-- ✅ Form-API adapter ensures compatibility and maintainability
+**⚠️ System Architecture:**
+- ⚠️ Form-API adapter required due to schema gaps
 - ✅ React Query cache optimization for performance
 - ✅ Parallel bulk operations using real endpoints
-- ✅ Comprehensive TypeScript coverage with runtime validation
+- ⚠️ TypeScript coverage with `Record<string, unknown>` compromises
 
-## ✅ Updated Priority Assessment (Post-Migration)
+## ⚠️ Updated Priority Assessment (80% Migration Complete)
 
 ### **✅ COMPLETED** 🟢
 1. ✅ **API Integration** - All CRUD endpoints migrated
 2. ✅ **File Upload Integration** - Real backend endpoint
 3. ✅ **Quest System Migration** - All 5 presets working with real API
-4. ✅ **Type Safety** - Generated SDK with comprehensive types
-5. ✅ **Error Handling** - Production-grade user experience
+4. ✅ **Error Handling** - Production-grade user experience
 
-### **OPTIONAL Future Enhancements** 🔵
-The following are **nice-to-have optimizations** (not requirements):
+### **⚠️ REQUIRED for 100% Completion** 🔴
+The following are **required** to eliminate technical debt:
 
-1. **Enhanced Resources Schema** - Would reduce adapter complexity
-   - Current: ✅ Working perfectly with adapter
-   - Enhancement: Direct type mapping (breaking change required)
+1. **Enhanced Resources Schema** - REQUIRED to eliminate `Record<string, unknown>`
+   - Current: ⚠️ Working with type assertions and workarounds
+   - Required: Proper schema definition for type safety
 
-2. **Unified Task Type System** - Would eliminate some casting
-   - Current: ✅ Working with type-safe adapter layer
-   - Enhancement: API schema alignment (major backend changes)
+2. **Unified Task Type System** - REQUIRED to eliminate casting
+   - Current: ⚠️ Working with adapter type assertions
+   - Required: API schema alignment for clean types
 
-3. **Consistent Nullability** - Would simplify null handling
-   - Current: ✅ Adapter normalizes null/undefined differences
-   - Enhancement: API consistency (breaking changes required)
+3. **Consistent Nullability** - REQUIRED to simplify adapter
+   - Current: ⚠️ Adapter normalizes null/undefined differences
+   - Required: API consistency to reduce workarounds
 
-## ✅ Current Validation Results
+4. **Zod Validation** - REQUIRED for runtime safety
+   - Current: ⚠️ Missing validation in adapter layer
+   - Required: Add Zod schemas for form-API conversion
 
-Migration validation completed successfully:
-1. ✅ `npm run build` - Compiles without errors
-2. ✅ `npm run typecheck` - All types valid
+## ⚠️ Current Validation Results
+
+Migration validation with compromises:
+1. ✅ `npm run build` - Compiles without errors (with type assertions)
+2. ⚠️ `npm run typecheck` - Passes with `Record<string, unknown>` workarounds
 3. ✅ Real API integration - All endpoints functional
-4. ✅ Quest system - All 5 presets operational with real data
+4. ⚠️ Quest system - All 5 presets operational with type compromises
 5. ✅ Error handling - Production-grade user experience
 
-## ✅ Current Architecture Decision
+## ⚠️ Current Architecture Decision
 
-**Recommendation: KEEP CURRENT ADAPTER APPROACH**
+**Recommendation: TEMPORARY ADAPTER UNTIL API IMPROVES**
 
-**Reasons:**
-1. ✅ **Working Perfectly** - System is production-ready and functional
-2. ✅ **Maintainable** - 240-line adapter vs. major API overhaul
-3. ✅ **Type Safety** - Comprehensive TypeScript coverage achieved
-4. ✅ **Flexibility** - Adapter layer allows frontend optimization without backend changes
-5. ✅ **Cost-Benefit** - Small adapter vs. breaking API changes for multiple consumers
+**Current State:**
+1. ⚠️ **Working with Debt** - System functional but with technical compromises
+2. ⚠️ **Maintainable** - 240-line adapter with 8 TODO items requiring attention
+3. ⚠️ **Type Safety** - TypeScript coverage with unsafe fallbacks
+4. ✅ **Flexibility** - Adapter layer enables frontend progress
+5. ⚠️ **Technical Debt** - Adapter complexity due to API schema gaps
+
+**Next Steps:**
+1. 🎯 **API Schema Improvements** - Priority for backend team
+2. 🎯 **Zod Validation** - Add runtime safety to adapter
+3. 🎯 **TODO Item Resolution** - Address 8 tracked issues
+4. 🎯 **Type Safety** - Eliminate `Record<string, unknown>` workarounds
 
 ---
 
 ## 🎯 Quest Preset System Integration Summary
 
-### ✅ **Current State (December 2024)**
+### ⚠️ **Current State (December 2024)**
 
-The quest preset system **exceeds all requirements and delivers enterprise-grade quality** with:
+The quest preset system **delivers functional implementation with technical debt** including:
 
-1. **Complete Frontend Implementation:**
-   - ✅ **5 Quest Presets**: All fully functional with business rules
+1. **Functional Frontend Implementation:**
+   - ✅ **5 Quest Presets**: All functional with business rules
    - ✅ **Enterprise UX**: Smart input processing, live previews, professional tooltips
    - ✅ **Dynamic Validation**: Preset-specific schema building with 150+ validation rules
    - ✅ **Real-time Features**: Twitter preview, reward calculations, calendar visualization
-   - ✅ **100% Feature Complete**: All 33 checklist requirements fulfilled
-   - ✅ **Production Quality**: Zero technical debt, comprehensive error handling
+   - ⚠️ **80% Feature Complete**: All features work with type safety compromises
+   - ⚠️ **Technical Debt**: Type assertions and `Record<string, unknown>` workarounds
 
-2. **API Compatibility:**
-   - ✅ **Seamless Integration**: All presets work perfectly with current API
-   - ✅ **Type Safety**: Comprehensive TypeScript coverage with runtime validation
+2. **API Integration with Workarounds:**
+   - ⚠️ **Working Integration**: All presets work with adapter layer
+   - ⚠️ **Type Safety**: TypeScript coverage with unsafe fallbacks
    - ✅ **Reward Calculations**: Accurate mapping for multiple/repeatable quest types
    - ✅ **Iterator Support**: 7-Day Challenge properly saves reward_map arrays
-   - ✅ **Resource Handling**: UI configuration and icons work correctly
+   - ⚠️ **Resource Handling**: UI configuration works with type assertions
 
-3. **Future Optimization Opportunities:**
-   - Enhanced schemas would reduce adapter complexity (currently manageable)
-   - Improved type safety at API level (current level is already high)
-   - Standardized validation across tiers (frontend validation is comprehensive)
-   - Developer experience improvements (current DX is excellent)
+3. **Required API Improvements:**
+   - Enhanced Resources schema to eliminate type assertions
+   - Improved type definitions for full type safety
+   - Standardized validation to remove adapter workarounds
+   - Schema improvements to achieve clean architecture
 
-### 🎉 **Final Status: PRODUCTION DEPLOYED SUCCESSFULLY**
+### ⚠️ **Final Status: PRODUCTION DEPLOYED WITH TECHNICAL DEBT**
 
-The quest management system **has achieved complete production readiness** with real API integration:
+The quest management system **is functional in production** with real API integration but needs improvements:
 
-✅ **Migration Completed**: 100% transition from mocks to real API endpoints
-✅ **Type Safety Maintained**: Generated TypeScript SDK with comprehensive coverage
+⚠️ **Migration 80% Complete**: Transition from mocks to real API with workarounds
+⚠️ **Type Safety Compromised**: Generated TypeScript SDK with `Record<string, unknown>` fallbacks
 ✅ **Zero Downtime**: Seamless transition preserving all functionality
 ✅ **Performance Optimized**: React Query caching with parallel operations
 ✅ **Enterprise Ready**: Production-grade error handling and user feedback
 
 **Current System Status:**
 
-1. ✅ **Production Ready**: All features deployed and operational
-2. ✅ **Adapter Architecture**: Proven maintainable and scalable approach
+1. ⚠️ **Production Ready**: All features functional with technical debt
+2. ⚠️ **Adapter Architecture**: Temporary solution due to API schema gaps
 3. ✅ **Real Data Integration**: Live backend synchronization
-4. ✅ **Developer Experience**: Type-safe development with excellent DX
+4. ⚠️ **Developer Experience**: Type safety compromised with workarounds
 
 **API Schema Enhancement Priority:**
-1. ✅ **Current Priority**: NONE - System is fully functional
-2. 🔵 **Future Consideration**: Schema optimization only if major API redesign occurs
-3. 🔵 **Decision Criteria**: Cost-benefit analysis of breaking changes vs. adapter maintenance
-4. 🔵 **Recommendation**: Focus on new features rather than architectural changes
+1. 🔴 **Current Priority**: HIGH - Schema improvements needed for 100% completion
+2. 🔴 **Immediate Need**: Resources schema definition and type consistency
+3. 🔴 **Technical Debt**: 8 TODO items requiring API schema work
+4. 🔴 **Recommendation**: API team prioritize schema improvements for clean architecture
 
-### 🏆 **Success Metrics Achieved**
+### ⚠️ **Partial Success Metrics Achieved**
 
-The current implementation proves that **preset-driven quest creation is not only feasible but the gold standard** for:
+The current implementation demonstrates **functional preset-driven quest creation** with some compromises:
 - ✅ **Eliminating Configuration Errors**: Impossible to create invalid quest combinations
 - ✅ **Accelerating Admin Workflows**: 80% reduction in form complexity
 - ✅ **Improving User Experience**: Professional UX with real-time feedback
-- ✅ **Maintaining Code Quality**: Clean, testable, maintainable architecture
+- ⚠️ **Code Quality**: Functional architecture with technical debt from type workarounds
 
-**Status: ✅ PRODUCTION DEPLOYED WITH REAL API INTEGRATION** 🎉
+**Status: ⚠️ PRODUCTION DEPLOYED WITH 80% COMPLETION** 🔧
 
 ---
 
@@ -519,15 +538,528 @@ The current implementation proves that **preset-driven quest creation is not onl
 ### ✅ **What Was Accomplished**
 - **API Integration**: All 7 CRUD endpoints connected to real backend
 - **Mock Removal**: Eliminated 200+ lines of mock code
-- **Type Safety**: Maintained comprehensive TypeScript coverage
+- **Functional System**: All quest presets working with real API
 - **Performance**: Optimized with React Query caching and parallel operations
 - **UX**: Production-grade error handling and user feedback
 
-### 🎯 **Final Recommendation**
-**KEEP CURRENT ARCHITECTURE** - The form-API adapter provides excellent value:
-- ✅ Proven scalable and maintainable
-- ✅ Enables frontend optimization without backend changes
-- ✅ Comprehensive type safety with generated SDK
-- ✅ Production-ready with zero technical debt
+### ⚠️ **What Needs Improvement**
+- **Type Safety**: Eliminate `Record<string, unknown>` workarounds
+- **API Schema**: Add proper Resources schema definition
+- **Validation**: Implement Zod validation in adapter layer
+- **Technical Debt**: Resolve 8 TODO items tracking schema gaps
 
-**Migration Status: 🎉 MISSION ACCOMPLISHED**
+### 🎯 **Final Recommendation**
+**TEMPORARY ADAPTER UNTIL API IMPROVES** - Current approach enables progress but needs backend work:
+- ⚠️ Functional but with technical compromises
+- ⚠️ Requires ongoing maintenance of type workarounds
+- 🔴 API schema improvements needed for clean architecture
+- 🔴 High priority for backend team to complete migration
+
+**Migration Status: ⚠️ 80% COMPLETE - API SCHEMA WORK NEEDED**
+
+---
+
+## 🔧 Детальные улучшения Swagger API для завершения миграции
+
+### 📋 **Текущие проблемы в API схеме (8 TODO пунктов)**
+
+#### 1. **ResourcesDto - Отсутствует схема (Критично)**
+**Проблема**: Resources типизированы как `Record<string, unknown>`, что требует небезопасных приведений типов.
+**Локация**: `form-api-adapter.ts:121` - "TODO: Replace with proper API schema validation"
+
+**Требуемая Swagger схема**:
+```yaml
+components:
+  schemas:
+    ResourcesDto:
+      type: object
+      description: "Ресурсы квеста (иконки, настройки UI, интеграции)"
+      properties:
+        icon:
+          type: string
+          format: uri
+          description: "URL иконки квеста"
+          example: "https://example.com/icon.png"
+        username:
+          type: string
+          description: "Имя пользователя для социальных сетей"
+          example: "@username"
+        tweetId:
+          type: string
+          pattern: '^[0-9]{19,20}$'
+          description: "ID твита для Twitter заданий"
+          example: "1234567890123456789"
+        isNew:
+          type: boolean
+          description: "Флаг нового ресурса"
+          default: false
+        block_id:
+          type: string
+          description: "ID блока для блокчейн заданий"
+        ui:
+          $ref: '#/components/schemas/UIResourcesDto'
+        adsgram:
+          $ref: '#/components/schemas/AdsgramResourcesDto'
+
+    UIResourcesDto:
+      type: object
+      description: "Настройки пользовательского интерфейса"
+      properties:
+        button:
+          type: string
+          description: "Текст кнопки действия"
+          example: "Подписаться"
+        pop-up:
+          $ref: '#/components/schemas/PopupResourcesDto'
+
+    PopupResourcesDto:
+      type: object
+      description: "Конфигурация всплывающего окна"
+      properties:
+        name:
+          type: string
+          description: "Название попапа"
+        button:
+          type: string
+          description: "Текст кнопки в попапе"
+        description:
+          type: string
+          description: "Описание в попапе"
+        static:
+          type: string
+          format: uri
+          description: "URL статического контента"
+        additional-title:
+          type: string
+          description: "Дополнительный заголовок"
+        additional-description:
+          type: string
+          description: "Дополнительное описание"
+
+    AdsgramResourcesDto:
+      type: object
+      description: "Конфигурация Adsgram интеграции"
+      properties:
+        type:
+          type: string
+          enum: [task, reward]
+          description: "Тип Adsgram интеграции"
+        subtype:
+          type: string
+          enum: [video-ad, post-style-image]
+          description: "Подтип контента Adsgram"
+```
+
+#### 2. **TaskResponseDto - Недостающие поля для списка задач**
+**Проблема**: Отсутствуют calculated поля для UI таблицы.
+**Локация**: `types.ts:67-70` - Quest extends TaskResponseDto with missing fields
+
+**Требуемые поля в TaskResponseDto**:
+```yaml
+TaskResponseDto:
+  type: object
+  properties:
+    # ... существующие поля ...
+
+    # Новые calculated поля для UI
+    usersCount:
+      type: integer
+      description: "Количество пользователей, выполнивших задачу"
+      example: 1542
+      readOnly: true
+
+    totalXp:
+      type: integer
+      description: "Общий XP заработанный пользователями"
+      example: 15420
+      readOnly: true
+
+    # Улучшения существующих полей
+    resources:
+      allOf:
+        - $ref: '#/components/schemas/ResourcesDto'
+        - nullable: true
+      description: "Ресурсы задачи"
+
+    type:
+      type: array
+      items:
+        $ref: '#/components/schemas/TaskTypeEnum'
+      description: "Типы задачи (может быть несколько)"
+      example: ["join", "like"]
+```
+
+#### 3. **Унификация типов задач (Type Safety)**
+**Проблема**: Форма ожидает single type, API возвращает array.
+**Локация**: `form-api-adapter.ts:201` - "TODO: Remove casting when API fixed"
+
+**Требуемые схемы**:
+```yaml
+components:
+  schemas:
+    # Для родительских задач
+    ParentTaskTypeEnum:
+      type: string
+      enum:
+        - referral
+        - connect
+        - join
+        - share
+        - like
+        - comment
+        - multiple
+        - repeatable
+        - dummy
+        - external
+      description: "Типы основных задач"
+
+    # Для дочерних задач
+    ChildTaskTypeEnum:
+      type: string
+      enum:
+        - like
+        - share
+        - comment
+        - join
+        - connect
+      description: "Типы дочерних задач (подмножество основных)"
+
+    # Основная схема задачи
+    TaskResponseDto:
+      type: object
+      properties:
+        type:
+          type: array
+          items:
+            $ref: '#/components/schemas/ParentTaskTypeEnum'
+          description: "Типы задачи"
+
+    # Схема для создания/обновления
+    CreateTaskDto:
+      type: object
+      properties:
+        type:
+          oneOf:
+            - $ref: '#/components/schemas/ParentTaskTypeEnum'
+            - type: array
+              items:
+                $ref: '#/components/schemas/ParentTaskTypeEnum'
+          description: "Тип задачи (строка или массив)"
+```
+
+#### 4. **Consistent Nullable Fields**
+**Проблема**: Некорректная обработка null/undefined между формой и API.
+**Локация**: `form-api-adapter.ts:352-360` - Missing Zod validation
+
+**Требуемые улучшения**:
+```yaml
+TaskResponseDto:
+  type: object
+  properties:
+    description:
+      type: string
+      nullable: true
+      description: "Описание задачи (null если не указано)"
+
+    uri:
+      type: string
+      format: uri
+      nullable: true
+      description: "Внешняя ссылка (null если не применимо)"
+
+    provider:
+      allOf:
+        - $ref: '#/components/schemas/TaskProviderEnum'
+        - nullable: true
+      description: "Провайдер социальной сети"
+
+    iterator:
+      allOf:
+        - $ref: '#/components/schemas/IteratorDto'
+        - nullable: true
+      description: "Настройки повторяющихся задач"
+```
+
+#### 5. **Child Tasks Schema**
+**Проблема**: Hardcoded values для дочерних задач.
+**Локация**: `form-api-adapter.ts:234-235` - TODO comments about children configuration
+
+**Требуемая схема**:
+```yaml
+ChildTaskDto:
+  type: object
+  description: "Дочерняя задача для мульти-задач"
+  properties:
+    title:
+      type: string
+      description: "Название дочерней задачи"
+      example: "Поставить лайк"
+
+    type:
+      $ref: '#/components/schemas/ChildTaskTypeEnum'
+
+    reward:
+      type: integer
+      minimum: 0
+      description: "Награда за выполнение"
+      example: 10
+
+    order_by:
+      type: integer
+      minimum: 0
+      description: "Порядок выполнения (0-based)"
+
+    group:
+      $ref: '#/components/schemas/TaskGroupEnum'
+      description: "Группа дочерней задачи"
+      default: "social"
+
+    description:
+      type: string
+      nullable: true
+      description: "Описание дочерней задачи"
+
+    resources:
+      allOf:
+        - $ref: '#/components/schemas/ResourcesDto'
+        - nullable: true
+```
+
+#### 6. **Iterator Schema для Daily Challenges**
+**Проблема**: Iterator поля типизированы как `{ [key: string]: unknown }` и разделены на 3 поля.
+**Локация**: API имеет `iterator`, `iterator_reward`, `iterator_resource` поля
+
+**Требуемые схемы**:
+```yaml
+# Основная конфигурация iterator
+TaskResponseDtoIterator:
+  type: object
+  description: "Конфигурация повторяющихся задач (7-дневные челленджи)"
+  properties:
+    days:
+      type: integer
+      minimum: 1
+      maximum: 30
+      description: "Количество дней в челлендже"
+      example: 7
+
+    reward_map:
+      type: array
+      items:
+        type: integer
+        minimum: 0
+      description: "Награды по дням [день1, день2, ...]"
+      example: [10, 20, 30, 40, 50, 70, 100]
+
+    reward_max:
+      type: integer
+      minimum: 0
+      description: "Максимальная награда"
+      example: 100
+
+    reward:
+      type: integer
+      minimum: 0
+      description: "Базовая награда"
+      example: 10
+
+    day:
+      type: integer
+      minimum: 0
+      description: "Текущий день (0-based)"
+      readOnly: true
+      example: 2
+
+    tick:
+      type: integer
+      description: "Таймер или счетчик"
+      nullable: true
+
+# Iterator ресурсы для UI
+TaskResponseDtoIteratorResource:
+  type: object
+  description: "UI ресурсы для повторяющихся задач"
+  properties:
+    icons:
+      type: array
+      items:
+        type: string
+        format: uri
+      description: "Иконки для каждого дня"
+      example: ["day1.png", "day2.png", "day3.png"]
+
+    titles:
+      type: array
+      items:
+        type: string
+      description: "Заголовки для каждого дня"
+      example: ["День 1", "День 2", "День 3"]
+
+    descriptions:
+      type: array
+      items:
+        type: string
+      description: "Описания для каждого дня"
+      example: ["Начало челленджа", "Продолжаем", "Почти там"]
+
+    background_color:
+      type: string
+      description: "Цвет фона для календаря"
+      example: "#ff6b6b"
+
+    completion_message:
+      type: string
+      description: "Сообщение при завершении"
+      example: "Поздравляем! Челлендж завершен!"
+
+# Обновление основной TaskResponseDto
+TaskResponseDto:
+  type: object
+  properties:
+    # ... другие поля ...
+
+    # Iterator поля (правильные названия из API)
+    iterator:
+      allOf:
+        - $ref: '#/components/schemas/TaskResponseDtoIterator'
+        - nullable: true
+      description: "Основная конфигурация повторяющихся задач"
+
+    iterator_reward:
+      type: array
+      items:
+        type: string
+      nullable: true
+      description: "Награды в строковом формате (дублирует iterator.reward_map)"
+      example: ["10", "20", "30", "40", "50", "70", "100"]
+
+    iterator_resource:
+      allOf:
+        - $ref: '#/components/schemas/TaskResponseDtoIteratorResource'
+        - nullable: true
+      description: "UI ресурсы для iterator (иконки, тексты по дням)"
+```
+
+### 📝 **Конкретные endpoints для обновления**
+
+#### **GET /api/admin/tasks** - Список задач
+**Текущие проблемы**: Отсутствуют calculated поля для таблицы
+```yaml
+/api/admin/tasks:
+  get:
+    summary: "Получить список задач для админ панели"
+    responses:
+      '200':
+        description: "Список задач с calculated полями"
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                allOf:
+                  - $ref: '#/components/schemas/TaskResponseDto'
+                  - type: object
+                    properties:
+                      usersCount:
+                        type: integer
+                        description: "Количество выполнивших"
+                      totalXp:
+                        type: integer
+                        description: "Общий заработанный XP"
+```
+
+#### **POST /api/admin/tasks** - Создание задачи
+**Текущие проблемы**: Resources без типизации
+```yaml
+/api/admin/tasks:
+  post:
+    summary: "Создать новую задачу"
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CreateTaskDto'
+    responses:
+      '201':
+        description: "Задача успешно создана"
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskResponseDto'
+```
+
+#### **PUT /api/admin/tasks/{id}** - Обновление задачи
+**Текущие проблемы**: Нет отдельной схемы для обновления
+```yaml
+/api/admin/tasks/{id}:
+  put:
+    summary: "Обновить задачу"
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UpdateTaskDto'
+
+UpdateTaskDto:
+  type: object
+  description: "Данные для обновления задачи"
+  properties:
+    # Все поля опциональны для PATCH-like поведения
+    title:
+      type: string
+      description: "Новое название"
+    enabled:
+      type: boolean
+      description: "Статус активности"
+    resources:
+      allOf:
+        - $ref: '#/components/schemas/ResourcesDto'
+        - nullable: true
+    # ... другие поля как опциональные
+```
+
+### 🎯 **Приоритет реализации**
+
+**Критический приоритет (блокируют clean code)**:
+1. ✅ **ResourcesDto schema** - устраняет `Record<string, unknown>`
+2. ✅ **Type safety для task types** - убирает type assertions
+3. ✅ **Nullable fields consistency** - упрощает adapter
+
+**Высокий приоритет (улучшает UX)**:
+4. ✅ **usersCount, totalXp поля** - для таблицы админки
+5. ✅ **Child tasks schema** - убирает hardcoded значения
+
+**Средний приоритет (техническая оптимизация)**:
+6. ✅ **Iterator schema** - для 7-дневных челленджей
+7. ✅ **Separate Create/Update DTOs** - лучше документация API
+8. ✅ **Error response schemas** - стандартизация ошибок
+
+### 🔍 **Пример миграции после улучшений**
+
+**До (текущее состояние с workarounds)**:
+```typescript
+// Небезопасное приведение типов
+const resources = apiResources as Record<string, unknown>;
+const typedResources = resources as {
+  icon?: string;
+  username?: string;
+  // ... длинный список полей
+};
+```
+
+**После (с правильной Swagger схемой)**:
+```typescript
+// Безопасная типизация из сгенерированных типов
+const resources: ResourcesDto = apiData.resources;
+// Автокомплит и type safety работают из коробки
+```
+
+**Результат**: Удаление 8 TODO пунктов и всех type assertions в adapter слое.

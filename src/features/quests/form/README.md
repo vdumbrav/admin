@@ -1,18 +1,39 @@
 # Quest Form Module
 
-Модульная архитектура для управления формой создания/редактирования квестов.
+**Status: ⚠️ 80% Complete - Migration to Direct API Integration**
 
-## 🏗️ Архитектура
+Модульная архитектура для управления формой создания/редактирования квестов с частичной миграцией на прямую интеграцию с API.
+
+## 📊 Current Migration Status (80% Complete)
+
+### ✅ **Completed (80%)**
+
+- ✅ Real API integration for all CRUD operations
+- ✅ Type-safe form handling with Quest types
+- ✅ Basic adapter layer for form-API compatibility
+- ✅ All 5 quest presets functional with real API
+- ✅ Production-ready error handling
+
+### ⚠️ **Remaining Issues (20%)**
+
+- ⚠️ **8 TODO items** requiring API schema improvements
+- ⚠️ **Type safety compromises** with `Record<string, unknown>` casting
+- ⚠️ **Legacy partnerIcon field** still present
+- ⚠️ **Hardcoded fallback values** for child tasks
+- ⚠️ **Missing Zod validation** in adapter layer
+
+## 🏗️ Architecture Status
 
 ```
 form/
-├── field-state.ts          # Управление состоянием полей
-├── business-rules.ts       # Бизнес-логика и расчеты
-├── use-quest-form.ts       # Хук для управления состоянием
-├── quest-form-fields.tsx   # Компонент полей формы
-├── quest-form-container.tsx # Основной контейнер
-├── index.ts               # Экспорты модуля
-└── README.md              # Эта документация
+├── field-state.ts          # ✅ Complete - управление состоянием полей
+├── business-rules.ts       # ✅ Complete - бизнес-логика и расчеты
+├── use-quest-form.ts       # ✅ Complete - хук для управления состоянием
+├── quest-form-fields.tsx   # ⚠️ Legacy field - компонент полей формы (partnerIcon)
+├── quest-form-container.tsx # ✅ Complete - основной контейнер
+├── use-connect-gate.ts     # ⚠️ Type safety - проверка connect требований
+├── index.ts               # ✅ Complete - экспорты модуля
+└── README.md              # 📝 This documentation
 ```
 
 ## 📦 Модули
