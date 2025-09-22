@@ -15,7 +15,6 @@ import {
   type VisibilityState,
 } from '@tanstack/react-table';
 import { Loader2 } from 'lucide-react';
-import { type AdminWaitlistTasksResponseDtoGroup } from '@/lib/api/generated/model';
 import { loadJSON, LS_TABLE_SIZE, LS_TABLE_SORT, LS_TABLE_VIS, saveJSON } from '@/utils/persist';
 import { Button } from '@/components/ui/button';
 import {
@@ -46,14 +45,14 @@ export const QuestsDataTable = ({ columns, isAdmin }: DataTableProps) => {
     group,
     type,
     provider,
-    visible: visibleStr,
+    enabled: visibleStr,
     page,
     limit,
     sort,
     setGroup: _setGroup,
     setType: _setType,
     setProvider: _setProvider,
-    setVisible: _setVisible,
+    setEnabled: _setVisible,
     setPage,
     setLimit,
     setSort,
@@ -74,15 +73,15 @@ export const QuestsDataTable = ({ columns, isAdmin }: DataTableProps) => {
   });
 
   // Convert context values to API format
-  const visible = visibleStr === 'true' ? true : visibleStr === 'false' ? false : undefined;
-  const groupForApi = group ? (group as AdminWaitlistTasksResponseDtoGroup) : undefined;
+  const enabled = visibleStr === 'true' ? true : visibleStr === 'false' ? false : undefined;
+  const groupForApi = group || undefined;
 
   const { data, isFetching, isLoading } = useQuests({
     search,
-    group: groupForApi,
+    group: groupForApi as string,
     type: type || undefined,
     provider: provider || undefined,
-    visible,
+    enabled,
     page,
     limit,
     sort,

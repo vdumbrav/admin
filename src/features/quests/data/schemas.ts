@@ -1,11 +1,11 @@
 import { z } from 'zod';
 import {
-  AdminWaitlistTasksResponseDtoGroup,
-  AdminWaitlistTasksResponseDtoProvider,
-  AdminWaitlistTasksResponseDtoStatus,
-  AdminWaitlistTasksResponseDtoTypeItem,
+  TaskResponseDtoGroup,
+  TaskResponseDtoProvider,
+  TaskResponseDtoStatus,
+  TaskResponseDtoTypeItem,
 } from '@/lib/api/generated/model';
-import type { Quest, Task } from './types';
+import type { Quest } from './types';
 
 // ============================================================================
 // Utility schemas
@@ -58,45 +58,45 @@ const iteratorSchema = z
 // ============================================================================
 
 const adminTaskTypeSchema = z.enum([
-  AdminWaitlistTasksResponseDtoTypeItem.referral,
-  AdminWaitlistTasksResponseDtoTypeItem.connect,
-  AdminWaitlistTasksResponseDtoTypeItem.join,
-  AdminWaitlistTasksResponseDtoTypeItem.share,
-  AdminWaitlistTasksResponseDtoTypeItem.like,
-  AdminWaitlistTasksResponseDtoTypeItem.comment,
-  AdminWaitlistTasksResponseDtoTypeItem.multiple,
-  AdminWaitlistTasksResponseDtoTypeItem.repeatable,
-  AdminWaitlistTasksResponseDtoTypeItem.dummy,
-  AdminWaitlistTasksResponseDtoTypeItem.external,
+  TaskResponseDtoTypeItem.referral,
+  TaskResponseDtoTypeItem.connect,
+  TaskResponseDtoTypeItem.join,
+  TaskResponseDtoTypeItem.share,
+  TaskResponseDtoTypeItem.like,
+  TaskResponseDtoTypeItem.comment,
+  TaskResponseDtoTypeItem.multiple,
+  TaskResponseDtoTypeItem.repeatable,
+  TaskResponseDtoTypeItem.dummy,
+  TaskResponseDtoTypeItem.external,
 ]);
 
 const providerSchema = z
   .enum([
-    AdminWaitlistTasksResponseDtoProvider.walme,
-    AdminWaitlistTasksResponseDtoProvider.matrix,
-    AdminWaitlistTasksResponseDtoProvider.twitter,
-    AdminWaitlistTasksResponseDtoProvider.telegram,
-    AdminWaitlistTasksResponseDtoProvider.discord,
-    AdminWaitlistTasksResponseDtoProvider.adsgram,
-    AdminWaitlistTasksResponseDtoProvider.monetag,
+    TaskResponseDtoProvider.walme,
+    TaskResponseDtoProvider.matrix,
+    TaskResponseDtoProvider.twitter,
+    TaskResponseDtoProvider.telegram,
+    TaskResponseDtoProvider.discord,
+    TaskResponseDtoProvider.adsgram,
+    TaskResponseDtoProvider.monetag,
   ])
   .optional();
 
 const groupSchema = z.enum([
-  AdminWaitlistTasksResponseDtoGroup.all,
-  AdminWaitlistTasksResponseDtoGroup.referral,
-  AdminWaitlistTasksResponseDtoGroup.social,
-  AdminWaitlistTasksResponseDtoGroup.daily,
-  AdminWaitlistTasksResponseDtoGroup.partner,
+  TaskResponseDtoGroup.all,
+  TaskResponseDtoGroup.referral,
+  TaskResponseDtoGroup.social,
+  TaskResponseDtoGroup.daily,
+  TaskResponseDtoGroup.partner,
 ]);
 
 const statusSchema = z
   .enum([
-    AdminWaitlistTasksResponseDtoStatus.new,
-    AdminWaitlistTasksResponseDtoStatus.started,
-    AdminWaitlistTasksResponseDtoStatus.completed,
-    AdminWaitlistTasksResponseDtoStatus.failed,
-    AdminWaitlistTasksResponseDtoStatus.locked,
+    TaskResponseDtoStatus.new,
+    TaskResponseDtoStatus.started,
+    TaskResponseDtoStatus.completed,
+    TaskResponseDtoStatus.failed,
+    TaskResponseDtoStatus.locked,
   ])
   .optional();
 
@@ -105,23 +105,23 @@ const statusSchema = z
 // ============================================================================
 
 const taskTypeSchema = z.enum([
-  AdminWaitlistTasksResponseDtoTypeItem.referral,
-  AdminWaitlistTasksResponseDtoTypeItem.connect,
-  AdminWaitlistTasksResponseDtoTypeItem.join,
-  AdminWaitlistTasksResponseDtoTypeItem.share,
-  AdminWaitlistTasksResponseDtoTypeItem.like,
-  AdminWaitlistTasksResponseDtoTypeItem.comment,
-  AdminWaitlistTasksResponseDtoTypeItem.multiple,
-  AdminWaitlistTasksResponseDtoTypeItem.repeatable,
-  AdminWaitlistTasksResponseDtoTypeItem.dummy,
-  AdminWaitlistTasksResponseDtoTypeItem.external,
+  TaskResponseDtoTypeItem.referral,
+  TaskResponseDtoTypeItem.connect,
+  TaskResponseDtoTypeItem.join,
+  TaskResponseDtoTypeItem.share,
+  TaskResponseDtoTypeItem.like,
+  TaskResponseDtoTypeItem.comment,
+  TaskResponseDtoTypeItem.multiple,
+  TaskResponseDtoTypeItem.repeatable,
+  TaskResponseDtoTypeItem.dummy,
+  TaskResponseDtoTypeItem.external,
 ]);
 
 const taskGroupSchema = z.enum([
-  AdminWaitlistTasksResponseDtoGroup.referral,
-  AdminWaitlistTasksResponseDtoGroup.social,
-  AdminWaitlistTasksResponseDtoGroup.daily,
-  AdminWaitlistTasksResponseDtoGroup.partner,
+  TaskResponseDtoGroup.referral,
+  TaskResponseDtoGroup.social,
+  TaskResponseDtoGroup.daily,
+  TaskResponseDtoGroup.partner,
 ]);
 
 // ============================================================================
@@ -150,36 +150,12 @@ export const questSchema: z.ZodType<Quest> = z.object({
   resources: resourcesSchema,
   iterator: iteratorSchema,
   next_tick: z.string().optional(),
-  visible: z.boolean().optional(),
-});
-
-// Schema for Task (form validation)
-export const taskSchema: z.ZodType<Task> = z.object({
-  id: z.number().optional(),
-  type: taskTypeSchema,
-  title: z.string().min(1, 'Title is required'),
-  description: z.string().nullable(),
-  blocking_task: z.number().nullable().optional(),
-  reward: z.number().optional(),
-  level: z.number().optional(),
-  group: taskGroupSchema,
-  order_by: z.number().default(0),
-  provider: providerSchema,
-  uri: z.string().nullable().optional(),
-  status: statusSchema,
-  error: z.string().nullable().optional(),
-  started_at: z.string().nullable().optional(),
-  completed_at: z.string().nullable().optional(),
-  next_tick: z.string().nullable().optional(),
-  resources: resourcesSchema,
-  child: z
-    .array(z.lazy((): z.ZodType<Task> => taskSchema))
-    .nullable()
-    .optional(),
-  iterable: z.boolean().nullable().optional(),
-  iterator: iteratorSchema,
-  providerCapitalized: z.string().optional(),
-  visible: z.boolean().optional(),
+  enabled: z.boolean(),
+  web: z.boolean(),
+  twa: z.boolean(),
+  pinned: z.boolean(),
+  usersCount: z.number().optional(),
+  totalXp: z.number().optional(),
 });
 
 // ============================================================================
@@ -208,7 +184,7 @@ export const questFormSchema = z.object({
   next_tick: z.string().nullable().optional(),
   resources: resourcesSchema,
   child: z
-    .array(z.lazy((): z.ZodType<Task> => taskSchema))
+    .array(z.lazy((): z.ZodType<Quest> => questSchema))
     .nullable()
     .optional(),
   iterable: z.boolean().nullable().optional(),

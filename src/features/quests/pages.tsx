@@ -2,11 +2,10 @@ import { Outlet, useNavigate, useParams, useRouterState, useSearch } from '@tans
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Main } from '@/components/layout/main';
-import { apiToForm } from './adapters/form-api-adapter';
+import { apiToForm, formToApi } from './adapters/form-api-adapter';
 import { useCreateQuest, useQuest, useUpdateQuest } from './api';
 import { PresetSelection } from './components/preset-selection';
-import { adaptQuestToTask, adaptTaskToQuest } from './data/adapters';
-import type { Task } from './data/types';
+import type { Quest } from './data/types';
 import { QuestForm } from './form';
 import { getPreset, type PresetId } from './presets';
 import type { QuestFormValues } from './types/form-types';
@@ -60,12 +59,13 @@ export const QuestCreatePage = () => {
             <QuestForm
               onSubmit={async (v: QuestFormValues) => {
                 try {
-                  const withSchedule: Partial<Task> = {
-                    ...(v as Partial<Task>),
+                  const questData = formToApi(v);
+                  const withSchedule: Partial<Quest> = {
+                    ...questData,
                     started_at: v.start,
                     completed_at: v.end,
                   };
-                  await create.mutateAsync(adaptTaskToQuest(withSchedule));
+                  await create.mutateAsync(withSchedule);
                   toast.success('Quest saved successfully');
                   void nav({ to: '/quests', search: listSearch });
                 } catch (e) {
@@ -127,16 +127,17 @@ export const QuestEditPage = () => {
         <QuestForm
           initial={
             // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-            data ? apiToForm(adaptQuestToTask(data)) : undefined
+            data ? apiToForm(data) : undefined
           }
           onSubmit={async (v: QuestFormValues) => {
             try {
-              const withSchedule: Partial<Task> = {
-                ...(v as Partial<Task>),
+              const questData = formToApi(v);
+              const withSchedule: Partial<Quest> = {
+                ...questData,
                 started_at: v.start,
                 completed_at: v.end,
               };
-              await update.mutateAsync(adaptTaskToQuest(withSchedule));
+              await update.mutateAsync(withSchedule);
               toast.success('Quest saved successfully');
               void nav({ to: '/quests', search: listSearch });
             } catch (e) {
@@ -187,12 +188,13 @@ export const QuestCreateWithPresetPage = () => {
           presetConfig={presetConfig}
           onSubmit={async (v: QuestFormValues) => {
             try {
-              const withSchedule: Partial<Task> = {
-                ...(v as Partial<Task>),
+              const questData = formToApi(v);
+              const withSchedule: Partial<Quest> = {
+                ...questData,
                 started_at: v.start,
                 completed_at: v.end,
               };
-              await create.mutateAsync(adaptTaskToQuest(withSchedule));
+              await create.mutateAsync(withSchedule);
               toast.success('Quest saved successfully');
               void nav({ to: '/quests', search: listSearch });
             } catch (e) {

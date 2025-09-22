@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { DataTableFacetedFilter } from '@/components/table/data-table-faceted-filter';
 import { DataTableViewOptions } from '@/components/table/data-table-view-options';
 import { useQuests } from '../api';
-import { groups, providers, types, enabledOptions } from '../data/data';
+import { enabledOptions, groups, providers, types } from '../data/data';
 import { useFilters } from '../hooks/use-filters';
 import { createVirtualColumn } from '../utils/virtual-column-helper';
 

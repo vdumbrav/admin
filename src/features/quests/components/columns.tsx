@@ -188,28 +188,28 @@ export const getColumns = (isAdmin: boolean): ColumnDef<Quest>[] => {
     },
     // 12. Start date
     {
-      accessorKey: 'startDate',
+      accessorKey: 'started_at',
       header: ({ column }) => <DataTableColumnHeader column={column} title='Start date' />,
-      cell: ({ row }) => formatDateDMY(row.original.startDate),
+      cell: ({ row }) => formatDateDMY(row.original.started_at),
       size: 160,
       minSize: 160,
       maxSize: 160,
     },
     // 13. End date
     {
-      accessorKey: 'endDate',
+      accessorKey: 'completed_at',
       header: ({ column }) => <DataTableColumnHeader column={column} title='End date' />,
-      cell: ({ row }) => formatDateDMY(row.original.endDate),
+      cell: ({ row }) => formatDateDMY(row.original.completed_at),
       size: 160,
       minSize: 160,
       maxSize: 160,
     },
     // 14. Web
     {
-      accessorKey: 'webEnabled',
+      accessorKey: 'web',
       header: ({ column }) => <DataTableColumnHeader column={column} title='Web' />,
       cell: ({ row }) =>
-        row.original.webEnabled ? (
+        row.original.web ? (
           <IconCheck size={16} className='text-[--success]' />
         ) : (
           <span className='text-muted-foreground'>–</span>
@@ -220,10 +220,10 @@ export const getColumns = (isAdmin: boolean): ColumnDef<Quest>[] => {
     },
     // 15. TMA
     {
-      accessorKey: 'tmaEnabled',
+      accessorKey: 'twa',
       header: ({ column }) => <DataTableColumnHeader column={column} title='TMA' />,
       cell: ({ row }) =>
-        row.original.tmaEnabled ? (
+        row.original.twa ? (
           <IconCheck size={16} className='text-[--success]' />
         ) : (
           <span className='text-muted-foreground'>–</span>

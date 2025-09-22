@@ -8,14 +8,14 @@ import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/comp
 import { Input } from '@/components/ui/input';
 import { NoWheelNumber } from '@/components/no-wheel-number';
 import { SelectDropdown } from '@/components/select-dropdown';
-import type { Task } from '../data/types';
+import type { Quest } from '../data/types';
 
-type ChildType = Extract<Task['type'], 'like' | 'share' | 'comment' | 'join' | 'connect'>;
+type ChildType = Extract<Quest['type'][number], 'like' | 'share' | 'comment' | 'join' | 'connect'>;
 
 interface Child {
   title: string;
   type: ChildType;
-  provider?: Task['provider'];
+  provider?: Quest['provider'];
   reward?: number;
   order_by: number;
   resources?: { tweetId?: string; username?: string };

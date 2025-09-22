@@ -556,22 +556,22 @@ export function QuestFormFields({
             />
           )}
 
-          {/* Visible Field */}
-          {isFieldVisible('visible', fieldStates) && (
+          {/* Enabled Field */}
+          {isFieldVisible('enabled', fieldStates) && (
             <FormField
               control={form.control}
-              name='visible'
+              name='enabled'
               render={({ field }) => (
                 <FormItem className='flex flex-row items-center justify-between rounded-lg border p-4'>
                   <div className='space-y-0.5'>
-                    <FormLabel className='text-base'>Visible</FormLabel>
-                    <FormDescription>Make this quest visible to users</FormDescription>
+                    <FormLabel className='text-base'>Enabled</FormLabel>
+                    <FormDescription>Make this quest enabled for users</FormDescription>
                   </div>
                   <FormControl>
                     <Switch
-                      checked={field.value}
+                      checked={Boolean(field.value)}
                       onCheckedChange={field.onChange}
-                      disabled={isFieldDisabled('visible', fieldStates)}
+                      disabled={isFieldDisabled('enabled', fieldStates)}
                     />
                   </FormControl>
                   <FormMessage />

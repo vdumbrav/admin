@@ -2,16 +2,19 @@ import { useMemo } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import {
-  useAdminWaitlistTasksControllerGetWaitlistTasks,
+  filesControllerUploadFile,
   useAdminWaitlistTasksControllerCreateTask,
-  useAdminWaitlistTasksControllerUpdateTask,
   useAdminWaitlistTasksControllerDeleteTask,
-  useFilesControllerUploadFile,
-  filesControllerUploadFile
+  useAdminWaitlistTasksControllerGetWaitlistTasks,
+  useAdminWaitlistTasksControllerUpdateTask,
 } from '@/lib/api/generated/admin/admin';
-import { type TaskResponseDto, type CreateTaskDto, type UpdateTaskDto, type UploadFileDto } from '@/lib/api/generated/model';
-import { adaptAdminTasksToQuests, adaptAdminTaskToQuest } from './data/adapters';
-import { formToApi, validateAndConvertToApi } from './adapters/form-api-adapter';
+import {
+  type CreateTaskDto,
+  type UpdateTaskDto,
+  type UploadFileDto,
+} from '@/lib/api/generated/model';
+import { validateAndConvertToApi } from './adapters/form-api-adapter';
+import { adaptAdminTaskToQuest } from './data/adapters';
 import type { Quest, QuestQuery, QuestsResponse } from './data/types';
 
 export const useQuests = (query: QuestQuery) => {
@@ -24,11 +27,8 @@ export const useQuests = (query: QuestQuery) => {
     refetch,
   } = useAdminWaitlistTasksControllerGetWaitlistTasks();
 
-  // Memoize transformation to avoid unnecessary re-renders
-  const transformedQuests = useMemo(() => {
-    if (!adminTasks) return undefined;
-    return adaptAdminTasksToQuests(adminTasks);
-  }, [adminTasks]);
+  // Use API data directly - no transformation needed
+  const transformedQuests = adminTasks;
 
   // Memoize filtering and pagination for performance
   const processedData = useMemo((): QuestsResponse | undefined => {
@@ -118,7 +118,12 @@ export const useQuests = (query: QuestQuery) => {
 
 export const useQuest = (id: number) => {
   // Use the base hook to get all tasks (leveraging React Query cache)
-  const { data: adminTasks, isLoading, error, isFetching } = useAdminWaitlistTasksControllerGetWaitlistTasks();
+  const {
+    data: adminTasks,
+    isLoading,
+    error,
+    isFetching,
+  } = useAdminWaitlistTasksControllerGetWaitlistTasks();
 
   // Memoize the specific task lookup and transformation
   const quest = useMemo(() => {
@@ -126,7 +131,7 @@ export const useQuest = (id: number) => {
 
     const task = adminTasks.find((task) => task.id === id);
 
-    return task ? adaptAdminTaskToQuest(task) : undefined;
+    return task;
   }, [adminTasks, id]);
 
   return {
@@ -153,12 +158,12 @@ export const useCreateQuest = () => {
   return useMutation({
     mutationFn: async (data: Partial<Quest>): Promise<Quest> => {
       // Convert form data to API format using adapter
-      const apiData = validateAndConvertToApi(data) as CreateTaskDto;
+      const apiData = validateAndConvertToApi(data) as unknown as CreateTaskDto;
 
       const result = await createTaskMutation.mutateAsync({ data: apiData });
 
-      // Convert API response back to Quest format
-      return adaptAdminTaskToQuest(result);
+      // Quest is the same as TaskResponseDto now
+      return result;
     },
     onSuccess: () => {
       toast.success('Quest created successfully');
@@ -182,12 +187,12 @@ export const useUpdateQuest = (id: number) => {
   return useMutation({
     mutationFn: async (data: Partial<Quest>): Promise<Quest> => {
       // Convert form data to API format using adapter
-      const apiData = validateAndConvertToApi(data) as UpdateTaskDto;
+      const apiData = validateAndConvertToApi(data) as unknown as UpdateTaskDto;
 
       const result = await updateTaskMutation.mutateAsync({ id, data: apiData });
 
-      // Convert API response back to Quest format
-      return adaptAdminTaskToQuest(result);
+      // Quest is the same as TaskResponseDto now
+      return result;
     },
     onSuccess: () => {
       toast.success('Quest updated successfully');
@@ -247,11 +252,11 @@ export const useToggleEnabled = () => {
       // Use PUT endpoint which works as PATCH for enabled updates
       const result = await updateTaskMutation.mutateAsync({
         id: data.id,
-        data: { enabled: data.enabled } as UpdateTaskDto
+        data: { enabled: data.enabled } as UpdateTaskDto,
       });
 
-      // Convert API response back to Quest format
-      return adaptAdminTaskToQuest(result);
+      // Quest is the same as TaskResponseDto now
+      return result;
     },
     onSuccess: () => {
       toast.success('Quest status updated successfully');
@@ -266,11 +271,6 @@ export const useToggleEnabled = () => {
 };
 
 /**
- * @deprecated Use useToggleEnabled instead
- */
-export const useToggleVisibility = useToggleEnabled;
-
-/**
  * Toggle quest pinned state (Real API implementation)
  */
 export const useTogglePinned = () => {
@@ -281,11 +281,11 @@ export const useTogglePinned = () => {
     mutationFn: async (data: { id: number; pinned: boolean }): Promise<Quest> => {
       const result = await updateTaskMutation.mutateAsync({
         id: data.id,
-        data: { pinned: data.pinned } as UpdateTaskDto
+        data: { pinned: data.pinned } as UpdateTaskDto,
       });
 
-      // Convert API response back to Quest format
-      return adaptAdminTaskToQuest(result);
+      // Quest is the same as TaskResponseDto now
+      return result;
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['api', 'admin', 'tasks'] });
@@ -328,14 +328,14 @@ export const useBulkUpdateQuests = () => {
       const apiData = validateAndConvertToApi(data.updates) as UpdateTaskDto;
 
       // Execute all updates in parallel
-      const promises = data.ids.map(id =>
-        updateTaskMutation.mutateAsync({ id, data: apiData })
+      const promises = data.ids.map(async (id) =>
+        updateTaskMutation.mutateAsync({ id, data: apiData }),
       );
 
       const results = await Promise.all(promises);
 
       // Convert all API responses back to Quest format
-      return results.map(result => adaptAdminTaskToQuest(result));
+      return results.map((result) => adaptAdminTaskToQuest(result));
     },
     onSuccess: () => {
       toast.success('Quests updated successfully');

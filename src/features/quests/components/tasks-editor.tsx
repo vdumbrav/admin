@@ -8,10 +8,10 @@ import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/comp
 import { Input } from '@/components/ui/input';
 import { NoWheelNumber } from '@/components/no-wheel-number';
 import { SelectDropdown } from '@/components/select-dropdown';
-import type { Task } from '../data/types';
+import type { Quest } from '../data/types';
 
 // Ограничиваем типы для Action with post
-type TaskType = Extract<Task['type'], 'like' | 'share' | 'comment'>;
+type TaskType = Extract<Quest['type'][number], 'like' | 'share' | 'comment'>;
 
 interface TaskItem {
   title: string;

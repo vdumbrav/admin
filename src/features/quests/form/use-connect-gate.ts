@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { useAdminControllerGetWaitlistTasks } from '@/lib/api/generated/admin/admin';
+import { useAdminWaitlistTasksControllerGetWaitlistTasks } from '@/lib/api/generated/admin/admin';
 
 export interface ConnectGateResult {
   hasRequiredConnect: boolean | null; // null while loading/unknown
@@ -11,13 +11,16 @@ export interface ConnectGateResult {
  * Returns null while loading/fetching.
  */
 export function useConnectGate(provider?: string): ConnectGateResult {
-  const { data, error, isLoading } = useAdminControllerGetWaitlistTasks();
+  const { data, error, isLoading } = useAdminWaitlistTasksControllerGetWaitlistTasks();
 
   const hasRequiredConnect = useMemo(() => {
     if (!provider) return null;
     if (!data) return null;
     // AdminWaitlistTasksResponseDto.type is an array on API model, check includes 'connect'
-    return data.some((t) => t.provider === provider && t.type.includes('connect'));
+    return data.some(
+      (t: { provider?: string; type: string[] }) =>
+        t.provider === provider && t.type.includes('connect'),
+    );
   }, [data, provider]);
 
   if (error) {

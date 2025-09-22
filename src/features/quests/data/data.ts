@@ -1,7 +1,7 @@
 import {
-  AdminWaitlistTasksResponseDtoGroup,
-  AdminWaitlistTasksResponseDtoProvider,
-  AdminWaitlistTasksResponseDtoTypeItem,
+  TaskResponseDtoGroup,
+  TaskResponseDtoProvider,
+  TaskResponseDtoTypeItem,
 } from '@/lib/api/generated/model';
 import { getAvailableApiGroups, getAvailableApiProviders, getAvailableApiTypes } from './adapters';
 import type { DropdownOption, UIGroup } from './types';
@@ -10,35 +10,35 @@ import type { DropdownOption, UIGroup } from './types';
 // UI Labels and Display Names
 // ============================================================================
 
-const GROUP_LABELS: Record<AdminWaitlistTasksResponseDtoGroup | 'all', string> = {
-  [AdminWaitlistTasksResponseDtoGroup.social]: 'Social',
-  [AdminWaitlistTasksResponseDtoGroup.daily]: 'Daily',
-  [AdminWaitlistTasksResponseDtoGroup.referral]: 'Referral',
-  [AdminWaitlistTasksResponseDtoGroup.partner]: 'Partner',
+const GROUP_LABELS: Record<TaskResponseDtoGroup | 'all', string> = {
+  [TaskResponseDtoGroup.social]: 'Social',
+  [TaskResponseDtoGroup.daily]: 'Daily',
+  [TaskResponseDtoGroup.referral]: 'Referral',
+  [TaskResponseDtoGroup.partner]: 'Partner',
   all: 'All Groups',
 };
 
-const TYPE_LABELS: Record<AdminWaitlistTasksResponseDtoTypeItem, string> = {
-  [AdminWaitlistTasksResponseDtoTypeItem.like]: 'Like',
-  [AdminWaitlistTasksResponseDtoTypeItem.comment]: 'Comment',
-  [AdminWaitlistTasksResponseDtoTypeItem.share]: 'Share',
-  [AdminWaitlistTasksResponseDtoTypeItem.join]: 'Join',
-  [AdminWaitlistTasksResponseDtoTypeItem.connect]: 'Connect',
-  [AdminWaitlistTasksResponseDtoTypeItem.multiple]: 'Multiple',
-  [AdminWaitlistTasksResponseDtoTypeItem.repeatable]: 'Repeatable',
-  [AdminWaitlistTasksResponseDtoTypeItem.dummy]: 'Dummy',
-  [AdminWaitlistTasksResponseDtoTypeItem.referral]: 'Referral',
-  [AdminWaitlistTasksResponseDtoTypeItem.external]: 'External',
+const TYPE_LABELS: Record<TaskResponseDtoTypeItem, string> = {
+  [TaskResponseDtoTypeItem.like]: 'Like',
+  [TaskResponseDtoTypeItem.comment]: 'Comment',
+  [TaskResponseDtoTypeItem.share]: 'Share',
+  [TaskResponseDtoTypeItem.join]: 'Join',
+  [TaskResponseDtoTypeItem.connect]: 'Connect',
+  [TaskResponseDtoTypeItem.multiple]: 'Multiple',
+  [TaskResponseDtoTypeItem.repeatable]: 'Repeatable',
+  [TaskResponseDtoTypeItem.dummy]: 'Dummy',
+  [TaskResponseDtoTypeItem.referral]: 'Referral',
+  [TaskResponseDtoTypeItem.external]: 'External',
 };
 
-const PROVIDER_LABELS: Record<AdminWaitlistTasksResponseDtoProvider, string> = {
-  [AdminWaitlistTasksResponseDtoProvider.twitter]: 'Twitter',
-  [AdminWaitlistTasksResponseDtoProvider.telegram]: 'Telegram',
-  [AdminWaitlistTasksResponseDtoProvider.discord]: 'Discord',
-  [AdminWaitlistTasksResponseDtoProvider.matrix]: 'Matrix',
-  [AdminWaitlistTasksResponseDtoProvider.walme]: 'Internal',
-  [AdminWaitlistTasksResponseDtoProvider.monetag]: 'Monetag',
-  [AdminWaitlistTasksResponseDtoProvider.adsgram]: 'AdsGram',
+const PROVIDER_LABELS: Record<TaskResponseDtoProvider, string> = {
+  [TaskResponseDtoProvider.twitter]: 'Twitter',
+  [TaskResponseDtoProvider.telegram]: 'Telegram',
+  [TaskResponseDtoProvider.discord]: 'Discord',
+  [TaskResponseDtoProvider.matrix]: 'Matrix',
+  [TaskResponseDtoProvider.walme]: 'Internal',
+  [TaskResponseDtoProvider.monetag]: 'Monetag',
+  [TaskResponseDtoProvider.adsgram]: 'AdsGram',
 };
 
 // ============================================================================
@@ -49,7 +49,7 @@ const PROVIDER_LABELS: Record<AdminWaitlistTasksResponseDtoProvider, string> = {
  * Groups dropdown options (API-synced)
  */
 export const groups = getAvailableApiGroups()
-  .filter((g) => g !== AdminWaitlistTasksResponseDtoGroup.all)
+  .filter((g) => g !== TaskResponseDtoGroup.all)
   .map(
     (group): DropdownOption => ({
       value: group,
@@ -85,11 +85,6 @@ export const enabledOptions = [
   { value: 'false', label: 'Disabled' },
 ];
 
-/**
- * @deprecated Use enabledOptions instead
- */
-export const visibilities = enabledOptions;
-
 // ============================================================================
 // Helper Functions
 // ============================================================================
@@ -104,42 +99,36 @@ export function getGroupLabel(value: UIGroup): string {
 /**
  * Get display label for a type value
  */
-export function getTypeLabel(value: AdminWaitlistTasksResponseDtoTypeItem): string {
+export function getTypeLabel(value: TaskResponseDtoTypeItem): string {
   return TYPE_LABELS[value] || value;
 }
 
 /**
  * Get display label for a provider value
  */
-export function getProviderLabel(value: AdminWaitlistTasksResponseDtoProvider): string {
+export function getProviderLabel(value: TaskResponseDtoProvider): string {
   return PROVIDER_LABELS[value] || value;
 }
 
 /**
  * Check if a type value is valid for API
  */
-export function isApiType(value: string): value is AdminWaitlistTasksResponseDtoTypeItem {
-  return Object.values(AdminWaitlistTasksResponseDtoTypeItem).includes(
-    value as AdminWaitlistTasksResponseDtoTypeItem,
-  );
+export function isApiType(value: string): value is TaskResponseDtoTypeItem {
+  return Object.values(TaskResponseDtoTypeItem).includes(value as TaskResponseDtoTypeItem);
 }
 
 /**
  * Check if a provider value is valid for API
  */
-export function isApiProvider(value: string): value is AdminWaitlistTasksResponseDtoProvider {
-  return Object.values(AdminWaitlistTasksResponseDtoProvider).includes(
-    value as AdminWaitlistTasksResponseDtoProvider,
-  );
+export function isApiProvider(value: string): value is TaskResponseDtoProvider {
+  return Object.values(TaskResponseDtoProvider).includes(value as TaskResponseDtoProvider);
 }
 
 /**
  * Check if a group value is valid for API
  */
-export function isApiGroup(value: string): value is AdminWaitlistTasksResponseDtoGroup {
-  return Object.values(AdminWaitlistTasksResponseDtoGroup).includes(
-    value as AdminWaitlistTasksResponseDtoGroup,
-  );
+export function isApiGroup(value: string): value is TaskResponseDtoGroup {
+  return Object.values(TaskResponseDtoGroup).includes(value as TaskResponseDtoGroup);
 }
 
 // ============================================================================
@@ -151,32 +140,30 @@ export function isApiGroup(value: string): value is AdminWaitlistTasksResponseDt
  * TODO: This should ideally come from API documentation or be configurable
  */
 export const TYPE_PROVIDER_REQUIREMENTS: Partial<
-  Record<AdminWaitlistTasksResponseDtoTypeItem, AdminWaitlistTasksResponseDtoProvider[]>
+  Record<TaskResponseDtoTypeItem, TaskResponseDtoProvider[]>
 > = {
-  [AdminWaitlistTasksResponseDtoTypeItem.like]: [
-    AdminWaitlistTasksResponseDtoProvider.twitter,
-    AdminWaitlistTasksResponseDtoProvider.telegram,
+  [TaskResponseDtoTypeItem.like]: [
+    TaskResponseDtoProvider.twitter,
+    TaskResponseDtoProvider.telegram,
   ],
-  [AdminWaitlistTasksResponseDtoTypeItem.share]: [
-    AdminWaitlistTasksResponseDtoProvider.twitter,
-    AdminWaitlistTasksResponseDtoProvider.telegram,
+  [TaskResponseDtoTypeItem.share]: [
+    TaskResponseDtoProvider.twitter,
+    TaskResponseDtoProvider.telegram,
   ],
-  [AdminWaitlistTasksResponseDtoTypeItem.comment]: [AdminWaitlistTasksResponseDtoProvider.twitter],
-  [AdminWaitlistTasksResponseDtoTypeItem.join]: [
-    AdminWaitlistTasksResponseDtoProvider.telegram,
-    AdminWaitlistTasksResponseDtoProvider.discord,
+  [TaskResponseDtoTypeItem.comment]: [TaskResponseDtoProvider.twitter],
+  [TaskResponseDtoTypeItem.join]: [
+    TaskResponseDtoProvider.telegram,
+    TaskResponseDtoProvider.discord,
   ],
-  [AdminWaitlistTasksResponseDtoTypeItem.connect]: [
-    AdminWaitlistTasksResponseDtoProvider.twitter,
-    AdminWaitlistTasksResponseDtoProvider.telegram,
+  [TaskResponseDtoTypeItem.connect]: [
+    TaskResponseDtoProvider.twitter,
+    TaskResponseDtoProvider.telegram,
   ],
 };
 
 /**
  * Get compatible providers for a given type
  */
-export function getCompatibleProviders(
-  type: AdminWaitlistTasksResponseDtoTypeItem,
-): AdminWaitlistTasksResponseDtoProvider[] {
+export function getCompatibleProviders(type: TaskResponseDtoTypeItem): TaskResponseDtoProvider[] {
   return TYPE_PROVIDER_REQUIREMENTS[type] ?? getAvailableApiProviders();
 }

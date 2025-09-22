@@ -59,41 +59,14 @@ export type UIGroup = TaskResponseDtoGroup; // UI type includes 'all' from API
 export type TaskProvider = TaskResponseDtoProvider;
 export type TaskStatus = TaskResponseDtoStatus;
 
-// Form-compatible Task interface (mixing API types with form requirements)
-export interface Task {
-  id?: number;
-  type: TaskType;
-  title: string;
-  description: string | null;
-  blocking_task?: number | null;
-  reward?: number;
-  level?: number;
-  group: TaskGroup;
-  order_by: number;
-  provider?: TaskProvider;
-  uri?: string | null;
-  status?: TaskStatus;
-  error?: string | null;
-  started_at?: string | null;
-  completed_at?: string | null;
-  next_tick?: string | null;
-  resources?: Resources | null;
-  child?: Array<Task> | null;
-  iterable?: boolean | null;
-  iterator?: IteratorDaily | null;
-  providerCapitalized?: string;
-}
-
 // ============================================================================
 // API-compatible types
 // ============================================================================
 
-// Extended Quest type with additional UI fields
+// Quest extends API response with additional fields not yet in API
 export type Quest = TaskResponseDto & {
   usersCount?: number;
   totalXp?: number;
-  startDate?: string | null;
-  endDate?: string | null;
 };
 
 // ============================================================================

@@ -16,7 +16,7 @@
  *
  * When API is improved, remove this adapter and use direct form-to-API mapping.
  */
-import type { Task } from '../data/types';
+import type { Quest } from '../data/types';
 import {
   type ChildFormValues,
   DEFAULT_FORM_VALUES,
@@ -39,11 +39,14 @@ import {
  * @param apiData - Partial task data from API response
  * @returns Complete form values ready for react-hook-form
  */
-export function apiToForm(apiData: Partial<Task>): QuestFormValues {
+export function apiToForm(apiData: Partial<Quest>): QuestFormValues {
   return {
     // Core fields with fallback to defaults
     title: apiData.title ?? (DEFAULT_FORM_VALUES.title as string),
-    type: apiData.type ?? (DEFAULT_FORM_VALUES.type as QuestFormValues['type']),
+    type:
+      Array.isArray(apiData.type) && apiData.type.length > 0
+        ? apiData.type[0]
+        : (DEFAULT_FORM_VALUES.type as QuestFormValues['type']),
     description: apiData.description ?? (DEFAULT_FORM_VALUES.description as string),
     group: apiData.group ?? (DEFAULT_FORM_VALUES.group as QuestFormValues['group']),
     order_by: apiData.order_by ?? (DEFAULT_FORM_VALUES.order_by as number),
@@ -79,18 +82,20 @@ export function apiToForm(apiData: Partial<Task>): QuestFormValues {
  * @param apiChild - Complete task from API
  * @returns Simplified child form values
  */
-function convertApiChildToForm(apiChild: Task): ChildFormValues {
+function convertApiChildToForm(apiChild: Quest): ChildFormValues {
   return {
     title: apiChild.title,
-    type: apiChild.type as ChildFormValues['type'], // TODO: Fix type mismatch in API
+    type: (Array.isArray(apiChild.type) && apiChild.type.length > 0
+      ? apiChild.type[0]
+      : 'external') as ChildFormValues['type'],
     provider: apiChild.provider,
     reward: apiChild.reward,
     order_by: apiChild.order_by,
     // Only extract relevant resources for children (Twitter-specific)
     resources: apiChild.resources
       ? {
-          tweetId: apiChild.resources.tweetId,
-          username: apiChild.resources.username,
+          tweetId: (apiChild.resources as Record<string, unknown>).tweetId as string,
+          username: (apiChild.resources as Record<string, unknown>).username as string,
         }
       : undefined,
   };
@@ -187,13 +192,13 @@ function convertApiResourcesToForm(
  * @param formData - Complete form values from react-hook-form
  * @returns API-compatible task data for submission
  */
-export function formToApi(formData: QuestFormValues): Partial<Task> {
+export function formToApi(formData: QuestFormValues): Partial<Quest> {
   return {
     // Core required fields
     title: formData.title,
-    type: formData.type,
-    description: formData.description || null, // API expects null for empty
-    group: formData.group as Task['group'], // TODO: Remove casting when API fixed
+    type: [formData.type],
+    description: formData.description || undefined,
+    group: formData.group as Quest['group'], // TODO: Remove casting when API fixed
     order_by: formData.order_by,
 
     // Optional fields
@@ -206,7 +211,7 @@ export function formToApi(formData: QuestFormValues): Partial<Task> {
     pinned: formData.pinned ?? false, // Default not pinned
 
     // Complex nested structures
-    resources: formData.resources ? convertFormResourcesToApi(formData.resources) : null,
+    resources: formData.resources ? convertFormResourcesToApi(formData.resources) : undefined,
     child: formData.child ? formData.child.map(convertFormChildToApi) : undefined,
   };
 }
@@ -221,23 +226,34 @@ export function formToApi(formData: QuestFormValues): Partial<Task> {
  * @param formChild - Child form values
  * @returns Complete Task object for API
  */
-function convertFormChildToApi(formChild: ChildFormValues): Task {
+function convertFormChildToApi(formChild: ChildFormValues): Quest {
   return {
+    id: 0, // Will be assigned by API
     title: formChild.title,
-    type: formChild.type as Task['type'], // TODO: Fix type compatibility
-    description: null, // TODO: Add description field to child form if needed
-    group: 'social' as Task['group'], // TODO: Make group configurable for children
+    type: [formChild.type] as Quest['type'], // API expects array
+    description: undefined, // TODO: Add description field to child form if needed
+    group: 'social' as Quest['group'], // TODO: Make group configurable for children
     order_by: formChild.order_by,
     provider: formChild.provider,
     reward: formChild.reward,
+    enabled: true,
+    web: true,
+    twa: false,
+    pinned: false,
+    child: [],
+    level: 0,
+    blocking_task: 0,
+    started_at: undefined,
+    completed_at: undefined,
+    iterable: false,
     // Only include Twitter-specific resources for children
     resources: formChild.resources
       ? {
           tweetId: formChild.resources.tweetId,
           username: formChild.resources.username,
         }
-      : null,
-  };
+      : undefined,
+  } as unknown as Quest;
 }
 
 /**
@@ -339,7 +355,7 @@ export function getDefaultFormValues(): QuestFormValues {
  * @param formData - Unknown data to validate and convert
  * @returns API-compatible task data
  */
-export function validateAndConvertToApi(formData: unknown): Partial<Task> {
+export function validateAndConvertToApi(formData: unknown): Partial<Quest> {
   // UNSAFE: Type assertion without validation
   // TODO: Add questFormSchema.parse(formData) validation
   return formToApi(formData as QuestFormValues);
