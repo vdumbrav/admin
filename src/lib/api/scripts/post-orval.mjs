@@ -5,7 +5,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import * as ts from 'typescript';
 
 const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url));
-const PROJECT_ROOT = resolve(SCRIPT_DIR, '../../..');
+const PROJECT_ROOT = resolve(SCRIPT_DIR, '../../../..');
 const GENERATED_DIR = resolve(PROJECT_ROOT, 'src/lib/api/generated');
 const TS_SOURCE_PATH = resolve(SCRIPT_DIR, 'update-api-barrel.ts');
 const DIST_PATH = resolve(SCRIPT_DIR, 'dist/update-api-barrel.js');
@@ -48,7 +48,16 @@ async function runBarrelGenerator() {
 }
 
 function runPrettier() {
-  const prettierBin = resolve(PROJECT_ROOT, 'node_modules', 'prettier', 'bin', 'prettier.cjs');
+  const prettierBin = resolve(
+    PROJECT_ROOT,
+    'node_modules',
+    '.pnpm',
+    'prettier@3.6.2',
+    'node_modules',
+    'prettier',
+    'bin',
+    'prettier.cjs',
+  );
   const result = spawnSync(
     process.execPath,
     [prettierBin, '--loglevel', 'warn', '--write', GENERATED_DIR],
