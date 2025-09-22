@@ -63,7 +63,11 @@ const childFormSchema = z.object({
 
 const iteratorSchema = z
   .object({
-    days: z.number().min(3, 'Minimum 3 days required').max(10, 'Maximum 10 days allowed'),
+    days: z
+      .number()
+      .min(3, 'Minimum 3 days required')
+      .max(10, 'Maximum 10 days allowed')
+      .optional(),
     reward_map: z.array(z.number().min(0, 'Reward must be positive')),
   })
   .optional();

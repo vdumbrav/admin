@@ -4,7 +4,7 @@ import {
   TaskResponseDtoTypeItem,
 } from '@/lib/api/generated/model';
 import { getAvailableApiGroups, getAvailableApiProviders, getAvailableApiTypes } from './adapters';
-import type { DropdownOption, UIGroup } from './types';
+import type { DropdownOption } from './types';
 
 // ============================================================================
 // UI Labels and Display Names
@@ -92,8 +92,8 @@ export const enabledOptions = [
 /**
  * Get display label for a group value
  */
-export function getGroupLabel(value: UIGroup): string {
-  return GROUP_LABELS[value] || value;
+export function getGroupLabel(value: TaskResponseDtoGroup): string {
+  return GROUP_LABELS[value] ?? value;
 }
 
 /**

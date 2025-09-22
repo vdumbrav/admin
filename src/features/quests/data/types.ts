@@ -1,14 +1,4 @@
-import type {
-  TaskResponseDto,
-  TaskResponseDtoGroup,
-  TaskResponseDtoProvider,
-  TaskResponseDtoStatus,
-  TaskResponseDtoTypeItem,
-} from '@/lib/api/generated/model';
-
-// ============================================================================
-// UI-specific types for form compatibility
-// ============================================================================
+import type { TaskResponseDto } from '@/lib/api/generated/model';
 
 export interface PopUp {
   name: string;
@@ -39,34 +29,9 @@ export interface Resources {
   adsgram?: AdsGramResource;
 }
 
-export interface IteratorDaily {
-  days: number;
-  reward_map: number[];
-  reward_max: number;
-  reward: number;
-  day?: number; // Current day - managed by backend
-  tick?: number; // Optional tick count
-}
-
-// ============================================================================
-// Form-compatible types (derived from API types where possible)
-// ============================================================================
-
-// Using API type directly where possible
-export type TaskType = TaskResponseDtoTypeItem;
-export type TaskGroup = Exclude<TaskResponseDtoGroup, 'all'>; // Form type excludes 'all'
-export type UIGroup = TaskResponseDtoGroup; // UI type includes 'all' from API
-export type TaskProvider = TaskResponseDtoProvider;
-export type TaskStatus = TaskResponseDtoStatus;
-
-// ============================================================================
-// API-compatible types
-// ============================================================================
-
-// Quest extends API response with additional fields not yet in API
 export type Quest = TaskResponseDto & {
-  usersCount?: number;
-  totalXp?: number;
+  usersCount?: number; // Display-only field
+  totalXp?: number; // Display-only field
 };
 
 // ============================================================================
@@ -83,38 +48,23 @@ export interface QuestsResponse {
   total: number;
 }
 
-// ============================================================================
-// Query types
-// ============================================================================
-
-// ============================================================================
-// Frontend-only query and sorting types (no server-side support needed)
-// ============================================================================
-
 export interface LocalSortConfig {
   field: keyof Quest;
   direction: 'asc' | 'desc';
 }
 
-export interface LocalPaginationConfig {
-  page: number;
-  limit: number;
-}
-
-export interface LocalFilterConfig {
+export interface QuestQuery {
+  // Client-side filtering - no server-side filtering needed
   search?: string;
   group?: string;
   type?: string;
   provider?: string;
-  enabled?: string;
-}
-
-export interface QuestQuery extends LocalFilterConfig, Partial<LocalPaginationConfig> {
-  sort?: string; // Format: "field:direction" e.g., "title:asc", "order_by:desc"
-}
-
-// API query with proper types for filtering
-export interface QuestApiQuery extends Omit<LocalFilterConfig, 'enabled'>, Partial<LocalPaginationConfig> {
   enabled?: boolean;
+
+  // Client-side pagination (small dataset ~50-200 items)
+  page?: number;
+  limit?: number;
+
+  // Client-side sorting - no server support needed
   sort?: string;
 }

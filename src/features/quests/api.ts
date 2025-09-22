@@ -14,10 +14,9 @@ import {
   type UploadFileDto,
 } from '@/lib/api/generated/model';
 import { validateAndConvertToApi } from './adapters/form-api-adapter';
-import type { Quest, QuestApiQuery, QuestsResponse } from './data/types';
+import type { Quest, QuestQuery, QuestsResponse } from './data/types';
 
-export const useQuests = (query: QuestApiQuery) => {
-  // Use the generated API hook for admin access to waitlist tasks
+export const useQuests = (query: QuestQuery) => {
   const {
     data: adminTasks,
     isLoading,
@@ -26,15 +25,13 @@ export const useQuests = (query: QuestApiQuery) => {
     refetch,
   } = useAdminWaitlistTasksControllerGetWaitlistTasks();
 
-  // Use API data directly - no transformation needed
-  const transformedQuests = adminTasks;
+  const questsData = adminTasks;
 
-  // Memoize filtering and pagination for performance
   const processedData = useMemo((): QuestsResponse | undefined => {
-    if (!transformedQuests) return undefined;
+    if (!questsData) return undefined;
 
-    // Apply client-side filtering (API returns full list of 50-200 items)
-    let filteredItems = transformedQuests.filter((item: Quest) => {
+    // Client-side filtering - no server-side filtering needed
+    let filteredItems = questsData.filter((item: Quest) => {
       const matchesSearch =
         !query.search ||
         item.title.toLowerCase().includes(query.search.toLowerCase()) ||
@@ -73,7 +70,7 @@ export const useQuests = (query: QuestApiQuery) => {
       return matchesSearch && matchesGroup && matchesType && matchesProvider && matchesVisibility;
     });
 
-    // Apply client-side sorting (frontend-only for small lists)
+    // Client-side sorting - no server support required
     if (query.sort) {
       const [field, direction] = query.sort.split(':');
       const isAsc = direction !== 'desc';
@@ -90,7 +87,7 @@ export const useQuests = (query: QuestApiQuery) => {
       });
     }
 
-    // Apply client-side pagination (frontend-only for small lists)
+    // Client-side pagination for small datasets
     const totalItems = filteredItems.length;
     let paginatedItems = filteredItems;
 
@@ -116,7 +113,6 @@ export const useQuests = (query: QuestApiQuery) => {
 };
 
 export const useQuest = (id: number) => {
-  // Use the base hook to get all tasks (leveraging React Query cache)
   const {
     data: adminTasks,
     isLoading,
@@ -124,13 +120,9 @@ export const useQuest = (id: number) => {
     isFetching,
   } = useAdminWaitlistTasksControllerGetWaitlistTasks();
 
-  // Memoize the specific task lookup and transformation
   const quest = useMemo(() => {
     if (!adminTasks) return undefined;
-
-    const task = adminTasks.find((task) => task.id === id);
-
-    return task;
+    return adminTasks.find((task) => task.id === id);
   }, [adminTasks, id]);
 
   return {
@@ -147,21 +139,14 @@ export const useQuest = (id: number) => {
 // Mutation Hooks
 // ============================================================================
 
-/**
- * Create quest mutation
- */
 export const useCreateQuest = () => {
   const queryClient = useQueryClient();
   const createTaskMutation = useAdminWaitlistTasksControllerCreateTask();
 
   return useMutation({
     mutationFn: async (data: Partial<Quest>): Promise<Quest> => {
-      // Convert form data to API format using adapter
       const apiData = validateAndConvertToApi(data) as unknown as CreateTaskDto;
-
       const result = await createTaskMutation.mutateAsync({ data: apiData });
-
-      // Quest is the same as TaskResponseDto now
       return result;
     },
     onSuccess: () => {
@@ -176,21 +161,14 @@ export const useCreateQuest = () => {
   });
 };
 
-/**
- * Update quest mutation
- */
 export const useUpdateQuest = (id: number) => {
   const queryClient = useQueryClient();
   const updateTaskMutation = useAdminWaitlistTasksControllerUpdateTask();
 
   return useMutation({
     mutationFn: async (data: Partial<Quest>): Promise<Quest> => {
-      // Convert form data to API format using adapter
       const apiData = validateAndConvertToApi(data) as unknown as UpdateTaskDto;
-
       const result = await updateTaskMutation.mutateAsync({ id, data: apiData });
-
-      // Quest is the same as TaskResponseDto now
       return result;
     },
     onSuccess: () => {
@@ -239,22 +217,16 @@ export const useDeleteQuest = () => {
   });
 };
 
-/**
- * Toggle quest enabled status mutation (Using PUT as PATCH)
- */
 export const useToggleEnabled = () => {
   const queryClient = useQueryClient();
   const updateTaskMutation = useAdminWaitlistTasksControllerUpdateTask();
 
   return useMutation({
     mutationFn: async (data: { id: number; enabled: boolean }): Promise<Quest> => {
-      // Use PUT endpoint which works as PATCH for enabled updates
       const result = await updateTaskMutation.mutateAsync({
         id: data.id,
         data: { enabled: data.enabled } as UpdateTaskDto,
       });
-
-      // Quest is the same as TaskResponseDto now
       return result;
     },
     onSuccess: () => {
@@ -269,9 +241,6 @@ export const useToggleEnabled = () => {
   });
 };
 
-/**
- * Toggle quest pinned state
- */
 export const useTogglePinned = () => {
   const queryClient = useQueryClient();
   const updateTaskMutation = useAdminWaitlistTasksControllerUpdateTask();
@@ -282,8 +251,6 @@ export const useTogglePinned = () => {
         id: data.id,
         data: { pinned: data.pinned } as UpdateTaskDto,
       });
-
-      // Quest is the same as TaskResponseDto now
       return result;
     },
     onSuccess: () => {

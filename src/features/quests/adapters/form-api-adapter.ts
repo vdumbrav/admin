@@ -73,10 +73,11 @@ export function apiToForm(apiData: Partial<Quest>): QuestFormValues {
     iterator: apiData.iterator
       ? {
           days: typeof apiData.iterator.days === 'number' ? apiData.iterator.days : undefined,
-          reward_map: Array.isArray(apiData.iterator.reward_map) &&
+          reward_map:
+            Array.isArray(apiData.iterator.reward_map) &&
             apiData.iterator.reward_map.every((r: unknown) => typeof r === 'number')
-            ? apiData.iterator.reward_map
-            : [],
+              ? apiData.iterator.reward_map
+              : [],
         }
       : undefined,
   };
@@ -230,9 +231,9 @@ export function formToApi(formData: QuestFormValues): Partial<Quest> {
     iterator: formData.iterator
       ? {
           days: formData.iterator.days,
-          reward_map: formData.iterator.reward_map || [],
-          reward_max: Math.max(...(formData.iterator.reward_map || [0])),
-          reward: formData.iterator.reward_map?.[0] || 0,
+          reward_map: formData.iterator.reward_map ?? [],
+          reward_max: Math.max(...(formData.iterator.reward_map ?? [0])),
+          reward: formData.iterator.reward_map?.[0] ?? 0,
           day: 0,
         }
       : undefined,
