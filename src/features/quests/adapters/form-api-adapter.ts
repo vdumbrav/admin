@@ -2,25 +2,22 @@
  * Adapter layer between form types and API types
  *
  * This adapter handles the conversion between clean form types optimized for UX
- * and the current API types. When the API is improved, this adapter can be updated
- * or removed.
+ * and API types. Required because:
  *
- * TECHNICAL DEBT ANALYSIS:
- * ========================
+ * 1. Form structure differs from API (single type vs array, optional vs required fields)
+ * 2. Iterator reward_map needs string conversion until Swagger IteratorDto is fixed
+ * 3. Child tasks require special handling for API compatibility
+ * 4. Form validation and defaults don't match API expectations
  *
- * Issues requiring attention:
- * 1. Type safety compromises with `as` casting due to API type inconsistencies
- * 2. Hardcoded fallback values (e.g., group: 'social' for children)
- * 3. Resources structure lacks proper typing (using Record<string, unknown>)
- * 4. Child task type mismatches between API and form (some types not supported)
- *
- * When API is improved, remove this adapter and use direct form-to-API mapping.
+ * REMAINING ISSUES:
+ * - IteratorDto - reward_map remains string[] in API (form uses number[])
+ * - Child task adapters use Pick<TaskResponseDto> for type safety
  */
-import type { Quest } from '../data/types';
+import type { TaskResponseDto } from '@/lib/api/generated/model';
+import { questFormSchema } from '../data/schemas';
 import {
   type ChildFormValues,
   DEFAULT_FORM_VALUES,
-  type FormResources,
   type QuestFormValues,
 } from '../types/form-types';
 
@@ -39,7 +36,7 @@ import {
  * @param apiData - Partial task data from API response
  * @returns Complete form values ready for react-hook-form
  */
-export function apiToForm(apiData: Partial<Quest>): QuestFormValues {
+export function apiToForm(apiData: Partial<TaskResponseDto>): QuestFormValues {
   return {
     // Core fields with fallback to defaults
     title: apiData.title ?? (DEFAULT_FORM_VALUES.title as string),
@@ -57,10 +54,8 @@ export function apiToForm(apiData: Partial<Quest>): QuestFormValues {
     reward: apiData.reward,
     enabled: apiData.enabled ?? (DEFAULT_FORM_VALUES.enabled as boolean),
 
-    // Complex nested structures requiring conversion
-    resources: apiData.resources
-      ? convertApiResourcesToForm(apiData.resources as Record<string, unknown>)
-      : DEFAULT_FORM_VALUES.resources,
+    // Resources directly from API
+    resources: apiData.resource ?? apiData.resources ?? DEFAULT_FORM_VALUES.resources,
     child: apiData.child ? apiData.child.map(convertApiChildToForm) : undefined,
 
     // Schedule mapping for edit mode
@@ -68,16 +63,15 @@ export function apiToForm(apiData: Partial<Quest>): QuestFormValues {
     end: apiData.completed_at ?? undefined,
 
     // Iterator mapping for 7-day challenge (API → Form)
-    // API has iterator object with reward_map as numbers
-    // iterator_resource excluded from form (generated on backend)
+    // API sends string[], convert to number[] for form
     iterator: apiData.iterator
       ? {
           days: typeof apiData.iterator.days === 'number' ? apiData.iterator.days : undefined,
-          reward_map:
-            Array.isArray(apiData.iterator.reward_map) &&
-            apiData.iterator.reward_map.every((r: unknown) => typeof r === 'number')
-              ? apiData.iterator.reward_map
-              : [],
+          reward_map: Array.isArray(apiData.iterator.reward_map)
+            ? apiData.iterator.reward_map.map((reward: string | number) =>
+                typeof reward === 'string' ? parseFloat(reward) || 0 : reward,
+              )
+            : [],
         }
       : undefined,
   };
@@ -85,15 +79,9 @@ export function apiToForm(apiData: Partial<Quest>): QuestFormValues {
 
 /**
  * Convert API child task to form child
- *
- * ISSUE: Type casting required due to API/form type mismatch
- * - API supports more task types than child form accepts
- * - Should be resolved by aligning API schemas
- *
- * @param apiChild - Complete task from API
- * @returns Simplified child form values
+ * Type casting required due to API/form type mismatch
  */
-function convertApiChildToForm(apiChild: Quest): ChildFormValues {
+function convertApiChildToForm(apiChild: TaskResponseDto): ChildFormValues {
   return {
     title: apiChild.title,
     description: apiChild.description,
@@ -104,90 +92,14 @@ function convertApiChildToForm(apiChild: Quest): ChildFormValues {
     provider: apiChild.provider,
     reward: apiChild.reward,
     order_by: apiChild.order_by,
-    // Only extract relevant resources for children (Twitter-specific)
-    resources: apiChild.resources
-      ? {
-          tweetId: (apiChild.resources as Record<string, unknown>).tweetId as string,
-          username: (apiChild.resources as Record<string, unknown>).username as string,
-        }
-      : undefined,
-  };
-}
-
-/**
- * Convert API resources to form resources
- *
- * MAJOR ISSUE: Resources lack proper typing in API
- * - Currently using unsafe type casting from Record<string, unknown>
- * - API should define proper ResourcesSchema in OpenAPI/Swagger
- * - This function contains the most technical debt in the adapter
- *
- * @param apiResources - Untyped resources object from API
- * @returns Properly typed form resources
- */
-function convertApiResourcesToForm(
-  apiResources: Record<string, unknown> | null | undefined,
-): FormResources {
-  if (!apiResources) return {};
-
-  // UNSAFE: Type assertion due to lack of proper API typing
-  // TODO: Replace with proper API schema validation once ResourcesDto is defined
-  // API should have: interface ResourcesDto { icon?, username?, tweetId?, ui?, adsgram? }
-  const resources = apiResources as {
-    icon?: string;
-    username?: string;
-    tweetId?: string;
-    isNew?: boolean;
-    block_id?: string;
-    ui?: {
-      button?: string;
-      'pop-up'?: {
-        name?: string;
-        button?: string;
-        description?: string;
-        static?: string;
-        'additional-title'?: string;
-        'additional-description'?: string;
-      };
-    };
-    adsgram?: {
-      type?: 'task' | 'reward';
-      subtype?: 'video-ad' | 'post-style-image';
-    };
-  };
-
-  return {
-    // Basic resource fields
-    icon: resources.icon,
-    username: resources.username,
-    tweetId: resources.tweetId,
-    isNew: resources.isNew,
-    block_id: resources.block_id,
-
-    // UI configuration with safe defaults
-    ui: resources.ui
-      ? {
-          button: resources.ui.button ?? '',
-          'pop-up': resources.ui['pop-up']
-            ? {
-                name: resources.ui['pop-up'].name ?? '',
-                button: resources.ui['pop-up'].button ?? '',
-                description: resources.ui['pop-up'].description ?? '',
-                static: resources.ui['pop-up'].static,
-                'additional-title': resources.ui['pop-up']['additional-title'],
-                'additional-description': resources.ui['pop-up']['additional-description'],
-              }
-            : undefined,
-        }
-      : DEFAULT_FORM_VALUES.resources?.ui,
-
-    // Adsgram integration settings
-    adsgram: resources.adsgram
-      ? {
-          type: resources.adsgram.type,
-          subtype: resources.adsgram.subtype,
-        }
-      : undefined,
+    // Extract relevant resources for children
+    resources:
+      (apiChild.resource ?? apiChild.resources)
+        ? {
+            tweetId: (apiChild.resource ?? apiChild.resources)?.tweetId as string,
+            username: (apiChild.resource ?? apiChild.resources)?.username as string,
+          }
+        : undefined,
   };
 }
 
@@ -206,13 +118,13 @@ function convertApiResourcesToForm(
  * @param formData - Complete form values from react-hook-form
  * @returns API-compatible task data for submission
  */
-export function formToApi(formData: QuestFormValues): Partial<Quest> {
+export function formToApi(formData: QuestFormValues): Partial<TaskResponseDto> {
   return {
     // Core required fields
     title: formData.title,
     type: [formData.type],
     description: formData.description || undefined,
-    group: formData.group as Quest['group'], // TODO: Remove casting - requires proper TaskGroup API type
+    group: formData.group,
     order_by: formData.order_by,
 
     // Optional fields
@@ -224,22 +136,23 @@ export function formToApi(formData: QuestFormValues): Partial<Quest> {
     twa: formData.twa ?? false, // Default TWA disabled for admin-created tasks
     pinned: formData.pinned ?? false, // Default not pinned
 
-    // Complex nested structures
-    resources: formData.resources ? convertFormResourcesToApi(formData.resources) : undefined,
+    // Resources directly as ResourcesDto
+    resource: formData.resources,
     child: formData.child ? formData.child.map(convertFormChildToApi) : undefined,
 
     // Iterator mapping for 7-day challenge (Form → API)
-    // Send iterator object directly, backend handles iterator_reward and iterator_resource
     iterator: formData.iterator
       ? {
-          days: formData.iterator.days,
-          reward_map: formData.iterator.reward_map ?? [],
-          reward_max: Math.max(...(formData.iterator.reward_map ?? [0])),
-          reward: formData.iterator.reward_map?.[0] ?? 0,
+          days: formData.iterator.days ?? 7,
+          reward_map: formData.iterator.reward_map.map(String), // TODO: Remove .map(String) when API uses number[] (P0)
+          reward_max: Math.max(...formData.iterator.reward_map),
+          reward: formData.iterator.reward_map[0] ?? 0,
           day: 0,
+          iterator_reward: [],
+          iterator_resource: {}, // TODO: Remove when IteratorDto makes this optional (P1)
+          resource: {}, // TODO: Remove when IteratorDto makes this optional (P1)
         }
       : undefined,
-    // iterator_reward and iterator_resource are generated/managed by backend
   };
 }
 
@@ -249,11 +162,11 @@ export function formToApi(formData: QuestFormValues): Partial<Quest> {
  * @param formChild - Child form values
  * @returns Complete Task object for API
  */
-function convertFormChildToApi(formChild: ChildFormValues): Quest {
+function convertFormChildToApi(formChild: ChildFormValues): TaskResponseDto {
   return {
     id: 0, // Will be assigned by API
     title: formChild.title,
-    type: [formChild.type] as Quest['type'], // API expects array
+    type: [formChild.type] as TaskResponseDto['type'], // API expects array
     description: formChild.description,
     group: formChild.group,
     order_by: formChild.order_by,
@@ -265,64 +178,22 @@ function convertFormChildToApi(formChild: ChildFormValues): Quest {
     pinned: false,
     child: [],
     level: 0,
-    blocking_task: 0,
+    blocking_task: { id: 0, title: '' }, // BlockingTaskDto structure
     started_at: undefined,
     completed_at: undefined,
     iterable: false,
-    // Only include Twitter-specific resources for children
+    // Include relevant resources for children
     resources: formChild.resources
       ? {
           tweetId: formChild.resources.tweetId,
           username: formChild.resources.username,
         }
       : undefined,
-  } as unknown as Quest;
-}
-
-/**
- * Convert form resources to API resources
- *
- * ISSUE: Returns untyped Record<string, unknown> due to API limitations
- * - API should accept properly typed Resources interface
- * - Currently loses type safety on return value
- *
- * @param formResources - Properly typed form resources
- * @returns Untyped object for API compatibility
- */
-function convertFormResourcesToApi(formResources: FormResources): Record<string, unknown> {
-  return {
-    // Basic resource fields
-    icon: formResources.icon,
-    username: formResources.username,
-    tweetId: formResources.tweetId,
-    isNew: formResources.isNew,
-    block_id: formResources.block_id,
-
-    // UI configuration structure
-    ui: formResources.ui
-      ? {
-          button: formResources.ui.button,
-          'pop-up': formResources.ui['pop-up']
-            ? {
-                name: formResources.ui['pop-up'].name,
-                button: formResources.ui['pop-up'].button,
-                description: formResources.ui['pop-up'].description,
-                static: formResources.ui['pop-up'].static,
-                'additional-title': formResources.ui['pop-up']['additional-title'],
-                'additional-description': formResources.ui['pop-up']['additional-description'],
-              }
-            : undefined,
-        }
-      : undefined,
-
-    // Adsgram integration settings
-    adsgram: formResources.adsgram
-      ? {
-          type: formResources.adsgram.type,
-          subtype: formResources.adsgram.subtype,
-        }
-      : undefined,
-  };
+    // Required fields for TaskResponseDto
+    blocking_task_id: 0,
+    total_reward: 0,
+    total_users: 0,
+  } as TaskResponseDto;
 }
 
 // ============================================================================
@@ -372,16 +243,14 @@ export function getDefaultFormValues(): QuestFormValues {
 /**
  * Validate form data and convert to API format
  *
- * TODO: Implement proper Zod validation here instead of type assertion
- * Current issue: API schema gaps force us to use Record<string, unknown>
- * After API improvements: Replace with proper CreateTaskDto/UpdateTaskDto types
- * Currently assumes react-hook-form has already validated the data
- *
- * @param formData - Unknown data to validate and convert
- * @returns API-compatible task data
+ * TODO: Consider simplifying when Create/Update DTOs match TaskResponseDto structure (P2)
+ * Currently needed for:
+ * - Zod validation
+ * - type: string → type: string[] conversion
+ * - Iterator number[] → string[] conversion (temporary)
+ * - Enum compatibility (CreateTaskDtoType vs TaskResponseDtoTypeItem)
  */
-export function validateAndConvertToApi(formData: unknown): Partial<Quest> {
-  // UNSAFE: Type assertion without validation
-  // TODO: Add questFormSchema.parse(formData) validation
-  return formToApi(formData as QuestFormValues);
+export function validateAndConvertToApi(formData: unknown): Partial<TaskResponseDto> {
+  const validatedData = questFormSchema.parse(formData);
+  return formToApi(validatedData as QuestFormValues);
 }

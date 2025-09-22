@@ -11,11 +11,12 @@ import {
 } from '@/lib/api/generated/admin/admin';
 import {
   type CreateTaskDto,
+  type TaskResponseDto,
   type UpdateTaskDto,
   type UploadFileDto,
 } from '@/lib/api/generated/model';
 import { validateAndConvertToApi } from './adapters/form-api-adapter';
-import type { Quest, QuestQuery, QuestsResponse } from './data/types';
+import type { QuestQuery, QuestsResponse } from './data/types';
 
 export const useQuests = (query: QuestQuery) => {
   const {
@@ -32,12 +33,10 @@ export const useQuests = (query: QuestQuery) => {
     if (!questsData) return undefined;
 
     // Client-side filtering - no server-side filtering needed
-    let filteredItems = questsData.filter((item: Quest) => {
+    let filteredItems = questsData.filter((item: TaskResponseDto) => {
       const matchesSearch =
         !query.search ||
-        // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
         item.title.toLowerCase().includes(query.search.toLowerCase()) ||
-        // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
         item.description.toLowerCase().includes(query.search.toLowerCase()) ||
         false;
 
@@ -79,8 +78,8 @@ export const useQuests = (query: QuestQuery) => {
       const isAsc = direction !== 'desc';
 
       filteredItems = [...filteredItems].sort((a, b) => {
-        const aVal = (a as unknown as Record<string, unknown>)[field];
-        const bVal = (b as unknown as Record<string, unknown>)[field];
+        const aVal = a[field as keyof TaskResponseDto];
+        const bVal = b[field as keyof TaskResponseDto];
 
         if (aVal !== null && aVal !== undefined && bVal !== null && bVal !== undefined) {
           if (aVal < bVal) return isAsc ? -1 : 1;
@@ -148,7 +147,9 @@ export const useCreateQuest = () => {
   const queryKey = getAdminWaitlistTasksControllerGetWaitlistTasksQueryKey();
 
   return useMutation({
-    mutationFn: async (data: Partial<Quest>): Promise<Quest> => {
+    mutationFn: async (data: Partial<TaskResponseDto>): Promise<TaskResponseDto> => {
+      // TODO: Remove casting when validateAndConvertToApi returns proper CreateTaskDto (P2)
+      // Currently needed due to TaskResponseDto vs CreateTaskDto structural differences
       const apiData = validateAndConvertToApi(data) as unknown as CreateTaskDto;
       const result = await createTaskMutation.mutateAsync({ data: apiData });
       return result;
@@ -170,7 +171,9 @@ export const useUpdateQuest = (id: number) => {
   const queryKey = getAdminWaitlistTasksControllerGetWaitlistTasksQueryKey();
 
   return useMutation({
-    mutationFn: async (data: Partial<Quest>): Promise<Quest> => {
+    mutationFn: async (data: Partial<TaskResponseDto>): Promise<TaskResponseDto> => {
+      // TODO: Remove casting when validateAndConvertToApi returns proper UpdateTaskDto (P2)
+      // Currently needed due to TaskResponseDto vs UpdateTaskDto structural differences
       const apiData = validateAndConvertToApi(data) as unknown as UpdateTaskDto;
       const result = await updateTaskMutation.mutateAsync({ id, data: apiData });
       return result;
@@ -226,7 +229,7 @@ export const useToggleEnabled = () => {
   const queryKey = getAdminWaitlistTasksControllerGetWaitlistTasksQueryKey();
 
   return useMutation({
-    mutationFn: async (data: { id: number; enabled: boolean }): Promise<Quest> => {
+    mutationFn: async (data: { id: number; enabled: boolean }): Promise<TaskResponseDto> => {
       const result = await updateTaskMutation.mutateAsync({
         id: data.id,
         data: { enabled: data.enabled } as UpdateTaskDto,
@@ -250,7 +253,7 @@ export const useTogglePinned = () => {
   const queryKey = getAdminWaitlistTasksControllerGetWaitlistTasksQueryKey();
 
   return useMutation({
-    mutationFn: async (data: { id: number; pinned: boolean }): Promise<Quest> => {
+    mutationFn: async (data: { id: number; pinned: boolean }): Promise<TaskResponseDto> => {
       const result = await updateTaskMutation.mutateAsync({
         id: data.id,
         data: { pinned: data.pinned } as UpdateTaskDto,

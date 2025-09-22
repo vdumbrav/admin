@@ -9,6 +9,8 @@ interface Props {
 
 export function FiltersProvider({ children }: Props) {
   const router = useRouter();
+  // TODO: Fix TanStack Router typing to avoid unknown casting (P2)
+  // Currently needed due to router type mismatch with QuestSearch
   const searchParams = useSearch({
     from: '/_authenticated/quests/' as const,
   }) as unknown as QuestSearch;

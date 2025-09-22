@@ -152,7 +152,14 @@ export function isApiGroup(value: string): value is TaskResponseDtoGroup {
 
 /**
  * Types that require specific providers
- * TODO: This should ideally come from API documentation or be configurable
+ *
+ * TODO: Move to API configuration endpoint
+ * Currently hardcoded but should be:
+ * - GET /api/admin/quest-type-provider-requirements
+ * - Configurable via admin panel
+ * - Part of API documentation/schema
+ *
+ * Priority: P1 - Important for architecture quality
  */
 export const TYPE_PROVIDER_REQUIREMENTS: Partial<
   Record<TaskResponseDtoTypeItem, TaskResponseDtoProvider[]>

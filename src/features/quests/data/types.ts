@@ -1,5 +1,7 @@
 import type { TaskResponseDto } from '@/lib/api/generated/model';
 
+export { type TaskResponseDto as Quest } from '@/lib/api/generated/model';
+
 export interface PopUp {
   name: string;
   button: string;
@@ -29,12 +31,6 @@ export interface Resources {
   adsgram?: AdsGramResource;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
-export type Quest = TaskResponseDto & {
-  usersCount?: number; // Display-only field
-  totalXp?: number; // Display-only field
-};
-
 // ============================================================================
 // Utility types
 // ============================================================================
@@ -45,12 +41,12 @@ export interface DropdownOption {
 }
 
 export interface QuestsResponse {
-  items: Quest[];
+  items: TaskResponseDto[];
   total: number;
 }
 
 export interface LocalSortConfig {
-  field: keyof Quest;
+  field: keyof TaskResponseDto;
   direction: 'asc' | 'desc';
 }
 

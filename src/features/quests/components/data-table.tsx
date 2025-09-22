@@ -15,6 +15,7 @@ import {
   type VisibilityState,
 } from '@tanstack/react-table';
 import { Loader2 } from 'lucide-react';
+import type { TaskResponseDto } from '@/lib/api/generated/model';
 import { loadJSON, LS_TABLE_SIZE, LS_TABLE_SORT, LS_TABLE_VIS, saveJSON } from '@/utils/persist';
 import { Button } from '@/components/ui/button';
 import {
@@ -27,12 +28,11 @@ import {
 } from '@/components/ui/table';
 import { DataTablePagination } from '@/components/table/data-table-pagination';
 import { useQuests } from '../api';
-import type { Quest } from '../data/types';
 import { useFilters } from '../hooks/use-filters';
 import { DataTableToolbar } from './data-table-toolbar';
 
 interface DataTableProps {
-  columns: ColumnDef<Quest>[];
+  columns: ColumnDef<TaskResponseDto>[];
   isAdmin: boolean;
 }
 
@@ -85,8 +85,8 @@ export const QuestsDataTable = ({ columns, isAdmin }: DataTableProps) => {
   // Maintain current sort but move pinned items to the top while keeping relative order
   const rows = React.useMemo(() => {
     const items = data?.items ?? [];
-    const pinned: Quest[] = [];
-    const others: Quest[] = [];
+    const pinned: TaskResponseDto[] = [];
+    const others: TaskResponseDto[] = [];
     for (const it of items) {
       if (it.pinned) pinned.push(it);
       else others.push(it);

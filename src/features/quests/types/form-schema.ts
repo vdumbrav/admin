@@ -10,7 +10,8 @@ const questGroupSchema = z.enum(QUEST_GROUPS);
 const providerSchema = z.enum(PROVIDERS).optional();
 const childTypeSchema = z.enum(CHILD_TYPES);
 
-// Resource schemas - Type-synchronized with form-types.ts
+// Resource schemas compatible with API ResourcesDto
+// Using string types to match API but with runtime validation
 
 const formPopupResourcesSchema = z.object({
   name: z.string().optional(),
@@ -22,20 +23,22 @@ const formPopupResourcesSchema = z.object({
 });
 
 const formUIResourcesSchema = z.object({
-  button: z.string().optional(), // Optional as per FormUIResources interface
+  button: z.string().optional(),
   'pop-up': formPopupResourcesSchema.optional(),
 });
 
+// Compatible with AdsgramDto (type: string, subtype: string)
 const formAdsgramResourcesSchema = z.object({
-  type: z.enum(['task', 'reward']).optional(),
-  subtype: z.enum(['video-ad', 'post-style-image']).optional(),
+  type: z.string().optional(), // API uses string, validate at runtime
+  subtype: z.string().optional(), // API uses string, validate at runtime
 });
 
+// Compatible with ResourcesDto from API
 const formResourcesSchema = z
   .object({
-    icon: z.string().optional(), // Allow any string, not just URLs
+    icon: z.string().optional(),
     username: z.string().optional(),
-    tweetId: z.string().optional(), // Simple string, no preprocessing
+    tweetId: z.string().optional(),
     isNew: z.boolean().optional(),
     block_id: z.string().optional(),
     ui: formUIResourcesSchema.optional(),
@@ -136,6 +139,29 @@ export const buildQuestFormSchema = (presetId?: string) =>
       if (val.icon?.trim() && !val.icon.startsWith('http')) {
         // Just a warning in development, not an error
         console.warn('Icon should be a URL, got:', val.icon);
+      }
+
+      // Adsgram type validation - ensure valid enum values
+      if (
+        val.resources?.adsgram?.type &&
+        !['task', 'reward'].includes(val.resources.adsgram.type)
+      ) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'Adsgram type must be "task" or "reward"',
+          path: ['resources', 'adsgram', 'type'],
+        });
+      }
+
+      if (
+        val.resources?.adsgram?.subtype &&
+        !['video-ad', 'post-style-image'].includes(val.resources.adsgram.subtype)
+      ) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'Adsgram subtype must be "video-ad" or "post-style-image"',
+          path: ['resources', 'adsgram', 'subtype'],
+        });
       }
 
       // Tweet ID validation - should be digits only if provided

@@ -2,18 +2,18 @@
 import { Link } from '@tanstack/react-router';
 import { type ColumnDef, type Row } from '@tanstack/react-table';
 import { IconCheck, IconStar, IconStarFilled } from '@tabler/icons-react';
+import type { TaskResponseDto } from '@/lib/api/generated/model';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { DataTableColumnHeader } from '@/components/table/data-table-column-header';
 import { useToggleEnabled } from '../api';
-import type { Quest } from '../data/types';
 import { useQuestSearch } from '../use-quest-search';
 import { getBadgeClasses, getBadgeStyle, getBadgeVariant } from '../utils/badge-variants';
 import { formatDateDMY, formatNumberShort, formatXp } from '../utils/format';
 import { getProviderIcon } from '../utils/provider-icons';
 import { DataTableRowActions } from './data-table-row-actions';
 
-const EnabledCell = ({ row, isAdmin }: { row: Row<Quest>; isAdmin: boolean }) => {
+const EnabledCell = ({ row, isAdmin }: { row: Row<TaskResponseDto>; isAdmin: boolean }) => {
   const toggle = useToggleEnabled();
   const enabled = row.getValue('enabled') !== false;
   if (!isAdmin) return <span>{enabled ? 'Yes' : 'No'}</span>;
@@ -26,8 +26,8 @@ const EnabledCell = ({ row, isAdmin }: { row: Row<Quest>; isAdmin: boolean }) =>
   );
 };
 
-export const getColumns = (isAdmin: boolean): ColumnDef<Quest>[] => {
-  const TitleCell = ({ row }: { row: Row<Quest> }) => {
+export const getColumns = (isAdmin: boolean): ColumnDef<TaskResponseDto>[] => {
+  const TitleCell = ({ row }: { row: Row<TaskResponseDto> }) => {
     const search = useQuestSearch({ from: '/_authenticated/quests/' as const });
     return (
       <Link
@@ -41,7 +41,7 @@ export const getColumns = (isAdmin: boolean): ColumnDef<Quest>[] => {
       </Link>
     );
   };
-  const cols: ColumnDef<Quest>[] = [
+  const cols: ColumnDef<TaskResponseDto>[] = [
     // 1. Pin indicator
     {
       id: 'pin',
@@ -146,18 +146,18 @@ export const getColumns = (isAdmin: boolean): ColumnDef<Quest>[] => {
     },
     // 8. Users (short)
     {
-      accessorKey: 'usersCount',
+      accessorKey: 'total_users',
       header: ({ column }) => <DataTableColumnHeader column={column} title='Users' />,
-      cell: ({ row }) => formatNumberShort(row.original.usersCount),
+      cell: ({ row }) => formatNumberShort(row.original.total_users),
       size: 120,
       minSize: 120,
       maxSize: 120,
     },
     // 9. Total XP
     {
-      accessorKey: 'totalXp',
+      accessorKey: 'total_reward',
       header: ({ column }) => <DataTableColumnHeader column={column} title='Total XP' />,
-      cell: ({ row }) => formatNumberShort(row.original.totalXp),
+      cell: ({ row }) => formatNumberShort(row.original.total_reward),
       size: 120,
       minSize: 120,
       maxSize: 120,

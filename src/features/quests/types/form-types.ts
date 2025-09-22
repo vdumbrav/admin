@@ -1,3 +1,7 @@
+// Form interfaces
+// Use ResourcesDto directly from API instead of custom form types
+import type { ResourcesDto, TaskResponseDto } from '@/lib/api/generated/model';
+
 /**
  * Form-specific types for QuestForm component
  *
@@ -34,50 +38,13 @@ export const PROVIDERS = [
 
 export const CHILD_TYPES = ['like', 'share', 'comment', 'join', 'connect'] as const;
 
-// Form interfaces
-
-export interface FormPopupResources {
-  name?: string;
-  button?: string;
-  description?: string;
-  static?: string;
-  'additional-title'?: string;
-  'additional-description'?: string;
-}
-
-export interface FormUIResources {
-  button?: string;
-  'pop-up'?: FormPopupResources;
-}
-
-export interface FormAdsgramResources {
-  type?: 'task' | 'reward';
-  subtype?: 'video-ad' | 'post-style-image';
-}
-
-export interface FormResources {
-  icon?: string;
-  username?: string;
-  tweetId?: string;
-  isNew?: boolean;
-  block_id?: string;
-  ui?: FormUIResources;
-  adsgram?: FormAdsgramResources;
-}
-
-export interface ChildFormValues {
-  title: string;
-  description?: string;
-  type: (typeof CHILD_TYPES)[number];
-  group: (typeof QUEST_GROUPS)[number];
-  provider?: (typeof PROVIDERS)[number];
-  reward?: number;
-  order_by: number;
-  resources?: {
-    tweetId?: string;
-    username?: string;
-  };
-}
+// Child task type - subset of TaskResponseDto for simplified UX
+export type ChildFormValues = Pick<TaskResponseDto, 'title' | 'group' | 'provider' | 'order_by'> & {
+  description?: string; // Optional for child tasks
+  reward?: number; // Optional for child tasks
+  type: (typeof CHILD_TYPES)[number]; // Restricted to child-supported types
+  resources?: Pick<ResourcesDto, 'tweetId' | 'username'>; // Simplified resources
+};
 
 export interface QuestFormValues {
   title: string;
@@ -94,7 +61,7 @@ export interface QuestFormValues {
   twa?: boolean;
   pinned?: boolean;
   icon?: string;
-  resources?: FormResources;
+  resources?: ResourcesDto;
   child?: ChildFormValues[];
   start?: string;
   end?: string;

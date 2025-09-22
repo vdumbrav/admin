@@ -5,7 +5,8 @@ import {
   TaskResponseDtoStatus,
   TaskResponseDtoTypeItem,
 } from '@/lib/api/generated/model';
-import type { Quest } from './types';
+
+// import type { Quest } from './types'; // ⚠️ TEMPORARY: Removed until IteratorDto is fixed
 
 // ============================================================================
 // Utility schemas
@@ -35,21 +36,22 @@ const resourcesSchema = z
     block_id: z.string().optional(),
     adsgram: z
       .object({
-        type: z.enum(['task', 'reward']),
-        subtype: z.enum(['video-ad', 'post-style-image']).optional(),
+        type: z.string().optional(), // More flexible for API compatibility
+        subtype: z.string().optional(), // More flexible for API compatibility
       })
       .optional(),
   })
   .optional();
 
+// API sends string[] but form uses number[], adapter handles conversion
 const iteratorSchema = z
   .object({
     day: z.number(),
     days: z.number(),
-    reward_map: z.array(z.number()),
-    reward_max: z.number(),
+    reward_map: z.array(z.union([z.string(), z.number()])), // TODO: Change to z.number() only when API fixed (P0)
+    iterator_reward: z.array(z.string()),
     reward: z.number(),
-    tick: z.number().optional(),
+    reward_max: z.number(),
   })
   .optional();
 
@@ -129,33 +131,45 @@ const taskGroupSchema = z.enum([
 // ============================================================================
 
 // Schema for Quest (API response validation)
-export const questSchema: z.ZodType<Quest> = z.object({
+// TODO: Replace z.ZodType<any> with proper TaskResponseDto when IteratorDto is fixed (P0)
+// Currently any due to iterator_resource/resource type mismatches
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const questSchema: z.ZodType<any> = z.object({
   id: z.number(),
   type: z.array(adminTaskTypeSchema),
-  iterable: z.boolean(),
+  provider: providerSchema,
+  web: z.boolean(),
+  twa: z.boolean(),
+  enabled: z.boolean(),
+  group: groupSchema,
+  level: z.number(),
+  reward: z.number(),
   title: z.string(),
   description: z.string(),
-  child: z.array(z.lazy((): z.ZodType<Quest> => questSchema)),
-  provider: providerSchema,
+  pinned: z.boolean(),
   uri: z.string().optional(),
-  blocking_task: z.number(),
-  reward: z.number(),
-  level: z.number(),
-  group: groupSchema,
+  parent_id: z.number().optional(),
+  blocking_task: z
+    .object({
+      id: z.number(),
+      title: z.string(),
+    })
+    .optional(),
+  resource: resourcesSchema,
+  iterator: iteratorSchema,
+  iterable: z.boolean(),
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  child: z.array(z.lazy((): z.ZodType<any> => questSchema)), // TODO: Fix when questSchema is properly typed (P0)
+  blocking_task_id: z.number(),
   order_by: z.number(),
   status: statusSchema,
   error: z.string().optional(),
   started_at: z.string().optional(),
   completed_at: z.string().optional(),
   resources: resourcesSchema,
-  iterator: iteratorSchema,
   next_tick: z.string().optional(),
-  enabled: z.boolean(),
-  web: z.boolean(),
-  twa: z.boolean(),
-  pinned: z.boolean(),
-  usersCount: z.number().optional(),
-  totalXp: z.number().optional(),
+  total_reward: z.number(),
+  total_users: z.number(),
 });
 
 // ============================================================================
@@ -166,10 +180,7 @@ export const questFormSchema = z.object({
   id: z.number().optional(),
   type: taskTypeSchema,
   title: z.string().min(1, 'Title is required').max(100, 'Title too long'),
-  description: z
-    .string()
-    .nullable()
-    .refine((val) => !val || val.length <= 500, 'Description too long'),
+  description: z.string().max(500, 'Description too long'),
   blocking_task: z.number().nullable().optional(),
   reward: z.number().min(0, 'Reward must be positive').optional(),
   level: z.number().optional(),
@@ -184,7 +195,9 @@ export const questFormSchema = z.object({
   next_tick: z.string().nullable().optional(),
   resources: resourcesSchema,
   child: z
-    .array(z.lazy((): z.ZodType<Quest> => questSchema))
+    // TODO: Fix when questSchema is properly typed (P0)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    .array(z.lazy((): z.ZodType<any> => questSchema))
     .nullable()
     .optional(),
   iterable: z.boolean().nullable().optional(),

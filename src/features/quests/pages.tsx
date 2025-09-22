@@ -14,6 +14,7 @@ export const QuestCreatePage = () => {
   const hasPreset = useRouterState({
     select: (s) => s.matches.some((m) => m.routeId === '/_authenticated/quests/new/$preset'),
   });
+  // TODO: Fix TanStack Router typing to avoid unknown casting (P2)
   // Read showForm from router search to stay reactive to URL changes
   const searchObj = useSearch({ from: '/_authenticated/quests/new' as const }) as unknown;
   let showForm = false;

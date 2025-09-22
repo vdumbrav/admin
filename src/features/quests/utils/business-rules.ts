@@ -1,5 +1,6 @@
+import type { ResourcesUiPopUpDto } from '@/lib/api/generated/model';
 import type { PresetConfig } from '../presets';
-import type { FormPopupResources, QuestFormValues } from '../types/form-types';
+import type { QuestFormValues } from '../types/form-types';
 
 /**
  * Apply business rules from preset configuration to form values
@@ -29,7 +30,7 @@ export function applyBusinessRules(
                   name: groupName,
                   button: result.resources?.ui?.['pop-up']?.button ?? 'Join',
                   description: result.resources?.ui?.['pop-up']?.description ?? '',
-                } as FormPopupResources,
+                } as ResourcesUiPopUpDto,
               },
             };
           }
