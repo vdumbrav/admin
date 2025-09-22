@@ -35,7 +35,9 @@ export const useQuests = (query: QuestQuery) => {
     let filteredItems = questsData.filter((item: Quest) => {
       const matchesSearch =
         !query.search ||
+        // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
         item.title.toLowerCase().includes(query.search.toLowerCase()) ||
+        // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
         item.description.toLowerCase().includes(query.search.toLowerCase()) ||
         false;
 

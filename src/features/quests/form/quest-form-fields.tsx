@@ -2,10 +2,9 @@
  * Quest Form Fields Component
  * Renders form fields based on field state matrix and preset configuration
  */
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import type { UseFormReturn } from 'react-hook-form';
 import { Badge } from '@/components/ui/badge';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import {
   FormControl,
   FormDescription,
@@ -61,8 +60,35 @@ export function QuestFormFields({
   onImageUpload,
   connectGateWarnings,
 }: QuestFormFieldsProps) {
-  const [showAdvanced, setShowAdvanced] = useState(false);
   const [showTweetEmbed, setShowTweetEmbed] = useState(false);
+
+  // Total Reward Display memoized calculation
+  const childTasks = form.watch('child');
+  const iterator = form.watch('iterator');
+  const totalRewardValue = form.watch('totalReward');
+
+  const totalRewardDisplay = useMemo(() => {
+    const hasChildTasks = childTasks && childTasks.length > 0;
+    const hasIteratorRewards = iterator?.reward_map && iterator.reward_map.length > 0;
+    const shouldShow =
+      (Boolean(hasChildTasks) || Boolean(hasIteratorRewards)) &&
+      isFieldVisible('totalReward', fieldStates);
+
+    return shouldShow ? (
+      <div className='space-y-2'>
+        <label className='text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70'>
+          Total Reward
+        </label>
+        <div className='bg-muted/50 rounded-md border px-3 py-2 text-sm'>
+          {totalRewardValue ?? 0}
+        </div>
+        <p className='text-muted-foreground text-sm'>
+          Automatically calculated from {hasChildTasks ? 'child tasks' : 'daily rewards'}
+        </p>
+      </div>
+    ) : null;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [childTasks, iterator, totalRewardValue]);
 
   // ============================================================================
   // Basic Fields
@@ -165,7 +191,7 @@ export function QuestFormFields({
               <FormControl>
                 <DatePicker
                   date={field.value ? new Date(field.value) : undefined}
-                  onSelect={(date) => field.onChange(date?.toISOString())}
+                  onSelect={(date) => field.onChange(date?.toISOString() ?? null)}
                   placeholder='Select start date'
                   disabled={isFieldDisabled('start', fieldStates)}
                 />
@@ -184,7 +210,7 @@ export function QuestFormFields({
               <FormControl>
                 <DatePicker
                   date={field.value ? new Date(field.value) : undefined}
-                  onSelect={(date) => field.onChange(date?.toISOString())}
+                  onSelect={(date) => field.onChange(date?.toISOString() ?? null)}
                   placeholder='Select end date'
                   disabled={isFieldDisabled('end', fieldStates)}
                 />
@@ -443,30 +469,8 @@ export function QuestFormFields({
         />
       )}
 
-      {/* Total Reward Field (readonly) */}
-      {isFieldVisible('totalReward', fieldStates) && (
-        <FormField
-          control={form.control}
-          name='totalReward'
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Total Reward</FormLabel>
-              <FormControl>
-                <NoWheelNumber
-                  placeholder='Calculated automatically'
-                  readOnly
-                  disabled
-                  {...field}
-                />
-              </FormControl>
-              <FormDescription>
-                Automatically calculated from tasks or daily rewards
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      )}
+      {/* Total Reward Display (only for multiple/iterable quests) */}
+      {totalRewardDisplay}
 
       {/* Icon Upload */}
       {isFieldVisible('icon', fieldStates) && (
@@ -538,62 +542,57 @@ export function QuestFormFields({
         </div>
       )}
 
-      {/* Advanced Fields Collapsible */}
-      <Collapsible open={showAdvanced} onOpenChange={setShowAdvanced}>
-        <CollapsibleTrigger className='flex w-full items-center justify-between rounded-lg border p-4 text-left'>
-          <span className='font-medium'>Advanced Settings</span>
-          <span className='text-muted-foreground text-sm'>{showAdvanced ? 'Hide' : 'Show'}</span>
-        </CollapsibleTrigger>
-        <CollapsibleContent className='space-y-4 pt-4'>
-          {/* Type Field */}
-          {isFieldVisible('type', fieldStates) && (
-            <ManagedField
-              name='type'
-              label='Quest Type'
-              presetConfig={presetConfig}
-              disabled={isFieldDisabled('type', fieldStates)}
-              placeholder='Select type'
-            />
-          )}
+      {/* Advanced Settings */}
+      <div className='space-y-4'>
+        <h3 className='text-lg font-medium'>Advanced Settings</h3>
+        {/* Type Field */}
+        {isFieldVisible('type', fieldStates) && (
+          <ManagedField
+            name='type'
+            label='Quest Type'
+            presetConfig={presetConfig}
+            disabled={isFieldDisabled('type', fieldStates)}
+            placeholder='Select type'
+          />
+        )}
 
-          {/* Enabled Field */}
-          {isFieldVisible('enabled', fieldStates) && (
-            <FormField
-              control={form.control}
-              name='enabled'
-              render={({ field }) => (
-                <FormItem className='flex flex-row items-center justify-between rounded-lg border p-4'>
-                  <div className='space-y-0.5'>
-                    <FormLabel className='text-base'>Enabled</FormLabel>
-                    <FormDescription>Make this quest enabled for users</FormDescription>
-                  </div>
-                  <FormControl>
-                    <Switch
-                      checked={Boolean(field.value)}
-                      onCheckedChange={field.onChange}
-                      disabled={isFieldDisabled('enabled', fieldStates)}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          )}
+        {/* Enabled Field */}
+        {isFieldVisible('enabled', fieldStates) && (
+          <FormField
+            control={form.control}
+            name='enabled'
+            render={({ field }) => (
+              <FormItem className='flex flex-row items-center justify-between rounded-lg border p-4'>
+                <div className='space-y-0.5'>
+                  <FormLabel className='text-base'>Enabled</FormLabel>
+                  <FormDescription>Make this quest enabled for users</FormDescription>
+                </div>
+                <FormControl>
+                  <Switch
+                    checked={Boolean(field.value)}
+                    onCheckedChange={field.onChange}
+                    disabled={isFieldDisabled('enabled', fieldStates)}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
 
-          {/* Button Text - Only editable for Explore preset */}
-          {presetConfig?.id === 'explore' && (
-            <ManagedField
-              name='resources.ui.button'
-              label='Button text'
-              presetConfig={presetConfig}
-              placeholder='Override button label'
-            />
-          )}
+        {/* Button Text - Only editable for Explore preset */}
+        {presetConfig?.id === 'explore' && (
+          <ManagedField
+            name='resources.ui.button'
+            label='Button text'
+            presetConfig={presetConfig}
+            placeholder='Override button label'
+          />
+        )}
 
-          {/* Children Editor for non-preset forms */}
-          {!presetConfig && isFieldVisible('children', fieldStates) && <ChildrenEditor />}
-        </CollapsibleContent>
-      </Collapsible>
+        {/* Children Editor for non-preset forms */}
+        {!presetConfig && isFieldVisible('children', fieldStates) && <ChildrenEditor />}
+      </div>
     </div>
   );
 }

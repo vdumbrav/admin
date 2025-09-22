@@ -29,6 +29,7 @@ export interface Resources {
   adsgram?: AdsGramResource;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
 export type Quest = TaskResponseDto & {
   usersCount?: number; // Display-only field
   totalXp?: number; // Display-only field

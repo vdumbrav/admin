@@ -7,7 +7,9 @@ type QuestsDialogType = 'delete';
 interface QuestsContextType {
   open: QuestsDialogType | null;
   setOpen: (o: QuestsDialogType | null) => void;
+  // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
   currentRow: Quest | null;
+  // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
   setCurrentRow: React.Dispatch<React.SetStateAction<Quest | null>>;
 }
 
@@ -19,6 +21,7 @@ interface Props {
 
 export const QuestsProvider = ({ children }: Props) => {
   const [open, setOpen] = useDialogState<QuestsDialogType>(null);
+  // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
   const [currentRow, setCurrentRow] = useState<Quest | null>(null);
   return (
     <QuestsContext value={{ open, setOpen, currentRow, setCurrentRow }}>{children}</QuestsContext>

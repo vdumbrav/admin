@@ -25,18 +25,18 @@ export function getPresetFormValues(presetConfig?: PresetConfig): QuestFormValue
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
   const presetDefaults = presetConfig.defaults || {};
 
-  // Add automatic fields
-  const now = new Date();
-  const startTime = new Date(now.getTime() + 60 * 60 * 1000); // +1 hour
-
   // Deep merge preset defaults with form defaults
   const mergedValues = deepMerge(
     defaultValues as Record<string, unknown>,
     presetDefaults as Partial<Record<string, unknown>>,
   ) as QuestFormValues;
 
-  // Add start time
-  mergedValues.start = startTime.toISOString();
+  // Add start time only if not already set
+  if (!mergedValues.start) {
+    const now = new Date();
+    const startTime = new Date(now.getTime() + 60 * 60 * 1000); // +1 hour
+    mergedValues.start = startTime.toISOString();
+  }
 
   return mergedValues;
 }

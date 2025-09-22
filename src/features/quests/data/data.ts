@@ -10,14 +10,22 @@ import type { DropdownOption } from './types';
 // UI Labels and Display Names
 // ============================================================================
 
-const GROUP_LABELS: Record<TaskResponseDtoGroup | 'all', string> = {
+/**
+ * Human-readable labels for quest groups
+ * Maps API enum values to user-friendly display names
+ */
+const GROUP_LABELS: Record<TaskResponseDtoGroup, string> = {
+  [TaskResponseDtoGroup.all]: 'All Groups',
   [TaskResponseDtoGroup.social]: 'Social',
   [TaskResponseDtoGroup.daily]: 'Daily',
   [TaskResponseDtoGroup.referral]: 'Referral',
   [TaskResponseDtoGroup.partner]: 'Partner',
-  all: 'All Groups',
 };
 
+/**
+ * Human-readable labels for quest types
+ * Maps API enum values to user-friendly display names
+ */
 const TYPE_LABELS: Record<TaskResponseDtoTypeItem, string> = {
   [TaskResponseDtoTypeItem.like]: 'Like',
   [TaskResponseDtoTypeItem.comment]: 'Comment',
@@ -31,6 +39,10 @@ const TYPE_LABELS: Record<TaskResponseDtoTypeItem, string> = {
   [TaskResponseDtoTypeItem.external]: 'External',
 };
 
+/**
+ * Human-readable labels for quest providers
+ * Maps API enum values to user-friendly display names
+ */
 const PROVIDER_LABELS: Record<TaskResponseDtoProvider, string> = {
   [TaskResponseDtoProvider.twitter]: 'Twitter',
   [TaskResponseDtoProvider.telegram]: 'Telegram',
@@ -47,6 +59,7 @@ const PROVIDER_LABELS: Record<TaskResponseDtoProvider, string> = {
 
 /**
  * Groups dropdown options (API-synced)
+ * Excludes 'all' as it's used for filtering, not as a quest group
  */
 export const groups = getAvailableApiGroups()
   .filter((g) => g !== TaskResponseDtoGroup.all)
@@ -58,7 +71,8 @@ export const groups = getAvailableApiGroups()
   );
 
 /**
- * Types dropdown options (API-synced + form-specific)
+ * Types dropdown options (API-synced)
+ * All available quest types from the API
  */
 export const types = getAvailableApiTypes().map(
   (type): DropdownOption => ({
@@ -69,6 +83,7 @@ export const types = getAvailableApiTypes().map(
 
 /**
  * Providers dropdown options (API-synced)
+ * All available quest providers from the API
  */
 export const providers = getAvailableApiProviders().map(
   (provider): DropdownOption => ({
@@ -79,6 +94,7 @@ export const providers = getAvailableApiProviders().map(
 
 /**
  * Enabled status dropdown options
+ * For filtering quests by enabled/disabled status
  */
 export const enabledOptions = [
   { value: 'true', label: 'Enabled' },
@@ -91,6 +107,8 @@ export const enabledOptions = [
 
 /**
  * Get display label for a group value
+ * @param group - The group enum value or 'all'
+ * @returns Human-readable label
  */
 export function getGroupLabel(value: TaskResponseDtoGroup): string {
   return GROUP_LABELS[value] ?? value;
