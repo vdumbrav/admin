@@ -16,15 +16,25 @@ const parseBool = (v: unknown, def = false): boolean => {
   return def;
 };
 
+const parseString = (v: unknown, def: string): string => {
+  return typeof v === 'string' ? v : def;
+};
+
+const parseNumber = (v: unknown, def: number): number => {
+  const num = Number(v);
+  return !Number.isNaN(num) && num > 0 ? num : def;
+};
+
+// More type-safe search parameter parser
 export const parseQuestSearch = (search: Record<string, unknown>) => ({
-  search: (search.search as string) || defaultQuestSearch.search,
-  group: (search.group as string) || defaultQuestSearch.group,
-  type: (search.type as string) || defaultQuestSearch.type,
-  provider: (search.provider as string) || defaultQuestSearch.provider,
-  enabled: (search.enabled as string) || defaultQuestSearch.enabled,
-  page: Number(search.page ?? defaultQuestSearch.page),
-  limit: Number(search.limit ?? defaultQuestSearch.limit),
-  sort: (search.sort as string) || defaultQuestSearch.sort,
+  search: parseString(search.search, defaultQuestSearch.search),
+  group: parseString(search.group, defaultQuestSearch.group),
+  type: parseString(search.type, defaultQuestSearch.type),
+  provider: parseString(search.provider, defaultQuestSearch.provider),
+  enabled: parseString(search.enabled, defaultQuestSearch.enabled),
+  page: parseNumber(search.page, defaultQuestSearch.page),
+  limit: parseNumber(search.limit, defaultQuestSearch.limit),
+  sort: parseString(search.sort, defaultQuestSearch.sort),
   showForm: parseBool(search.showForm, defaultQuestSearch.showForm),
 });
 

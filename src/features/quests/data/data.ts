@@ -115,35 +115,35 @@ export function getGroupLabel(value: TaskResponseDtoGroup): string {
  * Get display label for a type value
  */
 export function getTypeLabel(value: TaskResponseDtoTypeItem): string {
-  return TYPE_LABELS[value] || value;
+  return TYPE_LABELS[value] || value; // TODO: Use ?? instead of || for better null handling (P3)
 }
 
 /**
  * Get display label for a provider value
  */
 export function getProviderLabel(value: TaskResponseDtoProvider): string {
-  return PROVIDER_LABELS[value] || value;
+  return PROVIDER_LABELS[value] || value; // TODO: Use ?? instead of || for better null handling (P3)
 }
 
 /**
  * Check if a type value is valid for API
  */
 export function isApiType(value: string): value is TaskResponseDtoTypeItem {
-  return Object.values(TaskResponseDtoTypeItem).includes(value as TaskResponseDtoTypeItem);
+  return (Object.values(TaskResponseDtoTypeItem)).includes(value); // TODO: Improve when TS supports better enum typing (P3)
 }
 
 /**
  * Check if a provider value is valid for API
  */
 export function isApiProvider(value: string): value is TaskResponseDtoProvider {
-  return Object.values(TaskResponseDtoProvider).includes(value as TaskResponseDtoProvider);
+  return (Object.values(TaskResponseDtoProvider)).includes(value); // TODO: Improve when TS supports better enum typing (P3)
 }
 
 /**
  * Check if a group value is valid for API
  */
 export function isApiGroup(value: string): value is TaskResponseDtoGroup {
-  return Object.values(TaskResponseDtoGroup).includes(value as TaskResponseDtoGroup);
+  return (Object.values(TaskResponseDtoGroup)).includes(value); // TODO: Improve when TS supports better enum typing (P3)
 }
 
 // ============================================================================
@@ -187,5 +187,5 @@ export const TYPE_PROVIDER_REQUIREMENTS: Partial<
  * Get compatible providers for a given type
  */
 export function getCompatibleProviders(type: TaskResponseDtoTypeItem): TaskResponseDtoProvider[] {
-  return TYPE_PROVIDER_REQUIREMENTS[type] ?? getAvailableApiProviders();
+  return TYPE_PROVIDER_REQUIREMENTS[type] ?? getAvailableApiProviders(); // TODO: Replace with API call when endpoint implemented (P1)
 }

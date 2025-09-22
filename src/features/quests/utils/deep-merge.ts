@@ -1,38 +1,41 @@
 /**
- * Deep merge two objects
+ * Deep merge two objects - simplified implementation
  * Handles nested objects properly, arrays are replaced (not merged)
  */
-export function deepMerge<T extends Record<string, unknown>>(target: T, source: Partial<T>): T {
-  const result = { ...target };
 
-  for (const key in source) {
-    if (Object.prototype.hasOwnProperty.call(source, key)) {
-      const sourceValue = source[key];
-      const targetValue = result[key];
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    !Array.isArray(value) &&
+    Object.prototype.toString.call(value) === '[object Object]'
+  );
+}
 
-      if (sourceValue === null || sourceValue === undefined) {
-        // Skip null/undefined values from source
-        continue;
-      }
+export function deepMerge<T extends Record<string, unknown>>(
+  target: T,
+  source: Partial<T>
+): T {
+  // TODO P3: Fix generic type constraints to avoid index assignment issues
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const result = { ...target } as any;
 
-      if (Array.isArray(sourceValue)) {
-        // Arrays are replaced, not merged
-        result[key] = sourceValue as T[Extract<keyof T, string>];
-      } else if (
-        typeof sourceValue === 'object' &&
-        typeof targetValue === 'object' &&
-        targetValue !== null &&
-        !Array.isArray(targetValue)
-      ) {
-        // Recursively merge nested objects
-        result[key] = deepMerge(targetValue as Record<string, unknown>, sourceValue) as T[Extract<
-          keyof T,
-          string
-        >];
-      } else {
-        // Primitive values are replaced
-        result[key] = sourceValue as T[Extract<keyof T, string>];
-      }
+  for (const [key, sourceValue] of Object.entries(source)) {
+    if (sourceValue === null || sourceValue === undefined) {
+      continue;
+    }
+
+    const targetValue = result[key];
+
+    if (Array.isArray(sourceValue)) {
+      // Arrays are replaced, not merged
+      result[key] = sourceValue;
+    } else if (isPlainObject(sourceValue) && isPlainObject(targetValue)) {
+      // Recursively merge nested objects
+      result[key] = deepMerge(targetValue, sourceValue);
+    } else {
+      // Primitive values are replaced
+      result[key] = sourceValue;
     }
   }
 

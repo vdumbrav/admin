@@ -22,8 +22,7 @@ export function getPresetFormValues(presetConfig?: PresetConfig): QuestFormValue
   }
 
   // Start with defaults from preset config
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-  const presetDefaults = presetConfig.defaults || {};
+  const presetDefaults = presetConfig.defaults;
 
   // Deep merge preset defaults with form defaults
   const mergedValues = deepMerge(
@@ -66,8 +65,7 @@ export function applyBusinessRules(
   const updatedValues = { ...values };
 
   // Auto-generate pop-up name based on group
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-  if (updatedValues.group && !updatedValues.resources?.ui?.['pop-up']?.name) {
+  if (!updatedValues.resources?.ui?.['pop-up']?.name) {
     const popupName = getPopupNameByGroup(updatedValues.group);
     if (popupName) {
       updatedValues.resources = {
@@ -174,8 +172,7 @@ export function applyBusinessRules(
  * Calculate total reward from child tasks
  */
 export function calculateTotalReward(children: ChildFormValues[]): number {
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-  if (!children || children.length === 0) {
+  if (!children.length) {
     return 0;
   }
 

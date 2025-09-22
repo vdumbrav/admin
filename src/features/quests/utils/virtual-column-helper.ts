@@ -29,8 +29,8 @@ export function createVirtualColumn({
         if (value.length === 0) {
           setValue('');
         } else {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-          setValue(isMultiple ? value.join(',') : value[0]);
+          const stringArray = value.map(String);
+          setValue(isMultiple ? stringArray.join(',') : stringArray[0]);
         }
       } else {
         setValue('');

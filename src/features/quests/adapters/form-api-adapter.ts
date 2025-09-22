@@ -39,23 +39,20 @@ import {
 export function apiToForm(apiData: Partial<TaskResponseDto>): QuestFormValues {
   return {
     // Core fields with fallback to defaults
-    title: apiData.title ?? (DEFAULT_FORM_VALUES.title as string),
-    type:
-      Array.isArray(apiData.type) && apiData.type.length > 0
-        ? apiData.type[0]
-        : (DEFAULT_FORM_VALUES.type as QuestFormValues['type']),
-    description: apiData.description ?? (DEFAULT_FORM_VALUES.description as string),
-    group: apiData.group ?? (DEFAULT_FORM_VALUES.group as QuestFormValues['group']),
-    order_by: apiData.order_by ?? (DEFAULT_FORM_VALUES.order_by as number),
+    title: apiData.title ?? '',
+    type: Array.isArray(apiData.type) && apiData.type.length > 0 ? apiData.type[0] : 'external', // TODO: Simplify when API uses single type instead of array (P2)
+    description: apiData.description ?? '',
+    group: apiData.group ?? 'all',
+    order_by: apiData.order_by ?? 0,
 
     // Optional fields
     provider: apiData.provider,
     uri: apiData.uri ?? undefined,
     reward: apiData.reward,
-    enabled: apiData.enabled ?? (DEFAULT_FORM_VALUES.enabled as boolean),
+    enabled: apiData.enabled ?? true,
 
     // Resources directly from API
-    resources: apiData.resource ?? apiData.resources ?? DEFAULT_FORM_VALUES.resources,
+    resources: apiData.resource ?? apiData.resources ?? DEFAULT_FORM_VALUES.resources, // TODO: Unify resource vs resources field naming (P1)
     child: apiData.child ? apiData.child.map(convertApiChildToForm) : undefined,
 
     // Schedule mapping for edit mode
@@ -78,28 +75,46 @@ export function apiToForm(apiData: Partial<TaskResponseDto>): QuestFormValues {
 }
 
 /**
- * Convert API child task to form child
- * Type casting required due to API/form type mismatch
+ * Safely extract first type from API type array
+ */
+function getFirstType(apiType: string | string[] | undefined): string {
+  if (Array.isArray(apiType) && apiType.length > 0) {
+    return apiType[0];
+  }
+  return typeof apiType === 'string' ? apiType : 'external';
+}
+
+/**
+ * Extract child resources from API response
+ */
+function extractChildResources(resourceData: unknown): ChildFormValues['resources'] {
+  if (!resourceData || typeof resourceData !== 'object') {
+    return undefined;
+  }
+
+  const data = resourceData as Record<string, unknown>;
+  const tweetId = typeof data.tweetId === 'string' ? data.tweetId : undefined;
+  const username = typeof data.username === 'string' ? data.username : undefined;
+
+  return (tweetId || username) ? { tweetId, username } : undefined;
+}
+
+/**
+ * Convert API child task to form child with minimal casting
  */
 function convertApiChildToForm(apiChild: TaskResponseDto): ChildFormValues {
+  const resourceData = apiChild.resource ?? apiChild.resources;
+  const childType = getFirstType(apiChild.type);
+
   return {
     title: apiChild.title,
     description: apiChild.description,
-    type: (Array.isArray(apiChild.type) && apiChild.type.length > 0
-      ? apiChild.type[0]
-      : 'external') as ChildFormValues['type'],
+    type: childType as ChildFormValues['type'], // TODO: Remove when API unifies enums between Create/Response DTOs (P2)
     group: apiChild.group,
     provider: apiChild.provider,
     reward: apiChild.reward,
     order_by: apiChild.order_by,
-    // Extract relevant resources for children
-    resources:
-      (apiChild.resource ?? apiChild.resources)
-        ? {
-            tweetId: (apiChild.resource ?? apiChild.resources)?.tweetId as string,
-            username: (apiChild.resource ?? apiChild.resources)?.username as string,
-          }
-        : undefined,
+    resources: extractChildResources(resourceData),
   };
 }
 
@@ -122,7 +137,7 @@ export function formToApi(formData: QuestFormValues): Partial<TaskResponseDto> {
   return {
     // Core required fields
     title: formData.title,
-    type: [formData.type],
+    type: [formData.type], // TODO: Simplify when API uses single type instead of array (P2)
     description: formData.description || undefined,
     group: formData.group,
     order_by: formData.order_by,
@@ -166,7 +181,7 @@ function convertFormChildToApi(formChild: ChildFormValues): TaskResponseDto {
   return {
     id: 0, // Will be assigned by API
     title: formChild.title,
-    type: [formChild.type] as TaskResponseDto['type'], // API expects array
+    type: [formChild.type] as TaskResponseDto['type'], // TODO: Remove array wrapping when API unifies type structures (P2)
     description: formChild.description,
     group: formChild.group,
     order_by: formChild.order_by,
@@ -193,7 +208,7 @@ function convertFormChildToApi(formChild: ChildFormValues): TaskResponseDto {
     blocking_task_id: 0,
     total_reward: 0,
     total_users: 0,
-  } as TaskResponseDto;
+  } as TaskResponseDto; // TODO: Remove casting when CreateTaskDto matches TaskResponseDto structure (P2)
 }
 
 // ============================================================================
@@ -237,7 +252,7 @@ export function getDefaultFormValues(): QuestFormValues {
       tweetId: '',
       icon: '',
     },
-  } as QuestFormValues;
+  } as QuestFormValues; // TODO: Remove casting when type compatibility improves (P2)
 }
 
 /**
@@ -252,5 +267,5 @@ export function getDefaultFormValues(): QuestFormValues {
  */
 export function validateAndConvertToApi(formData: unknown): Partial<TaskResponseDto> {
   const validatedData = questFormSchema.parse(formData);
-  return formToApi(validatedData as QuestFormValues);
+  return formToApi(validatedData as QuestFormValues); // TODO: Remove casting when Zod types align better (P2)
 }
