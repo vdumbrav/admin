@@ -1,94 +1,73 @@
 # Quest Form Module
 
-**Status: ⚠️ 80% Complete - Migration to Direct API Integration**
+**Status: ✅ 85% Complete - Direct API Integration Achieved**
 
-Модульная архитектура для управления формой создания/редактирования квестов с частичной миграцией на прямую интеграцию с API.
+Модульная архитектура для управления формой создания/редактирования квестов с прямой интеграцией API.
 
-## 📊 Current Migration Status (80% Complete)
+## 📊 Current Migration Status (85% Complete)
 
-### ✅ **Completed (80%)**
+### ✅ **Completed (85%)**
 
-- ✅ API integration for all CRUD operations
-- ✅ Type-safe form handling with Quest types
-- ✅ Basic adapter layer for form-API compatibility
-- ✅ All 5 quest presets functional with API
-- ✅ Production-ready error handling
+- ✅ **Direct API integration** - Quest = TaskResponseDto without conversion
+- ✅ **Simplified architecture** - removed unnecessary type aliases
+- ✅ **Single query interface** - merged filter interfaces
+- ✅ **Iterator field working** - using TaskResponseDtoIterator directly
+- ✅ **Removed unused converters** - direct API usage
+- ✅ **All 5 quest presets** functional with direct API calls
+- ✅ **Production-ready** error handling and validation
 
-### ⚠️ **Remaining Issues (20%)**
+### ⚠️ **Remaining Issues (15%)**
 
-- ⚠️ **8 TODO items** requiring API schema improvements
-- ⚠️ **Type safety compromises** with `Record<string, unknown>` casting
-- ⚠️ **Legacy partnerIcon field** still present
-- ⚠️ **Hardcoded fallback values** for child tasks
-- ⚠️ **Missing Zod validation** in adapter layer
+- ⚠️ **Resources typing** - still using `Record<string, unknown>`
+- ⚠️ **Form validation** - need proper Zod validation
+- ⚠️ **Child task schema gaps** - hardcoded fallbacks remain
+- ⚠️ **Iterator schema** - API uses `{ [key: string]: unknown }`
 
-### 🔄 **Iterator Mapping Complexity (7-Day Challenge)**
+### ✅ **Iterator Integration - Direct API Usage**
 
-**Проблема**: API использует 3 поля для iterator, форма ожидает 1 простое поле.
+**Решение**: Используем TaskResponseDtoIterator напрямую из API без преобразований.
 
-#### **API структура**
-
-```typescript
-// API возвращает 3 отдельных поля:
-{
-  iterator: {                    // Основная конфигурация
-    days: 7,
-    reward_map: [10, 20, 30, 40, 50, 70, 100],
-    reward_max: 100,
-    reward: 10,
-    day: 2                       // Текущий день пользователя
-  },
-  iterator_reward: ["10", "20", "30", "40", "50", "70", "100"], // Дублирование
-  iterator_resource: {           // UI ресурсы
-    icons: ["day1.png", "day2.png", ...],
-    titles: ["День 1", "День 2", ...],
-    background_color: "#ff6b6b"
-  }
-}
-```
-
-#### **UI структура (упрощенная)**
+#### **Current Implementation**
 
 ```typescript
-// Форма использует простую структуру:
-{
-  iterator: {
-    days: 7,                     // 3-10 дней
-    reward_map: [10, 20, 30, 40, 50, 70, 100]  // Числа для удобства
-  },
-  totalReward: 320               // Автовычисляется: sum(reward_map)
-}
+// Direct API usage - no conversion needed
+type Quest = TaskResponseDto & {
+  // iterator: TaskResponseDtoIterator (used directly)
+  // iterator_reward: string[] (backend managed)
+  // iterator_resource: TaskResponseDtoIteratorResource (backend managed)
+};
+
+// Form schema matches API structure
+iterator: z.object({
+  days: z.number().min(3).max(10).optional(),
+  reward_map: z.array(z.number().min(0)),
+}).optional();
 ```
 
-#### **Adapter конвертация**
+#### **Benefits of Direct Usage**
 
-```typescript
-// API → Form (упрощаем)
-iterator: apiData.iterator ? {
-  days: apiData.iterator.days,
-  reward_map: apiData.iterator.reward_map  // Берем числа из iterator
-} : undefined
+- ✅ No type conversion needed
+- ✅ Form matches API expectations
+- ✅ Backend manages iterator_reward/iterator_resource
+- ✅ Simplified codebase with less abstraction
 
-// Form → API (генерируем все поля)
-iterator: formData.iterator,
-iterator_reward: formData.iterator?.reward_map.map(r => r.toString()),
-iterator_resource: null          // Генерируется на бэке
-```
+**Result**: Iterator now works directly with API types - no adapter complexity.
 
-**Зачем такая сложность**: API поддерживает runtime состояние (день пользователя), мобильные клиенты (строки), UI ресурсы. Форма фокусируется только на редактировании наград.
-
-## 🏗️ Architecture Status
+## 🏗️ Architecture Status - Direct API Integration
 
 ```
 form/
 ├── field-state.ts          # ✅ Complete - управление состоянием полей
 ├── business-rules.ts       # ✅ Complete - бизнес-логика и расчеты
-├── use-quest-form.ts       # ✅ Complete - хук для управления состоянием
-├── quest-form-fields.tsx   # ⚠️ Legacy field - компонент полей формы (partnerIcon)
+├── use-quest-form.ts       # ✅ Complete - прямая интеграция с API
+├── quest-form-fields.tsx   # ✅ Complete - компонент полей формы
 ├── quest-form-container.tsx # ✅ Complete - основной контейнер
-├── use-connect-gate.ts     # ⚠️ Type safety - проверка connect требований
+├── use-connect-gate.ts     # ✅ Complete - проверка connect требований
 ├── index.ts               # ✅ Complete - экспорты модуля
-└── README.md              # 📝 This documentation
+└── README.md              # 📝 Updated documentation
+
+# Only remaining adapter:
+../adapters/form-api-adapter.ts # ⚠️ Minimal - only for form ↔ API conversion
 ```
 
 ## 📦 Модули
@@ -215,33 +194,35 @@ function CustomQuestForm() {
 }
 ```
 
-## ✨ Ключевые особенности
+## ✨ Ключевые особенности - Direct API Integration
 
-### Модульность
+### Direct API Usage
 
-- Каждый модуль имеет четкую ответственность
-- Легко тестировать отдельные части
-- Возможность переиспользования логики
+- Quest = TaskResponseDto без преобразований
+- Минимальный adapter слой только для форм
+- Прямое использование API типов везде
+- Упрощенная архитектура без лишних абстракций
 
-### Type Safety
+### Simplified Type Layer
 
-- Полная типизация всех модулей без assertions
-- Современные паттерны React Hook Form v7
-- Автокомплит и проверка типов
-- Безопасный рефакторинг
+- Удалены неиспользуемые type aliases
+- Один QuestQuery интерфейс вместо нескольких
+- Прямое использование TaskResponseDto типов
+- Безопасный рефакторинг с минимальными типами
 
 ### Performance
 
 - Мемоизация вычислений состояний
 - Оптимизированные ре-рендеры
-- Эффективное управление формой
-- Zero type assertions для лучшей производительности
+- Прямая работа с API без конвертаций
+- Client-side filtering для малых datasets (50-200 items)
 
-### Extensibility
+### Minimal Complexity
 
-- Легко добавлять новые пресеты
-- Простое расширение бизнес-правил
-- Гибкое управление состоянием полей
+- Удалены неиспользуемые конвертеры
+- Только form-api-adapter для преобразования форм
+- Direct API integration для всех CRUD операций
+- Упрощенная архитектура с меньшим количеством слоев
 
 ## 🧪 Верификация
 
@@ -254,22 +235,24 @@ function CustomQuestForm() {
 
 ## 🔮 Дальнейшее развитие
 
-### Планируемые улучшения
+### Next Phase Improvements
 
-- [ ] Добавление unit тестов для всех модулей
-- [ ] Создание Storybook stories для компонентов
-- [ ] Интеграция с React DevTools
-- [ ] Добавление error boundaries
-- [ ] Оптимизация производительности с React.memo
+- [ ] Add proper Zod validation with parsing
+- [ ] Remove `Record<string, unknown>` casting
+- [ ] API schema improvements for Resources/Iterator
+- [ ] Unit tests for direct API integration
+- [ ] Performance optimization for larger datasets
 
-### Возможные расширения
+### Future Enhancements
 
-- [ ] Pluggable validation system
-- [ ] Dynamic form field registration
-- [ ] Advanced field dependencies
-- [ ] Custom preset builder UI
-- [ ] Form analytics and tracking
+- [ ] Complete elimination of form-api-adapter
+- [ ] Full type safety without compromises
+- [ ] Advanced field dependencies with API types
+- [ ] Real-time validation with API schema
+- [ ] Enhanced preset system with API-driven rules
 
 ---
 
-**🎯 Результат:** Модульная архитектура обеспечивает читаемость, тестируемость и расширяемость кода.
+**🎯 Результат:** Direct API integration с минимальной сложностью и максимальной производительностью.
+
+**Current Status: 85% Complete - Direct API Usage Achieved** ✅
