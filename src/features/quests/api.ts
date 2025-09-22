@@ -3,6 +3,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import {
   filesControllerUploadFile,
+  getAdminWaitlistTasksControllerGetWaitlistTasksQueryKey,
   useAdminWaitlistTasksControllerCreateTask,
   useAdminWaitlistTasksControllerDeleteTask,
   useAdminWaitlistTasksControllerGetWaitlistTasks,
@@ -142,6 +143,7 @@ export const useQuest = (id: number) => {
 export const useCreateQuest = () => {
   const queryClient = useQueryClient();
   const createTaskMutation = useAdminWaitlistTasksControllerCreateTask();
+  const queryKey = getAdminWaitlistTasksControllerGetWaitlistTasksQueryKey();
 
   return useMutation({
     mutationFn: async (data: Partial<Quest>): Promise<Quest> => {
@@ -150,9 +152,8 @@ export const useCreateQuest = () => {
       return result;
     },
     onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey });
       toast.success('Quest created successfully');
-      // Invalidate and refetch quests list
-      void queryClient.invalidateQueries({ queryKey: ['api', 'admin', 'tasks'] });
     },
     onError: (error) => {
       const message = error instanceof Error ? error.message : 'Failed to create quest';
@@ -164,6 +165,7 @@ export const useCreateQuest = () => {
 export const useUpdateQuest = (id: number) => {
   const queryClient = useQueryClient();
   const updateTaskMutation = useAdminWaitlistTasksControllerUpdateTask();
+  const queryKey = getAdminWaitlistTasksControllerGetWaitlistTasksQueryKey();
 
   return useMutation({
     mutationFn: async (data: Partial<Quest>): Promise<Quest> => {
@@ -172,9 +174,8 @@ export const useUpdateQuest = (id: number) => {
       return result;
     },
     onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey });
       toast.success('Quest updated successfully');
-      // Invalidate and refetch quests list
-      void queryClient.invalidateQueries({ queryKey: ['api', 'admin', 'tasks'] });
     },
     onError: (error) => {
       const message = error instanceof Error ? error.message : 'Failed to update quest';
@@ -200,15 +201,15 @@ export const useUpdateQuest = (id: number) => {
 export const useDeleteQuest = () => {
   const queryClient = useQueryClient();
   const deleteTaskMutation = useAdminWaitlistTasksControllerDeleteTask();
+  const queryKey = getAdminWaitlistTasksControllerGetWaitlistTasksQueryKey();
 
   return useMutation({
     mutationFn: async (id: number): Promise<void> => {
       await deleteTaskMutation.mutateAsync({ id });
     },
     onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey });
       toast.success('Quest deleted successfully');
-      // Invalidate and refetch quests list
-      void queryClient.invalidateQueries({ queryKey: ['api', 'admin', 'tasks'] });
     },
     onError: (error) => {
       const message = error instanceof Error ? error.message : 'Failed to delete quest';
@@ -220,6 +221,7 @@ export const useDeleteQuest = () => {
 export const useToggleEnabled = () => {
   const queryClient = useQueryClient();
   const updateTaskMutation = useAdminWaitlistTasksControllerUpdateTask();
+  const queryKey = getAdminWaitlistTasksControllerGetWaitlistTasksQueryKey();
 
   return useMutation({
     mutationFn: async (data: { id: number; enabled: boolean }): Promise<Quest> => {
@@ -230,9 +232,8 @@ export const useToggleEnabled = () => {
       return result;
     },
     onSuccess: () => {
-      toast.success('Quest status updated successfully');
-      // Invalidate and refetch quests list
-      void queryClient.invalidateQueries({ queryKey: ['api', 'admin', 'tasks'] });
+      void queryClient.invalidateQueries({ queryKey });
+      toast.success('Quest status updated');
     },
     onError: (error) => {
       const message = error instanceof Error ? error.message : 'Failed to toggle status';
@@ -244,6 +245,7 @@ export const useToggleEnabled = () => {
 export const useTogglePinned = () => {
   const queryClient = useQueryClient();
   const updateTaskMutation = useAdminWaitlistTasksControllerUpdateTask();
+  const queryKey = getAdminWaitlistTasksControllerGetWaitlistTasksQueryKey();
 
   return useMutation({
     mutationFn: async (data: { id: number; pinned: boolean }): Promise<Quest> => {
@@ -254,7 +256,7 @@ export const useTogglePinned = () => {
       return result;
     },
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['api', 'admin', 'tasks'] });
+      void queryClient.invalidateQueries({ queryKey });
       toast.success('Updated pin state');
     },
     onError: (error) => {
