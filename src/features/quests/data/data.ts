@@ -1,7 +1,7 @@
 import {
   TaskResponseDtoGroup,
   TaskResponseDtoProvider,
-  TaskResponseDtoTypeItem,
+  WaitlistTasksResponseDtoTypeItem,
 } from '@/lib/api/generated/model';
 import { getAvailableApiGroups, getAvailableApiProviders, getAvailableApiTypes } from './adapters';
 import type { DropdownOption } from './types';
@@ -26,17 +26,17 @@ const GROUP_LABELS: Record<TaskResponseDtoGroup, string> = {
  * Human-readable labels for quest types
  * Maps API enum values to user-friendly display names
  */
-const TYPE_LABELS: Record<TaskResponseDtoTypeItem, string> = {
-  [TaskResponseDtoTypeItem.like]: 'Like',
-  [TaskResponseDtoTypeItem.comment]: 'Comment',
-  [TaskResponseDtoTypeItem.share]: 'Share',
-  [TaskResponseDtoTypeItem.join]: 'Join',
-  [TaskResponseDtoTypeItem.connect]: 'Connect',
-  [TaskResponseDtoTypeItem.multiple]: 'Multiple',
-  [TaskResponseDtoTypeItem.repeatable]: 'Repeatable',
-  [TaskResponseDtoTypeItem.dummy]: 'Dummy',
-  [TaskResponseDtoTypeItem.referral]: 'Referral',
-  [TaskResponseDtoTypeItem.external]: 'External',
+const TYPE_LABELS: Record<WaitlistTasksResponseDtoTypeItem, string> = {
+  [WaitlistTasksResponseDtoTypeItem.like]: 'Like',
+  [WaitlistTasksResponseDtoTypeItem.comment]: 'Comment',
+  [WaitlistTasksResponseDtoTypeItem.share]: 'Share',
+  [WaitlistTasksResponseDtoTypeItem.join]: 'Join',
+  [WaitlistTasksResponseDtoTypeItem.connect]: 'Connect',
+  [WaitlistTasksResponseDtoTypeItem.multiple]: 'Multiple',
+  [WaitlistTasksResponseDtoTypeItem.repeatable]: 'Repeatable',
+  [WaitlistTasksResponseDtoTypeItem.dummy]: 'Dummy',
+  [WaitlistTasksResponseDtoTypeItem.referral]: 'Referral',
+  [WaitlistTasksResponseDtoTypeItem.external]: 'External',
 };
 
 /**
@@ -114,7 +114,7 @@ export function getGroupLabel(value: TaskResponseDtoGroup): string {
 /**
  * Get display label for a type value
  */
-export function getTypeLabel(value: TaskResponseDtoTypeItem): string {
+export function getTypeLabel(value: WaitlistTasksResponseDtoTypeItem): string {
   return TYPE_LABELS[value] || value; // TODO: Use ?? instead of || for better null handling (P3)
 }
 
@@ -128,8 +128,10 @@ export function getProviderLabel(value: TaskResponseDtoProvider): string {
 /**
  * Check if a type value is valid for API
  */
-export function isApiType(value: string): value is TaskResponseDtoTypeItem {
-  return Object.values(TaskResponseDtoTypeItem).includes(value as TaskResponseDtoTypeItem); // TODO: Improve when TS supports better enum typing (P3)
+export function isApiType(value: string): value is WaitlistTasksResponseDtoTypeItem {
+  return Object.values(WaitlistTasksResponseDtoTypeItem).includes(
+    value as WaitlistTasksResponseDtoTypeItem,
+  ); // TODO: Improve when TS supports better enum typing (P3)
 }
 
 /**
@@ -162,22 +164,22 @@ export function isApiGroup(value: string): value is TaskResponseDtoGroup {
  * Priority: P1 - Important for architecture quality
  */
 export const TYPE_PROVIDER_REQUIREMENTS: Partial<
-  Record<TaskResponseDtoTypeItem, TaskResponseDtoProvider[]>
+  Record<WaitlistTasksResponseDtoTypeItem, TaskResponseDtoProvider[]>
 > = {
-  [TaskResponseDtoTypeItem.like]: [
+  [WaitlistTasksResponseDtoTypeItem.like]: [
     TaskResponseDtoProvider.twitter,
     TaskResponseDtoProvider.telegram,
   ],
-  [TaskResponseDtoTypeItem.share]: [
+  [WaitlistTasksResponseDtoTypeItem.share]: [
     TaskResponseDtoProvider.twitter,
     TaskResponseDtoProvider.telegram,
   ],
-  [TaskResponseDtoTypeItem.comment]: [TaskResponseDtoProvider.twitter],
-  [TaskResponseDtoTypeItem.join]: [
+  [WaitlistTasksResponseDtoTypeItem.comment]: [TaskResponseDtoProvider.twitter],
+  [WaitlistTasksResponseDtoTypeItem.join]: [
     TaskResponseDtoProvider.telegram,
     TaskResponseDtoProvider.discord,
   ],
-  [TaskResponseDtoTypeItem.connect]: [
+  [WaitlistTasksResponseDtoTypeItem.connect]: [
     TaskResponseDtoProvider.twitter,
     TaskResponseDtoProvider.telegram,
   ],
@@ -186,6 +188,8 @@ export const TYPE_PROVIDER_REQUIREMENTS: Partial<
 /**
  * Get compatible providers for a given type
  */
-export function getCompatibleProviders(type: TaskResponseDtoTypeItem): TaskResponseDtoProvider[] {
+export function getCompatibleProviders(
+  type: WaitlistTasksResponseDtoTypeItem,
+): TaskResponseDtoProvider[] {
   return TYPE_PROVIDER_REQUIREMENTS[type] ?? getAvailableApiProviders(); // TODO: Replace with API call when endpoint implemented (P1)
 }

@@ -1,13 +1,13 @@
 import {
   TaskResponseDtoGroup as ApiGroup,
   TaskResponseDtoProvider as ApiProvider,
-  TaskResponseDtoTypeItem as ApiTypeItem,
+  WaitlistTasksResponseDtoTypeItem as ApiTypeItem,
   type TaskResponseDtoGroup,
   type TaskResponseDtoProvider,
-  type TaskResponseDtoTypeItem,
+  type WaitlistTasksResponseDtoTypeItem,
 } from '@/lib/api/generated/model';
 
-export function getAvailableApiTypes(): TaskResponseDtoTypeItem[] {
+export function getAvailableApiTypes(): WaitlistTasksResponseDtoTypeItem[] {
   return Object.values(ApiTypeItem);
 }
 

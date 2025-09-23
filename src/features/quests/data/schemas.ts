@@ -1,10 +1,10 @@
 import { z } from 'zod';
-import type { TaskResponseDto } from '@/lib/api/generated/model';
 import {
+  type TaskResponseDto,
   TaskResponseDtoGroup,
   TaskResponseDtoProvider,
-  TaskResponseDtoStatus,
-  TaskResponseDtoTypeItem,
+  WaitlistTasksResponseDtoStatus,
+  WaitlistTasksResponseDtoTypeItem,
 } from '@/lib/api/generated/model';
 
 // import type { Quest } from './types'; // ⚠️ TEMPORARY: Removed until IteratorDto is fixed
@@ -44,12 +44,12 @@ const resourcesSchema = z
   })
   .optional();
 
-// API sends string[] but form uses number[], adapter handles conversion
 const iteratorSchema = z
   .object({
+    id: z.number(),
     day: z.number(),
     days: z.number(),
-    reward_map: z.array(z.union([z.string(), z.number()])), // TODO: Change to z.number() only when API fixed (P0)
+    reward_map: z.array(z.number()),
     iterator_reward: z.array(z.string()),
     reward: z.number(),
     reward_max: z.number(),
@@ -61,16 +61,16 @@ const iteratorSchema = z
 // ============================================================================
 
 const adminTaskTypeSchema = z.enum([
-  TaskResponseDtoTypeItem.referral,
-  TaskResponseDtoTypeItem.connect,
-  TaskResponseDtoTypeItem.join,
-  TaskResponseDtoTypeItem.share,
-  TaskResponseDtoTypeItem.like,
-  TaskResponseDtoTypeItem.comment,
-  TaskResponseDtoTypeItem.multiple,
-  TaskResponseDtoTypeItem.repeatable,
-  TaskResponseDtoTypeItem.dummy,
-  TaskResponseDtoTypeItem.external,
+  WaitlistTasksResponseDtoTypeItem.referral,
+  WaitlistTasksResponseDtoTypeItem.connect,
+  WaitlistTasksResponseDtoTypeItem.join,
+  WaitlistTasksResponseDtoTypeItem.share,
+  WaitlistTasksResponseDtoTypeItem.like,
+  WaitlistTasksResponseDtoTypeItem.comment,
+  WaitlistTasksResponseDtoTypeItem.multiple,
+  WaitlistTasksResponseDtoTypeItem.repeatable,
+  WaitlistTasksResponseDtoTypeItem.dummy,
+  WaitlistTasksResponseDtoTypeItem.external,
 ]);
 
 const providerSchema = z
@@ -95,11 +95,11 @@ const groupSchema = z.enum([
 
 const statusSchema = z
   .enum([
-    TaskResponseDtoStatus.new,
-    TaskResponseDtoStatus.started,
-    TaskResponseDtoStatus.completed,
-    TaskResponseDtoStatus.failed,
-    TaskResponseDtoStatus.locked,
+    WaitlistTasksResponseDtoStatus.new,
+    WaitlistTasksResponseDtoStatus.started,
+    WaitlistTasksResponseDtoStatus.completed,
+    WaitlistTasksResponseDtoStatus.failed,
+    WaitlistTasksResponseDtoStatus.locked,
   ])
   .optional();
 
@@ -108,16 +108,16 @@ const statusSchema = z
 // ============================================================================
 
 const taskTypeSchema = z.enum([
-  TaskResponseDtoTypeItem.referral,
-  TaskResponseDtoTypeItem.connect,
-  TaskResponseDtoTypeItem.join,
-  TaskResponseDtoTypeItem.share,
-  TaskResponseDtoTypeItem.like,
-  TaskResponseDtoTypeItem.comment,
-  TaskResponseDtoTypeItem.multiple,
-  TaskResponseDtoTypeItem.repeatable,
-  TaskResponseDtoTypeItem.dummy,
-  TaskResponseDtoTypeItem.external,
+  WaitlistTasksResponseDtoTypeItem.referral,
+  WaitlistTasksResponseDtoTypeItem.connect,
+  WaitlistTasksResponseDtoTypeItem.join,
+  WaitlistTasksResponseDtoTypeItem.share,
+  WaitlistTasksResponseDtoTypeItem.like,
+  WaitlistTasksResponseDtoTypeItem.comment,
+  WaitlistTasksResponseDtoTypeItem.multiple,
+  WaitlistTasksResponseDtoTypeItem.repeatable,
+  WaitlistTasksResponseDtoTypeItem.dummy,
+  WaitlistTasksResponseDtoTypeItem.external,
 ]);
 
 const taskGroupSchema = z.enum([
@@ -134,7 +134,7 @@ const taskGroupSchema = z.enum([
 // Schema for Quest (API response validation)
 export const questSchema: z.ZodType<TaskResponseDto> = z.object({
   id: z.number(),
-  type: z.array(adminTaskTypeSchema),
+  type: adminTaskTypeSchema,
   provider: providerSchema,
   web: z.boolean(),
   twa: z.boolean(),

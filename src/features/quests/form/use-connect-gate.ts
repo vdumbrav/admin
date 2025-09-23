@@ -17,10 +17,7 @@ export function useConnectGate(provider?: string): ConnectGateResult {
     if (!provider) return null;
     if (!data) return null;
     // AdminWaitlistTasksResponseDto.type is an array on API model, check includes 'connect'
-    return data.some(
-      (t: { provider?: string; type: string[] }) =>
-        t.provider === provider && t.type.includes('connect'),
-    );
+    return data.some((t) => t.provider === provider && t.type.includes('connect'));
   }, [data, provider]);
 
   if (error) {

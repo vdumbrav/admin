@@ -4,14 +4,14 @@
  * This adapter handles the conversion between clean form types optimized for UX
  * and API types. Required because:
  *
- * 1. Form structure differs from API (single type vs array, optional vs required fields)
- * 2. Iterator reward_map needs string conversion until Swagger IteratorDto is fixed
- * 3. Child tasks require special handling for API compatibility
- * 4. Form validation and defaults don't match API expectations
+ * 1. Form validation and defaults don't match API expectations
+ * 2. Child tasks require special handling for API compatibility
+ * 3. Date fields (start/end) are form-only and not sent to API
  *
- * REMAINING ISSUES:
- * - IteratorDto - reward_map remains string[] in API (form uses number[])
- * - Child task adapters use Pick<TaskResponseDto> for type safety
+ * MIGRATION STATUS:
+ * ✅ IteratorDto fields are now optional (iterator_resource, resource)
+ * ✅ reward_map is now number[] (was string[])
+ * ✅ type field is now single value (was array)
  */
 import type { TaskResponseDto } from '@/lib/api/generated/model';
 import { questFormSchema } from '../data/schemas';
@@ -20,6 +20,7 @@ import {
   DEFAULT_FORM_VALUES,
   type QuestFormValues,
 } from '../types/form-types';
+import type { QuestWithDates } from '../types/quest-with-dates';
 
 // ============================================================================
 // API to Form conversion
@@ -36,11 +37,11 @@ import {
  * @param apiData - Partial task data from API response
  * @returns Complete form values ready for react-hook-form
  */
-export function apiToForm(apiData: Partial<TaskResponseDto>): QuestFormValues {
+export function apiToForm(apiData: Partial<QuestWithDates>): QuestFormValues {
   return {
     // Core fields with fallback to defaults
     title: apiData.title ?? '',
-    type: Array.isArray(apiData.type) && apiData.type.length > 0 ? apiData.type[0] : 'external', // TODO: Simplify when API uses single type instead of array (P2)
+    type: apiData.type ?? 'external',
     description: apiData.description ?? '',
     group: apiData.group ?? 'all',
     order_by: apiData.order_by ?? 0,
@@ -54,7 +55,7 @@ export function apiToForm(apiData: Partial<TaskResponseDto>): QuestFormValues {
     block_id: apiData.blocking_task?.id,
 
     // Resources directly from API
-    resources: apiData.resource ?? apiData.resources ?? DEFAULT_FORM_VALUES.resources, // TODO: Unify resource vs resources field naming (P1)
+    resources: apiData.resource ?? DEFAULT_FORM_VALUES.resources,
     child: apiData.child ? apiData.child.map(convertApiChildToForm) : undefined,
 
     // Schedule mapping for edit mode
@@ -62,39 +63,25 @@ export function apiToForm(apiData: Partial<TaskResponseDto>): QuestFormValues {
     end: apiData.completed_at ?? undefined,
 
     // Iterator mapping for 7-day challenge (API → Form)
-    // API sends string[], convert to number[] for form
     iterator: apiData.iterator
       ? {
           days: typeof apiData.iterator.days === 'number' ? apiData.iterator.days : undefined,
-          reward_map: Array.isArray(apiData.iterator.reward_map)
-            ? apiData.iterator.reward_map.map((reward: string | number) =>
-                typeof reward === 'string' ? parseFloat(reward) || 0 : reward,
-              )
-            : [],
+          reward_map: apiData.iterator.reward_map,
         }
       : undefined,
   };
 }
 
 /**
- * Safely extract first type from API type array
- */
-function getFirstType(apiType: string | string[] | undefined): string {
-  if (Array.isArray(apiType) && apiType.length > 0) {
-    return apiType[0];
-  }
-  return typeof apiType === 'string' ? apiType : 'external';
-}
-
-/**
  * Extract child resources from API response
  */
 function extractChildResources(resourceData: unknown): ChildFormValues['resources'] {
+  // TODO: Improve type safety for resourceData (P3)
   if (!resourceData || typeof resourceData !== 'object') {
     return undefined;
   }
 
-  const data = resourceData as Record<string, unknown>;
+  const data = resourceData as Record<string, unknown>; // TODO: Replace with proper type validation (P3)
   const tweetId = typeof data.tweetId === 'string' ? data.tweetId : undefined;
   const username = typeof data.username === 'string' ? data.username : undefined;
 
@@ -105,13 +92,11 @@ function extractChildResources(resourceData: unknown): ChildFormValues['resource
  * Convert API child task to form child with minimal casting
  */
 function convertApiChildToForm(apiChild: TaskResponseDto): ChildFormValues {
-  const resourceData = apiChild.resource ?? apiChild.resources;
-  const childType = getFirstType(apiChild.type);
-
+  const resourceData = apiChild.resource;
   return {
     title: apiChild.title,
     description: apiChild.description,
-    type: childType as ChildFormValues['type'], // TODO: Remove when API unifies enums between Create/Response DTOs (P2)
+    type: apiChild.type as ChildFormValues['type'], // TODO: Remove casting when type compatibility improves (P2)
     group: apiChild.group,
     provider: apiChild.provider,
     reward: apiChild.reward,
@@ -135,11 +120,11 @@ function convertApiChildToForm(apiChild: TaskResponseDto): ChildFormValues {
  * @param formData - Complete form values from react-hook-form
  * @returns API-compatible task data for submission
  */
-export function formToApi(formData: QuestFormValues): Partial<TaskResponseDto> {
+export function formToApi(formData: QuestFormValues): Partial<QuestWithDates> {
   return {
     // Core required fields
     title: formData.title,
-    type: [formData.type], // TaskResponseDto.type is array
+    type: formData.type,
     description: formData.description || undefined,
     group: formData.group,
     order_by: formData.order_by,
@@ -157,22 +142,24 @@ export function formToApi(formData: QuestFormValues): Partial<TaskResponseDto> {
 
     // Resources directly as ResourcesDto
     resource: formData.resources,
-    child: formData.child ? formData.child.map(convertFormChildToApi) : undefined,
+    child: formData.child ? formData.child.map(convertFormChildToApi) : [],
 
     // Iterator mapping for 7-day challenge (Form → API)
     iterator: formData.iterator
       ? {
           id: 0, // Will be assigned by API
           days: formData.iterator.days ?? 7,
-          reward_map: formData.iterator.reward_map.map(String), // TODO: Remove .map(String) when API uses number[] (P0)
+          reward_map: formData.iterator.reward_map,
           reward_max: Math.max(...formData.iterator.reward_map),
           reward: formData.iterator.reward_map[0] ?? 0,
           day: 0,
           iterator_reward: [],
-          iterator_resource: {}, // TODO: Remove when IteratorDto makes this optional (P1)
-          resource: {}, // TODO: Remove when IteratorDto makes this optional (P1)
         }
       : undefined,
+
+    // Date fields
+    started_at: formData.start,
+    completed_at: formData.end,
   };
 }
 
@@ -184,9 +171,8 @@ export function formToApi(formData: QuestFormValues): Partial<TaskResponseDto> {
  */
 function convertFormChildToApi(formChild: ChildFormValues): TaskResponseDto {
   return {
-    id: 0, // Will be assigned by API
     title: formChild.title,
-    type: [formChild.type] as TaskResponseDto['type'], // TODO: Remove array wrapping when API unifies type structures (P2)
+    type: formChild.type,
     description: formChild.description,
     group: formChild.group,
     order_by: formChild.order_by,
@@ -203,13 +189,14 @@ function convertFormChildToApi(formChild: ChildFormValues): TaskResponseDto {
     completed_at: undefined,
     iterable: false,
     // Include relevant resources for children
-    resources: formChild.resources
+    resource: formChild.resources
       ? {
           tweetId: formChild.resources.tweetId,
           username: formChild.resources.username,
         }
       : undefined,
     // Required fields for TaskResponseDto
+    id: 0, // Will be assigned by API
     blocking_task_id: 0,
     total_reward: 0,
     total_users: 0,
@@ -257,7 +244,7 @@ export function getDefaultFormValues(): QuestFormValues {
       tweetId: '',
       icon: '',
     },
-  } as QuestFormValues; // TODO: Remove casting when type compatibility improves (P2)
+  };
 }
 
 /**
@@ -266,12 +253,10 @@ export function getDefaultFormValues(): QuestFormValues {
  * TODO: Consider simplifying when Create/Update DTOs match TaskResponseDto structure (P2)
  * Currently needed for:
  * - Zod validation
- * - type: string → type: string[] conversion
- * - Iterator number[] → string[] conversion (temporary)
  * - Enum compatibility (CreateTaskDtoType vs TaskResponseDtoTypeItem)
  */
-export function validateAndConvertToApi(formData: unknown): Partial<TaskResponseDto> {
+export function validateAndConvertToApi(formData: unknown): Partial<QuestWithDates> {
+  // TODO: Replace unknown with proper type (P3)
   const validatedData = questFormSchema.parse(formData);
   return formToApi(validatedData as QuestFormValues); // TODO: Remove casting when Zod types align better (P2)
 }
-
