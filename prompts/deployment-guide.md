@@ -19,7 +19,6 @@ VITE_APP_BASE_URL=https://admin.yourdomain.com
 VITE_API_URL=https://api.yourdomain.com
 
 # Build Configuration
-PUBLIC_BASE=/admin/
 ```
 
 ### Security Checklist
@@ -31,45 +30,6 @@ PUBLIC_BASE=/admin/
 - [ ] Token lifetimes set appropriately
 - [ ] Security headers configured (CSP, HSTS, etc.)
 
-## GitHub Pages Deployment
-
-The project includes GitHub Actions workflow for automatic deployment:
-
-### Workflow Configuration
-
-```yaml
-# .github/workflows/pages.yml
-name: Deploy to GitHub Pages
-on:
-  push:
-    branches: [main]
-  workflow_dispatch:
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
-      - run: npm ci
-      - run: npm run typecheck
-      - run: npm run lint
-      - run: npm run build
-        env:
-          VITE_API_URL: "https://api.yourdomain.com"
-          VITE_APP_BASE_URL: "https://yourusername.github.io/admin/"
-          VITE_OIDC_AUTHORITY: "https://keycloak.yourdomain.com/realms/production"
-          VITE_OIDC_CLIENT_ID: "waitlist-api"
-          VITE_PUBLIC_BASE: "/admin/"
-```
-
-### GitHub Pages Setup
-
-1. Go to repository Settings → Pages
-2. Select "GitHub Actions" as source
-3. Configure environment variables in repository secrets
-4. Push to main branch to trigger deployment
 
 ## Keycloak Configuration
 
@@ -353,7 +313,6 @@ if (location.protocol !== 'https:' && location.hostname !== 'localhost') {
 
 - Configure server to handle SPA routing
 - Check base path configuration
-- Verify PUBLIC_BASE environment variable
 
 ### Debugging Production Issues
 

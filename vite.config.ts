@@ -7,11 +7,7 @@ import { tanstackRouter } from '@tanstack/router-plugin/vite';
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
 
-  // Use VITE_PUBLIC_BASE for GH Pages builds
-  const base = env.VITE_PUBLIC_BASE || '/admin/';
-
   return {
-    base,
     server: {
       port: 3000,
       proxy: {
