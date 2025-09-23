@@ -39,3 +39,23 @@ export const parseQuestSearch = (search: Record<string, unknown>) => ({
 });
 
 export type QuestSearch = ReturnType<typeof parseQuestSearch>;
+
+// Ensure all search parameters have valid defaults
+export function ensureValidQuestSearch(search: Partial<QuestSearch>): QuestSearch {
+  return {
+    search: search.search ?? defaultQuestSearch.search,
+    group: search.group ?? defaultQuestSearch.group,
+    type: search.type ?? defaultQuestSearch.type,
+    provider: search.provider ?? defaultQuestSearch.provider,
+    enabled: search.enabled ?? defaultQuestSearch.enabled,
+    page: search.page ?? defaultQuestSearch.page,
+    limit: search.limit ?? defaultQuestSearch.limit,
+    sort: search.sort ?? defaultQuestSearch.sort,
+    showForm: search.showForm ?? defaultQuestSearch.showForm,
+  };
+}
+
+// Create search params for navigation with optional overrides
+export function createQuestSearch(overrides: Partial<QuestSearch> = {}): QuestSearch {
+  return ensureValidQuestSearch(overrides);
+}

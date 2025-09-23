@@ -149,7 +149,9 @@ export const useCreateQuest = () => {
     mutationFn: async (data: Partial<TaskResponseDto>): Promise<TaskResponseDto> => {
       const apiData = validateAndConvertToApi(data);
       // validateAndConvertToApi returns TaskResponseDto structure but API expects CreateTaskDto
-      const result = await createTaskMutation.mutateAsync({ data: apiData as unknown as CreateTaskDto });
+      const result = await createTaskMutation.mutateAsync({
+        data: apiData as unknown as CreateTaskDto,
+      });
       return result;
     },
     onSuccess: () => {

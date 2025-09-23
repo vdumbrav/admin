@@ -490,21 +490,25 @@ MCP is configured via `mcp.json` in the project root for maximum compatibility. 
 #### Configured MCP Servers
 
 **UI & Styling:**
+
 - **shadcn/ui** - Official component registry with automatic installation
 - **Tailwind CSS** - AI-powered CSS generation and framework integration
 - **Radix UI Docs** - Complete Radix UI documentation access
 
 **Development Stack:**
+
 - **Vite (Blowback)** - Frontend development environment integration
 - **React Docs** - React 19 documentation and patterns
 - **TypeScript Docs** - TypeScript language documentation
 - **TanStack Docs** - Query, Router, and Table documentation
 
 **Form & Validation:**
+
 - **React Hook Form** - Form handling patterns and utilities
 - **Zod** - Schema validation and type generation
 
 **API & Tools:**
+
 - **OpenAPI** - Schema generation and API client tools (Orval integration)
 - **Filesystem** - File operations and project structure access
 - **GitHub/Git** - Repository management and version control
@@ -587,6 +591,7 @@ The MCP configuration works with any MCP-compatible AI platform:
 Use natural language with any MCP-compatible AI to:
 
 **Component Development:**
+
 ```
 "Add a data table component from shadcn"
 "Create a form using React Hook Form with Zod validation"
@@ -595,6 +600,7 @@ Use natural language with any MCP-compatible AI to:
 ```
 
 **API Integration:**
+
 ```
 "Generate API client from OpenAPI schema using Orval"
 "Create TanStack Query hooks for user management"
@@ -602,6 +608,7 @@ Use natural language with any MCP-compatible AI to:
 ```
 
 **Documentation & Learning:**
+
 ```
 "Show me React 19 patterns for this component"
 "Explain Radix UI accessibility features"
