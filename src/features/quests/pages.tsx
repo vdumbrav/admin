@@ -5,7 +5,8 @@ import { Main } from '@/components/layout/main';
 import { apiToForm, formToApi } from './adapters/form-api-adapter';
 import { useCreateQuest, useQuest, useUpdateQuest } from './api';
 import { PresetSelection } from './components/preset-selection';
-import type { Quest } from './data/types';
+import type { QuestWithDates } from './data/types';
+import { createQuestSearch } from './default-search';
 import { QuestForm } from './form';
 import { getPreset, type PresetId } from './presets';
 import type { QuestFormValues } from './types/form-types';
@@ -25,7 +26,7 @@ export const QuestCreatePage = () => {
     group: 'all',
     type: '',
     provider: '',
-    visible: '',
+    enabled: '',
     page: 1,
     limit: 20,
     sort: 'order_by:asc',
@@ -44,7 +45,10 @@ export const QuestCreatePage = () => {
                 <h2 className='text-2xl font-bold tracking-tight'>New Quest</h2>
                 <p className='text-muted-foreground'>Create a new quest without preset.</p>
               </div>
-              <Button variant='outline' onClick={() => void nav({ to: '/quests' })}>
+              <Button
+                variant='outline'
+                onClick={() => void nav({ to: '/quests', search: createQuestSearch() })}
+              >
                 Back to list
               </Button>
             </div>
@@ -52,7 +56,7 @@ export const QuestCreatePage = () => {
               onSubmit={async (v: QuestFormValues) => {
                 try {
                   const questData = formToApi(v);
-                  const withSchedule: Partial<Quest> = {
+                  const withSchedule: Partial<QuestWithDates> = {
                     ...questData,
                     started_at: v.start,
                     completed_at: v.end,
@@ -86,7 +90,7 @@ export const QuestEditPage = () => {
     group: 'all',
     type: '',
     provider: '',
-    visible: '',
+    enabled: '',
     page: 1,
     limit: 20,
     sort: 'order_by:asc',
@@ -112,7 +116,10 @@ export const QuestEditPage = () => {
             <h2 className='text-2xl font-bold tracking-tight'>Edit Quest #{id}</h2>
             <p className='text-muted-foreground'>Update quest properties.</p>
           </div>
-          <Button variant='outline' onClick={() => void nav({ to: '/quests' })}>
+          <Button
+            variant='outline'
+            onClick={() => void nav({ to: '/quests', search: createQuestSearch() })}
+          >
             Back to list
           </Button>
         </div>
@@ -124,7 +131,7 @@ export const QuestEditPage = () => {
           onSubmit={async (v: QuestFormValues) => {
             try {
               const questData = formToApi(v);
-              const withSchedule: Partial<Quest> = {
+              const withSchedule: Partial<QuestWithDates> = {
                 ...questData,
                 started_at: v.start,
                 completed_at: v.end,
@@ -136,7 +143,7 @@ export const QuestEditPage = () => {
               toast.error(e instanceof Error ? e.message : 'Failed to save');
             }
           }}
-          onCancel={() => void nav({ to: '/quests' })}
+          onCancel={() => void nav({ to: '/quests', search: createQuestSearch() })}
         />
       </Main>
     </>
@@ -152,7 +159,7 @@ export const QuestCreateWithPresetPage = () => {
     group: 'all',
     type: '',
     provider: '',
-    visible: '',
+    enabled: '',
     page: 1,
     limit: 20,
     sort: 'order_by:asc',
@@ -172,7 +179,10 @@ export const QuestCreateWithPresetPage = () => {
             </h2>
             <p className='text-muted-foreground'>{presetConfig.description}</p>
           </div>
-          <Button variant='outline' onClick={() => void nav({ to: '/quests' })}>
+          <Button
+            variant='outline'
+            onClick={() => void nav({ to: '/quests', search: createQuestSearch() })}
+          >
             Back to list
           </Button>
         </div>
@@ -181,7 +191,7 @@ export const QuestCreateWithPresetPage = () => {
           onSubmit={async (v: QuestFormValues) => {
             try {
               const questData = formToApi(v);
-              const withSchedule: Partial<Quest> = {
+              const withSchedule: Partial<QuestWithDates> = {
                 ...questData,
                 started_at: v.start,
                 completed_at: v.end,
@@ -193,7 +203,7 @@ export const QuestCreateWithPresetPage = () => {
               toast.error(e instanceof Error ? e.message : 'Failed to save');
             }
           }}
-          onCancel={() => void nav({ to: '/quests' })}
+          onCancel={() => void nav({ to: '/quests', search: createQuestSearch() })}
         />
       </Main>
     </>

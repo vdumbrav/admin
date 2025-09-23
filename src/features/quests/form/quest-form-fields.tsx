@@ -580,7 +580,9 @@ export function QuestFormFields({
                     onValueChange={field.onChange}
                     items={types}
                     placeholder='Select quest type'
-                    disabled={isFieldDisabled('type', fieldStates) || isFieldReadonly('type', fieldStates)}
+                    disabled={
+                      isFieldDisabled('type', fieldStates) || isFieldReadonly('type', fieldStates)
+                    }
                   />
                 </FormControl>
                 <FormMessage />

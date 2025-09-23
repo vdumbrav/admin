@@ -1,6 +1,7 @@
 import { useNavigate } from '@tanstack/react-router';
 import { Button } from '@/components/ui/button';
 import { SelectDropdown } from '@/components/select-dropdown';
+import { createQuestSearch } from '../default-search';
 import { listPresets } from '../presets';
 
 export const PresetSelection = () => {
@@ -20,12 +21,17 @@ export const PresetSelection = () => {
           </p>
         </div>
         <div className='flex gap-3'>
-          <Button variant='outline' onClick={() => void navigate({ to: '/quests' })}>
+          <Button
+            variant='outline'
+            onClick={() => void navigate({ to: '/quests', search: createQuestSearch() })}
+          >
             Back to list
           </Button>
           <Button
             variant='ghost'
-            onClick={() => void navigate({ to: '/quests/new', search: { showForm: true } })}
+            onClick={() =>
+              void navigate({ to: '/quests/new', search: createQuestSearch({ showForm: true }) })
+            }
           >
             Create without preset
           </Button>
@@ -42,7 +48,11 @@ export const PresetSelection = () => {
           placeholder='Select a preset'
           items={presetItems}
           onValueChange={(value) =>
-            void navigate({ to: '/quests/new/$preset', params: { preset: value } })
+            void navigate({
+              to: '/quests/new/$preset',
+              params: { preset: value },
+              search: createQuestSearch(),
+            })
           }
         />
         <p className='text-muted-foreground mt-2 text-sm' id='preset-help'>

@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { DataTableColumnHeader } from '@/components/table/data-table-column-header';
 import { useToggleEnabled } from '../api';
+import { getQuestEndDate, getQuestStartDate } from '../types/quest-with-dates';
 import { getBadgeClasses, getBadgeStyle, getBadgeVariant } from '../utils/badge-variants';
 import { formatDateDMY, formatNumberShort, formatXp } from '../utils/format';
 import { getProviderIcon } from '../utils/provider-icons';
@@ -173,7 +174,7 @@ export const getColumns = (isAdmin: boolean): ColumnDef<TaskResponseDto>[] => {
     // 10. New (check / –)
     {
       id: 'isNew',
-      accessorFn: (row) => row.resources?.isNew,
+      accessorFn: (row) => row.resource?.isNew,
       header: ({ column }) => <DataTableColumnHeader column={column} title='New' />,
       cell: ({ row }) =>
         row.getValue('isNew') ? (
@@ -198,7 +199,10 @@ export const getColumns = (isAdmin: boolean): ColumnDef<TaskResponseDto>[] => {
     {
       accessorKey: 'started_at',
       header: ({ column }) => <DataTableColumnHeader column={column} title='Start date' />,
-      cell: ({ row }) => formatDateDMY(row.original.started_at),
+      cell: ({ row }) => {
+        const date = getQuestStartDate(row.original);
+        return date ? formatDateDMY(date) : '–';
+      },
       size: 160,
       minSize: 160,
       maxSize: 160,
@@ -207,7 +211,10 @@ export const getColumns = (isAdmin: boolean): ColumnDef<TaskResponseDto>[] => {
     {
       accessorKey: 'completed_at',
       header: ({ column }) => <DataTableColumnHeader column={column} title='End date' />,
-      cell: ({ row }) => formatDateDMY(row.original.completed_at),
+      cell: ({ row }) => {
+        const date = getQuestEndDate(row.original);
+        return date ? formatDateDMY(date) : '–';
+      },
       size: 160,
       minSize: 160,
       maxSize: 160,

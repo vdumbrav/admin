@@ -11,7 +11,7 @@ import { SelectDropdown } from '@/components/select-dropdown';
 import type { Quest } from '../data/types';
 
 // Ограничиваем типы для Action with post
-type TaskType = Extract<Quest['type'][number], 'like' | 'share' | 'comment'>;
+type TaskType = Extract<Quest['type'], 'like' | 'share' | 'comment'>;
 
 interface TaskItem {
   title: string;
@@ -34,7 +34,7 @@ const taskTypes = [
 // Provider is readonly for action-with-post preset
 
 export const TasksEditor = () => {
-  const { control, setValue } = useFormContext<FormValues>();
+  const { control, setValue } = useFormContext(); // Remove type assertion to let TS infer from usage
   const { fields, append, remove, move } = useFieldArray({
     control,
     name: 'child',
@@ -187,7 +187,7 @@ const TaskRow = ({ id, index, remove, canRemove }: RowProps) => {
             <FormItem>
               <FormLabel>Type</FormLabel>
               <SelectDropdown
-                value={field.value}
+                value={field.value as string}
                 onValueChange={field.onChange}
                 placeholder='Select type'
                 items={taskTypes}

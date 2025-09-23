@@ -28,6 +28,7 @@ import {
 } from '@/components/ui/table';
 import { DataTablePagination } from '@/components/table/data-table-pagination';
 import { useQuests } from '../api';
+import { createQuestSearch } from '../default-search';
 import { useFilters } from '../hooks/use-filters';
 import { DataTableToolbar } from './data-table-toolbar';
 
@@ -211,7 +212,9 @@ export const QuestsDataTable = ({ columns, isAdmin }: DataTableProps) => {
                       <p>No quests yet</p>
                       {isAdmin && (
                         <Button asChild size='sm'>
-                          <Link to='/quests/new'>Create quest</Link>
+                          <Link to='/quests/new' search={() => createQuestSearch()}>
+                            Create quest
+                          </Link>
                         </Button>
                       )}
                     </div>

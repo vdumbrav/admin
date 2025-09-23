@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useRouter, useSearch } from '@tanstack/react-router';
-import type { QuestSearch } from '../default-search';
+import { ensureValidQuestSearch, type QuestSearch } from '../default-search';
 import { FiltersContext, type FiltersContextType } from '../hooks/use-filters';
 
 interface Props {
@@ -22,10 +22,7 @@ export function FiltersProvider({ children }: Props) {
     (updates: Partial<QuestSearch>) => {
       void router.navigate({
         to: '/quests',
-        search: (prev) => ({
-          ...prev,
-          ...updates,
-        }),
+        search: (prev) => ensureValidQuestSearch({ ...prev, ...updates }),
         replace: true,
       });
     },
