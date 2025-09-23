@@ -6,6 +6,115 @@
         "shadcn@latest",
         "mcp"
       ]
+    },
+    "tailwind": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "mcp-tailwind-gemini"
+      ]
+    },
+    "blowback": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "blowback-context"
+      ]
+    },
+    "react-hook-form": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@mcp-b/mcp-react-hook-form"
+      ]
+    },
+    "zod": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "zod-mcp-server"
+      ]
+    },
+    "radix-docs": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "docs-mcp-server"
+      ],
+      "env": {
+        "DOCS_URL": "https://docs.radix-ui.com"
+      }
+    },
+    "tanstack-docs": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "docs-mcp-server"
+      ],
+      "env": {
+        "DOCS_URL": "https://tanstack.com"
+      }
+    },
+    "react-docs": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "docs-mcp-server"
+      ],
+      "env": {
+        "DOCS_URL": "https://react.dev"
+      }
+    },
+    "typescript-docs": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "docs-mcp-server"
+      ],
+      "env": {
+        "DOCS_URL": "https://www.typescriptlang.org/docs"
+      }
+    },
+    "vite-docs": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "docs-mcp-server"
+      ],
+      "env": {
+        "DOCS_URL": "https://vitejs.dev"
+      }
+    },
+    "openapi": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@aws-amplify/openapi-mcp-server"
+      ]
+    },
+    "filesystem": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem"
+      ],
+      "env": {
+        "ROOT_PATH": "."
+      }
+    },
+    "github": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-github"
+      ]
+    },
+    "git": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "mcp-git-server"
+      ]
     }
   }
 }

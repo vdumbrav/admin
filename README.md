@@ -481,55 +481,37 @@ This admin panel features a sophisticated **preset-based quest creation system**
 
 ## 🤖 Working with MCP (Model Context Protocol)
 
-This project is configured with MCP support for enhanced AI-assisted development with Claude Code.
+This project is configured with MCP support for enhanced AI-assisted development across multiple AI platforms (Claude Code, Cursor, Continue, etc.).
 
 ### Setup
 
-MCP is already configured with `.mcp.json` and `components.json`. The shadcn MCP server provides:
+MCP is configured via `mcp.json` in the project root for maximum compatibility. The configuration includes servers for your entire tech stack:
 
-- Access to the official shadcn/ui component registry
-- Automatic component installation with dependencies
-- Integration with your existing project configuration
+#### Configured MCP Servers
 
-### Usage Examples
+**UI & Styling:**
+- **shadcn/ui** - Official component registry with automatic installation
+- **Tailwind CSS** - AI-powered CSS generation and framework integration
+- **Radix UI Docs** - Complete Radix UI documentation access
 
-You can use natural language with Claude Code to:
+**Development Stack:**
+- **Vite (Blowback)** - Frontend development environment integration
+- **React Docs** - React 19 documentation and patterns
+- **TypeScript Docs** - TypeScript language documentation
+- **TanStack Docs** - Query, Router, and Table documentation
 
-**Install Components:**
+**Form & Validation:**
+- **React Hook Form** - Form handling patterns and utilities
+- **Zod** - Schema validation and type generation
 
-```
-"Add a data table component from shadcn"
-"Install the calendar component"
-"Add form components for user registration"
-```
+**API & Tools:**
+- **OpenAPI** - Schema generation and API client tools (Orval integration)
+- **Filesystem** - File operations and project structure access
+- **GitHub/Git** - Repository management and version control
 
-**Browse Registry:**
+### Universal Configuration
 
-```
-"Show me all available shadcn components"
-"What navigation components are available?"
-"List components for data visualization"
-```
-
-**Create with Components:**
-
-```
-"Create a settings page using shadcn form components"
-"Build a dashboard with cards and tables from shadcn"
-"Add a contact form with proper validation"
-```
-
-### MCP Commands
-
-The MCP server supports these operations:
-
-- **`mcp://shadcn/list`** - List available components
-- **`mcp://shadcn/get/{name}`** - Get component details
-- **`mcp://shadcn/install/{name}`** - Install component with dependencies
-
-### Configuration Files
-
-**`.mcp.json`** - MCP server configuration:
+The MCP configuration works with any MCP-compatible AI platform:
 
 ```json
 {
@@ -537,28 +519,112 @@ The MCP server supports these operations:
     "shadcn": {
       "command": "npx",
       "args": ["shadcn@latest", "mcp"]
+    },
+    "tailwind": {
+      "command": "npx",
+      "args": ["-y", "mcp-tailwind-gemini"]
+    },
+    "react-hook-form": {
+      "command": "npx",
+      "args": ["-y", "@mcp-b/mcp-react-hook-form"]
+    },
+    "zod": {
+      "command": "npx",
+      "args": ["-y", "zod-mcp-server"]
+    },
+    "radix-docs": {
+      "command": "npx",
+      "args": ["-y", "docs-mcp-server"],
+      "env": { "DOCS_URL": "https://docs.radix-ui.com" }
+    },
+    "tanstack-docs": {
+      "command": "npx",
+      "args": ["-y", "docs-mcp-server"],
+      "env": { "DOCS_URL": "https://tanstack.com" }
+    },
+    "react-docs": {
+      "command": "npx",
+      "args": ["-y", "docs-mcp-server"],
+      "env": { "DOCS_URL": "https://react.dev" }
+    },
+    "typescript-docs": {
+      "command": "npx",
+      "args": ["-y", "docs-mcp-server"],
+      "env": { "DOCS_URL": "https://www.typescriptlang.org/docs" }
+    },
+    "vite-docs": {
+      "command": "npx",
+      "args": ["-y", "docs-mcp-server"],
+      "env": { "DOCS_URL": "https://vitejs.dev" }
+    },
+    "blowback": {
+      "command": "npx",
+      "args": ["-y", "blowback-context"]
+    },
+    "openapi": {
+      "command": "npx",
+      "args": ["-y", "@aws-amplify/openapi-mcp-server"]
+    },
+    "filesystem": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem"],
+      "env": { "ROOT_PATH": "." }
+    },
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"]
+    },
+    "git": {
+      "command": "npx",
+      "args": ["-y", "mcp-git-server"]
     }
   }
 }
 ```
 
-**`components.json`** - Registry configuration:
+### Usage Examples
 
-```json
-{
-  "registries": {
-    "@shadcn/ui": "https://ui.shadcn.com/r/{name}.json"
-  }
-}
+Use natural language with any MCP-compatible AI to:
+
+**Component Development:**
 ```
+"Add a data table component from shadcn"
+"Create a form using React Hook Form with Zod validation"
+"Build a dashboard with TanStack Query for data fetching"
+"Style this component with Tailwind CSS utilities"
+```
+
+**API Integration:**
+```
+"Generate API client from OpenAPI schema using Orval"
+"Create TanStack Query hooks for user management"
+"Add authentication to API requests"
+```
+
+**Documentation & Learning:**
+```
+"Show me React 19 patterns for this component"
+"Explain Radix UI accessibility features"
+"What are TypeScript best practices for this code?"
+"How to optimize Vite build for production?"
+```
+
+### Platform Compatibility
+
+This MCP configuration works with:
+
+- **Claude Code** - Native MCP support
+- **Cursor** - Via MCP protocol integration
+- **Continue** - With MCP server configuration
+- **Other IDEs** - Any editor with MCP support
 
 ### Benefits
 
-- **Faster Development:** Install components with a single AI prompt
-- **Consistent Styling:** All components follow your configured theme
-- **Dependency Management:** Automatic installation of required dependencies
-- **Type Safety:** Full TypeScript support maintained
-- **Documentation Integration:** AI understands component APIs and usage
+- **Unified Development:** Single configuration for all AI platforms
+- **Tech Stack Integration:** Direct access to documentation for your exact dependencies
+- **Automatic Installation:** Components and dependencies installed automatically
+- **Type Safety:** Full TypeScript support maintained across all integrations
+- **Version Consistency:** All tools use your project's exact package versions
 
 ## 📚 Documentation & Prompts
 
