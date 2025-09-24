@@ -599,8 +599,8 @@ export function QuestFormFields({
             render={({ field }) => (
               <FormItem className='flex flex-row items-center justify-between rounded-lg border p-4'>
                 <div className='space-y-0.5'>
-                  <FormLabel className='text-base'>Enabled</FormLabel>
-                  <FormDescription>Make this quest enabled for users</FormDescription>
+                  <FormLabel className='text-base'>Visible</FormLabel>
+                  <FormDescription>Make this quest visible for users</FormDescription>
                 </div>
                 <FormControl>
                   <Switch

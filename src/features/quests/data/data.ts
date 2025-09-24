@@ -91,11 +91,11 @@ export const providers = getAvailableApiProviders().map(
 
 /**
  * Enabled status dropdown options
- * For filtering quests by enabled/disabled status
+ * For filtering quests by visible/hidden status
  */
 export const enabledOptions = [
-  { value: 'true', label: 'Enabled' },
-  { value: 'false', label: 'Disabled' },
+  { value: 'true', label: 'Visible' },
+  { value: 'false', label: 'Hidden' },
 ];
 
 // ============================================================================
@@ -115,14 +115,14 @@ export function getGroupLabel(value: TaskResponseDtoGroup): string {
  * Get display label for a type value
  */
 export function getTypeLabel(value: WaitlistTasksResponseDtoTypeItem): string {
-  return TYPE_LABELS[value] || value; // TODO: Use ?? instead of || for better null handling (P3)
+  return TYPE_LABELS[value] ?? value;
 }
 
 /**
  * Get display label for a provider value
  */
 export function getProviderLabel(value: TaskResponseDtoProvider): string {
-  return PROVIDER_LABELS[value] || value; // TODO: Use ?? instead of || for better null handling (P3)
+  return PROVIDER_LABELS[value] ?? value;
 }
 
 /**
@@ -155,13 +155,8 @@ export function isApiGroup(value: string): value is TaskResponseDtoGroup {
 /**
  * Types that require specific providers
  *
- * TODO: Move to API configuration endpoint
- * Currently hardcoded but should be:
- * - GET /api/admin/quest-type-provider-requirements
- * - Configurable via admin panel
- * - Part of API documentation/schema
- *
- * Priority: P1 - Important for architecture quality
+ * This mapping defines which quest types are compatible with which providers.
+ * Currently hardcoded for simplicity - can be moved to API configuration later.
  */
 export const TYPE_PROVIDER_REQUIREMENTS: Partial<
   Record<WaitlistTasksResponseDtoTypeItem, TaskResponseDtoProvider[]>
@@ -191,5 +186,5 @@ export const TYPE_PROVIDER_REQUIREMENTS: Partial<
 export function getCompatibleProviders(
   type: WaitlistTasksResponseDtoTypeItem,
 ): TaskResponseDtoProvider[] {
-  return TYPE_PROVIDER_REQUIREMENTS[type] ?? getAvailableApiProviders(); // TODO: Replace with API call when endpoint implemented (P1)
+  return TYPE_PROVIDER_REQUIREMENTS[type] ?? getAvailableApiProviders();
 }

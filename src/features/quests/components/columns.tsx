@@ -7,7 +7,6 @@ import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { DataTableColumnHeader } from '@/components/table/data-table-column-header';
 import { useToggleEnabled } from '../api';
-import { getQuestEndDate, getQuestStartDate } from '../types/quest-with-dates';
 import { getBadgeClasses, getBadgeStyle, getBadgeVariant } from '../utils/badge-variants';
 import { formatDateDMY, formatNumberShort, formatXp } from '../utils/format';
 import { getProviderIcon } from '../utils/provider-icons';
@@ -16,12 +15,12 @@ import { DataTableRowActions } from './data-table-row-actions';
 const EnabledCell = ({ row, isAdmin }: { row: Row<TaskResponseDto>; isAdmin: boolean }) => {
   const toggle = useToggleEnabled();
   const enabled = row.getValue('enabled') !== false;
-  if (!isAdmin) return <span>{enabled ? 'Yes' : 'No'}</span>;
+  if (!isAdmin) return <span>{enabled ? 'Visible' : 'Hidden'}</span>;
   return (
     <Switch
       checked={enabled}
       onCheckedChange={(v) => toggle.mutate({ id: row.original.id, enabled: v })}
-      aria-label={`Toggle enabled status for ${String(row.original.title)}`}
+      aria-label={`Toggle visibility for ${String(row.original.title)}`}
     />
   );
 };
@@ -98,12 +97,12 @@ export const getColumns = (isAdmin: boolean): ColumnDef<TaskResponseDto>[] => {
       accessorKey: 'type',
       header: ({ column }) => <DataTableColumnHeader column={column} title='Type' />,
       cell: ({ row }) => {
-        const types = row.original.type;
-        return Array.isArray(types) ? types.join(', ') : String(types);
+        const type = row.original.type;
+        return String(type);
       },
       filterFn: (row, id, value: string[]) => {
-        const types = row.getValue(id);
-        return Array.isArray(types) ? types.some((type: string) => value.includes(type)) : false;
+        const type = row.getValue(id);
+        return value.includes(String(type));
       },
       size: 120,
       minSize: 120,
@@ -139,7 +138,7 @@ export const getColumns = (isAdmin: boolean): ColumnDef<TaskResponseDto>[] => {
     // 7. Enabled (switch)
     {
       accessorKey: 'enabled',
-      header: ({ column }) => <DataTableColumnHeader column={column} title='Enabled' />,
+      header: ({ column }) => <DataTableColumnHeader column={column} title='Visible' />,
       cell: (ctx) => <EnabledCell row={ctx.row} isAdmin={isAdmin} />,
       enableSorting: false,
       filterFn: (row, id, value: string | string[]) => {
@@ -200,7 +199,7 @@ export const getColumns = (isAdmin: boolean): ColumnDef<TaskResponseDto>[] => {
       accessorKey: 'started_at',
       header: ({ column }) => <DataTableColumnHeader column={column} title='Start date' />,
       cell: ({ row }) => {
-        const date = getQuestStartDate(row.original);
+        const date = row.original.started_at;
         return date ? formatDateDMY(date) : '–';
       },
       size: 160,
@@ -212,7 +211,7 @@ export const getColumns = (isAdmin: boolean): ColumnDef<TaskResponseDto>[] => {
       accessorKey: 'completed_at',
       header: ({ column }) => <DataTableColumnHeader column={column} title='End date' />,
       cell: ({ row }) => {
-        const date = getQuestEndDate(row.original);
+        const date = row.original.completed_at;
         return date ? formatDateDMY(date) : '–';
       },
       size: 160,

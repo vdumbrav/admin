@@ -56,13 +56,8 @@ export const DataTableToolbar = <TData,>({ table }: DataTableToolbarProps<TData>
     const counts = new Map<string, number>();
 
     allData.items.forEach((item) => {
-      if (Array.isArray(item.type)) {
-        item.type.forEach((t) => {
-          counts.set(t, (counts.get(t) ?? 0) + 1);
-        });
-      } else if (typeof item.type === 'string') {
-        counts.set(item.type, (counts.get(item.type) ?? 0) + 1);
-      }
+      const type = item.type;
+      counts.set(type, (counts.get(type) ?? 0) + 1);
     });
 
     return counts;
@@ -148,26 +143,26 @@ export const DataTableToolbar = <TData,>({ table }: DataTableToolbarProps<TData>
       <div className='flex flex-1 flex-col-reverse items-start gap-y-2 sm:flex-row sm:items-center sm:space-x-2'>
         <div className='flex gap-x-2'>
           <DataTableFacetedFilter
-            column={virtualGroupColumn as Column<unknown, unknown>}
+            column={virtualGroupColumn as Column<unknown, unknown>} // TODO: P2 - Create proper typed virtual column interface
             title='Group'
             options={groups}
             multiple={true}
           />
           <DataTableFacetedFilter
-            column={virtualTypeColumn as Column<unknown, unknown>}
+            column={virtualTypeColumn as Column<unknown, unknown>} // TODO: P2 - Create proper typed virtual column interface
             title='Type'
             options={types}
             multiple={true}
           />
           <DataTableFacetedFilter
-            column={virtualProviderColumn as Column<unknown, unknown>}
+            column={virtualProviderColumn as Column<unknown, unknown>} // TODO: P2 - Create proper typed virtual column interface
             title='Provider'
             options={providers}
             multiple={true}
           />
           <DataTableFacetedFilter
-            column={virtualEnabledColumn as Column<unknown, unknown>}
-            title='Enabled'
+            column={virtualEnabledColumn as Column<unknown, unknown>} // TODO: P2 - Create proper typed virtual column interface
+            title='Visible'
             options={enabledOptions}
             multiple={false}
           />

@@ -2,9 +2,6 @@ import type { TaskResponseDto } from '@/lib/api/generated/model';
 
 export { type TaskResponseDto as Quest } from '@/lib/api/generated/model';
 
-// Temporary: Quest with date fields until API supports them
-export type { QuestWithDates } from '../types/quest-with-dates';
-
 export interface PopUp {
   name: string;
   button: string;

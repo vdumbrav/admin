@@ -50,13 +50,7 @@ export const useQuests = (query: QuestQuery) => {
         !query.type ||
         (() => {
           const selectedTypes = query.type.split(',').filter(Boolean);
-          // Handle both array and string types
-          if (Array.isArray(item.type)) {
-            return item.type.some((t: string) => selectedTypes.includes(t));
-          } else if (typeof item.type === 'string') {
-            return selectedTypes.includes(item.type);
-          }
-          return false;
+          return selectedTypes.includes(item.type);
         })();
 
       const matchesProvider =
@@ -148,7 +142,9 @@ export const useCreateQuest = () => {
   return useMutation({
     mutationFn: async (data: Partial<TaskResponseDto>): Promise<TaskResponseDto> => {
       const apiData = validateAndConvertToApi(data);
+      // TODO: CRITICAL - Remove double casting when CreateTaskDto matches TaskResponseDto structure
       // validateAndConvertToApi returns TaskResponseDto structure but API expects CreateTaskDto
+      // Priority: P1 - This indicates misaligned API types that should be unified
       const result = await createTaskMutation.mutateAsync({
         data: apiData as unknown as CreateTaskDto,
       });
@@ -172,7 +168,9 @@ export const useUpdateQuest = (id: number) => {
 
   return useMutation({
     mutationFn: async (data: Partial<TaskResponseDto>): Promise<TaskResponseDto> => {
+      // TODO: CRITICAL - Remove double casting when UpdateTaskDto matches TaskResponseDto structure
       // validateAndConvertToApi returns TaskResponseDto structure but API expects UpdateTaskDto
+      // Priority: P1 - This indicates misaligned API types that should be unified
       const apiData = validateAndConvertToApi(data) as unknown as UpdateTaskDto;
       const result = await updateTaskMutation.mutateAsync({ id, data: apiData });
       return result;
@@ -231,7 +229,7 @@ export const useToggleEnabled = () => {
     mutationFn: async (data: { id: number; enabled: boolean }): Promise<TaskResponseDto> => {
       const result = await updateTaskMutation.mutateAsync({
         id: data.id,
-        data: { enabled: data.enabled } as UpdateTaskDto,
+        data: { enabled: data.enabled } as UpdateTaskDto, // TODO: P2 - Create proper UpdateTaskDto partial for single field updates
       });
       return result;
     },
@@ -255,7 +253,7 @@ export const useTogglePinned = () => {
     mutationFn: async (data: { id: number; pinned: boolean }): Promise<TaskResponseDto> => {
       const result = await updateTaskMutation.mutateAsync({
         id: data.id,
-        data: { pinned: data.pinned } as UpdateTaskDto,
+        data: { pinned: data.pinned } as UpdateTaskDto, // TODO: P2 - Create proper UpdateTaskDto partial for single field updates
       });
       return result;
     },

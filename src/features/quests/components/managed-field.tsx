@@ -20,7 +20,7 @@ interface ManagedFieldProps {
 const getNestedValue = (obj: unknown, path: string): unknown => {
   return path.split('.').reduce((current, key) => {
     if (current && typeof current === 'object' && key in current) {
-      return (current as Record<string, unknown>)[key];
+      return (current as Record<string, unknown>)[key]; // TODO: P3 - Improve nested object access typing
     }
     return undefined;
   }, obj);

@@ -69,7 +69,7 @@ export function applyBusinessRules(
       case 'set totalReward from child.sum(reward)':
         if (values.child && Array.isArray(values.child)) {
           const totalReward = values.child.reduce((sum, task) => sum + (task.reward ?? 0), 0);
-          (result as QuestFormValues & { totalReward: number }).totalReward = totalReward;
+          (result as QuestFormValues & { totalReward: number }).totalReward = totalReward; // TODO: P2 - Create proper typed interface for calculated fields
         }
         break;
 

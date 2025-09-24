@@ -1,11 +1,11 @@
 import { Outlet, useNavigate, useParams, useRouterState, useSearch } from '@tanstack/react-router';
 import { toast } from 'sonner';
+import type { TaskResponseDto } from '@/lib/api/generated/model';
 import { Button } from '@/components/ui/button';
 import { Main } from '@/components/layout/main';
 import { apiToForm, formToApi } from './adapters/form-api-adapter';
 import { useCreateQuest, useQuest, useUpdateQuest } from './api';
 import { PresetSelection } from './components/preset-selection';
-import type { QuestWithDates } from './data/types';
 import { createQuestSearch } from './default-search';
 import { QuestForm } from './form';
 import { getPreset, type PresetId } from './presets';
@@ -56,7 +56,7 @@ export const QuestCreatePage = () => {
               onSubmit={async (v: QuestFormValues) => {
                 try {
                   const questData = formToApi(v);
-                  const withSchedule: Partial<QuestWithDates> = {
+                  const withSchedule: Partial<TaskResponseDto> = {
                     ...questData,
                     started_at: v.start,
                     completed_at: v.end,
@@ -131,7 +131,7 @@ export const QuestEditPage = () => {
           onSubmit={async (v: QuestFormValues) => {
             try {
               const questData = formToApi(v);
-              const withSchedule: Partial<QuestWithDates> = {
+              const withSchedule: Partial<TaskResponseDto> = {
                 ...questData,
                 started_at: v.start,
                 completed_at: v.end,
@@ -191,7 +191,7 @@ export const QuestCreateWithPresetPage = () => {
           onSubmit={async (v: QuestFormValues) => {
             try {
               const questData = formToApi(v);
-              const withSchedule: Partial<QuestWithDates> = {
+              const withSchedule: Partial<TaskResponseDto> = {
                 ...questData,
                 started_at: v.start,
                 completed_at: v.end,

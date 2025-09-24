@@ -20,7 +20,6 @@ import {
   DEFAULT_FORM_VALUES,
   type QuestFormValues,
 } from '../types/form-types';
-import type { QuestWithDates } from '../types/quest-with-dates';
 
 // ============================================================================
 // API to Form conversion
@@ -37,7 +36,7 @@ import type { QuestWithDates } from '../types/quest-with-dates';
  * @param apiData - Partial task data from API response
  * @returns Complete form values ready for react-hook-form
  */
-export function apiToForm(apiData: Partial<QuestWithDates>): QuestFormValues {
+export function apiToForm(apiData: Partial<TaskResponseDto>): QuestFormValues {
   return {
     // Core fields with fallback to defaults
     title: apiData.title ?? '',
@@ -73,17 +72,22 @@ export function apiToForm(apiData: Partial<QuestWithDates>): QuestFormValues {
 }
 
 /**
- * Extract child resources from API response
+ * Type guard to validate resource data structure
+ */
+function isValidResourceData(data: unknown): data is Record<string, unknown> {
+  return data !== null && typeof data === 'object';
+}
+
+/**
+ * Extract child resources from API response with proper type safety
  */
 function extractChildResources(resourceData: unknown): ChildFormValues['resources'] {
-  // TODO: Improve type safety for resourceData (P3)
-  if (!resourceData || typeof resourceData !== 'object') {
+  if (!isValidResourceData(resourceData)) {
     return undefined;
   }
 
-  const data = resourceData as Record<string, unknown>; // TODO: Replace with proper type validation (P3)
-  const tweetId = typeof data.tweetId === 'string' ? data.tweetId : undefined;
-  const username = typeof data.username === 'string' ? data.username : undefined;
+  const tweetId = typeof resourceData.tweetId === 'string' ? resourceData.tweetId : undefined;
+  const username = typeof resourceData.username === 'string' ? resourceData.username : undefined;
 
   return tweetId || username ? { tweetId, username } : undefined;
 }
@@ -120,7 +124,7 @@ function convertApiChildToForm(apiChild: TaskResponseDto): ChildFormValues {
  * @param formData - Complete form values from react-hook-form
  * @returns API-compatible task data for submission
  */
-export function formToApi(formData: QuestFormValues): Partial<QuestWithDates> {
+export function formToApi(formData: QuestFormValues): Partial<TaskResponseDto> {
   return {
     // Core required fields
     title: formData.title,
@@ -255,8 +259,7 @@ export function getDefaultFormValues(): QuestFormValues {
  * - Zod validation
  * - Enum compatibility (CreateTaskDtoType vs TaskResponseDtoTypeItem)
  */
-export function validateAndConvertToApi(formData: unknown): Partial<QuestWithDates> {
-  // TODO: Replace unknown with proper type (P3)
-  const validatedData = questFormSchema.parse(formData);
-  return formToApi(validatedData as QuestFormValues); // TODO: Remove casting when Zod types align better (P2)
+export function validateAndConvertToApi(formData: unknown): Partial<TaskResponseDto> {
+  const validatedData = questFormSchema.parse(formData) as QuestFormValues;
+  return formToApi(validatedData);
 }

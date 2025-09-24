@@ -25,6 +25,7 @@ export function getPresetFormValues(presetConfig?: PresetConfig): QuestFormValue
   const presetDefaults = presetConfig.defaults;
 
   // Deep merge preset defaults with form defaults
+  // TODO: P2 - Improve deepMerge typing to avoid casting QuestFormValues
   const mergedValues = deepMerge(
     defaultValues as Record<string, unknown>,
     presetDefaults as Partial<Record<string, unknown>>,
