@@ -11,6 +11,7 @@ ARG VITE_OIDC_SCOPE
 WORKDIR /app
 
 COPY package.json package-lock.json ./
+COPY src/lib ./src/
 RUN npm ci
 
 COPY . .
