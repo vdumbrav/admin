@@ -10,13 +10,20 @@ export const requireAuthBeforeLoad = async () => {
     user = await userManager.getUser();
   } catch (e) {
     logError('Auth guard failed to get user', e);
-    throw redirect({ to: '/sign-in', replace: true });
+    // Try silent refresh before redirecting
+    try {
+      user = await userManager.signinSilent();
+    } catch (silentError) {
+      logError('Silent renewal failed in auth guard', silentError);
+      throw redirect({ to: '/sign-in', replace: true });
+    }
   }
 
   if (!user) {
     throw redirect({ to: '/sign-in', replace: true });
   }
 
+  // Allow access if token is expired but user has valid roles - let the app handle token refresh
   const hasAccess = userHasAllowedRole(user);
 
   if (!hasAccess) {
@@ -35,7 +42,13 @@ export const requireAdminBeforeLoad = async () => {
     user = await userManager.getUser();
   } catch (e) {
     logError('Admin guard failed to get user', e);
-    throw redirect({ to: '/sign-in', replace: true });
+    // Try silent refresh before redirecting
+    try {
+      user = await userManager.signinSilent();
+    } catch (silentError) {
+      logError('Silent renewal failed in admin guard', silentError);
+      throw redirect({ to: '/sign-in', replace: true });
+    }
   }
 
   if (!userIsAdmin(user)) {

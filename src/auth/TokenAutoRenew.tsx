@@ -13,11 +13,13 @@ export function TokenAutoRenew() {
 
       console.warn('[TokenAutoRenew] Access token expired');
 
-      // Attempt silent renewal, but don't redirect on failure
-      auth.signinSilent().catch((error) => {
-        console.error('[TokenAutoRenew] Silent renewal failed:', error);
-        // Don't redirect to login, just log the error
-      });
+      // Attempt silent renewal only if no active navigation is happening
+      if (!auth.activeNavigator) {
+        auth.signinSilent().catch((error) => {
+          console.error('[TokenAutoRenew] Silent renewal failed:', error);
+          // Don't redirect to login, just log the error
+        });
+      }
     });
 
     return () => {

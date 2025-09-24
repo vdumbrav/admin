@@ -29,9 +29,9 @@ export function useAppAuth(): AuthResult {
       logError('Failed to refresh token silently', error);
     }
 
-    // If we can't get a token, the user needs to sign in again
-    logError('No valid access token available');
-    return undefined;
+    // If we can't get a token, return existing token instead of undefined to prevent logout
+    logError('No valid access token available, returning existing token');
+    return auth.user?.access_token;
   }, [auth]);
 
   const signoutRedirect = React.useCallback(() => {

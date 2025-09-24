@@ -20,13 +20,27 @@ const createApiClient = (): AxiosInstance => {
     throw new Error('API URL is not defined');
   }
 
-  return axios.create({
+  const client = axios.create({
     baseURL,
     timeout: 30000,
     // Don't set default Content-Type - let axios handle it automatically
     // For JSON: axios will set application/json
     // For FormData: axios will set multipart/form-data with boundary
   });
+
+  // Add response interceptor to handle 401 errors gracefully
+  client.interceptors.response.use(
+    (response) => response,
+    (error) => {
+      if (axios.isAxiosError(error) && error.response?.status === 401) {
+        console.warn('[API Client] 401 Unauthorized - token may be expired');
+        // Don't automatically logout, just log the warning
+      }
+      return Promise.reject(error);
+    },
+  );
+
+  return client;
 };
 
 export async function orvalMutator<TResponse>(
