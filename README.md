@@ -198,7 +198,7 @@ API generation is controlled by environment variables:
 VITE_SWAGGER_URL=https://waitlist.cedradev.xyz/api/api-tools/docs-json
 
 # Used by generated client
-VITE_API_URL=https://waitlist.cedradev.xyz/api
+VITE_API_URL=https://waitlist.cedradev.xyz
 ```
 
 ## 🛠️ Development
