@@ -60,7 +60,7 @@ export async function orvalMutator<TResponse>(
 
     const requestConfig: AxiosRequestConfig = {
       ...restConfig,
-      data: data as unknown,
+      data: data as unknown, // TODO: P3 - Improve typing for Axios data parameter (Orval limitation)
       headers: resolvedHeaders,
       signal: config.signal,
     };
