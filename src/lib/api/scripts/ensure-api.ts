@@ -1,7 +1,7 @@
 #!/usr/bin/env tsx
 import { existsSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { updateApi } from './update-api.js';
+import { updateApi } from './update-api';
 
 const PROJECT_ROOT = resolve(process.cwd());
 const GENERATED_DIR = resolve(PROJECT_ROOT, 'src/lib/api/generated');

@@ -1,0 +1,9 @@
+{
+  "extends": "../../../../tsconfig.node.json",
+  "compilerOptions": {
+    "moduleResolution": "Node",
+    "allowImportingTsExtensions": false,
+    "noEmit": true
+  },
+  "include": ["./**/*"]
+}
