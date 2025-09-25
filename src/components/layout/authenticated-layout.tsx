@@ -1,9 +1,9 @@
 import Cookies from 'js-cookie';
 import { Outlet } from '@tanstack/react-router';
-import { Menu } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { SearchProvider } from '@/context/search-context';
-import { SidebarProvider, SidebarTrigger, useSidebar } from '@/components/ui/sidebar';
+import { SidebarProvider, useSidebar } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/layout/app-sidebar';
 import SkipToMain from '@/components/skip-to-main';
 
@@ -11,54 +11,39 @@ interface Props {
   children?: React.ReactNode;
 }
 
-function MobileSidebarTrigger() {
+function MobileOverlay() {
+  const { state, isMobile, toggleSidebar } = useSidebar();
+
+  if (!isMobile || state !== 'expanded') return null;
+
   return (
-    <div className='fixed top-4 left-4 z-50 lg:hidden'>
-      <SidebarTrigger
-        variant='outline'
-        className='bg-background/80 backdrop-blur-sm'
-        aria-label='Toggle sidebar'
-      >
-        <Menu className='h-4 w-4' />
-      </SidebarTrigger>
-    </div>
+    <div
+      className='fixed inset-0 z-40 bg-black/10 backdrop-blur-xs'
+      onClick={toggleSidebar}
+      aria-label='Close sidebar'
+    />
   );
 }
 
-function CollapsedSidebarTrigger() {
-  const { state } = useSidebar();
-
-  if (state === 'expanded') return null;
-
-  return (
-    <div className='fixed bottom-4 left-4 z-50 hidden lg:block'>
-      <SidebarTrigger
-        variant='outline'
-        className='bg-background/80 shadow-lg backdrop-blur-sm'
-        aria-label='Open sidebar'
-      >
-        <Menu className='h-4 w-4' />
-      </SidebarTrigger>
-    </div>
-  );
-}
 
 export function AuthenticatedLayout({ children }: Props) {
-  const defaultOpen = Cookies.get('sidebar_state') !== 'false';
+  const isMobile = useIsMobile();
+  const defaultOpen = isMobile ? false : Cookies.get('sidebar_state') !== 'false';
   return (
     <SearchProvider>
       <SidebarProvider defaultOpen={defaultOpen}>
         <SkipToMain />
         <AppSidebar />
-        <MobileSidebarTrigger />
-        <CollapsedSidebarTrigger />
+        <MobileOverlay />
         <div
           id='content'
           className={cn(
-            'ml-auto w-full max-w-full',
-            'peer-data-[state=collapsed]:w-[calc(100%-var(--sidebar-width-icon)-1rem)]',
-            'peer-data-[state=expanded]:w-[calc(100%-var(--sidebar-width))]',
-            'sm:transition-[width] sm:duration-200 sm:ease-linear',
+            'w-full max-w-full',
+            'md:ml-auto',
+            'md:peer-data-[state=collapsed]:w-[calc(100%-var(--sidebar-width-icon))]',
+            'md:peer-data-[state=expanded]:w-[calc(100%-var(--sidebar-width))]',
+            'md:transition-[width] md:duration-200 md:ease-linear',
+            'ml-12 w-[calc(100%-3rem)]',
             'flex h-svh flex-col',
             'group-data-[scroll-locked=1]/body:h-full',
             'has-[main.fixed-main]:group-data-[scroll-locked=1]/body:h-svh',
