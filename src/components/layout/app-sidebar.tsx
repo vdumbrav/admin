@@ -1,5 +1,6 @@
 import React from 'react';
 import { IconMoon, IconPlus, IconSun } from '@tabler/icons-react';
+import { PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import { useAppAuth } from '@/auth/hooks';
 import { useTheme } from '@/context/theme-context';
 import {
@@ -18,7 +19,7 @@ import {
   SidebarMenuItem,
   SidebarRail,
   SidebarSeparator,
-  SidebarTrigger,
+  useSidebar,
 } from '@/components/ui/sidebar';
 import { NavGroup } from '@/components/layout/nav-group';
 import { NavUser } from '@/components/layout/nav-user';
@@ -28,6 +29,7 @@ import { sidebarData } from './data/sidebar-data';
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const auth = useAppAuth();
   const { theme, setTheme } = useTheme();
+  const { state, toggleSidebar } = useSidebar();
   const isAdmin = auth.isAdmin;
 
   const navGroups = React.useMemo(() => {
@@ -50,10 +52,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar collapsible='icon' variant='floating' {...props}>
       <SidebarHeader>
-        <div className='flex items-center justify-between'>
-          <TeamSwitcher teams={sidebarData.teams} />
-          <SidebarTrigger className='ml-auto' />
-        </div>
+        <TeamSwitcher teams={sidebarData.teams} />
       </SidebarHeader>
       <SidebarContent>
         {navGroups.map((props) => (
@@ -61,6 +60,34 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         ))}
       </SidebarContent>
       <SidebarFooter>
+        {/* Sidebar Toggle */}
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              size='lg'
+              className='w-full'
+              onClick={toggleSidebar}
+              aria-label={state === 'expanded' ? 'Collapse sidebar' : 'Expand sidebar'}
+            >
+              <div className='bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg'>
+                {state === 'expanded' ? (
+                  <PanelLeftClose className='size-4' />
+                ) : (
+                  <PanelLeftOpen className='size-4' />
+                )}
+              </div>
+              <div className='grid flex-1 text-left text-sm leading-tight'>
+                <span className='truncate font-semibold'>
+                  {state === 'expanded' ? 'Collapse' : 'Expand'} Sidebar
+                </span>
+                <span className='truncate text-xs'>Toggle navigation</span>
+              </div>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+
+        <SidebarSeparator />
+
         {/* Theme Switch */}
         <SidebarMenu>
           <SidebarMenuItem>
