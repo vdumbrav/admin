@@ -36,7 +36,7 @@ export function TokenAutoRenew() {
         });
       }).catch((error) => {
         console.error('[TokenAutoRenew] Silent renewal failed:', {
-          error: error.message || error,
+          error: error.message ?? error,
           errorName: error.name,
           user: auth.user?.profile?.sub,
           isAuthenticated: auth.isAuthenticated
