@@ -27,6 +27,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { DataTablePagination } from '@/components/table/data-table-pagination';
+import { TableLoadingRow } from '@/components/table/table-loading-row';
 import { useQuests } from '../api';
 import { createQuestSearch } from '../default-search';
 import { useFilters } from '../hooks/use-filters';
@@ -184,7 +185,12 @@ export const QuestsDataTable = ({ columns, isAdmin }: DataTableProps) => {
             ))}
           </TableHeader>
           <TableBody>
-            {isLoading ? null : table.getRowModel().rows.length ? (
+            {isLoading ? (
+              <TableLoadingRow
+                colSpan={memoColumns.length}
+                message='Loading quests...'
+              />
+            ) : table.getRowModel().rows.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
