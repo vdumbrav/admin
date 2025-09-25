@@ -26,17 +26,16 @@ export const useQuests = (query: QuestQuery) => {
     refetch,
   } = useAdminWaitlistTasksControllerGetWaitlistTasks();
 
-  const questsData = adminTasks;
-
   const processedData = useMemo((): QuestsResponse | undefined => {
-    if (!questsData) return undefined;
+    const questsData = adminTasks ?? [];
+    if (!Array.isArray(questsData)) return undefined;
 
     // Client-side filtering - no server-side filtering needed
     let filteredItems = questsData.filter((item: TaskResponseDto) => {
       const matchesSearch =
         !query.search ||
-        item.title.toLowerCase().includes(query.search.toLowerCase()) ||
-        item.description.toLowerCase().includes(query.search.toLowerCase()) ||
+        item.title?.toLowerCase().includes(query.search.toLowerCase()) ||
+        item.description?.toLowerCase().includes(query.search.toLowerCase()) ||
         false;
 
       const matchesGroup =
@@ -96,7 +95,7 @@ export const useQuests = (query: QuestQuery) => {
       items: paginatedItems,
       total: totalItems,
     };
-  }, [questsData, query]);
+  }, [adminTasks, query]);
 
   return {
     data: processedData,
@@ -116,8 +115,9 @@ export const useQuest = (id: number) => {
   } = useAdminWaitlistTasksControllerGetWaitlistTasks();
 
   const quest = useMemo(() => {
-    if (!adminTasks) return undefined;
-    return adminTasks.find((task) => task.id === id);
+    const questsData = adminTasks ?? [];
+    if (!Array.isArray(questsData)) return undefined;
+    return questsData.find((task) => task.id === id);
   }, [adminTasks, id]);
 
   return {
