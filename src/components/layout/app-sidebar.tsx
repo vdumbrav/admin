@@ -1,7 +1,7 @@
 import React from 'react';
 import { IconMoon, IconPlus, IconSun } from '@tabler/icons-react';
 import { useAppAuth } from '@/auth/hooks';
-import { PanelLeftClose, PanelLeftOpen } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { useTheme } from '@/context/theme-context';
 import {
   DropdownMenu,
@@ -17,7 +17,6 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarRail,
   SidebarSeparator,
   useSidebar,
 } from '@/components/ui/sidebar';
@@ -29,7 +28,7 @@ import { sidebarData } from './data/sidebar-data';
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const auth = useAppAuth();
   const { theme, setTheme } = useTheme();
-  const { state, toggleSidebar } = useSidebar();
+  const { toggleSidebar } = useSidebar();
   const isAdmin = auth.isAdmin;
 
   const navGroups = React.useMemo(() => {
@@ -60,34 +59,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         ))}
       </SidebarContent>
       <SidebarFooter>
-        {/* Sidebar Toggle */}
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton
-              size='lg'
-              className='w-full'
-              onClick={toggleSidebar}
-              aria-label={state === 'expanded' ? 'Collapse sidebar' : 'Expand sidebar'}
-            >
-              <div className='bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg'>
-                {state === 'expanded' ? (
-                  <PanelLeftClose className='size-4' />
-                ) : (
-                  <PanelLeftOpen className='size-4' />
-                )}
-              </div>
-              <div className='grid flex-1 text-left text-sm leading-tight'>
-                <span className='truncate font-semibold'>
-                  {state === 'expanded' ? 'Collapse' : 'Expand'} Sidebar
-                </span>
-                <span className='truncate text-xs'>Toggle navigation</span>
-              </div>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
-
-        <SidebarSeparator />
-
         {/* Theme Switch */}
         <SidebarMenu>
           <SidebarMenuItem>
@@ -135,8 +106,30 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
         {/* User Profile */}
         <NavUser />
+
+        <SidebarSeparator />
+
+        {/* Sidebar Toggle */}
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              size='lg'
+              className='w-full'
+              onClick={toggleSidebar}
+              aria-label='Collapse menu'
+            >
+              <div className='bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg'>
+                <ArrowLeft className='size-4' />
+              </div>
+              <div className='grid flex-1 text-left text-sm leading-tight'>
+                <span className='truncate font-semibold'>
+                  Collapse menu
+                </span>
+              </div>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
       </SidebarFooter>
-      <SidebarRail />
     </Sidebar>
   );
 }
