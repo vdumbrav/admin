@@ -1,5 +1,5 @@
 import { IconChecklist } from '@tabler/icons-react';
-import { Command } from 'lucide-react';
+import { CedraLogo } from '@/components/icons/cedra-logo';
 import { type SidebarData } from '../types';
 
 export const sidebarData: SidebarData = {
@@ -11,7 +11,7 @@ export const sidebarData: SidebarData = {
   teams: [
     {
       name: 'Waitlist Admin',
-      logo: Command,
+      logo: CedraLogo,
       plan: 'Internal',
     },
   ],
