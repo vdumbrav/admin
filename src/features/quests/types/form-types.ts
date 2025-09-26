@@ -99,8 +99,8 @@ export const DEFAULT_FORM_VALUES: Partial<QuestFormValues> = {
   uri: '', // Empty string instead of undefined for controlled input
   icon: '', // Empty string instead of undefined
   provider: undefined, // For controlled Select components
-  start: '', // Empty string for controlled input
-  end: '', // Empty string for controlled input
+  start: undefined, // No default start time
+  end: undefined, // No default end time
   resources: {
     ui: {
       button: '',

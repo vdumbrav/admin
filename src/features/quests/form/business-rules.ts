@@ -31,12 +31,6 @@ export function getPresetFormValues(presetConfig?: PresetConfig): QuestFormValue
     presetDefaults as Partial<Record<string, unknown>>,
   ) as QuestFormValues;
 
-  // Add start time only if not already set
-  if (!mergedValues.start) {
-    const now = new Date();
-    const startTime = new Date(now.getTime() + 60 * 60 * 1000); // +1 hour
-    mergedValues.start = startTime.toISOString();
-  }
 
   // Auto-set preset ID from preset config
   if (presetConfig?.id && typeof presetConfig.id === 'string') {

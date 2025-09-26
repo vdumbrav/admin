@@ -24,7 +24,7 @@ export function DatePicker({
     if (date) {
       return format(date, 'HH:mm');
     }
-    return '12:00';
+    return '00:00';
   });
 
   const handleDateSelect = (selectedDate: Date | undefined) => {
@@ -74,7 +74,9 @@ export function DatePicker({
               value={timeValue}
               onChange={(e) => handleTimeChange(e.target.value)}
               className='mt-1'
-              step='1'
+              step="60"
+              lang='en-GB'
+               inputmode="numeric" pattern="[0-2][0-9]:[0-5][0-9]" 
             />
           </div>
         </div>
