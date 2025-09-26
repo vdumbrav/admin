@@ -47,6 +47,7 @@ export interface QuestFormFieldsProps {
   presetConfig?: PresetConfig;
   onImageUpload: (file: File) => Promise<string>;
   connectGateWarnings: string[];
+  availableQuests?: { id: number; title: string; type: string[] }[];
 }
 
 // ============================================================================
@@ -59,6 +60,7 @@ export function QuestFormFields({
   presetConfig,
   onImageUpload,
   connectGateWarnings,
+  availableQuests = [],
 }: QuestFormFieldsProps) {
   const [showTweetEmbed, setShowTweetEmbed] = useState(false);
 
@@ -260,6 +262,35 @@ export function QuestFormFields({
           )}
         />
       )}
+
+      {/* Blocking Task Field */}
+      <FormField
+        control={form.control}
+        name='blocking_task'
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Blocking Task (Optional)</FormLabel>
+            <FormControl>
+              <SelectDropdown
+                items={availableQuests.map((quest) => ({
+                  value: quest.id.toString(),
+                  label: `${quest.title} (${quest.type.join(', ')})`,
+                }))}
+                placeholder='Select quest that must be completed first'
+                disabled={isFieldDisabled('blocking_task', fieldStates)}
+                value={field.value?.id?.toString() ?? ''}
+                onValueChange={(value) =>
+                  field.onChange(value === '' ? undefined : { id: parseInt(value) })
+                }
+              />
+            </FormControl>
+            <FormDescription>
+              Users must complete this quest before they can start the current quest
+            </FormDescription>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
 
       {/* Connect-specific Fields */}
       {presetConfig?.id === 'connect' && (

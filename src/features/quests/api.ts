@@ -142,11 +142,8 @@ export const useCreateQuest = () => {
   return useMutation({
     mutationFn: async (data: Partial<TaskResponseDto>): Promise<TaskResponseDto> => {
       const apiData = validateAndConvertToApi(data);
-      // TODO: CRITICAL - Remove double casting when CreateTaskDto matches TaskResponseDto structure
-      // validateAndConvertToApi returns TaskResponseDto structure but API expects CreateTaskDto
-      // Priority: P1 - This indicates misaligned API types that should be unified
       const result = await createTaskMutation.mutateAsync({
-        data: apiData as unknown as CreateTaskDto,
+        data: apiData as CreateTaskDto,
       });
       return result;
     },
@@ -168,10 +165,7 @@ export const useUpdateQuest = (id: number) => {
 
   return useMutation({
     mutationFn: async (data: Partial<TaskResponseDto>): Promise<TaskResponseDto> => {
-      // TODO: CRITICAL - Remove double casting when UpdateTaskDto matches TaskResponseDto structure
-      // validateAndConvertToApi returns TaskResponseDto structure but API expects UpdateTaskDto
-      // Priority: P1 - This indicates misaligned API types that should be unified
-      const apiData = validateAndConvertToApi(data) as unknown as UpdateTaskDto;
+      const apiData = validateAndConvertToApi(data) as UpdateTaskDto;
       const result = await updateTaskMutation.mutateAsync({ id, data: apiData });
       return result;
     },

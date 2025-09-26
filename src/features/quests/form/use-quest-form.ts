@@ -13,6 +13,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useAppAuth } from '@/auth/hooks';
 import { toast } from 'sonner';
+import { useAdminWaitlistTasksControllerGetWaitlistTasks } from '@/lib/api/generated/admin/admin';
 import { replaceObjectUrl } from '@/utils/object-url';
 import { uploadMedia } from '../api';
 import type { PresetConfig } from '../presets/types';
@@ -51,6 +52,7 @@ export interface UseQuestFormReturn {
 
   // Business logic
   connectGateWarnings: string[];
+  availableQuests: { id: number; title: string; type: string[] }[];
 }
 
 // ============================================================================
@@ -152,6 +154,17 @@ export function useQuestForm({
 
   // Validate provider dependencies - Join/Action quests need Connect quest first
   const { hasRequiredConnect } = useConnectGate(watchedValues.provider);
+
+  // Get available quests for blocking_task selection
+  const { data: allQuests } = useAdminWaitlistTasksControllerGetWaitlistTasks();
+  const availableQuests = useMemo(() => {
+    if (!allQuests) return [];
+    return allQuests.map((quest) => ({
+      id: quest.id,
+      title: quest.title,
+      type: [quest.type], // Wrap single type in array for consistency
+    }));
+  }, [allQuests]);
 
   // Additional validation beyond Zod - preset-specific business rules
   const validateForm = (values: QuestFormValues) => {
@@ -293,5 +306,6 @@ export function useQuestForm({
     handleCancel,
     handleImageUpload,
     connectGateWarnings,
+    availableQuests,
   };
 }
