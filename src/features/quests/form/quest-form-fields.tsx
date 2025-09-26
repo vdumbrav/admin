@@ -4,6 +4,7 @@
  */
 import { useMemo, useState } from 'react';
 import type { UseFormReturn } from 'react-hook-form';
+import { Info } from 'lucide-react';
 import { type TaskResponseDtoProvider } from '@/lib/api/generated/model';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -320,11 +321,22 @@ export function QuestFormFields({
           name='resources.ui.pop-up.description'
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Popup description</FormLabel>
-              <FormDescription>
-                Description shown in quest popup modal. For join quests, Connect Gate auto-fills
-                additional connection requirements.
-              </FormDescription>
+              <div className='flex items-center gap-2'>
+                <FormLabel>Popup description</FormLabel>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Info className='text-muted-foreground h-4 w-4 cursor-help' />
+                    </TooltipTrigger>
+                    <TooltipContent className='max-w-[300px]'>
+                      <p>
+                        Description shown in quest popup modal. For join quests, Connect Gate
+                        auto-fills additional connection requirements.
+                      </p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
               <FormControl>
                 <Textarea
                   placeholder='Enter popup description'

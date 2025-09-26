@@ -69,9 +69,9 @@ export const QuestEditPage = () => {
   const { data } = useQuest(questId);
   const update = useUpdateQuest(questId);
   const nav = useNavigate({});
-  // Preserve search params when returning to list
-  const parentSearch = useQuestSearch({ from: '/_authenticated/quests/' });
-  const listSearch = parentSearch;
+  // Use current route's search instead of parent
+  const currentSearch = useQuestSearch({ from: '/_authenticated/quests/$id' });
+  const listSearch = currentSearch;
 
   if (!data) {
     return (

@@ -1,16 +1,10 @@
 import { useFormContext } from 'react-hook-form';
+import { Info } from 'lucide-react';
 // import { Badge } from '@/components/ui/badge';
 // import { Button } from '@/components/ui/button';
-import {
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form';
+import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-// import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import type { PresetConfig } from '../presets';
 
 interface ManagedFieldProps {
@@ -83,7 +77,21 @@ export const ManagedField = ({
       render={({ field }) => (
         <FormItem>
           <div className='flex items-center justify-between'>
-            <FormLabel>{label}</FormLabel>
+            <div className='flex items-center gap-2'>
+              <FormLabel>{label}</FormLabel>
+              {description && (
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Info className='text-muted-foreground h-4 w-4 cursor-help' />
+                    </TooltipTrigger>
+                    <TooltipContent className='max-w-[300px]'>
+                      <p>{description}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              )}
+            </div>
             <div className='flex items-center gap-2'>
               {/* {isDefaultedByPreset && (
                 <TooltipProvider>
@@ -117,7 +125,6 @@ export const ManagedField = ({
               )} */}
             </div>
           </div>
-          {description && <FormDescription>{description}</FormDescription>}
           <FormControl>
             <Input
               {...field}
