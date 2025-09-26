@@ -1,3 +1,5 @@
+import { UserRole } from '@/auth/roles';
+import { getRolesFromUser } from '@/auth/utils';
 import { type IdTokenClaims } from 'oidc-client-ts';
 
 /**
@@ -44,16 +46,42 @@ export const getUserShowName = (profile?: IdTokenClaims | null): string => {
 };
 
 /**
+ * Get user role for display
+ */
+export const getUserRole = (user?: { profile?: IdTokenClaims | null } | null): string => {
+  if (!user) return 'User';
+
+  const roles = getRolesFromUser(user as any);
+
+  if (roles.includes(UserRole.Admin) || roles.includes(UserRole.Administrator)) {
+    return 'Admin';
+  }
+  if (roles.includes(UserRole.Moderator) || roles.includes(UserRole.Support)) {
+    return 'Support';
+  }
+  if (roles.includes(UserRole.Client)) {
+    return 'Client';
+  }
+
+  return 'User';
+};
+
+/**
  * Get all user display data at once
  */
-export const getUserDisplayData = (profile?: IdTokenClaims | null) => {
+export const getUserDisplayData = (
+  profile?: IdTokenClaims | null,
+  user?: { profile?: IdTokenClaims | null } | null,
+) => {
   const showName = getUserShowName(profile);
   const userEmail = getUserEmail(profile);
   const userInitials = getUserInitials(showName, userEmail);
+  const role = getUserRole(user);
 
   return {
     showName,
     userEmail,
     userInitials,
+    role,
   };
 };

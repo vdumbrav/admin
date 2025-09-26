@@ -1,7 +1,7 @@
 import { useAppAuth } from '@/auth/hooks';
 import { ChevronsUpDown, LogOut } from 'lucide-react';
 import { getUserDisplayData } from '@/utils/user';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,7 +20,7 @@ import {
 export function NavUser() {
   const { isMobile } = useSidebar();
   const auth = useAppAuth();
-  const { showName, userEmail, userInitials } = getUserDisplayData(auth.user?.profile);
+  const { showName, userInitials, role } = getUserDisplayData(auth.user?.profile, auth.user);
 
   return (
     <SidebarMenu>
@@ -33,11 +33,12 @@ export function NavUser() {
               aria-label='Open profile menu'
             >
               <Avatar className='h-8 w-8 rounded-lg'>
+                <AvatarImage src={auth.user?.profile?.picture} />
                 <AvatarFallback className='rounded-lg'>{userInitials}</AvatarFallback>
               </Avatar>
               <div className='grid flex-1 text-left text-sm leading-tight'>
                 <span className='truncate font-semibold'>{showName}</span>
-                <span className='truncate text-xs'>{userEmail}</span>
+                <span className='truncate text-xs'>{role}</span>
               </div>
               <ChevronsUpDown className='ml-auto size-4' />
             </SidebarMenuButton>
@@ -51,11 +52,12 @@ export function NavUser() {
             <DropdownMenuLabel className='p-0 font-normal'>
               <div className='flex items-center gap-2 px-1 py-1.5 text-left text-sm'>
                 <Avatar className='h-8 w-8 rounded-lg'>
+                  <AvatarImage src={auth.user?.profile?.picture} />
                   <AvatarFallback className='rounded-lg'>{userInitials}</AvatarFallback>
                 </Avatar>
                 <div className='grid flex-1 text-left text-sm leading-tight'>
                   <span className='truncate font-semibold'>{showName}</span>
-                  <span className='truncate text-xs'>{userEmail}</span>
+                  <span className='truncate text-xs'>{role}</span>
                 </div>
               </div>
             </DropdownMenuLabel>
