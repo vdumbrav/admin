@@ -14,7 +14,6 @@ import {
   useReactTable,
   type VisibilityState,
 } from '@tanstack/react-table';
-import { Loader2 } from 'lucide-react';
 import type { TaskResponseDto } from '@/lib/api/generated/model';
 import { loadJSON, LS_TABLE_SIZE, LS_TABLE_SORT, LS_TABLE_VIS, saveJSON } from '@/utils/persist';
 import { Button } from '@/components/ui/button';
@@ -165,11 +164,6 @@ export const QuestsDataTable = ({ columns, isAdmin }: DataTableProps) => {
     <div className='space-y-4'>
       <DataTableToolbar table={table} />
       <div className='relative rounded-md border' aria-busy={isFetching}>
-        {isFetching && (
-          <div className='bg-background/50 absolute inset-0 z-10 flex items-center justify-center'>
-            <Loader2 className='text-muted-foreground h-5 w-5 animate-spin' aria-hidden />
-          </div>
-        )}
         <Table>
           <TableHeader className='bg-background sticky top-0 z-10'>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -185,7 +179,7 @@ export const QuestsDataTable = ({ columns, isAdmin }: DataTableProps) => {
             ))}
           </TableHeader>
           <TableBody>
-            {isLoading ? (
+            {isLoading || isFetching ? (
               <TableLoadingRow colSpan={memoColumns.length} message='Loading quests...' />
             ) : table.getRowModel().rows.length ? (
               table.getRowModel().rows.map((row) => (
