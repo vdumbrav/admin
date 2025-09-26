@@ -15,11 +15,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Get token using our smart logic
       const token = await getAccessToken();
 
-      console.log('[AuthProvider] API request with token:', {
-        hasToken: !!token,
-        tokenStart: token?.substring(0, 10),
-      });
-
       // Add auth header if token is available
       if (token) {
         config.headers = {
@@ -27,7 +22,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           Authorization: `Bearer ${token}`,
         };
       } else {
-        console.warn('[AuthProvider] No token available, skipping API request');
         // Throw error to prevent request without token
         throw new Error('No valid token available');
       }
