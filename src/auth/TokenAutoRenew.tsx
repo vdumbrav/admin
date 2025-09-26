@@ -29,11 +29,15 @@ export function TokenAutoRenew() {
       console.log('[TokenAutoRenew] Attempting silent renewal...');
 
       // Attempt silent renewal - let the app handle failures gracefully
-      auth.signinSilent().then((user) => {
-        console.log('[TokenAutoRenew] Silent renewal successful', {
-          user: user?.profile?.sub,
-          newExpiry: user?.expires_at ? new Date(user.expires_at * 1000).toISOString() : 'unknown'
-        });
+      auth.signinSilent().then((renewedUser) => {
+        if (renewedUser) {
+          console.log('[TokenAutoRenew] Silent renewal successful', {
+            user: renewedUser.profile?.sub,
+            newExpiry: renewedUser.expires_at ? new Date(renewedUser.expires_at * 1000).toISOString() : 'unknown',
+            tokenExpired: renewedUser.expired
+          });
+          // The renewed user is automatically set in the auth context by react-oidc-context
+        }
       }).catch((error) => {
         console.error('[TokenAutoRenew] Silent renewal failed:', {
           error: error.message ?? error,
@@ -56,8 +60,8 @@ export function TokenAutoRenew() {
 
     return () => {
       console.log('[TokenAutoRenew] Cleaning up token auto-renewal');
-      handleTokenExpired();
-      handleTokenExpiring();
+      handleTokenExpired?.();
+      handleTokenExpiring?.();
     };
   }, [auth]);
 
