@@ -6,6 +6,7 @@ import { useMemo, useState } from 'react';
 import type { UseFormReturn } from 'react-hook-form';
 import { type TaskResponseDtoProvider } from '@/lib/api/generated/model';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
   FormControl,
@@ -362,7 +363,7 @@ export function QuestFormFields({
             control={form.control}
             name='web'
             render={({ field }) => (
-              <FormItem className='flex flex-row items-center space-y-0 space-x-3'>
+              <FormItem className='flex flex-row items-center space-y-0 space-x-2'>
                 <FormControl>
                   <Checkbox checked={field.value} onCheckedChange={field.onChange} />
                 </FormControl>
@@ -670,29 +671,46 @@ export function QuestFormFields({
           />
         )}
 
-        {/* Enabled Field */}
-        {isFieldVisible('enabled', fieldStates) && (
-          <FormField
-            control={form.control}
-            name='enabled'
-            render={({ field }) => (
-              <FormItem className='flex flex-row items-center space-y-0 space-x-3'>
-                <FormControl>
-                  <Switch
-                    checked={Boolean(field.value)}
-                    onCheckedChange={field.onChange}
-                    disabled={isFieldDisabled('enabled', fieldStates)}
-                    className='scale-125'
-                  />
-                </FormControl>
-                <div className='space-y-1 leading-none'>
-                  <FormLabel>Set Visible</FormLabel>
-                </div>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        )}
+        {/* Set Visible and Actions Row */}
+        <div className='flex items-center justify-between'>
+          {/* Set Visible - Left side */}
+          {isFieldVisible('enabled', fieldStates) && (
+            <FormField
+              control={form.control}
+              name='enabled'
+              render={({ field }) => (
+                <FormItem className='flex flex-row items-center space-y-0 space-x-3'>
+                  <FormControl>
+                    <Switch
+                      checked={Boolean(field.value)}
+                      onCheckedChange={field.onChange}
+                      disabled={isFieldDisabled('enabled', fieldStates)}
+                      className='scale-125'
+                    />
+                  </FormControl>
+                  <div className='space-y-1 leading-none'>
+                    <FormLabel>Set Visible</FormLabel>
+                  </div>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
+
+          {/* Actions - Right side */}
+          <div className='flex gap-2'>
+            <Button variant='outline' type='button' onClick={() => form.reset()}>
+              Reset
+            </Button>
+            <Button variant='outline' type='button' onClick={() => window.history.back()}>
+              Cancel
+            </Button>
+            <Button type='submit' disabled={form.formState.isSubmitting}>
+              {form.formState.isSubmitting && <span className='mr-2'>⏳</span>}
+              Save
+            </Button>
+          </div>
+        </div>
 
         {/* Button Text - Only editable for Explore preset */}
         {presetConfig?.id === 'explore' && (

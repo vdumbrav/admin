@@ -5,7 +5,6 @@
 import { useState } from 'react';
 import { Form } from '@/components/ui/form';
 import { ConfirmDialog } from '@/components/confirm-dialog';
-import { FormActions } from '../components/form-actions';
 import type { PresetConfig } from '../presets/types';
 import type { QuestFormValues } from '../types/form-types';
 import { QuestFormFields } from './quest-form-fields';
@@ -43,7 +42,6 @@ export function QuestFormContainer({
   const {
     form,
     fieldStates,
-    isDirty,
     handleSubmit,
     handleCancel,
     handleImageUpload,
@@ -61,10 +59,6 @@ export function QuestFormContainer({
   // ============================================================================
 
   const [confirmOpen, setConfirmOpen] = useState(false);
-  const requestCancel = () => {
-    if (isDirty) setConfirmOpen(true);
-    else handleCancel();
-  };
 
   // ============================================================================
   // Render
@@ -92,14 +86,6 @@ export function QuestFormContainer({
           </div>
         </form>
       </Form>
-
-      {/* Form Actions */}
-      <FormActions
-        onSubmit={() => void handleSubmit()}
-        onCancel={requestCancel}
-        onReset={() => form.reset()}
-        isSubmitting={form.formState.isSubmitting}
-      />
 
       <ConfirmDialog
         open={confirmOpen}
