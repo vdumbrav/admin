@@ -27,7 +27,7 @@ export const oidcConfig: AuthProviderProps = {
   response_type: 'code',
   scope,
   automaticSilentRenew: true,
-  monitorSession: false,
+  monitorSession: true,
   includeIdTokenInSilentRenew: true,
   revokeTokensOnSignout: true,
   accessTokenExpiringNotificationTimeInSeconds: 60,

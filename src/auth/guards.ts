@@ -7,7 +7,10 @@ import { getRolesFromUser, userHasAllowedRole, userIsAdmin } from './utils';
 export const requireAuthBeforeLoad = async () => {
   let user;
   try {
+    // Force fresh user data from storage to get latest token state
+    await userManager.clearStaleState();
     user = await userManager.getUser();
+
     console.log('[AuthGuard] User check:', {
       hasUser: !!user,
       userId: user?.profile?.sub,
@@ -59,6 +62,8 @@ export const requireAdminBeforeLoad = async () => {
   let user;
   try {
     console.log('[AdminGuard] Attempting to get user from userManager');
+    // Force fresh user data from storage to get latest token state
+    await userManager.clearStaleState();
     user = await userManager.getUser();
     console.log('[AdminGuard] User retrieved:', {
       hasUser: !!user,
