@@ -131,52 +131,72 @@ function convertApiChildToForm(apiChild: TaskResponseDto): ChildFormValues {
  * @returns API-compatible task data for submission
  */
 export function formToApi(formData: QuestFormValues): Partial<TaskResponseDto> {
-  return {
+  // Helper function to filter out empty values
+  const filterEmptyValues = (obj: Record<string, unknown>): Record<string, unknown> => {
+    const result: Record<string, unknown> = {};
+    for (const [key, value] of Object.entries(obj)) {
+      if (value !== '' && value !== null && value !== undefined) {
+        if (typeof value === 'object' && value !== null) {
+          const filtered = filterEmptyValues(value as Record<string, unknown>);
+          if (Object.keys(filtered).length > 0) {
+            result[key] = filtered;
+          }
+        } else {
+          result[key] = value;
+        }
+      }
+    }
+    return result;
+  };
+
+  const baseData = {
     // Core required fields
     title: formData.title,
     type: formData.type,
     description: formData.description || undefined,
     group: formData.group,
-    order_by: formData.order_by,
-
-    // Optional fields
-    provider: formData.provider,
-    uri: formData.uri,
     reward: formData.reward,
     enabled: formData.enabled,
-    preset: formData.preset ?? undefined,
-    blocking_task: formData.blocking_task,
     web: formData.web ?? true, // Default web enabled for admin-created tasks
     twa: formData.twa ?? false, // Default TWA disabled for admin-created tasks
     pinned: formData.pinned ?? false, // Default not pinned
+    level: 1, // Required field for CreateTaskDto - form doesn't have this field
 
-    // Resources with icon included
-    resource:
-      (formData.resources ?? formData.icon)
-        ? {
-            ...formData.resources,
-            icon: formData.icon ?? formData.resources?.icon,
-          }
-        : undefined,
-    child: formData.child ? formData.child.map(convertFormChildToApi) : [],
+    // Optional fields - only include if not empty
+    ...(formData.provider && { provider: formData.provider }),
+    ...(formData.uri && { uri: formData.uri }),
+    ...(formData.blocking_task && { blocking_task: formData.blocking_task }),
 
-    // Iterator mapping for 7-day challenge (Form → API)
-    iterator: formData.iterator
-      ? {
-          id: 0, // Will be assigned by API
-          days: formData.iterator.days ?? 7,
-          reward_map: formData.iterator.reward_map,
-          reward_max: Math.max(...formData.iterator.reward_map),
-          reward: formData.iterator.reward_map[0] ?? 0,
-          day: 0,
-          iterator_reward: [],
-        }
-      : undefined,
+    // Resources with icon included - only if there's actual data
+    ...(((formData.resources && Object.values(formData.resources).some(val => val !== '' && val !== undefined)) || formData.icon) && {
+      resource: filterEmptyValues({
+        ...formData.resources,
+        icon: formData.icon ?? formData.resources?.icon,
+      })
+    }),
 
-    // Date fields
-    started_at: formData.start,
-    completed_at: formData.end,
+    // Child tasks - only if there are actual children
+    ...(formData.child && formData.child.length > 0 && { child: formData.child.map(convertFormChildToApi) }),
+
+    // Iterator mapping for 7-day challenge (Form → API) - only if present
+    ...(formData.iterator && {
+      iterator: {
+        id: 0, // Will be assigned by API
+        days: formData.iterator.days ?? 7,
+        reward_map: formData.iterator.reward_map,
+        reward_max: Math.max(...formData.iterator.reward_map),
+        reward: formData.iterator.reward_map[0] ?? 0,
+        day: 0,
+        iterator_reward: [],
+      }
+    }),
+
+    // Date fields - only if not empty
+    ...(formData.start && { started_at: formData.start }),
+    ...(formData.end && { completed_at: formData.end }),
   };
+
+  return baseData;
 }
 
 /**
@@ -199,7 +219,7 @@ function convertFormChildToApi(formChild: ChildFormValues): TaskResponseDto {
     twa: false,
     pinned: false,
     child: [],
-    level: 0,
+    level: 1,
     blocking_task: { id: 0, title: '' }, // BlockingTaskDto structure
     started_at: undefined,
     completed_at: undefined,
