@@ -48,12 +48,12 @@ const formResourcesSchema = z
 // Child quest schema for multi-step quests
 
 const childFormSchema = z.object({
-  title: z.string(),
+  title: z.string().optional().default(''),
   description: z.string().optional(),
   type: childTypeSchema,
-  group: questGroupSchema,
+  group: questGroupSchema.default('social'),
   provider: providerSchema,
-  reward: z.number().optional(),
+  reward: z.number().min(0, 'Reward must be greater than 0').optional().default(0),
   order_by: z.number(),
   resources: z
     .object({
@@ -207,18 +207,18 @@ export const buildQuestFormSchema = (presetId?: string) =>
         }
       }
 
-      if (presetId === 'action-with-post') {
+      if (val.provider === 'twitter' && val.type !== 'multiple') {
         if (!val.resources?.username) {
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
-            message: 'Username is required for Action with Post preset',
+            message: 'Username is required for Twitter provider',
             path: ['resources', 'username'],
           });
         }
         if (!val.resources?.tweetId) {
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
-            message: 'Tweet ID is required for Action with Post preset',
+            message: 'Tweet ID is required for Twitter provider',
             path: ['resources', 'tweetId'],
           });
         }

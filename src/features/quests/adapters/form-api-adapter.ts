@@ -61,7 +61,7 @@ export function apiToForm(apiData: Partial<TaskResponseDto>): QuestFormValues {
           icon: undefined, // Remove icon from resources to avoid duplication
         }
       : DEFAULT_FORM_VALUES.resources,
-    child: apiData.child ? apiData.child.map(convertApiChildToForm) : undefined,
+    child: apiData.child ? apiData.child.map(convertApiChildToForm) : [],
 
     // Schedule mapping for edit mode
     start: apiData.started_at ?? undefined,

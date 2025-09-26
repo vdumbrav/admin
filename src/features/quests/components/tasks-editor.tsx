@@ -1,23 +1,30 @@
 import { useEffect, useRef } from 'react';
-import { useFieldArray, useFormContext } from 'react-hook-form';
+import { useFieldArray, useFormContext, useWatch } from 'react-hook-form';
 import { DndContext, type DragEndEvent } from '@dnd-kit/core';
 import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { Button } from '@/components/ui/button';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { NoWheelNumber } from '@/components/no-wheel-number';
 import { SelectDropdown } from '@/components/select-dropdown';
 import type { Quest } from '../data/types';
+import { TwitterPreview } from './twitter-preview';
 
 // Ограничиваем типы для Action with post
 type TaskType = Extract<Quest['type'], 'like' | 'share' | 'comment'>;
 
 interface TaskItem {
   title: string;
+  description?: string;
   type: TaskType;
   reward?: number;
   order_by: number;
+  resources?: {
+    username?: string;
+    tweetId?: string;
+  };
 }
 
 interface FormValues {
@@ -85,9 +92,15 @@ export const TasksEditor = () => {
           onClick={() =>
             append({
               title: '',
+              description: '',
               type: 'like',
+              group: 'social',
               order_by: fields.length,
               reward: 0,
+              resources: {
+                username: '',
+                tweetId: '',
+              },
             })
           }
           disabled={!canAddMore}
@@ -179,6 +192,20 @@ const TaskRow = ({ id, index, remove, canRemove }: RowProps) => {
         )}
       />
 
+      <FormField
+        control={control}
+        name={`child.${index}.description`}
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Description</FormLabel>
+            <FormControl>
+              <Textarea {...field} placeholder='Enter task description' rows={2} />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
       <div className='grid gap-4 sm:grid-cols-2'>
         <FormField
           control={control}
@@ -201,14 +228,14 @@ const TaskRow = ({ id, index, remove, canRemove }: RowProps) => {
           name={`child.${index}.reward`}
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Reward</FormLabel>
+              <FormLabel>Reward, XP</FormLabel>
               <FormControl>
                 <NoWheelNumber
                   {...field}
-                  value={field.value ?? ''}
+                  value={field.value ?? 0}
                   onChange={(e) =>
                     field.onChange(
-                      Number.isNaN(e.target.valueAsNumber) ? undefined : e.target.valueAsNumber,
+                      Number.isNaN(e.target.valueAsNumber) ? 0 : e.target.valueAsNumber,
                     )
                   }
                   min={0}
@@ -221,7 +248,70 @@ const TaskRow = ({ id, index, remove, canRemove }: RowProps) => {
         />
       </div>
 
-      {/* Twitter fields are global for action-with-post preset */}
+      {/* Twitter fields for this task */}
+      <div className='grid gap-4 sm:grid-cols-2'>
+        <FormField
+          control={control}
+          name={`child.${index}.resources.username`}
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Twitter Username</FormLabel>
+              <FormControl>
+                <Input {...field} placeholder='Enter username (without @)' />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={control}
+          name={`child.${index}.resources.tweetId`}
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Tweet URL or ID</FormLabel>
+              <FormControl>
+                <Input
+                  {...field}
+                  placeholder='Tweet ID or URL'
+                  onChange={(e) => {
+                    const raw = e.target.value.trim();
+                    // Extract ID from URL if provided
+                    const urlMatch = /status\/(\d{19,20})/.exec(raw);
+                    const digits = raw.replace(/\D/g, '');
+                    const id = urlMatch?.[1] ?? digits;
+                    field.onChange(id);
+                  }}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
+
+      {/* Twitter Preview for this child task */}
+      <ChildTwitterPreview index={index} />
+    </div>
+  );
+};
+
+// Child Twitter Preview Component for individual tasks
+const ChildTwitterPreview = ({ index }: { index: number }) => {
+  const { control } = useFormContext();
+  const username = useWatch({ control, name: `child.${index}.resources.username` });
+  const tweetId = useWatch({ control, name: `child.${index}.resources.tweetId` });
+
+  // Check if we have twitter data to preview
+  const hasTwitterData = !!(username && tweetId);
+
+  if (!hasTwitterData) {
+    return null;
+  }
+
+  // Create a form context wrapper for TwitterPreview
+  return (
+    <div className='mt-4'>
+      <TwitterPreview username={username} tweetId={tweetId} />
     </div>
   );
 };

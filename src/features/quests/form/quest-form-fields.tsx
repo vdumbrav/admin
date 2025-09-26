@@ -77,7 +77,7 @@ export function QuestFormFields({
 
   // Filter providers based on current type
   const availableProviders = useMemo(() => {
-    if (currentType === undefined) return providers;
+    if (!currentType) return providers;
 
     const compatibleProviders = getCompatibleProviders(currentType);
     return providers.filter((provider) =>
@@ -336,6 +336,82 @@ export function QuestFormFields({
         />
       )}
 
+      {/* Twitter Username and Tweet ID - for specific presets only, not for multiple type */}
+      {currentType !== 'multiple' &&
+        (presetConfig?.id === 'action-with-post' ||
+          (presetConfig && ['connect', 'join'].includes(presetConfig.id))) && (
+          <>
+            {/* Username Field */}
+            {isFieldVisible('username', fieldStates) && (
+              <FormField
+                control={form.control}
+                name='resources.username'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Twitter Username</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder='Enter username (without @)'
+                        disabled={isFieldDisabled('username', fieldStates)}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormDescription>Twitter username without the @ symbol</FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
+
+            {/* Tweet ID Field */}
+            {isFieldVisible('tweetId', fieldStates) && (
+              <FormField
+                control={form.control}
+                name='resources.tweetId'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Tweet URL or ID</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder='https://x.com/user/status/123… or just the ID'
+                        disabled={isFieldDisabled('tweetId', fieldStates)}
+                        value={field.value ?? ''}
+                        onChange={(e) => {
+                          const raw = e.target.value.trim();
+                          // Only digits allowed in the final value
+                          const urlMatch = /status\/(\d{19,20})/.exec(raw);
+                          const digits = raw.replace(/\D/g, '');
+                          const id = urlMatch?.[1] ?? digits;
+                          field.onChange(id);
+                          // Immediate feedback only if invalid after processing
+                          if (id && !/^\d{19,20}$/.test(id)) {
+                            form.setError('resources.tweetId' as never, {
+                              type: 'custom',
+                              message: 'Enter a valid Tweet ID (19–20 digits) or tweet URL',
+                            });
+                          } else {
+                            form.clearErrors('resources.tweetId' as never);
+                          }
+                        }}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      Tweet ID auto-extracted from URL (only digits kept)
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
+          </>
+        )}
+
+      {/* Child Tasks Section for Multiple Type */}
+      {currentType === 'multiple' && isFieldVisible('tasks', fieldStates) && <TasksEditor />}
+
+      {/* Total Reward Display (only for multiple/iterable quests, but not for seven-day-challenge) */}
+      {presetConfig?.id !== 'seven-day-challenge' && totalRewardDisplay}
+
       {/* Daily Rewards Editor for 7-Day Challenge */}
       {presetConfig?.id === 'seven-day-challenge' &&
         isFieldVisible('dailyRewards', fieldStates) && <DailyRewardsEditor />}
@@ -572,81 +648,14 @@ export function QuestFormFields({
         ) : null;
       })()}
 
-      {/* Twitter-specific Fields */}
+      {/* Twitter Preview (only if username and tweetId exist) */}
+      {form.watch('resources.username') && form.watch('resources.tweetId') && <TwitterPreview />}
+
+      {/* Twitter-specific Fields - only for children, not in main form */}
+
+      {/* Tweet Embed Toggle */}
       {presetConfig?.id === 'action-with-post' && (
         <>
-          {/* Username Field */}
-          {isFieldVisible('username', fieldStates) && (
-            <FormField
-              control={form.control}
-              name='resources.username'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Twitter Username</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder='Enter username (without @)'
-                      disabled={isFieldDisabled('username', fieldStates)}
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormDescription>Twitter username without the @ symbol</FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          )}
-
-          {/* Tweet ID Field */}
-          {isFieldVisible('tweetId', fieldStates) && (
-            <FormField
-              control={form.control}
-              name='resources.tweetId'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Tweet URL or ID</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder='https://x.com/user/status/123… or just the ID'
-                      disabled={isFieldDisabled('tweetId', fieldStates)}
-                      value={field.value ?? ''}
-                      onChange={(e) => {
-                        const raw = e.target.value.trim();
-                        // Only digits allowed in the final value
-                        const urlMatch = /status\/(\d{19,20})/.exec(raw);
-                        const digits = raw.replace(/\D/g, '');
-                        const id = urlMatch?.[1] ?? digits;
-                        field.onChange(id);
-                        // Immediate feedback only if invalid after processing
-                        if (id && !/^\d{19,20}$/.test(id)) {
-                          form.setError('resources.tweetId' as never, {
-                            type: 'custom',
-                            message: 'Enter a valid Tweet ID (19–20 digits) or tweet URL',
-                          });
-                        } else {
-                          form.clearErrors('resources.tweetId' as never);
-                        }
-                      }}
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    Tweet ID auto-extracted from URL (only digits kept)
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          )}
-
-          {/* Twitter Preview */}
-          {form.watch('resources.username') && form.watch('resources.tweetId') && (
-            <TwitterPreview />
-          )}
-
-          {/* Tasks Editor */}
-          {isFieldVisible('tasks', fieldStates) && <TasksEditor />}
-
-          {/* Tweet Embed Toggle */}
           <div className='flex items-center space-x-2'>
             <Switch
               id='show-tweet-embed'
@@ -671,9 +680,6 @@ export function QuestFormFields({
       )}
 
       {/* Universal Fields */}
-
-      {/* Total Reward Display (only for multiple/iterable quests, but not for seven-day-challenge) */}
-      {presetConfig?.id !== 'seven-day-challenge' && totalRewardDisplay}
 
       {/* Connect Gate Warnings */}
       {connectGateWarnings.length > 0 && (

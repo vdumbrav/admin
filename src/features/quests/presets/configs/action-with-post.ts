@@ -5,7 +5,8 @@ export const actionWithPostPresetConfig: PresetConfig = {
   name: 'Action with post',
 
   fieldVisibility: {
-    group: 'visible', // social OR partner
+    type: 'readonly', // Always 'multiple'
+    group: 'readonly', // Always 'social'
     provider: 'readonly', // Always 'twitter'
     uri: 'hidden', // Not used for this type
     reward: 'hidden', // Use totalReward instead
@@ -20,6 +21,7 @@ export const actionWithPostPresetConfig: PresetConfig = {
 
   defaults: {
     type: 'multiple',
+    group: 'social',
     provider: 'twitter',
     resources: {
       ui: {

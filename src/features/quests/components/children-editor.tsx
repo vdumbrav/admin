@@ -170,7 +170,7 @@ const ChildRow = ({ id, index, remove }: RowProps) => {
           name={`child.${index}.reward`}
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Reward</FormLabel>
+              <FormLabel>Reward, XP</FormLabel>
               <FormControl>
                 <NoWheelNumber
                   {...field}
@@ -196,7 +196,7 @@ const ChildRow = ({ id, index, remove }: RowProps) => {
             name={`child.${index}.resources.tweetId`}
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Tweet ID</FormLabel>
+                <FormLabel>Tweet URL or ID</FormLabel>
                 <FormControl>
                   <Input
                     {...field}
@@ -213,7 +213,7 @@ const ChildRow = ({ id, index, remove }: RowProps) => {
             name={`child.${index}.resources.username`}
             render={({ field }) => (
               <FormItem>
-                <FormLabel> Username</FormLabel>
+                <FormLabel>Twitter Username</FormLabel>
                 <FormControl>
                   <Input
                     {...field}

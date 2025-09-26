@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
 import { Spinner } from '@radix-ui/themes';
+import { Eye, EyeOff } from 'lucide-react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
 
 interface FormValues {
   resources?: {
@@ -66,12 +69,25 @@ interface TwitterPreviewState {
   } | null;
 }
 
-export const TwitterPreview = () => {
+interface TwitterPreviewProps {
+  username?: string;
+  tweetId?: string;
+}
+
+export const TwitterPreview = ({
+  username: propsUsername,
+  tweetId: propsTweetId,
+}: TwitterPreviewProps = {}) => {
   const { control } = useFormContext<FormValues>();
-  const username = useWatch({ control, name: 'resources.username' });
-  const tweetId = useWatch({ control, name: 'resources.tweetId' });
+  const formUsername = useWatch({ control, name: 'resources.username' });
+  const formTweetId = useWatch({ control, name: 'resources.tweetId' });
+
+  // Use props if provided, otherwise fall back to form values
+  const username = propsUsername ?? formUsername;
+  const tweetId = propsTweetId ?? formTweetId;
 
   const [previews, setPreviews] = useState<Record<string, TwitterPreviewState>>({});
+  const [showPreview, setShowPreview] = useState(true);
 
   // Check if we have twitter data to preview
   const hasTwitterData = !!(username && tweetId);
@@ -132,90 +148,123 @@ export const TwitterPreview = () => {
 
   return (
     <div className='space-y-4'>
-      <div>
-        <h3 className='text-sm font-medium'>Twitter Preview</h3>
-        <p className='text-muted-foreground text-xs'>
-          Preview of tweet @{username}/{tweetId} (mock data)
-        </p>
+      <div className='flex items-center justify-between'>
+        <div>
+          <h3 className='text-sm font-medium'>Twitter Preview</h3>
+          <p className='text-muted-foreground text-xs'>
+            Preview of tweet @{username}/{tweetId} (mock data)
+          </p>
+        </div>
+        <Button
+          type='button'
+          variant='ghost'
+          size='sm'
+          onClick={() => setShowPreview(!showPreview)}
+          className='flex items-center gap-2'
+        >
+          {showPreview ? <EyeOff className='h-4 w-4' /> : <Eye className='h-4 w-4' />}
+          {showPreview ? 'Hide' : 'Show'}
+        </Button>
       </div>
 
-      <div className='space-y-4'>
-        <div className='rounded-md border p-4'>
-          <div className='mb-2 flex items-center justify-between'>
-            <span className='text-muted-foreground text-xs font-medium'>
-              Username: @{username} • Tweet ID: {tweetId}
-            </span>
+      {showPreview && (
+        <div className='space-y-4'>
+          <div className='rounded-md border p-4'>
+            <div className='mb-2 flex items-center justify-between'>
+              <span className='text-muted-foreground text-xs font-medium'>
+                Username: @{username} • Tweet ID: {tweetId}
+              </span>
+              {/* eslint-disable-next-line @typescript-eslint/no-unnecessary-condition */}
+              {previews[tweetId]?.loading && (
+                <div className='text-muted-foreground flex items-center gap-1 text-xs'>
+                  <Spinner size='1' />
+                  Loading...
+                </div>
+              )}
+            </div>
+
             {/* eslint-disable-next-line @typescript-eslint/no-unnecessary-condition */}
             {previews[tweetId]?.loading && (
-              <div className='text-muted-foreground flex items-center gap-1 text-xs'>
-                <Spinner size='1' />
-                Loading...
+              <div className='bg-muted flex h-32 items-center justify-center rounded-md'>
+                <div className='text-muted-foreground flex items-center gap-2 text-sm'>
+                  <Spinner size='2' />
+                  Fetching tweet preview...
+                </div>
+              </div>
+            )}
+
+            {/* eslint-disable-next-line @typescript-eslint/no-unnecessary-condition */}
+            {previews[tweetId]?.error && (
+              <div className='rounded-md border bg-white p-4'>
+                <div className='flex items-start gap-3'>
+                  <Avatar className='h-10 w-10'>
+                    <AvatarFallback>
+                      <span className='text-sm'>🐦</span>
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className='flex-1'>
+                    <div className='flex items-center gap-2'>
+                      <span className='font-semibold text-gray-500'>Tweet Preview</span>
+                      <span className='text-muted-foreground'>@{username}</span>
+                    </div>
+                    <div className='mt-2 text-sm text-gray-500'>
+                      Tweet not available for preview. Link will work in live version.
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* eslint-disable-next-line @typescript-eslint/no-unnecessary-condition */}
+            {previews[tweetId]?.tweetData && (
+              <div className='rounded-md border bg-white p-4'>
+                <div className='flex items-start gap-3'>
+                  <Avatar className='h-10 w-10'>
+                    <AvatarImage
+                      src={previews[tweetId].tweetData.author.profile_image_url}
+                      alt={previews[tweetId].tweetData.author.name}
+                    />
+                    <AvatarFallback>
+                      {previews[tweetId].tweetData.author.name.charAt(0).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className='flex-1'>
+                    <div className='flex items-center gap-2'>
+                      <span className='font-semibold'>
+                        {previews[tweetId].tweetData.author.name}
+                      </span>
+                      <span className='text-muted-foreground'>
+                        @{previews[tweetId].tweetData.author.username}
+                      </span>
+                      <span className='text-muted-foreground'>·</span>
+                      <span className='text-muted-foreground text-sm'>
+                        {new Date(previews[tweetId].tweetData.created_at).toLocaleDateString()}
+                      </span>
+                    </div>
+                    <div className='mt-2 text-sm whitespace-pre-wrap'>
+                      {previews[tweetId].tweetData.text}
+                    </div>
+                    <div className='text-muted-foreground mt-3 flex gap-6 text-sm'>
+                      <span>💬 {previews[tweetId].tweetData.public_metrics.reply_count}</span>
+                      <span>🔄 {previews[tweetId].tweetData.public_metrics.retweet_count}</span>
+                      <span>❤️ {previews[tweetId].tweetData.public_metrics.like_count}</span>
+                      <span>🔗 {previews[tweetId].tweetData.public_metrics.quote_count}</span>
+                    </div>
+                  </div>
+                </div>
               </div>
             )}
           </div>
 
-          {/* eslint-disable-next-line @typescript-eslint/no-unnecessary-condition */}
-          {previews[tweetId]?.loading && (
-            <div className='bg-muted flex h-32 items-center justify-center rounded-md'>
-              <div className='text-muted-foreground flex items-center gap-2 text-sm'>
-                <Spinner size='2' />
-                Fetching tweet preview...
-              </div>
+          <div className='rounded-md border border-blue-200 bg-blue-50 p-3 text-sm text-blue-800'>
+            <div className='font-medium'>Mock Preview</div>
+            <div className='mt-1 text-xs text-blue-600'>
+              This is a mock preview for development. Available mock tweet IDs: 1234567890,
+              9876543210
             </div>
-          )}
-
-          {/* eslint-disable-next-line @typescript-eslint/no-unnecessary-condition */}
-          {previews[tweetId]?.error && (
-            <div className='rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-800'>
-              {previews[tweetId].error}
-              <div className='mt-1 text-xs text-red-600'>
-                Try using one of these mock tweet IDs: 1234567890, 9876543210
-              </div>
-            </div>
-          )}
-
-          {/* eslint-disable-next-line @typescript-eslint/no-unnecessary-condition */}
-          {previews[tweetId]?.tweetData && (
-            <div className='rounded-md border bg-white p-4'>
-              <div className='flex items-start gap-3'>
-                <img
-                  src={previews[tweetId].tweetData.author.profile_image_url}
-                  alt={previews[tweetId].tweetData.author.name}
-                  className='h-10 w-10 rounded-full'
-                />
-                <div className='flex-1'>
-                  <div className='flex items-center gap-2'>
-                    <span className='font-semibold'>{previews[tweetId].tweetData.author.name}</span>
-                    <span className='text-muted-foreground'>
-                      @{previews[tweetId].tweetData.author.username}
-                    </span>
-                    <span className='text-muted-foreground'>·</span>
-                    <span className='text-muted-foreground text-sm'>
-                      {new Date(previews[tweetId].tweetData.created_at).toLocaleDateString()}
-                    </span>
-                  </div>
-                  <div className='mt-2 text-sm whitespace-pre-wrap'>
-                    {previews[tweetId].tweetData.text}
-                  </div>
-                  <div className='text-muted-foreground mt-3 flex gap-6 text-sm'>
-                    <span>💬 {previews[tweetId].tweetData.public_metrics.reply_count}</span>
-                    <span>🔄 {previews[tweetId].tweetData.public_metrics.retweet_count}</span>
-                    <span>❤️ {previews[tweetId].tweetData.public_metrics.like_count}</span>
-                    <span>🔗 {previews[tweetId].tweetData.public_metrics.quote_count}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
+          </div>
         </div>
-      </div>
-
-      <div className='rounded-md border border-blue-200 bg-blue-50 p-3 text-sm text-blue-800'>
-        <div className='font-medium'>Mock Preview</div>
-        <div className='mt-1 text-xs text-blue-600'>
-          This is a mock preview for development. Available mock tweet IDs: 1234567890, 9876543210
-        </div>
-      </div>
+      )}
     </div>
   );
 };

@@ -177,7 +177,7 @@ export function useQuestForm({
       }
     }
 
-    if (presetConfig?.id === 'action-with-post') {
+    if (values.provider === 'twitter' && values.type !== 'multiple') {
       if (!values.resources?.username) {
         errors['resources.username'] = 'Username is required';
       }

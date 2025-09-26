@@ -149,6 +149,11 @@ export function applyBusinessRules(
   // Calculate total reward for multi-task quests
   if (updatedValues.child && updatedValues.child.length > 0) {
     updatedValues.totalReward = calculateTotalReward(updatedValues.child);
+
+    // For action-with-post preset, sync reward field with totalReward
+    if (presetConfig?.id === 'action-with-post') {
+      updatedValues.reward = updatedValues.totalReward;
+    }
   }
 
   // Calculate total reward for 7-day challenge
