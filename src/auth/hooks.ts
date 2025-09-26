@@ -8,6 +8,17 @@ import { getRolesFromUser } from './utils';
 
 export function useAppAuth(): AuthResult {
   const auth = useAuth();
+
+  console.log('[useAppAuth] Auth state:', {
+    isAuthenticated: auth.isAuthenticated,
+    isLoading: auth.isLoading,
+    userExpired: auth.user?.expired,
+    userExpiresAt: auth.user?.expires_at
+      ? new Date(auth.user.expires_at * 1000).toISOString()
+      : 'unknown',
+    activeNavigator: auth.activeNavigator,
+  });
+
   const roles = React.useMemo(() => {
     return auth.user ? getRolesFromUser(auth.user) : [];
   }, [auth.user]);
@@ -53,8 +64,23 @@ export function useAppAuth(): AuthResult {
     return auth.user ? hasSupportRoleFromUser(auth.user) : false;
   }, [auth.user]);
 
+  // Enhanced isAuthenticated logic like cedra-front
+  const hasStoredOIDCUser = React.useMemo(() => {
+    if (typeof window === 'undefined') return false;
+    const storedUserKey = `oidc.user:${auth.settings.authority}:${auth.settings.client_id}`;
+    return Boolean(localStorage.getItem(storedUserKey));
+  }, [auth.settings]);
+
+  const isUserAuthenticated = auth.isAuthenticated || hasStoredOIDCUser;
+
+  console.log('[useAppAuth] Enhanced auth logic:', {
+    originalIsAuthenticated: auth.isAuthenticated,
+    hasStoredOIDCUser,
+    finalIsAuthenticated: isUserAuthenticated,
+  });
+
   return {
-    isAuthenticated: auth.isAuthenticated,
+    isAuthenticated: isUserAuthenticated,
     isLoading: auth.isLoading,
     user: auth.user,
     signinRedirect: () => {
