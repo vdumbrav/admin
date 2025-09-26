@@ -2,9 +2,7 @@ import type { PresetConfig } from '../types';
 
 export const joinPresetConfig: PresetConfig = {
   id: 'join',
-  name: 'Join',
-  description: 'Join social media channels, groups, or follow accounts',
-  icon: '👥',
+  name: 'Join/Follow Telegram, Discord, X',
 
   fieldVisibility: {
     group: 'visible', // social OR partner

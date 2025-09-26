@@ -2,9 +2,7 @@ import type { PresetConfig } from '../types';
 
 export const sevenDayChallengePresetConfig: PresetConfig = {
   id: 'seven-day-challenge',
-  name: '7-day challenge',
-  description: 'Daily rewards for consecutive engagement over 7 days',
-  icon: '📅',
+  name: 'Day challenge',
 
   fieldVisibility: {
     group: 'readonly', // Always 'daily'

@@ -52,8 +52,6 @@ export interface RewardCalculationConfig {
 export const presetConfigSchema = z.object({
   id: z.enum(['connect', 'join', 'action-with-post', 'seven-day-challenge', 'explore']),
   name: z.string().min(1),
-  description: z.string().min(1),
-  icon: z.string().min(1),
 
   // Form behavior
   fieldVisibility: z.record(z.string(), z.enum(['visible', 'hidden', 'readonly', 'conditional'])),

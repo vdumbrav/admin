@@ -3,8 +3,6 @@ import type { PresetConfig } from '../types';
 export const explorePresetConfig: PresetConfig = {
   id: 'explore',
   name: 'Explore',
-  description: 'Navigate to external resources and websites',
-  icon: '🔍',
 
   fieldVisibility: {
     group: 'visible', // Any group allowed

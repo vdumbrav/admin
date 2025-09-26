@@ -3,8 +3,6 @@ import type { PresetConfig } from '../types';
 export const actionWithPostPresetConfig: PresetConfig = {
   id: 'action-with-post',
   name: 'Action with post',
-  description: 'Engage with Twitter posts: like, comment, retweet',
-  icon: '💬',
 
   fieldVisibility: {
     group: 'visible', // social OR partner

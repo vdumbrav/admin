@@ -2,9 +2,7 @@ import type { PresetConfig } from '../types';
 
 export const connectPresetConfig: PresetConfig = {
   id: 'connect',
-  name: 'Connect',
-  description: 'Connect social media account to unlock platform-specific quests',
-  icon: '🔗',
+  name: 'Connect Telegram, Discord, X',
 
   fieldVisibility: {
     group: 'readonly', // Always 'social'
