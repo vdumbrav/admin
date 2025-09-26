@@ -167,16 +167,16 @@ export function applyBusinessRules(
     );
   }
 
-  // Auto-select block_id for quests that need Connect gate
+  // Auto-select blocking_task for quests that need Connect gate
   if (
     updatedValues.provider &&
     updatedValues.type !== 'connect' &&
-    !updatedValues.block_id &&
+    !updatedValues.blocking_task &&
     _findConnectQuestByProvider
   ) {
     const connectQuestId = _findConnectQuestByProvider(updatedValues.provider);
     if (connectQuestId) {
-      updatedValues.block_id = connectQuestId;
+      updatedValues.blocking_task = { id: connectQuestId };
     }
   }
 

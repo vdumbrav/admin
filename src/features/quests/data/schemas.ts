@@ -34,7 +34,7 @@ const resourcesSchema = z
     tweetId: z.string().optional(),
     username: z.string().optional(),
     isNew: z.boolean().optional(),
-    block_id: z.string().optional(),
+    blocking_task: z.object({ id: z.number() }).optional(),
     adsgram: z
       .object({
         type: z.string().optional(), // More flexible for API compatibility

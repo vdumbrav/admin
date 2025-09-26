@@ -40,7 +40,6 @@ const formResourcesSchema = z
     username: z.string().optional(),
     tweetId: z.string().optional(),
     isNew: z.boolean().optional(),
-    block_id: z.string().optional(),
     ui: formUIResourcesSchema.optional(),
     adsgram: formAdsgramResourcesSchema.optional(),
   })
@@ -95,7 +94,7 @@ const baseQuestFormShape = {
   pinned: z.boolean().optional(),
   icon: z.string().optional(),
   preset: z.string().optional().nullable(), // Auto-generated preset ID (can be null for old quests)
-  block_id: z.number().optional(), // Auto-selected parent quest ID
+  blocking_task: z.object({ id: z.number() }).optional(), // Parent quest that blocks this quest
   resources: formResourcesSchema,
   child: z.array(childFormSchema).optional(),
   start: z.string().optional(),

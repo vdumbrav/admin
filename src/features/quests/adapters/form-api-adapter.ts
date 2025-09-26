@@ -51,7 +51,7 @@ export function apiToForm(apiData: Partial<TaskResponseDto>): QuestFormValues {
     reward: apiData.reward,
     enabled: apiData.enabled ?? true,
     preset: apiData.preset,
-    block_id: apiData.blocking_task?.id,
+    blocking_task: apiData.blocking_task,
 
     // Resources directly from API
     resources: apiData.resource ?? DEFAULT_FORM_VALUES.resources,
@@ -139,7 +139,7 @@ export function formToApi(formData: QuestFormValues): Partial<TaskResponseDto> {
     reward: formData.reward,
     enabled: formData.enabled,
     preset: formData.preset ?? undefined,
-    blocking_task: formData.block_id ? { id: formData.block_id } : undefined,
+    blocking_task: formData.blocking_task,
     web: formData.web ?? true, // Default web enabled for admin-created tasks
     twa: formData.twa ?? false, // Default TWA disabled for admin-created tasks
     pinned: formData.pinned ?? false, // Default not pinned

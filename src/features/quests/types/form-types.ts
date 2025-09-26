@@ -62,7 +62,7 @@ export interface QuestFormValues {
   pinned?: boolean;
   icon?: string;
   preset?: string | null; // Auto-generated preset ID (can be null for old quests)
-  block_id?: number; // Auto-selected parent quest ID
+  blocking_task?: { id: number }; // Parent quest that blocks this quest
   resources?: ResourcesDto;
   child?: ChildFormValues[];
   start?: string;
