@@ -263,34 +263,14 @@ export function QuestFormFields({
         />
       )}
 
-      {/* Blocking Task Field */}
-      <FormField
-        control={form.control}
-        name='blocking_task'
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Blocking Task (Optional)</FormLabel>
-            <FormControl>
-              <SelectDropdown
-                items={availableQuests.map((quest) => ({
-                  value: quest.id.toString(),
-                  label: `${quest.title} (${quest.type.join(', ')})`,
-                }))}
-                placeholder='Select quest that must be completed first'
-                disabled={isFieldDisabled('blocking_task', fieldStates)}
-                value={field.value?.id?.toString() ?? ''}
-                onValueChange={(value) =>
-                  field.onChange(value === '' ? undefined : { id: parseInt(value) })
-                }
-              />
-            </FormControl>
-            <FormDescription>
-              Users must complete this quest before they can start the current quest
-            </FormDescription>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
+      {/* Blocking Task Info */}
+      {form.watch('blocking_task') && (
+        <div className="rounded-md border border-blue-200 bg-blue-50 p-3">
+          <p className="text-sm text-blue-700">
+            This quest will be linked to "{availableQuests.find(q => q.id === form.watch('blocking_task')?.id)?.title || 'Unknown'}" as a dependency
+          </p>
+        </div>
+      )}
 
       {/* Connect-specific Fields */}
       {presetConfig?.id === 'connect' && (
