@@ -6,7 +6,6 @@ import { UserRole } from './roles';
  * This is the single source of truth for role extraction
  */
 export const getRolesFromUser = (user: User | null | undefined): string[] => {
-
   if (!user?.access_token) {
     console.log('[AuthUtils] No access token found, returning empty roles');
     return [];
@@ -24,7 +23,6 @@ export const getRolesFromUser = (user: User | null | undefined): string[] => {
       resource_access?: Record<string, { roles?: string[] }>;
     };
 
-
     // Extract realm roles (primary source)
     const realmRoles: string[] = payload.realm_access?.roles ?? [];
 
@@ -40,7 +38,6 @@ export const getRolesFromUser = (user: User | null | undefined): string[] => {
     // Combine all roles
     const allRoles = [...realmRoles, ...clientRoles, ...accountRoles];
     const uniqueRoles = [...new Set(allRoles)];
-
 
     return uniqueRoles;
   } catch (error) {

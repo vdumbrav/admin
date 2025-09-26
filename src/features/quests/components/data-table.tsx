@@ -186,10 +186,7 @@ export const QuestsDataTable = ({ columns, isAdmin }: DataTableProps) => {
           </TableHeader>
           <TableBody>
             {isLoading ? (
-              <TableLoadingRow
-                colSpan={memoColumns.length}
-                message='Loading quests...'
-              />
+              <TableLoadingRow colSpan={memoColumns.length} message='Loading quests...' />
             ) : table.getRowModel().rows.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow

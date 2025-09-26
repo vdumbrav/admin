@@ -6,10 +6,7 @@ interface TableLoadingRowProps {
   message?: string;
 }
 
-export function TableLoadingRow({
-  colSpan,
-  message = 'Loading...'
-}: TableLoadingRowProps) {
+export function TableLoadingRow({ colSpan, message = 'Loading...' }: TableLoadingRowProps) {
   return (
     <TableRow>
       <TableCell colSpan={colSpan} className='h-24'>

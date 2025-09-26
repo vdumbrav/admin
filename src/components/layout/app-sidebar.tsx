@@ -1,7 +1,7 @@
 import React from 'react';
 import { IconMoon, IconPlus, IconSun } from '@tabler/icons-react';
-import { PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import { useAppAuth } from '@/auth/hooks';
+import { PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import { useTheme } from '@/context/theme-context';
 import {
   DropdownMenu,

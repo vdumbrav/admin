@@ -94,7 +94,6 @@ function SidebarProvider({
   // This makes it easier to style the sidebar with Tailwind classes.
   const state = open ? 'expanded' : 'collapsed';
 
-
   const contextValue = React.useMemo<SidebarContextProps>(
     () => ({
       state,
@@ -162,7 +161,6 @@ function Sidebar({
     );
   }
 
-
   return (
     <div
       className='group peer text-sidebar-foreground block'
@@ -175,12 +173,12 @@ function Sidebar({
       <div
         data-slot='sidebar-container'
         className={cn(
-          'fixed inset-y-0 left-0 h-svh bg-sidebar transition-[width] duration-200 ease-linear flex',
-          'hidden md:flex md:z-10',
+          'bg-sidebar fixed inset-y-0 left-0 flex h-svh transition-[width] duration-200 ease-linear',
+          'hidden md:z-10 md:flex',
           state === 'collapsed' ? 'w-12' : 'w-64',
         )}
       >
-        <div className='flex flex-col bg-sidebar rounded-[10px] border border-gray-200 dark:border-gray-800 m-2 h-[calc(100%-1rem)]'>
+        <div className='bg-sidebar m-2 flex h-[calc(100%-1rem)] flex-col rounded-[10px] border border-gray-200 dark:border-gray-800'>
           {children}
         </div>
       </div>
@@ -188,12 +186,12 @@ function Sidebar({
       <div
         data-slot='sidebar-container-mobile'
         className={cn(
-          'fixed inset-y-0 left-0 z-50 h-svh bg-transparent transition-[width] duration-200 ease-linear flex',
+          'fixed inset-y-0 left-0 z-50 flex h-svh bg-transparent transition-[width] duration-200 ease-linear',
           'md:hidden',
           state === 'collapsed' ? 'w-12' : 'w-64',
         )}
       >
-        <div className='flex flex-col bg-sidebar rounded-[10px] border border-gray-200 dark:border-gray-800 m-2 h-[calc(100%-1rem)]'>
+        <div className='bg-sidebar m-2 flex h-[calc(100%-1rem)] flex-col rounded-[10px] border border-gray-200 dark:border-gray-800'>
           {children}
         </div>
       </div>

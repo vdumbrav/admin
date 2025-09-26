@@ -1,8 +1,8 @@
 import Cookies from 'js-cookie';
 import { Outlet } from '@tanstack/react-router';
 import { cn } from '@/lib/utils';
-import { useIsMobile } from '@/hooks/use-mobile';
 import { SearchProvider } from '@/context/search-context';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { SidebarProvider, useSidebar } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/layout/app-sidebar';
 import SkipToMain from '@/components/skip-to-main';
@@ -24,7 +24,6 @@ function MobileOverlay() {
     />
   );
 }
-
 
 export function AuthenticatedLayout({ children }: Props) {
   const isMobile = useIsMobile();

@@ -8,7 +8,9 @@ export const requireAuthBeforeLoad = async () => {
   let user;
   try {
     // Small delay to allow React context to update after silent renewal
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await new Promise<void>((resolve) => {
+      setTimeout(() => resolve(), 100);
+    });
 
     // Force fresh user data from storage to get latest token state
     await userManager.clearStaleState();
@@ -20,7 +22,7 @@ export const requireAuthBeforeLoad = async () => {
       isExpired: user?.expired,
       expiresAt: user?.expires_at ? new Date(user.expires_at * 1000).toISOString() : 'unknown',
       scopes: user?.scope,
-      accessToken: user?.access_token ? `${user.access_token.substring(0, 20)}...` : 'missing'
+      accessToken: user?.access_token ? `${user.access_token.substring(0, 20)}...` : 'missing',
     });
   } catch (e) {
     console.error('[AuthGuard] Failed to get user from userManager:', e);
@@ -44,7 +46,7 @@ export const requireAuthBeforeLoad = async () => {
     userRoles: roles,
     hasAccess,
     requiredRoles: [UserRole.Admin, UserRole.Administrator, UserRole.Moderator, UserRole.Support],
-    tokenExpired: user.expired
+    tokenExpired: user.expired,
   });
 
   if (!hasAccess) {
@@ -66,7 +68,9 @@ export const requireAdminBeforeLoad = async () => {
   try {
     console.log('[AdminGuard] Attempting to get user from userManager');
     // Small delay to allow React context to update after silent renewal
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await new Promise<void>((resolve) => {
+      setTimeout(() => resolve(), 100);
+    });
 
     // Force fresh user data from storage to get latest token state
     await userManager.clearStaleState();
@@ -75,7 +79,7 @@ export const requireAdminBeforeLoad = async () => {
       hasUser: !!user,
       userId: user?.profile?.sub,
       isExpired: user?.expired,
-      expiresAt: user?.expires_at ? new Date(user.expires_at * 1000).toISOString() : 'unknown'
+      expiresAt: user?.expires_at ? new Date(user.expires_at * 1000).toISOString() : 'unknown',
     });
   } catch (e) {
     console.error('[AdminGuard] Failed to get user from userManager:', e);
@@ -93,7 +97,7 @@ export const requireAdminBeforeLoad = async () => {
     userRoles: roles,
     isAdmin,
     requiredRoles: [UserRole.Admin, UserRole.Administrator],
-    tokenExpired: user?.expired
+    tokenExpired: user?.expired,
   });
 
   if (!isAdmin) {
