@@ -172,12 +172,11 @@ export const QuestCreateWithPresetPage = () => {
   return (
     <>
       <Main>
-        <div className='mx-auto mb-4 flex max-w-5xl items-center justify-between'>
+        <div className='mb-4 flex max-w-5xl items-center justify-between'>
           <div>
-            <h2 className='text-2xl font-bold tracking-tight'>
-              New Quest - {presetConfig.name} {presetConfig.icon}
-            </h2>
-            <p className='text-muted-foreground'>{presetConfig.description}</p>
+            <h2 className='text-2xl font-bold tracking-tight'>New Quest</h2>
+            <p className='text-muted-foreground'>Create a new quest</p>
+            <p className='text-muted-foreground mt-4 text-sm'>{presetConfig.name}</p>
           </div>
           <Button
             variant='outline'

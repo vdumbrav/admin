@@ -16,9 +16,9 @@ export function TeamSwitcher({
   return (
     <div className='flex justify-start p-1'>
       {open ? (
-        <activeTeam.logo variant="full" width={64} height={32} className='text-foreground' />
+        <activeTeam.logo variant='full' width={64} height={32} className='text-foreground' />
       ) : (
-        <activeTeam.logo variant="minimal" width={32} height={32} className='text-foreground' />
+        <activeTeam.logo variant='minimal' width={32} height={32} className='text-foreground' />
       )}
     </div>
   );

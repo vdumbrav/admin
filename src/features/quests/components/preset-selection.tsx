@@ -28,9 +28,7 @@ export const PresetSelection = () => {
       <div className='flex items-center justify-between'>
         <div>
           <h1 className='text-2xl font-bold tracking-tight'>New Quest</h1>
-          <p className='text-muted-foreground'>
-            Select quest preset
-          </p>
+          <p className='text-muted-foreground'>Select quest preset</p>
         </div>
         <Button
           variant='outline'
@@ -50,10 +48,7 @@ export const PresetSelection = () => {
             value={selectedPreset}
             onValueChange={setSelectedPreset}
           />
-          <Button
-            onClick={handleSave}
-            disabled={!selectedPreset}
-          >
+          <Button onClick={handleSave} disabled={!selectedPreset}>
             Save
           </Button>
         </div>

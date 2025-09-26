@@ -80,7 +80,7 @@ export function QuestFormContainer({
           }}
           className='space-y-6'
         >
-          <div className='mx-auto max-w-2xl'>
+          <div className='max-w-2xl'>
             <QuestFormFields
               form={form}
               fieldStates={fieldStates}

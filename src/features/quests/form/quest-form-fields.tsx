@@ -268,7 +268,7 @@ export function QuestFormFields({
         <div className='rounded-md border border-blue-200 bg-blue-50 p-3'>
           <p className='text-sm text-blue-700'>
             This quest will be linked to "
-            {availableQuests.find((q) => q.id === form.watch('blocking_task')?.id)?.title ||
+            {availableQuests.find((q) => q.id === form.watch('blocking_task')?.id)?.title ??
               'Unknown'}
             " as a dependency
           </p>

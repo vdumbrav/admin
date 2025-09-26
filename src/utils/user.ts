@@ -1,6 +1,6 @@
 import { UserRole } from '@/auth/roles';
 import { getRolesFromUser } from '@/auth/utils';
-import { type IdTokenClaims } from 'oidc-client-ts';
+import { type IdTokenClaims, type User } from 'oidc-client-ts';
 
 /**
  * Generate user initials from name or email
@@ -51,7 +51,7 @@ export const getUserShowName = (profile?: IdTokenClaims | null): string => {
 export const getUserRole = (user?: { profile?: IdTokenClaims | null } | null): string => {
   if (!user) return 'User';
 
-  const roles = getRolesFromUser(user as any);
+  const roles = getRolesFromUser(user as User);
 
   if (roles.includes(UserRole.Admin) || roles.includes(UserRole.Administrator)) {
     return 'Admin';

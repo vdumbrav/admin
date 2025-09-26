@@ -221,7 +221,6 @@ function SidebarTrigger({ className, onClick, ...props }: React.ComponentProps<t
   );
 }
 
-
 function SidebarInset({ className, ...props }: React.ComponentProps<'main'>) {
   return (
     <main
