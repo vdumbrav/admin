@@ -74,7 +74,7 @@ export const getColumns = (isAdmin: boolean): ColumnDef<TaskResponseDto>[] => {
         const variant = getBadgeVariant(group);
         return (
           <Badge className={getBadgeClasses(variant)} style={getBadgeStyle(variant)}>
-            {group}
+            {group.charAt(0).toUpperCase() + group.slice(1).toLowerCase()}
           </Badge>
         );
       },
@@ -98,7 +98,8 @@ export const getColumns = (isAdmin: boolean): ColumnDef<TaskResponseDto>[] => {
       header: ({ column }) => <DataTableColumnHeader column={column} title='Type' />,
       cell: ({ row }) => {
         const type = row.original.type;
-        return String(type);
+        const typeStr = String(type);
+        return typeStr.charAt(0).toUpperCase() + typeStr.slice(1).toLowerCase();
       },
       filterFn: (row, id, value: string[]) => {
         const type = row.getValue(id);
@@ -117,7 +118,7 @@ export const getColumns = (isAdmin: boolean): ColumnDef<TaskResponseDto>[] => {
         return (
           <div className='flex items-center gap-2' title={provider}>
             {getProviderIcon(provider)}
-            <span>{provider}</span>
+            <span>{provider.charAt(0).toUpperCase() + provider.slice(1).toLowerCase()}</span>
           </div>
         );
       },
