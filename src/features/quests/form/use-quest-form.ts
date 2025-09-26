@@ -84,7 +84,7 @@ export function useQuestForm({
   const form = useForm<QuestFormValues>({
     resolver: zodResolver(zodSchema),
     defaultValues,
-    mode: 'onSubmit', // Only validate on submit, not on change
+    mode: 'onSubmit', // Only validate on submit
   });
 
   // ============================================================================
@@ -160,7 +160,7 @@ export function useQuestForm({
     // Conditional required fields by preset
     if (presetConfig?.id === 'connect') {
       if (!values.provider) {
-        errors.provider = 'Provider is required';
+        errors.provider = 'Provider is required for Connect preset';
       }
     }
 
@@ -235,6 +235,12 @@ export function useQuestForm({
             message,
           });
         });
+
+        // Show custom validation errors in toast
+        const customErrorMessages = Object.values(customValidationErrors);
+        if (customErrorMessages.length > 0) {
+          toast.error(`Validation failed: ${customErrorMessages.join(', ')}`);
+        }
         return;
       }
 
@@ -250,6 +256,12 @@ export function useQuestForm({
     (errors) => {
       // This runs when Zod validation fails
       console.log('Zod validation errors:', errors);
+
+      // Show toast for validation errors
+      const errorMessages = Object.values(errors).map(error => error?.message).filter(Boolean);
+      if (errorMessages.length > 0) {
+        toast.error(errorMessages.join(', '));
+      }
     },
   );
 

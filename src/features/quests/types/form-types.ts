@@ -94,7 +94,7 @@ export const DEFAULT_FORM_VALUES: Partial<QuestFormValues> = {
   web: true,
   twa: false,
   pinned: false,
-  reward: undefined,
+  reward: 0,
   totalReward: undefined, // For controlled inputs - always defined value
   uri: '', // Empty string instead of undefined for controlled input
   icon: '', // Empty string instead of undefined
