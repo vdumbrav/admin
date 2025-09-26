@@ -16,7 +16,7 @@ export function useAppAuth(): AuthResult {
     console.log('[getAccessToken] Token request:', {
       hasUser: !!auth.user,
       userExpired: auth.user?.expired,
-      activeNavigator: auth.activeNavigator
+      activeNavigator: auth.activeNavigator,
     });
 
     // Check for valid OIDC token first

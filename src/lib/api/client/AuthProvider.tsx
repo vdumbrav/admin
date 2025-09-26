@@ -1,30 +1,42 @@
 import React from 'react';
 import { type AxiosRequestConfig } from 'axios';
-import { useAuth } from 'react-oidc-context';
+import { useAppAuth } from '@/auth/hooks';
 import { setAuthenticatedMutator } from './authenticatedMutator';
 import { orvalMutator } from './orvalMutator';
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const auth = useAuth();
+  const { getAccessToken } = useAppAuth();
 
   React.useEffect(() => {
     // Set the global authenticated mutator
     const authenticatedMutator = async function <TResponse>(
       config: AxiosRequestConfig,
     ): Promise<TResponse> {
-      // Add auth header if user is authenticated
-      if (auth.user?.access_token) {
+      // Get token using our smart logic
+      const token = await getAccessToken();
+
+      console.log('[AuthProvider] API request with token:', {
+        hasToken: !!token,
+        tokenStart: token?.substring(0, 10),
+      });
+
+      // Add auth header if token is available
+      if (token) {
         config.headers = {
           ...config.headers,
-          Authorization: `Bearer ${auth.user.access_token}`,
+          Authorization: `Bearer ${token}`,
         };
+      } else {
+        console.warn('[AuthProvider] No token available, skipping API request');
+        // Throw error to prevent request without token
+        throw new Error('No valid token available');
       }
 
       return orvalMutator<TResponse>(config);
     };
 
     setAuthenticatedMutator(authenticatedMutator);
-  }, [auth.user?.access_token]);
+  }, [getAccessToken]);
 
   return <>{children}</>;
 }
