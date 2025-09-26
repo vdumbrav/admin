@@ -6,6 +6,7 @@ import { useMemo, useState } from 'react';
 import type { UseFormReturn } from 'react-hook-form';
 import { type TaskResponseDtoProvider } from '@/lib/api/generated/model';
 import { Badge } from '@/components/ui/badge';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   FormControl,
   FormDescription,
@@ -78,8 +79,8 @@ export function QuestFormFields({
     if (!currentType) return providers;
 
     const compatibleProviders = getCompatibleProviders(currentType);
-    return providers.filter(provider =>
-      compatibleProviders.includes(provider.value as TaskResponseDtoProvider)
+    return providers.filter((provider) =>
+      compatibleProviders.includes(provider.value as TaskResponseDtoProvider),
     );
   }, [currentType]);
 
@@ -113,7 +114,7 @@ export function QuestFormFields({
   return (
     <div className='space-y-6'>
       {/* First Row: Provider and Group */}
-      <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+      <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
         {/* Provider Field */}
         {isFieldVisible('provider', fieldStates) && (
           <FormField
@@ -123,8 +124,8 @@ export function QuestFormFields({
               <FormItem>
                 <FormLabel>Provider</FormLabel>
                 <FormControl>
-                  {(isFieldDisabled('provider', fieldStates) ||
-                    isFieldReadonly('provider', fieldStates)) ? (
+                  {isFieldDisabled('provider', fieldStates) ||
+                  isFieldReadonly('provider', fieldStates) ? (
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger asChild>
@@ -135,7 +136,9 @@ export function QuestFormFields({
                               placeholder='Select provider'
                               disabled={isFieldDisabled('provider', fieldStates)}
                               value={field.value}
-                              onValueChange={(value) => field.onChange(value === '' ? undefined : value)}
+                              onValueChange={(value) =>
+                                field.onChange(value === '' ? undefined : value)
+                              }
                             />
                           </div>
                         </TooltipTrigger>
@@ -170,8 +173,8 @@ export function QuestFormFields({
               <FormItem>
                 <FormLabel>Group</FormLabel>
                 <FormControl>
-                  {(isFieldDisabled('group', fieldStates) ||
-                    isFieldReadonly('group', fieldStates)) ? (
+                  {isFieldDisabled('group', fieldStates) ||
+                  isFieldReadonly('group', fieldStates) ? (
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger asChild>
@@ -282,47 +285,109 @@ export function QuestFormFields({
         </div>
       )}
 
-      {/* Start / End datetime */}
-      <div className='grid grid-cols-1 items-start gap-4 sm:grid-cols-2'>
-        <FormField
-          control={form.control}
-          name='start'
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Start</FormLabel>
-              <FormControl>
-                <DatePicker
-                  date={field.value ? new Date(field.value) : undefined}
-                  onSelect={(date) => field.onChange(date?.toISOString() ?? null)}
-                  placeholder='Select start date'
-                  disabled={isFieldDisabled('start', fieldStates)}
-                />
-              </FormControl>
-              <FormDescription>Default is current time + 1 hour</FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name='end'
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>End</FormLabel>
-              <FormControl>
-                <DatePicker
-                  date={field.value ? new Date(field.value) : undefined}
-                  onSelect={(date) => field.onChange(date?.toISOString() ?? null)}
-                  placeholder='Select end date'
-                  disabled={isFieldDisabled('end', fieldStates)}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+      {/* Dates and Badge New in one row */}
+      <div className='mb-2 grid grid-cols-10 items-center gap-4'>
+        <div className='col-span-8'>
+          <div className='flex items-center gap-4'>
+            <FormField
+              control={form.control}
+              name='start'
+              render={({ field }) => (
+                <FormItem className='flex-1'>
+                  <FormLabel>Start</FormLabel>
+                  <FormControl>
+                    <DatePicker
+                      date={field.value ? new Date(field.value) : undefined}
+                      onSelect={(date) => field.onChange(date?.toISOString() ?? null)}
+                      placeholder='Select start date'
+                      disabled={isFieldDisabled('start', fieldStates)}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <span className='text-muted-foreground mt-6'>-</span>
+            <FormField
+              control={form.control}
+              name='end'
+              render={({ field }) => (
+                <FormItem className='flex-1'>
+                  <FormLabel>End</FormLabel>
+                  <FormControl>
+                    <DatePicker
+                      date={field.value ? new Date(field.value) : undefined}
+                      onSelect={(date) => field.onChange(date?.toISOString() ?? null)}
+                      placeholder='Select end date'
+                      disabled={isFieldDisabled('end', fieldStates)}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+        </div>
+
+        <div className='col-span-2 flex justify-center'>
+          <FormField
+            control={form.control}
+            name='resources.isNew'
+            render={({ field }) => (
+              <FormItem className='mt-5 flex flex-row items-center gap-3'>
+                <FormControl>
+                  <Switch
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                    className='scale-125'
+                  />
+                </FormControl>
+                <div className='space-y-1 leading-none'>
+                  <FormLabel>Badge New</FormLabel>
+                </div>
+              </FormItem>
+            )}
+          />
+        </div>
+      </div>
+      <div>
+        <FormDescription>If End Date is not selected, then the Quest is unlimited</FormDescription>
       </div>
 
+      {/* Available on */}
+      <div className='space-y-4'>
+        <FormLabel className='text-base font-medium'>Available on</FormLabel>
+        <div className='flex gap-6'>
+          <FormField
+            control={form.control}
+            name='web'
+            render={({ field }) => (
+              <FormItem className='flex flex-row items-center space-y-0 space-x-3'>
+                <FormControl>
+                  <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                </FormControl>
+                <div className='space-y-1 leading-none'>
+                  <FormLabel>Web</FormLabel>
+                </div>
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name='twa'
+            render={({ field }) => (
+              <FormItem className='flex flex-row items-center space-y-0 space-x-3'>
+                <FormControl>
+                  <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                </FormControl>
+                <div className='space-y-1 leading-none'>
+                  <FormLabel>TMA</FormLabel>
+                </div>
+              </FormItem>
+            )}
+          />
+        </div>
+      </div>
 
       {/* Blocking Task Info */}
       {form.watch('blocking_task') && (
@@ -335,8 +400,6 @@ export function QuestFormFields({
           </p>
         </div>
       )}
-
-
 
       {/* Twitter-specific Fields */}
       {presetConfig?.id === 'action-with-post' && (
@@ -565,7 +628,6 @@ export function QuestFormFields({
 
       {/* Advanced Settings */}
       <div className='space-y-4'>
-        <h3 className='text-lg font-medium'>Advanced Settings</h3>
         {/* Type Field */}
         {isFieldVisible('type', fieldStates) && (
           <FormField
@@ -614,18 +676,18 @@ export function QuestFormFields({
             control={form.control}
             name='enabled'
             render={({ field }) => (
-              <FormItem className='flex flex-row items-center justify-between rounded-lg border p-4'>
-                <div className='space-y-0.5'>
-                  <FormLabel className='text-base'>Visible</FormLabel>
-                  <FormDescription>Make this quest visible for users</FormDescription>
-                </div>
+              <FormItem className='flex flex-row items-center space-y-0 space-x-3'>
                 <FormControl>
                   <Switch
                     checked={Boolean(field.value)}
                     onCheckedChange={field.onChange}
                     disabled={isFieldDisabled('enabled', fieldStates)}
+                    className='scale-125'
                   />
                 </FormControl>
+                <div className='space-y-1 leading-none'>
+                  <FormLabel>Set Visible</FormLabel>
+                </div>
                 <FormMessage />
               </FormItem>
             )}

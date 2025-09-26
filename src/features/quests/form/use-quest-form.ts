@@ -131,19 +131,6 @@ export function useQuestForm({
     }
   }, [watchedValues, presetConfig, isDirty, form]);
 
-  // Set default quest start time to 1 hour from now if not specified (only in create mode)
-  useEffect(() => {
-    // Skip auto-setting start time in edit mode
-    if (initial) return;
-
-    const currentStart = form.getValues('start');
-    if (!currentStart) {
-      const now = new Date();
-      const startTime = new Date(now.getTime() + 60 * 60 * 1000);
-      form.setValue('start', startTime.toISOString(), { shouldDirty: false, shouldValidate: true });
-    }
-  }, [form, initial]);
-
   // ============================================================================
   // Connect Gate Warnings
   // ============================================================================

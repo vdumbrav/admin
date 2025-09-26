@@ -55,7 +55,7 @@ export function DatePicker({
         <Button
           variant={'outline'}
           className={cn(
-            'w-[280px] justify-start text-left font-normal',
+            'min-w-[200px] justify-start text-left font-normal',
             !date && 'text-muted-foreground',
           )}
           disabled={disabled}
@@ -68,12 +68,13 @@ export function DatePicker({
         <div className='p-3'>
           <Calendar mode='single' selected={date} onSelect={handleDateSelect} />
           <div className='mt-3 border-t pt-3'>
-            <label className='text-sm font-medium'>Time (24h format)</label>
+            <label className='text-sm font-medium'>Time</label>
             <Input
               type='time'
               value={timeValue}
               onChange={(e) => handleTimeChange(e.target.value)}
               className='mt-1'
+              step='1'
             />
           </div>
         </div>
