@@ -81,11 +81,11 @@ export function useQuestForm({
   }, [initial, presetConfig]);
 
   const zodSchema = buildQuestFormSchema(presetConfig?.id);
-  const form = useForm<QuestFormValues>({
+  const form = useForm({
     resolver: zodResolver(zodSchema),
     defaultValues,
     mode: 'onSubmit', // Only validate on submit
-  });
+  }) as ReturnType<typeof useForm<QuestFormValues>>;
 
   // ============================================================================
   // Watched Values & State
@@ -257,8 +257,20 @@ export function useQuestForm({
       // This runs when Zod validation fails
       console.log('Zod validation errors:', errors);
 
+      // Set field-level errors for proper display under form fields
+      Object.entries(errors).forEach(([field, error]) => {
+        if (error?.message) {
+          form.setError(field, {
+            type: 'validation',
+            message: error.message,
+          });
+        }
+      });
+
       // Show toast for validation errors
-      const errorMessages = Object.values(errors).map(error => error?.message).filter(Boolean);
+      const errorMessages = Object.values(errors)
+        .map((error) => error?.message)
+        .filter(Boolean);
       if (errorMessages.length > 0) {
         toast.error(errorMessages.join(', '));
       }

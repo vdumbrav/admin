@@ -79,14 +79,14 @@ const iteratorSchema = z
 // Main quest form schema with preset-specific validation
 
 const baseQuestFormShape = {
-  title: z.string(),
+  title: z.string().min(1, 'Title is required'),
   type: questTypeSchema,
   description: z.string(),
   group: questGroupSchema,
   order_by: z.number(),
   provider: providerSchema,
   uri: z.string().optional(),
-  reward: z.number().optional(),
+  reward: z.number().min(1, 'Reward must be greater than 0').default(0),
   totalReward: z.number().optional(),
   enabled: z.boolean().optional(),
   web: z.boolean().optional(),

@@ -31,7 +31,6 @@ export function getPresetFormValues(presetConfig?: PresetConfig): QuestFormValue
     presetDefaults as Partial<Record<string, unknown>>,
   ) as QuestFormValues;
 
-
   // Auto-set preset ID from preset config
   if (presetConfig?.id && typeof presetConfig.id === 'string') {
     mergedValues.preset ??= presetConfig.id;

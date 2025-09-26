@@ -54,7 +54,7 @@ export interface QuestFormValues {
   order_by: number;
   provider?: (typeof PROVIDERS)[number];
   uri?: string;
-  reward?: number;
+  reward: number;
   totalReward?: number;
   enabled?: boolean;
   web?: boolean;

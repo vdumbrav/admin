@@ -74,9 +74,10 @@ export function DatePicker({
               value={timeValue}
               onChange={(e) => handleTimeChange(e.target.value)}
               className='mt-1'
-              step="60"
+              step='60'
               lang='en-GB'
-               inputmode="numeric" pattern="[0-2][0-9]:[0-5][0-9]" 
+              inputMode='numeric'
+              pattern='[0-2][0-9]:[0-5][0-9]'
             />
           </div>
         </div>

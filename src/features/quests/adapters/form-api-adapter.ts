@@ -48,7 +48,7 @@ export function apiToForm(apiData: Partial<TaskResponseDto>): QuestFormValues {
     // Optional fields
     provider: apiData.provider,
     uri: apiData.uri ?? undefined,
-    reward: apiData.reward,
+    reward: apiData.reward ?? 0,
     enabled: apiData.enabled ?? true,
     preset: apiData.preset,
     blocking_task: apiData.blocking_task,
@@ -231,7 +231,7 @@ export function getDefaultFormValues(): QuestFormValues {
     twa: false,
     pinned: false,
     // Ensure values for all possible fields to avoid uncontrolled->controlled warning
-    reward: undefined,
+    reward: 0,
     totalReward: undefined,
     uri: '',
     icon: '',

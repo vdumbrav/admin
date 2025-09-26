@@ -87,7 +87,7 @@ export const TasksEditor = () => {
               title: '',
               type: 'like',
               order_by: fields.length,
-              reward: 10,
+              reward: 0,
             })
           }
           disabled={!canAddMore}

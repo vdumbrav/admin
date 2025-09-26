@@ -268,7 +268,6 @@ export function QuestFormFields({
                 <FormControl>
                   <NoWheelNumber
                     placeholder='Enter reward amount'
-                    min={0}
                     step={10}
                     disabled={isFieldDisabled('reward', fieldStates)}
                     readOnly={isFieldReadonly('reward', fieldStates)}
@@ -391,16 +390,20 @@ export function QuestFormFields({
       </div>
 
       {/* Blocking Task Info */}
-      {form.watch('blocking_task') && (
-        <div className='rounded-md border border-blue-200 bg-blue-50 p-3'>
-          <p className='text-sm text-blue-700'>
-            This quest will be linked to "
-            {availableQuests.find((q) => q.id === form.watch('blocking_task')?.id)?.title ??
-              'Unknown'}
-            " as a dependency
-          </p>
-        </div>
-      )}
+      {(() => {
+        const blockingTask = form.watch('blocking_task');
+        const foundQuest = blockingTask
+          ? availableQuests.find((q) => q.id === blockingTask.id)
+          : null;
+
+        return blockingTask && foundQuest ? (
+          <div className='border-muted bg-muted/50 rounded-md border p-3'>
+            <p className='text-muted-foreground text-sm'>
+              This quest will be linked to "{foundQuest.title}" as a dependency
+            </p>
+          </div>
+        ) : null;
+      })()}
 
       {/* Twitter-specific Fields */}
       {presetConfig?.id === 'action-with-post' && (
@@ -656,7 +659,7 @@ export function QuestFormFields({
                 </div>
                 <FormControl>
                   <SelectDropdown
-                    value={field.value ?? ''}
+                    value={field.value}
                     onValueChange={field.onChange}
                     items={types}
                     placeholder='Select quest type'
