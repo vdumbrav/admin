@@ -5,63 +5,22 @@ export function TokenAutoRenew() {
   const auth = useAuth();
 
   useEffect(() => {
-    console.log('[TokenAutoRenew] Initializing token auto-renewal', {
-      isAuthenticated: auth.isAuthenticated,
-      isLoading: auth.isLoading,
-      user: auth.user?.profile?.sub,
-      activeNavigator: auth.activeNavigator
-    });
-
-    const handleTokenExpired = auth.events.addAccessTokenExpired(() => {
-      console.warn('[TokenAutoRenew] Access token expired', {
-        user: auth.user?.profile?.sub,
-        activeNavigator: auth.activeNavigator,
-        isAuthenticated: auth.isAuthenticated,
-        tokenExpiry: auth.user?.expires_at ? new Date(auth.user.expires_at * 1000).toISOString() : 'unknown'
-      });
-
+    const handleTokenExpired = auth.events.addAccessTokenExpired?.(() => {
       // Don't create parallel navigators
-      if (auth.activeNavigator) {
-        console.log('[TokenAutoRenew] Skipping renewal - active navigator present');
-        return;
-      }
+      if (auth.activeNavigator) return;
 
-      console.log('[TokenAutoRenew] Attempting silent renewal...');
+      // Log token expiration but don't automatically redirect/renew
+      console.warn('[TokenAutoRenew] Access token expired');
 
-      // Attempt silent renewal - let the app handle failures gracefully
-      auth.signinSilent().then((renewedUser) => {
-        if (renewedUser) {
-          console.log('[TokenAutoRenew] Silent renewal successful', {
-            user: renewedUser.profile?.sub,
-            newExpiry: renewedUser.expires_at ? new Date(renewedUser.expires_at * 1000).toISOString() : 'unknown',
-            tokenExpired: renewedUser.expired
-          });
-          // The renewed user is automatically set in the auth context by react-oidc-context
-        }
-      }).catch((error) => {
-        console.error('[TokenAutoRenew] Silent renewal failed:', {
-          error: error.message ?? error,
-          errorName: error.name,
-          user: auth.user?.profile?.sub,
-          isAuthenticated: auth.isAuthenticated
-        });
-        // Don't redirect to login, just log the error - let guards handle it
-      });
-    });
-
-    // Add token expiring handler for early warnings
-    const handleTokenExpiring = auth.events.addAccessTokenExpiring(() => {
-      console.log('[TokenAutoRenew] Access token expiring soon', {
-        user: auth.user?.profile?.sub,
-        tokenExpiry: auth.user?.expires_at ? new Date(auth.user.expires_at * 1000).toISOString() : 'unknown',
-        timeUntilExpiry: auth.user?.expires_at ? `${Math.round((auth.user.expires_at * 1000 - Date.now()) / 1000)}s` : 'unknown'
+      // Only attempt silent renewal, but don't redirect on failure
+      auth.signinSilent().catch((error) => {
+        console.error('[TokenAutoRenew] Silent renewal failed:', error);
+        // Don't redirect to login, just log the error
       });
     });
 
     return () => {
-      console.log('[TokenAutoRenew] Cleaning up token auto-renewal');
       handleTokenExpired?.();
-      handleTokenExpiring?.();
     };
   }, [auth]);
 

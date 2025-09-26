@@ -7,6 +7,9 @@ import { getRolesFromUser, userHasAllowedRole, userIsAdmin } from './utils';
 export const requireAuthBeforeLoad = async () => {
   let user;
   try {
+    // Small delay to allow React context to update after silent renewal
+    await new Promise(resolve => setTimeout(resolve, 100));
+
     // Force fresh user data from storage to get latest token state
     await userManager.clearStaleState();
     user = await userManager.getUser();
@@ -62,6 +65,9 @@ export const requireAdminBeforeLoad = async () => {
   let user;
   try {
     console.log('[AdminGuard] Attempting to get user from userManager');
+    // Small delay to allow React context to update after silent renewal
+    await new Promise(resolve => setTimeout(resolve, 100));
+
     // Force fresh user data from storage to get latest token state
     await userManager.clearStaleState();
     user = await userManager.getUser();
