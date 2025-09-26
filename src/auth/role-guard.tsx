@@ -16,18 +16,7 @@ export function RoleGuard({
 
   const hasRequiredRole = requiredRoles.some((role) => roles.includes(role));
 
-  console.log('[RoleGuard] Auth check:', {
-    isLoading,
-    isAuthenticated,
-    hasAllowedRole,
-    hasRequiredRole,
-    roles,
-    userExpired: user?.expired,
-    userExpiresAt: user?.expires_at ? new Date(user.expires_at * 1000).toISOString() : 'unknown',
-  });
-
   if (isLoading) {
-    console.log('[RoleGuard] Showing loading state');
     return (
       <div className='flex min-h-screen items-center justify-center'>
         <div className='border-primary h-8 w-8 animate-spin rounded-full border-4 border-t-transparent' />
@@ -37,21 +26,13 @@ export function RoleGuard({
 
   // If user has required roles but token is expired, allow access (let automatic renewal handle it)
   if (!isAuthenticated && (!hasRequiredRole || !hasAllowedRole)) {
-    console.warn('[RoleGuard] Not authenticated and no valid roles, redirecting to sign-in');
     return <Navigate to='/sign-in' replace />;
   }
 
   if (!hasRequiredRole || !hasAllowedRole) {
-    console.warn('[RoleGuard] Insufficient roles, redirecting to sign-in', {
-      hasRequiredRole,
-      hasAllowedRole,
-      requiredRoles,
-      userRoles: roles,
-    });
     return <Navigate to='/sign-in' replace />;
   }
 
-  console.log('[RoleGuard] Access granted');
   return <>{children}</>;
 }
 

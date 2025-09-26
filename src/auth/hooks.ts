@@ -8,40 +8,44 @@ import { getRolesFromUser } from './utils';
 
 export function useAppAuth(): AuthResult {
   const auth = useAuth();
-
-  console.log('[useAppAuth] Auth state:', {
-    isAuthenticated: auth.isAuthenticated,
-    isLoading: auth.isLoading,
-    userExpired: auth.user?.expired,
-    userExpiresAt: auth.user?.expires_at
-      ? new Date(auth.user.expires_at * 1000).toISOString()
-      : 'unknown',
-    activeNavigator: auth.activeNavigator,
-  });
-
   const roles = React.useMemo(() => {
     return auth.user ? getRolesFromUser(auth.user) : [];
   }, [auth.user]);
 
   const getAccessToken = React.useCallback(async (): Promise<string | undefined> => {
+    console.log('[getAccessToken] Token request:', {
+      hasUser: !!auth.user,
+      userExpired: auth.user?.expired,
+      activeNavigator: auth.activeNavigator
+    });
+
     // Check for valid OIDC token first
     if (auth.user && !auth.user.expired) {
-      const token = auth.user.access_token;
-      return token;
+      console.log('[getAccessToken] Using valid token');
+      return auth.user.access_token;
+    }
+
+    // If token renewal is in progress, wait for it
+    if (auth.activeNavigator === 'signinSilent') {
+      console.log('[getAccessToken] Token renewal in progress, returning undefined');
+      return undefined;
     }
 
     // Try to get a fresh token
     try {
+      console.log('[getAccessToken] Attempting silent renewal');
       const freshUser = await auth.signinSilent();
       if (freshUser?.access_token) {
+        console.log('[getAccessToken] Silent renewal successful');
         return freshUser.access_token;
       }
     } catch (error) {
+      console.error('[getAccessToken] Silent renewal failed:', error);
       logError('Failed to refresh token silently', error);
     }
 
     // If we can't get a token, return existing token instead of undefined to prevent logout
-    logError('No valid access token available, returning existing token');
+    console.warn('[getAccessToken] No valid access token available, returning existing token');
     return auth.user?.access_token;
   }, [auth]);
 
@@ -72,12 +76,6 @@ export function useAppAuth(): AuthResult {
   }, [auth.settings]);
 
   const isUserAuthenticated = auth.isAuthenticated || hasStoredOIDCUser;
-
-  console.log('[useAppAuth] Enhanced auth logic:', {
-    originalIsAuthenticated: auth.isAuthenticated,
-    hasStoredOIDCUser,
-    finalIsAuthenticated: isUserAuthenticated,
-  });
 
   return {
     isAuthenticated: isUserAuthenticated,
