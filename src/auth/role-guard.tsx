@@ -12,7 +12,7 @@ export function RoleGuard({
   requiredRoles = [UserRole.Admin, UserRole.Administrator, UserRole.Moderator, UserRole.Support],
   children,
 }: RoleGuardProps) {
-  const { isLoading, isAuthenticated, hasAllowedRole, roles, user } = useAppAuth();
+  const { isLoading, isAuthenticated, hasAllowedRole, roles } = useAppAuth();
 
   const hasRequiredRole = requiredRoles.some((role) => roles.includes(role));
 
