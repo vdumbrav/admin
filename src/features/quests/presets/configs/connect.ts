@@ -17,6 +17,9 @@ export const connectPresetConfig: PresetConfig = {
     tweetId: 'hidden',
     icon: 'hidden',
     partnerIcon: 'hidden',
+    buttonText: 'hidden',
+    popupDescription: 'hidden',
+    popupButton: 'hidden',
   },
 
   defaults: {

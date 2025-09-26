@@ -5,6 +5,7 @@ export const explorePresetConfig: PresetConfig = {
   name: 'Explore',
 
   fieldVisibility: {
+    type: 'hidden', // Fixed to 'external' for Explore preset
     group: 'visible', // Any group allowed
     provider: 'visible', // Usually 'walme' (Internal), but flexible
     uri: 'visible', // Required external URL
@@ -16,10 +17,19 @@ export const explorePresetConfig: PresetConfig = {
     tweetId: 'hidden',
     icon: 'visible', // Always available (not only Partner)
     partnerIcon: 'hidden', // Icon field covers this
+    buttonText: 'visible', // Button name for Explore
+    popupDescription: 'visible', // Popup description for Explore
+    popupButton: 'visible', // Popup button name for Explore
   },
 
   defaults: {
     type: 'external',
+    group: 'social', // Default to social group for Explore
+    // start: (() => {
+    //   const now = new Date();
+    //   now.setHours(now.getHours() + 1); // +1 hour from creation
+    //   return now.toISOString();
+    // })(),
     resources: {
       ui: {
         button: 'Explore',

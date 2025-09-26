@@ -22,6 +22,9 @@ export interface FieldVisibilityConfig {
   tweetId?: FieldVisibility;
   icon?: FieldVisibility;
   partnerIcon?: FieldVisibility;
+  buttonText?: FieldVisibility;
+  popupDescription?: FieldVisibility;
+  popupButton?: FieldVisibility;
 }
 
 export interface BusinessRule {

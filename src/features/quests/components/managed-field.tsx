@@ -1,9 +1,9 @@
 import { useFormContext } from 'react-hook-form';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+// import { Badge } from '@/components/ui/badge';
+// import { Button } from '@/components/ui/button';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+// import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import type { PresetConfig } from '../presets';
 
 interface ManagedFieldProps {
@@ -36,7 +36,7 @@ export const ManagedField = ({
   disabled,
   placeholder,
 }: ManagedFieldProps) => {
-  const { control, setValue, getValues, formState } = useFormContext();
+  const { control, getValues, formState } = useFormContext();
 
   // Check if field is dirty (manually changed by user)
   const isDirty = getNestedValue(formState.dirtyFields, name);
@@ -50,20 +50,22 @@ export const ManagedField = ({
   const presetValue = getPresetValue();
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   const currentValue = getValues(name);
-  const isOverridden = !!(isDirty && presetValue !== undefined && currentValue !== presetValue);
+  // const isOverridden = !!(isDirty && presetValue !== undefined && currentValue !== presetValue);
 
-  const isDefaultedByPreset = !!(
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-expect-error
+  const _isDefaultedByPreset = !!(
     presetConfig?.defaults &&
     presetValue !== undefined &&
     currentValue === presetValue &&
     !isDirty
   );
 
-  const handleReset = () => {
-    if (presetValue !== undefined) {
-      setValue(name, presetValue, { shouldDirty: false });
-    }
-  };
+  // const handleReset = () => {
+  //   if (presetValue !== undefined) {
+  //     setValue(name, presetValue, { shouldDirty: false });
+  //   }
+  // };
 
   return (
     <FormField
@@ -74,7 +76,7 @@ export const ManagedField = ({
           <div className='flex items-center justify-between'>
             <FormLabel>{label}</FormLabel>
             <div className='flex items-center gap-2'>
-              {isDefaultedByPreset && (
+              {/* {isDefaultedByPreset && (
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -83,12 +85,12 @@ export const ManagedField = ({
                       </Badge>
                     </TooltipTrigger>
                     <TooltipContent>
-                      Значение подставлено из пресета. Вы можете переопределить его.
+                      Value provided by preset. You can override it.
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
-              )}
-              {isOverridden && (
+              )} */}
+              {/* {isOverridden && (
                 <>
                   <Badge variant='secondary' className='text-xs'>
                     Overridden
@@ -103,7 +105,7 @@ export const ManagedField = ({
                     Reset to preset
                   </Button>
                 </>
-              )}
+              )} */}
             </div>
           </div>
           <FormControl>
@@ -115,12 +117,11 @@ export const ManagedField = ({
               placeholder={placeholder}
             />
           </FormControl>
-          {presetConfig && presetValue !== undefined && (
+          {/* {presetConfig && presetValue !== undefined && (
             <div className='text-muted-foreground text-xs'>
-              {/* eslint-disable-next-line @typescript-eslint/no-base-to-string */}
               Preset value: "{String(presetValue)}"
             </div>
-          )}
+          )} */}
           <FormMessage />
         </FormItem>
       )}

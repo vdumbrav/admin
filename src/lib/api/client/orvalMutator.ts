@@ -31,7 +31,7 @@ const createApiClient = (): AxiosInstance => {
   // Add response interceptor to handle 401 errors gracefully
   client.interceptors.response.use(
     (response) => response,
-    (error) => {
+    async (error) => {
       if (axios.isAxiosError(error) && error.response?.status === 401) {
         console.warn('[API Client] 401 Unauthorized - token may be expired');
         // Don't automatically logout, just log the warning

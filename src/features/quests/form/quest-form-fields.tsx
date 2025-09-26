@@ -21,12 +21,12 @@ import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { DatePicker } from '@/components/date-picker';
-import { ImageDropzone } from '@/components/image-dropzone';
 import { NoWheelNumber } from '@/components/no-wheel-number';
 import { SelectDropdown } from '@/components/select-dropdown';
 import { TwitterEmbed } from '@/components/twitter-embed';
 import { ChildrenEditor } from '../components/children-editor';
 import { DailyRewardsEditor } from '../components/daily-rewards-editor';
+import { IconUpload } from '../components/icon-upload';
 import { ManagedField } from '../components/managed-field';
 import { TasksEditor } from '../components/tasks-editor';
 import { TwitterPreview } from '../components/twitter-preview';
@@ -61,7 +61,6 @@ export function QuestFormFields({
   form,
   fieldStates,
   presetConfig,
-  onImageUpload,
   connectGateWarnings,
   availableQuests = [],
 }: QuestFormFieldsProps) {
@@ -248,6 +247,95 @@ export function QuestFormFields({
                   disabled={isFieldDisabled('description', fieldStates)}
                   readOnly={isFieldReadonly('description', fieldStates)}
                   {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      )}
+
+      {/* Button Text */}
+      {isFieldVisible('buttonText', fieldStates) && (
+        <ManagedField
+          name='resources.ui.button'
+          label='Button name'
+          presetConfig={presetConfig}
+          disabled={isFieldDisabled('buttonText', fieldStates)}
+          placeholder='Override button label'
+        />
+      )}
+
+      {/* Popup Description */}
+      {isFieldVisible('popupDescription', fieldStates) && (
+        <FormField
+          control={form.control}
+          name='resources.ui.pop-up.description'
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Popup description</FormLabel>
+              <FormControl>
+                <Textarea
+                  placeholder='Enter popup description'
+                  rows={3}
+                  disabled={isFieldDisabled('popupDescription', fieldStates)}
+                  readOnly={isFieldReadonly('popupDescription', fieldStates)}
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      )}
+
+      {/* Popup Button Name */}
+      {isFieldVisible('popupButton', fieldStates) && (
+        <ManagedField
+          name='resources.ui.pop-up.button'
+          label='Popup button name'
+          presetConfig={presetConfig}
+          disabled={isFieldDisabled('popupButton', fieldStates)}
+          placeholder='Override popup button label'
+        />
+      )}
+
+      {/* External URL */}
+      {isFieldVisible('uri', fieldStates) && (
+        <FormField
+          control={form.control}
+          name='uri'
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>URL (External URL)</FormLabel>
+              <FormControl>
+                <Input
+                  placeholder='https://example.com'
+                  disabled={isFieldDisabled('uri', fieldStates)}
+                  readOnly={isFieldReadonly('uri', fieldStates)}
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      )}
+
+      {/* Quest Icon */}
+      {isFieldVisible('icon', fieldStates) && (
+        <FormField
+          control={form.control}
+          name='icon'
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Quest Icon</FormLabel>
+              <FormControl>
+                <IconUpload
+                  value={field.value}
+                  onChange={field.onChange}
+                  onClear={() => field.onChange('')}
+                  disabled={isFieldDisabled('icon', fieldStates)}
                 />
               </FormControl>
               <FormMessage />
@@ -560,64 +648,6 @@ export function QuestFormFields({
       {/* Total Reward Display (only for multiple/iterable quests) */}
       {totalRewardDisplay}
 
-      {/* Icon Upload */}
-      {isFieldVisible('icon', fieldStates) && (
-        <FormField
-          control={form.control}
-          name='icon'
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Quest Icon</FormLabel>
-              <FormControl>
-                <div className='flex items-center gap-3'>
-                  <div className='h-10 w-10 overflow-hidden rounded border bg-white'>
-                    {field.value ? (
-                      <img
-                        src={field.value}
-                        alt='Icon preview'
-                        className='h-10 w-10 object-cover'
-                      />
-                    ) : (
-                      <div className='text-muted-foreground flex h-full w-full items-center justify-center text-xs'>
-                        40×40
-                      </div>
-                    )}
-                  </div>
-                  <ImageDropzone
-                    preview={field.value}
-                    onFile={async (file) => {
-                      const allowed = ['image/png', 'image/jpeg', 'image/jpg', 'image/svg+xml'];
-                      if (!allowed.includes(file.type)) {
-                        form.setError('icon' as never, {
-                          type: 'custom',
-                          message: 'Invalid file type. Use PNG/JPG/SVG.',
-                        });
-                        return;
-                      }
-                      if (file.size > 1024 * 1024) {
-                        form.setError('icon' as never, {
-                          type: 'custom',
-                          message: 'File is too large. Max size is 1MB.',
-                        });
-                        return;
-                      }
-                      form.clearErrors('icon' as never);
-                      const url = await onImageUpload(file);
-                      field.onChange(url);
-                      // no explicit return
-                    }}
-                    onClear={() => field.onChange('')}
-                    disabled={isFieldDisabled('icon', fieldStates)}
-                  />
-                </div>
-              </FormControl>
-              <FormDescription>Upload square image ≤ 1MB (PNG/JPG/SVG).</FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      )}
-
       {/* Connect Gate Warnings */}
       {connectGateWarnings.length > 0 && (
         <div className='rounded-md border border-yellow-200 bg-yellow-50 p-4'>
@@ -714,16 +744,6 @@ export function QuestFormFields({
             </Button>
           </div>
         </div>
-
-        {/* Button Text - Only editable for Explore preset */}
-        {presetConfig?.id === 'explore' && (
-          <ManagedField
-            name='resources.ui.button'
-            label='Button text'
-            presetConfig={presetConfig}
-            placeholder='Override button label'
-          />
-        )}
 
         {/* Children Editor for non-preset forms */}
         {!presetConfig && isFieldVisible('children', fieldStates) && <ChildrenEditor />}

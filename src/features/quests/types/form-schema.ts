@@ -249,5 +249,26 @@ export const buildQuestFormSchema = (presetId?: string) =>
             path: ['icon'],
           });
         }
+        if (!val.resources?.ui?.button) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: 'Button name is required for Explore preset',
+            path: ['resources', 'ui', 'button'],
+          });
+        }
+        if (!val.resources?.ui?.['pop-up']?.description) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: 'Popup description is required for Explore preset',
+            path: ['resources', 'ui', 'pop-up', 'description'],
+          });
+        }
+        if (!val.resources?.ui?.['pop-up']?.button) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: 'Popup button name is required for Explore preset',
+            path: ['resources', 'ui', 'pop-up', 'button'],
+          });
+        }
       }
     });
