@@ -14,8 +14,9 @@ import {
   type TaskResponseDto,
   type UpdateTaskDto,
 } from '@/lib/api/generated/model';
-import { validateAndConvertToApi } from './adapters/form-api-adapter';
+import { formToApi } from './adapters/form-api-adapter';
 import type { QuestQuery, QuestsResponse } from './data/types';
+import type { QuestFormValues } from './types/form-types';
 
 export const useQuests = (query: QuestQuery) => {
   const {
@@ -140,8 +141,8 @@ export const useCreateQuest = () => {
   const queryKey = getAdminWaitlistTasksControllerGetWaitlistTasksQueryKey();
 
   return useMutation({
-    mutationFn: async (data: Partial<TaskResponseDto>): Promise<TaskResponseDto> => {
-      const apiData = validateAndConvertToApi(data);
+    mutationFn: async (data: QuestFormValues): Promise<TaskResponseDto> => {
+      const apiData = formToApi(data);
       const result = await createTaskMutation.mutateAsync({
         data: apiData as CreateTaskDto,
       });
@@ -164,8 +165,8 @@ export const useUpdateQuest = (id: number) => {
   const queryKey = getAdminWaitlistTasksControllerGetWaitlistTasksQueryKey();
 
   return useMutation({
-    mutationFn: async (data: Partial<TaskResponseDto>): Promise<TaskResponseDto> => {
-      const apiData = validateAndConvertToApi(data) as UpdateTaskDto;
+    mutationFn: async (data: QuestFormValues): Promise<TaskResponseDto> => {
+      const apiData = formToApi(data) as UpdateTaskDto;
       const result = await updateTaskMutation.mutateAsync({ id, data: apiData });
       return result;
     },

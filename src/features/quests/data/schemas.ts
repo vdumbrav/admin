@@ -180,25 +180,29 @@ export const questFormSchema = z.object({
   description: z.string().optional().default(''),
   blocking_task: z.number().nullable().optional(),
   reward: z.number().min(1, 'Reward must be greater than 0').default(0),
+  totalReward: z.number().optional(),
   level: z.number().optional(),
   group: taskGroupSchema,
   order_by: z.number().min(0, 'Order must be positive'),
   provider: providerSchema,
   uri: z.string().nullable().optional(),
-  status: statusSchema,
-  error: z.string().nullable().optional(),
-  started_at: z.string().nullable().optional(),
-  completed_at: z.string().nullable().optional(),
-  next_tick: z.string().nullable().optional(),
+  enabled: z.boolean().optional(),
+  web: z.boolean().optional(),
+  twa: z.boolean().optional(),
+  pinned: z.boolean().optional(),
+  icon: z.string().optional(),
+  preset: z.string().optional().nullable(),
+  visible: z.boolean().optional(),
   resources: resourcesSchema,
   child: z
     .array(z.lazy((): z.ZodType<TaskResponseDto> => questSchema))
     .nullable()
     .optional(),
+  start: z.string().optional(),
+  end: z.string().optional(),
   iterable: z.boolean().nullable().optional(),
   iterator: iteratorSchema,
-  providerCapitalized: z.string().optional(),
-  visible: z.boolean().optional(),
+  repeatable: z.boolean().optional(),
 });
 
 // ============================================================================

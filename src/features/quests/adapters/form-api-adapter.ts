@@ -14,7 +14,7 @@
  * ✅ type field is now single value (was array)
  */
 import type { TaskResponseDto } from '@/lib/api/generated/model';
-import { questFormSchema } from '../data/schemas';
+import { buildQuestFormSchema } from '../types/form-schema';
 import {
   type ChildFormValues,
   DEFAULT_FORM_VALUES,
@@ -52,9 +52,15 @@ export function apiToForm(apiData: Partial<TaskResponseDto>): QuestFormValues {
     enabled: apiData.enabled ?? true,
     preset: apiData.preset,
     blocking_task: apiData.blocking_task,
+    icon: apiData.resource?.icon ?? undefined,
 
-    // Resources directly from API
-    resources: apiData.resource ?? DEFAULT_FORM_VALUES.resources,
+    // Resources directly from API (excluding icon which is handled separately)
+    resources: apiData.resource
+      ? {
+          ...apiData.resource,
+          icon: undefined, // Remove icon from resources to avoid duplication
+        }
+      : DEFAULT_FORM_VALUES.resources,
     child: apiData.child ? apiData.child.map(convertApiChildToForm) : undefined,
 
     // Schedule mapping for edit mode
@@ -144,8 +150,14 @@ export function formToApi(formData: QuestFormValues): Partial<TaskResponseDto> {
     twa: formData.twa ?? false, // Default TWA disabled for admin-created tasks
     pinned: formData.pinned ?? false, // Default not pinned
 
-    // Resources directly as ResourcesDto
-    resource: formData.resources,
+    // Resources with icon included
+    resource:
+      (formData.resources ?? formData.icon)
+        ? {
+            ...formData.resources,
+            icon: formData.icon ?? formData.resources?.icon,
+          }
+        : undefined,
     child: formData.child ? formData.child.map(convertFormChildToApi) : [],
 
     // Iterator mapping for 7-day challenge (Form → API)
@@ -259,7 +271,11 @@ export function getDefaultFormValues(): QuestFormValues {
  * - Zod validation
  * - Enum compatibility (CreateTaskDtoType vs TaskResponseDtoTypeItem)
  */
-export function validateAndConvertToApi(formData: unknown): Partial<TaskResponseDto> {
-  const validatedData = questFormSchema.parse(formData) as QuestFormValues;
+export function validateAndConvertToApi(
+  formData: unknown,
+  presetId?: string,
+): Partial<TaskResponseDto> {
+  const schema = buildQuestFormSchema(presetId);
+  const validatedData = schema.parse(formData) as QuestFormValues;
   return formToApi(validatedData);
 }

@@ -25,6 +25,7 @@ export interface FieldVisibilityConfig {
   buttonText?: FieldVisibility;
   popupDescription?: FieldVisibility;
   popupButton?: FieldVisibility;
+  repeatable?: FieldVisibility;
 }
 
 export interface BusinessRule {

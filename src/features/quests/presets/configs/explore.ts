@@ -7,7 +7,7 @@ export const explorePresetConfig: PresetConfig = {
   fieldVisibility: {
     type: 'hidden', // Fixed to 'external' for Explore preset
     group: 'visible', // Any group allowed
-    provider: 'visible', // Usually 'walme' (Internal), but flexible
+    provider: 'readonly', // Fixed to 'internal' for Explore preset
     uri: 'visible', // Required external URL
     reward: 'visible',
     tasks: 'hidden',
@@ -20,10 +20,12 @@ export const explorePresetConfig: PresetConfig = {
     buttonText: 'visible', // Button name for Explore
     popupDescription: 'visible', // Popup description for Explore
     popupButton: 'visible', // Popup button name for Explore
+    repeatable: 'visible', // Repeatable toggle for Explore
   },
 
   defaults: {
     type: 'external',
+    provider: 'walme',
     group: 'social', // Default to social group for Explore
     // start: (() => {
     //   const now = new Date();

@@ -61,6 +61,7 @@ export function QuestFormFields({
   form,
   fieldStates,
   presetConfig,
+  onImageUpload,
   connectGateWarnings,
   availableQuests = [],
 }: QuestFormFieldsProps) {
@@ -76,7 +77,7 @@ export function QuestFormFields({
 
   // Filter providers based on current type
   const availableProviders = useMemo(() => {
-    if (!currentType) return providers;
+    if (currentType === undefined) return providers;
 
     const compatibleProviders = getCompatibleProviders(currentType);
     return providers.filter((provider) =>
@@ -307,7 +308,7 @@ export function QuestFormFields({
           name='uri'
           render={({ field }) => (
             <FormItem>
-              <FormLabel>URL (External URL)</FormLabel>
+              <FormLabel>Url</FormLabel>
               <FormControl>
                 <Input
                   placeholder='https://example.com'
@@ -336,6 +337,7 @@ export function QuestFormFields({
                   onChange={field.onChange}
                   onClear={() => field.onChange('')}
                   disabled={isFieldDisabled('icon', fieldStates)}
+                  onImageUpload={onImageUpload}
                 />
               </FormControl>
               <FormMessage />
@@ -441,6 +443,32 @@ export function QuestFormFields({
       <div>
         <FormDescription>If End Date is not selected, then the Quest is unlimited</FormDescription>
       </div>
+
+      {/* Repeatable toggle */}
+      {isFieldVisible('repeatable', fieldStates) && (
+        <div className='space-y-2'>
+          <h3 className='text-base font-medium'>Repeatable</h3>
+          <FormField
+            control={form.control}
+            name='repeatable'
+            render={({ field }) => (
+              <FormItem className='flex flex-row items-center gap-3'>
+                <FormControl>
+                  <Switch
+                    checked={!!field.value}
+                    onCheckedChange={field.onChange}
+                    disabled={isFieldDisabled('repeatable', fieldStates)}
+                    className='scale-125'
+                  />
+                </FormControl>
+                <div className='space-y-1 leading-none'>
+                  <FormLabel>Set as repeatable every day</FormLabel>
+                </div>
+              </FormItem>
+            )}
+          />
+        </div>
+      )}
 
       {/* Available on */}
       <div className='space-y-4'>
@@ -596,50 +624,6 @@ export function QuestFormFields({
         <>
           {/* Daily Rewards Editor */}
           {isFieldVisible('dailyRewards', fieldStates) && <DailyRewardsEditor />}
-        </>
-      )}
-
-      {/* Explore-specific Fields */}
-      {presetConfig?.id === 'explore' && (
-        <>
-          {/* URI Field */}
-          {isFieldVisible('uri', fieldStates) && (
-            <FormField
-              control={form.control}
-              name='uri'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>External URL</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder='https://example.com'
-                      disabled={isFieldDisabled('uri', fieldStates)}
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormDescription>External link for users to visit</FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          )}
-
-          {/* Domain Warning (non-blocking) */}
-          {(() => {
-            const uri = form.getValues('uri');
-            const isSocial =
-              typeof uri === 'string' &&
-              /(?:x\.com|twitter\.com|t\.me|discord\.(?:gg|com)|youtube\.com)/i.test(uri);
-            return isSocial ? (
-              <div className='rounded-md border border-yellow-200 bg-yellow-50 p-4'>
-                <h4 className='text-sm font-medium text-yellow-800'>Explore Link Notice</h4>
-                <p className='text-yellow-800'>
-                  This link looks like a social platform. Consider using a Connect or Join quest
-                  instead.
-                </p>
-              </div>
-            ) : null;
-          })()}
         </>
       )}
 

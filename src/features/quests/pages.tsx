@@ -1,9 +1,8 @@
 import { Outlet, useNavigate, useParams, useRouterState, useSearch } from '@tanstack/react-router';
 import { toast } from 'sonner';
-import type { TaskResponseDto } from '@/lib/api/generated/model';
 import { Button } from '@/components/ui/button';
 import { Main } from '@/components/layout/main';
-import { apiToForm, formToApi } from './adapters/form-api-adapter';
+import { apiToForm } from './adapters/form-api-adapter';
 import { useCreateQuest, useQuest, useUpdateQuest } from './api';
 import { PresetSelection } from './components/preset-selection';
 import { createQuestSearch } from './default-search';
@@ -55,13 +54,7 @@ export const QuestCreatePage = () => {
             <QuestForm
               onSubmit={async (v: QuestFormValues) => {
                 try {
-                  const questData = formToApi(v);
-                  const withSchedule: Partial<TaskResponseDto> = {
-                    ...questData,
-                    started_at: v.start,
-                    completed_at: v.end,
-                  };
-                  await create.mutateAsync(withSchedule);
+                  await create.mutateAsync(v);
                   toast.success('Quest saved successfully');
                   void nav({ to: '/quests', search: listSearch });
                 } catch (e) {
@@ -130,13 +123,7 @@ export const QuestEditPage = () => {
           }
           onSubmit={async (v: QuestFormValues) => {
             try {
-              const questData = formToApi(v);
-              const withSchedule: Partial<TaskResponseDto> = {
-                ...questData,
-                started_at: v.start,
-                completed_at: v.end,
-              };
-              await update.mutateAsync(withSchedule);
+              await update.mutateAsync(v);
               toast.success('Quest saved successfully');
               void nav({ to: '/quests', search: listSearch });
             } catch (e) {
@@ -189,13 +176,7 @@ export const QuestCreateWithPresetPage = () => {
           presetConfig={presetConfig}
           onSubmit={async (v: QuestFormValues) => {
             try {
-              const questData = formToApi(v);
-              const withSchedule: Partial<TaskResponseDto> = {
-                ...questData,
-                started_at: v.start,
-                completed_at: v.end,
-              };
-              await create.mutateAsync(withSchedule);
+              await create.mutateAsync(v);
               toast.success('Quest saved successfully');
               void nav({ to: '/quests', search: listSearch });
             } catch (e) {
