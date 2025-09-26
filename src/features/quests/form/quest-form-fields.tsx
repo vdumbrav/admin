@@ -4,6 +4,7 @@
  */
 import { useMemo, useState } from 'react';
 import type { UseFormReturn } from 'react-hook-form';
+import { type TaskResponseDtoProvider } from '@/lib/api/generated/model';
 import { Badge } from '@/components/ui/badge';
 import {
   FormControl,
@@ -27,7 +28,7 @@ import { DailyRewardsEditor } from '../components/daily-rewards-editor';
 import { ManagedField } from '../components/managed-field';
 import { TasksEditor } from '../components/tasks-editor';
 import { TwitterPreview } from '../components/twitter-preview';
-import { groups, providers, types } from '../data/data';
+import { getCompatibleProviders, groups, providers, types } from '../data/data';
 import type { PresetConfig } from '../presets/types';
 import type { QuestFormValues } from '../types/form-types';
 import {
@@ -69,6 +70,19 @@ export function QuestFormFields({
   const iterator = form.watch('iterator');
   const totalRewardValue = form.watch('totalReward');
 
+  // Watch current type to filter compatible providers
+  const currentType = form.watch('type');
+
+  // Filter providers based on current type
+  const availableProviders = useMemo(() => {
+    if (!currentType) return providers;
+
+    const compatibleProviders = getCompatibleProviders(currentType);
+    return providers.filter(provider =>
+      compatibleProviders.includes(provider.value as TaskResponseDtoProvider)
+    );
+  }, [currentType]);
+
   const totalRewardDisplay = useMemo(() => {
     const hasChildTasks = childTasks && childTasks.length > 0;
     const hasIteratorRewards = iterator?.reward_map && iterator.reward_map.length > 0;
@@ -98,6 +112,101 @@ export function QuestFormFields({
 
   return (
     <div className='space-y-6'>
+      {/* First Row: Provider and Group */}
+      <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+        {/* Provider Field */}
+        {isFieldVisible('provider', fieldStates) && (
+          <FormField
+            control={form.control}
+            name='provider'
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Provider</FormLabel>
+                <FormControl>
+                  {(isFieldDisabled('provider', fieldStates) ||
+                    isFieldReadonly('provider', fieldStates)) ? (
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div>
+                            <SelectDropdown
+                              className='w-full'
+                              items={availableProviders}
+                              placeholder='Select provider'
+                              disabled={isFieldDisabled('provider', fieldStates)}
+                              value={field.value}
+                              onValueChange={(value) => field.onChange(value === '' ? undefined : value)}
+                            />
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          This field is enforced by preset and cannot be changed.
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  ) : (
+                    <SelectDropdown
+                      className='w-full'
+                      items={availableProviders}
+                      placeholder='Select provider'
+                      disabled={isFieldDisabled('provider', fieldStates)}
+                      value={field.value}
+                      onValueChange={(value) => field.onChange(value === '' ? undefined : value)}
+                    />
+                  )}
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
+
+        {/* Group Field */}
+        {isFieldVisible('group', fieldStates) && (
+          <FormField
+            control={form.control}
+            name='group'
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Group</FormLabel>
+                <FormControl>
+                  {(isFieldDisabled('group', fieldStates) ||
+                    isFieldReadonly('group', fieldStates)) ? (
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div>
+                            <SelectDropdown
+                              className='w-full'
+                              items={groups}
+                              placeholder='Select group'
+                              disabled={isFieldDisabled('group', fieldStates)}
+                              {...field}
+                            />
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          This field is enforced by preset and cannot be changed.
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  ) : (
+                    <SelectDropdown
+                      className='w-full'
+                      items={groups}
+                      placeholder='Select group'
+                      disabled={isFieldDisabled('group', fieldStates)}
+                      {...field}
+                    />
+                  )}
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
+      </div>
+
       {/* Title Field */}
       {isFieldVisible('title', fieldStates) && (
         <FormField
@@ -105,7 +214,7 @@ export function QuestFormFields({
           name='title'
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Quest Title</FormLabel>
+              <FormLabel>Title</FormLabel>
               <FormControl>
                 <Input
                   placeholder='Enter quest title'
@@ -143,43 +252,34 @@ export function QuestFormFields({
         />
       )}
 
-      {/* Group Field */}
-      {isFieldVisible('group', fieldStates) && (
-        <FormField
-          control={form.control}
-          name='group'
-          render={({ field }) => (
-            <FormItem>
-              <div className='flex items-center justify-between'>
-                <FormLabel>Group</FormLabel>
-                {(isFieldDisabled('group', fieldStates) ||
-                  isFieldReadonly('group', fieldStates)) && (
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Badge variant='secondary' className='text-xs'>
-                          Locked by preset
-                        </Badge>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        This field is enforced by preset and cannot be changed.
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                )}
-              </div>
-              <FormControl>
-                <SelectDropdown
-                  items={groups}
-                  placeholder='Select group'
-                  disabled={isFieldDisabled('group', fieldStates)}
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+      {/* Reward Field */}
+      {isFieldVisible('reward', fieldStates) && (
+        <div className='w-1/3'>
+          <FormField
+            control={form.control}
+            name='reward'
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Reward, XP</FormLabel>
+                <FormControl>
+                  <NoWheelNumber
+                    placeholder='Enter reward amount'
+                    min={0}
+                    step={10}
+                    disabled={isFieldDisabled('reward', fieldStates)}
+                    readOnly={isFieldReadonly('reward', fieldStates)}
+                    {...field}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      field.onChange(value === '' ? undefined : Number(value));
+                    }}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
       )}
 
       {/* Start / End datetime */}
@@ -223,45 +323,6 @@ export function QuestFormFields({
         />
       </div>
 
-      {/* Provider Field */}
-      {isFieldVisible('provider', fieldStates) && (
-        <FormField
-          control={form.control}
-          name='provider'
-          render={({ field }) => (
-            <FormItem>
-              <div className='flex items-center justify-between'>
-                <FormLabel>Provider</FormLabel>
-                {(isFieldDisabled('provider', fieldStates) ||
-                  isFieldReadonly('provider', fieldStates)) && (
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Badge variant='secondary' className='text-xs'>
-                          Locked by preset
-                        </Badge>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        This field is enforced by preset and cannot be changed.
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                )}
-              </div>
-              <FormControl>
-                <SelectDropdown
-                  items={providers}
-                  placeholder='Select provider'
-                  disabled={isFieldDisabled('provider', fieldStates)}
-                  value={field.value}
-                  onValueChange={(value) => field.onChange(value === '' ? undefined : value)}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      )}
 
       {/* Blocking Task Info */}
       {form.watch('blocking_task') && (
@@ -275,37 +336,7 @@ export function QuestFormFields({
         </div>
       )}
 
-      {/* Connect-specific Fields */}
-      {presetConfig?.id === 'connect' && (
-        <>
-          {/* URL Info */}
-          <div className='rounded-md border p-3'>
-            <div className='flex items-center space-x-2'>
-              <FormLabel>URL</FormLabel>
-              <Badge variant='secondary' className='text-xs'>
-                Auto-managed
-              </Badge>
-            </div>
-            <p className='text-muted-foreground mt-1 text-sm'>User's data</p>
-          </div>
-        </>
-      )}
 
-      {/* 7-day Challenge specific Fields */}
-      {presetConfig?.id === 'seven-day-challenge' && (
-        <>
-          {/* URL Info */}
-          <div className='rounded-md border p-3'>
-            <div className='flex items-center space-x-2'>
-              <FormLabel>URL</FormLabel>
-              <Badge variant='secondary' className='text-xs'>
-                Auto-managed
-              </Badge>
-            </div>
-            <p className='text-muted-foreground mt-1 text-sm'>User's data</p>
-          </div>
-        </>
-      )}
 
       {/* Twitter-specific Fields */}
       {presetConfig?.id === 'action-with-post' && (
@@ -458,34 +489,6 @@ export function QuestFormFields({
       )}
 
       {/* Universal Fields */}
-
-      {/* Reward Field */}
-      {isFieldVisible('reward', fieldStates) && (
-        <FormField
-          control={form.control}
-          name='reward'
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Reward</FormLabel>
-              <FormControl>
-                <NoWheelNumber
-                  placeholder='Enter reward amount'
-                  min={0}
-                  step={10}
-                  disabled={isFieldDisabled('reward', fieldStates)}
-                  readOnly={isFieldReadonly('reward', fieldStates)}
-                  {...field}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    field.onChange(value === '' ? undefined : Number(value));
-                  }}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      )}
 
       {/* Total Reward Display (only for multiple/iterable quests) */}
       {totalRewardDisplay}

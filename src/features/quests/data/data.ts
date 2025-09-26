@@ -177,6 +177,7 @@ export const TYPE_PROVIDER_REQUIREMENTS: Partial<
   [WaitlistTasksResponseDtoTypeItem.connect]: [
     TaskResponseDtoProvider.twitter,
     TaskResponseDtoProvider.telegram,
+    TaskResponseDtoProvider.discord,
   ],
 };
 

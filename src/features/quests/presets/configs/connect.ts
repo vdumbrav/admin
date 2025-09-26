@@ -7,6 +7,7 @@ export const connectPresetConfig: PresetConfig = {
   fieldVisibility: {
     group: 'readonly', // Always 'social'
     provider: 'visible', // telegram, discord, twitter
+    type: 'hidden', // Always 'connect'
     uri: 'hidden', // Show static text "URL: User's data"
     reward: 'visible',
     tasks: 'hidden',
