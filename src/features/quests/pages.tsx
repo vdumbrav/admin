@@ -5,10 +5,10 @@ import { Main } from '@/components/layout/main';
 import { apiToForm } from './adapters/form-api-adapter';
 import { useCreateQuest, useQuest, useUpdateQuest } from './api';
 import { PresetSelection } from './components/preset-selection';
+import { defaultQuestSearch } from './default-search';
 import { QuestForm } from './form';
 import { getPreset, type PresetId } from './presets';
 import type { QuestFormValues } from './types/form-types';
-import { useQuestSearch } from './use-quest-search';
 
 export const QuestCreatePage = () => {
   const hasPreset = useRouterState({
@@ -19,9 +19,6 @@ export const QuestCreatePage = () => {
   const showForm = search.showForm;
   const create = useCreateQuest();
   const nav = useNavigate({});
-  // Preserve search params when returning to list
-  const parentSearch = useQuestSearch({ from: '/_authenticated/quests/' });
-  const listSearch = parentSearch;
 
   return (
     <>
@@ -37,7 +34,7 @@ export const QuestCreatePage = () => {
               </div>
               <Button
                 variant='outline'
-                onClick={() => void nav({ to: '/quests', search: listSearch })}
+                onClick={() => void nav({ to: '/quests', search: defaultQuestSearch })}
               >
                 Back to list
               </Button>
@@ -47,12 +44,12 @@ export const QuestCreatePage = () => {
                 try {
                   await create.mutateAsync(v);
                   toast.success('Quest saved successfully');
-                  void nav({ to: '/quests', search: listSearch });
+                  void nav({ to: '/quests', search: defaultQuestSearch });
                 } catch (e) {
                   toast.error(e instanceof Error ? e.message : 'Failed to save');
                 }
               }}
-              onCancel={() => void nav({ to: '/quests', search: listSearch })}
+              onCancel={() => void nav({ to: '/quests', search: defaultQuestSearch })}
             />
           </div>
         ) : (
@@ -69,9 +66,6 @@ export const QuestEditPage = () => {
   const { data } = useQuest(questId);
   const update = useUpdateQuest(questId);
   const nav = useNavigate({});
-  // Use current route's search instead of parent
-  const currentSearch = useQuestSearch({ from: '/_authenticated/quests/$id' });
-  const listSearch = currentSearch;
 
   if (!data) {
     return (
@@ -92,7 +86,10 @@ export const QuestEditPage = () => {
             <h2 className='text-2xl font-bold tracking-tight'>Edit Quest #{id}</h2>
             <p className='text-muted-foreground'>Update quest properties.</p>
           </div>
-          <Button variant='outline' onClick={() => void nav({ to: '/quests', search: listSearch })}>
+          <Button
+            variant='outline'
+            onClick={() => void nav({ to: '/quests', search: defaultQuestSearch })}
+          >
             Back to list
           </Button>
         </div>
@@ -105,12 +102,12 @@ export const QuestEditPage = () => {
             try {
               await update.mutateAsync(v);
               toast.success('Quest saved successfully');
-              void nav({ to: '/quests', search: listSearch });
+              void nav({ to: '/quests', search: defaultQuestSearch });
             } catch (e) {
               toast.error(e instanceof Error ? e.message : 'Failed to save');
             }
           }}
-          onCancel={() => void nav({ to: '/quests', search: listSearch })}
+          onCancel={() => void nav({ to: '/quests', search: defaultQuestSearch })}
         />
       </Main>
     </>
@@ -121,9 +118,6 @@ export const QuestCreateWithPresetPage = () => {
   const { preset } = useParams({ from: '/_authenticated/quests/new/$preset' });
   const create = useCreateQuest();
   const nav = useNavigate({});
-  // Preserve search params when returning to list
-  const parentSearch = useQuestSearch({ from: '/_authenticated/quests/' });
-  const listSearch = parentSearch;
 
   // Get preset configuration
   const presetConfig = getPreset(preset as PresetId);
@@ -137,7 +131,10 @@ export const QuestCreateWithPresetPage = () => {
             <p className='text-muted-foreground'>Create a new quest</p>
             <p className='text-muted-foreground mt-4 text-sm'>{presetConfig.name}</p>
           </div>
-          <Button variant='outline' onClick={() => void nav({ to: '/quests', search: listSearch })}>
+          <Button
+            variant='outline'
+            onClick={() => void nav({ to: '/quests', search: defaultQuestSearch })}
+          >
             Back to list
           </Button>
         </div>
@@ -147,12 +144,12 @@ export const QuestCreateWithPresetPage = () => {
             try {
               await create.mutateAsync(v);
               toast.success('Quest saved successfully');
-              void nav({ to: '/quests', search: listSearch });
+              void nav({ to: '/quests', search: defaultQuestSearch });
             } catch (e) {
               toast.error(e instanceof Error ? e.message : 'Failed to save');
             }
           }}
-          onCancel={() => void nav({ to: '/quests', search: listSearch })}
+          onCancel={() => void nav({ to: '/quests', search: defaultQuestSearch })}
         />
       </Main>
     </>

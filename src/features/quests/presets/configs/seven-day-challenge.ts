@@ -5,6 +5,7 @@ export const sevenDayChallengePresetConfig: PresetConfig = {
   name: 'Day challenge',
 
   fieldVisibility: {
+    type: 'readonly', // Always 'repeatable'
     group: 'readonly', // Always 'daily'
     provider: 'readonly', // Always 'walme' (Internal)
     uri: 'hidden', // Not used

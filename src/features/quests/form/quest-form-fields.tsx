@@ -6,7 +6,6 @@ import { useMemo, useState } from 'react';
 import type { UseFormReturn } from 'react-hook-form';
 import { Info } from 'lucide-react';
 import { type TaskResponseDtoProvider } from '@/lib/api/generated/model';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
@@ -222,21 +221,6 @@ export function QuestFormFields({
               <FormItem>
                 <div className='flex items-center justify-between'>
                   <FormLabel>Type</FormLabel>
-                  {(isFieldDisabled('type', fieldStates) ||
-                    isFieldReadonly('type', fieldStates)) && (
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Badge variant='secondary' className='text-xs'>
-                            Locked by preset
-                          </Badge>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          This field is enforced by preset and cannot be changed.
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  )}
                 </div>
                 <FormControl>
                   <SelectDropdown
@@ -351,6 +335,10 @@ export function QuestFormFields({
           )}
         />
       )}
+
+      {/* Daily Rewards Editor for 7-Day Challenge */}
+      {presetConfig?.id === 'seven-day-challenge' &&
+        isFieldVisible('dailyRewards', fieldStates) && <DailyRewardsEditor />}
 
       {/* Popup Button Name */}
       {isFieldVisible('popupButton', fieldStates) && (
@@ -682,18 +670,10 @@ export function QuestFormFields({
         </>
       )}
 
-      {/* 7-Day Challenge Fields */}
-      {presetConfig?.id === 'seven-day-challenge' && (
-        <>
-          {/* Daily Rewards Editor */}
-          {isFieldVisible('dailyRewards', fieldStates) && <DailyRewardsEditor />}
-        </>
-      )}
-
       {/* Universal Fields */}
 
-      {/* Total Reward Display (only for multiple/iterable quests) */}
-      {totalRewardDisplay}
+      {/* Total Reward Display (only for multiple/iterable quests, but not for seven-day-challenge) */}
+      {presetConfig?.id !== 'seven-day-challenge' && totalRewardDisplay}
 
       {/* Connect Gate Warnings */}
       {connectGateWarnings.length > 0 && (
@@ -740,7 +720,7 @@ export function QuestFormFields({
             <Button variant='outline' type='button' onClick={() => form.reset()}>
               Reset
             </Button>
-            <Button variant='outline' type='button' onClick={() => window.history.back()}>
+            <Button variant='secondary' type='button' onClick={() => window.history.back()}>
               Cancel
             </Button>
             <Button type='submit' disabled={form.formState.isSubmitting}>

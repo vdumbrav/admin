@@ -1,14 +1,16 @@
 import { useEffect } from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
+import { Plus, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
+import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { NoWheelNumber } from '@/components/no-wheel-number';
 
 interface FormValues {
-  iterator?: {
-    reward_map?: number[]; // 7-Day Challenge: Daily rewards array [10, 20, 30...]
+  iterator: {
+    reward_map: number[]; // 7-Day Challenge: Daily rewards array [10, 20, 30...]
   };
-  totalReward?: number; // Auto-calculated sum of reward_map
+  totalReward: number; // Auto-calculated sum of reward_map
+  reward: number; // Main reward field - required
   start?: string;
 }
 
@@ -27,10 +29,11 @@ export const DailyRewardsEditor = () => {
     }
   };
 
-  const removeDay = () => {
+  const removeDay = (index: number) => {
     const currentMap = rewardMap ?? [];
     if (currentMap.length > MIN_DAYS) {
-      setValue('iterator.reward_map', currentMap.slice(0, -1), { shouldDirty: true });
+      const newMap = currentMap.filter((_, i) => i !== index);
+      setValue('iterator.reward_map', newMap, { shouldDirty: true });
     }
   };
 
@@ -42,6 +45,7 @@ export const DailyRewardsEditor = () => {
         return sum + (typeof reward === 'number' && reward >= 0 ? reward : 0);
       }, 0);
       setValue('totalReward', total, { shouldDirty: false });
+      setValue('reward', total, { shouldDirty: false });
     }
   }, [rewardMap, setValue]);
 
@@ -49,30 +53,7 @@ export const DailyRewardsEditor = () => {
     <div className='space-y-4'>
       <div className='flex items-center justify-between'>
         <div>
-          <h3 className='text-sm font-medium'>Daily Rewards</h3>
-          <p className='text-muted-foreground text-xs'>
-            Set reward amounts for each day ({rewardMap?.length ?? 0} days)
-          </p>
-        </div>
-        <div className='flex items-center gap-2'>
-          <Button
-            type='button'
-            variant='outline'
-            size='sm'
-            onClick={removeDay}
-            disabled={(rewardMap?.length ?? 0) <= MIN_DAYS}
-          >
-            Remove Day
-          </Button>
-          <Button
-            type='button'
-            variant='outline'
-            size='sm'
-            onClick={addDay}
-            disabled={(rewardMap?.length ?? 0) >= MAX_DAYS}
-          >
-            Add Day
-          </Button>
+          <h3 className='text-sm font-medium'>Reward for the day, XP</h3>
         </div>
       </div>
 
@@ -103,21 +84,49 @@ export const DailyRewardsEditor = () => {
                   </FormControl>
                   <FormMessage />
                 </FormItem>
+                {(rewardMap?.length ?? 0) > MIN_DAYS && (
+                  <Button
+                    type='button'
+                    variant='ghost'
+                    size='sm'
+                    onClick={() => removeDay(index)}
+                    className='text-muted-foreground hover:text-destructive h-8 w-8 p-0'
+                  >
+                    <Trash2 className='h-4 w-4' />
+                  </Button>
+                )}
               </div>
             )}
           />
         ))}
+
+        {/* Add Day Button */}
+        {(rewardMap?.length ?? 0) < MAX_DAYS && (
+          <Button
+            type='button'
+            variant='secondary'
+            onClick={addDay}
+            className='flex h-10 w-[230px] items-center justify-center gap-2'
+          >
+            <Plus className='h-4 w-4' />
+            Add Day
+          </Button>
+        )}
       </div>
 
       {rewardMap?.length && (
-        <div className='rounded-md border p-3 text-sm'>
-          <div className='flex items-center justify-between'>
-            <span className='font-medium'>Total Reward:</span>
-            <span className='font-mono'>{rewardMap.reduce((sum, reward) => sum + reward, 0)}</span>
-          </div>
-          <div className='text-muted-foreground mt-2 text-xs'>
-            Distribution: {rewardMap.join(' + ')}
-          </div>
+        <div className='grid grid-cols-3 gap-4'>
+          <FormItem>
+            <FormLabel>Total reward, XP</FormLabel>
+            <FormControl>
+              <input
+                type='number'
+                value={rewardMap.reduce((sum, reward) => sum + reward, 0)}
+                readOnly
+                className='border-input bg-muted ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex h-10 w-full rounded-md border px-3 py-2 text-sm [-moz-appearance:textfield] file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none'
+              />
+            </FormControl>
+          </FormItem>
         </div>
       )}
     </div>
