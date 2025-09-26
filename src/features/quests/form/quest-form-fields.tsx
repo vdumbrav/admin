@@ -211,6 +211,51 @@ export function QuestFormFields({
         )}
       </div>
 
+      {/* Type Field Row */}
+      <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
+        {isFieldVisible('type', fieldStates) && (
+          <FormField
+            control={form.control}
+            name='type'
+            render={({ field }) => (
+              <FormItem>
+                <div className='flex items-center justify-between'>
+                  <FormLabel>Type</FormLabel>
+                  {(isFieldDisabled('type', fieldStates) ||
+                    isFieldReadonly('type', fieldStates)) && (
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Badge variant='secondary' className='text-xs'>
+                            Locked by preset
+                          </Badge>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          This field is enforced by preset and cannot be changed.
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  )}
+                </div>
+                <FormControl>
+                  <SelectDropdown
+                    className='w-full'
+                    value={field.value}
+                    onValueChange={field.onChange}
+                    items={types}
+                    placeholder='Select quest type'
+                    disabled={
+                      isFieldDisabled('type', fieldStates) || isFieldReadonly('type', fieldStates)
+                    }
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
+      </div>
+
       {/* Title Field */}
       {isFieldVisible('title', fieldStates) && (
         <FormField
@@ -261,6 +306,7 @@ export function QuestFormFields({
         <ManagedField
           name='resources.ui.button'
           label='Button name'
+          description='Text displayed on the main quest button (e.g., "Join", "Follow"). Auto-filled based on provider.'
           presetConfig={presetConfig}
           disabled={isFieldDisabled('buttonText', fieldStates)}
           placeholder='Override button label'
@@ -275,6 +321,10 @@ export function QuestFormFields({
           render={({ field }) => (
             <FormItem>
               <FormLabel>Popup description</FormLabel>
+              <FormDescription>
+                Description shown in quest popup modal. For join quests, Connect Gate auto-fills
+                additional connection requirements.
+              </FormDescription>
               <FormControl>
                 <Textarea
                   placeholder='Enter popup description'
@@ -295,6 +345,7 @@ export function QuestFormFields({
         <ManagedField
           name='resources.ui.pop-up.button'
           label='Popup button name'
+          description='Text displayed on the button inside quest popup modal. Usually matches main button text.'
           presetConfig={presetConfig}
           disabled={isFieldDisabled('popupButton', fieldStates)}
           placeholder='Override popup button label'
@@ -497,7 +548,7 @@ export function QuestFormFields({
                   <Checkbox checked={field.value} onCheckedChange={field.onChange} />
                 </FormControl>
                 <div className='space-y-1 leading-none'>
-                  <FormLabel>TMA</FormLabel>
+                  <FormLabel>Telegram Mini App (TMA)</FormLabel>
                 </div>
               </FormItem>
             )}
@@ -646,48 +697,6 @@ export function QuestFormFields({
 
       {/* Advanced Settings */}
       <div className='space-y-4'>
-        {/* Type Field */}
-        {isFieldVisible('type', fieldStates) && (
-          <FormField
-            control={form.control}
-            name='type'
-            render={({ field }) => (
-              <FormItem>
-                <div className='flex items-center justify-between'>
-                  <FormLabel>Quest Type</FormLabel>
-                  {(isFieldDisabled('type', fieldStates) ||
-                    isFieldReadonly('type', fieldStates)) && (
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Badge variant='secondary' className='text-xs'>
-                            Locked by preset
-                          </Badge>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          This field is enforced by preset and cannot be changed.
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  )}
-                </div>
-                <FormControl>
-                  <SelectDropdown
-                    value={field.value}
-                    onValueChange={field.onChange}
-                    items={types}
-                    placeholder='Select quest type'
-                    disabled={
-                      isFieldDisabled('type', fieldStates) || isFieldReadonly('type', fieldStates)
-                    }
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        )}
-
         {/* Set Visible and Actions Row */}
         <div className='flex items-center justify-between'>
           {/* Set Visible - Left side */}

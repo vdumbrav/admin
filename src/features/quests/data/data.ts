@@ -3,7 +3,12 @@ import {
   TaskResponseDtoProvider,
   WaitlistTasksResponseDtoTypeItem,
 } from '@/lib/api/generated/model';
-import { getAvailableApiGroups, getAvailableApiProviders, getAvailableApiTypes } from './adapters';
+import {
+  getAvailableApiGroups,
+  getAvailableApiProviders,
+  getAvailableApiTypes,
+  getJoinPresetTypes,
+} from './adapters';
 import type { DropdownOption } from './types';
 
 // ============================================================================
@@ -72,6 +77,16 @@ export const groups = getAvailableApiGroups().map(
  * All available quest types from the API
  */
 export const types = getAvailableApiTypes().map(
+  (type): DropdownOption => ({
+    value: type,
+    label: TYPE_LABELS[type],
+  }),
+);
+
+/**
+ * Types for join preset only (limited set)
+ */
+export const joinPresetTypes = getJoinPresetTypes().map(
   (type): DropdownOption => ({
     value: type,
     label: TYPE_LABELS[type],
@@ -155,29 +170,31 @@ export function isApiGroup(value: string): value is TaskResponseDtoGroup {
 /**
  * Types that require specific providers
  *
- * This mapping defines which quest types are compatible with which providers.
- * Currently hardcoded for simplicity - can be moved to API configuration later.
+ * Based on actual usage in ~/works/waitlist production code:
+ * - like/comment/share only work with Twitter (Twitter intent links)
+ * - connect works with all OAuth providers (matrix, discord, twitter, telegram)
+ * - join removed as it has no specific implementation in waitlist project
+ * - dummy removed as it has no specific implementation in waitlist project
  */
 export const TYPE_PROVIDER_REQUIREMENTS: Partial<
   Record<WaitlistTasksResponseDtoTypeItem, TaskResponseDtoProvider[]>
 > = {
-  [WaitlistTasksResponseDtoTypeItem.like]: [
-    TaskResponseDtoProvider.twitter,
-    TaskResponseDtoProvider.telegram,
-  ],
-  [WaitlistTasksResponseDtoTypeItem.share]: [
-    TaskResponseDtoProvider.twitter,
-    TaskResponseDtoProvider.telegram,
-  ],
+  [WaitlistTasksResponseDtoTypeItem.like]: [TaskResponseDtoProvider.twitter],
   [WaitlistTasksResponseDtoTypeItem.comment]: [TaskResponseDtoProvider.twitter],
+  [WaitlistTasksResponseDtoTypeItem.share]: [TaskResponseDtoProvider.twitter],
   [WaitlistTasksResponseDtoTypeItem.join]: [
     TaskResponseDtoProvider.telegram,
     TaskResponseDtoProvider.discord,
+    TaskResponseDtoProvider.twitter,
   ],
   [WaitlistTasksResponseDtoTypeItem.connect]: [
+    TaskResponseDtoProvider.matrix,
+    TaskResponseDtoProvider.discord,
     TaskResponseDtoProvider.twitter,
     TaskResponseDtoProvider.telegram,
-    TaskResponseDtoProvider.discord,
+    TaskResponseDtoProvider.walme,
+    TaskResponseDtoProvider.monetag,
+    TaskResponseDtoProvider.adsgram,
   ],
 };
 

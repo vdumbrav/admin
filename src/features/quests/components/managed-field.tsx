@@ -1,7 +1,14 @@
 import { useFormContext } from 'react-hook-form';
 // import { Badge } from '@/components/ui/badge';
 // import { Button } from '@/components/ui/button';
-import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import {
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 // import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import type { PresetConfig } from '../presets';
@@ -9,6 +16,7 @@ import type { PresetConfig } from '../presets';
 interface ManagedFieldProps {
   name: string;
   label: string;
+  description?: string;
   presetConfig?: PresetConfig;
   disabled?: boolean;
   placeholder?: string;
@@ -32,6 +40,7 @@ const getNestedValue = (obj: unknown, path: string): unknown => {
 export const ManagedField = ({
   name,
   label,
+  description,
   presetConfig,
   disabled,
   placeholder,
@@ -108,6 +117,7 @@ export const ManagedField = ({
               )} */}
             </div>
           </div>
+          {description && <FormDescription>{description}</FormDescription>}
           <FormControl>
             <Input
               {...field}

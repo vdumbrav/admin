@@ -81,7 +81,7 @@ const iteratorSchema = z
 const baseQuestFormShape = {
   title: z.string().min(1, 'Title is required'),
   type: questTypeSchema,
-  description: z.string(),
+  description: z.string().min(1, 'Description is required'),
   group: questGroupSchema,
   order_by: z.number(),
   provider: providerSchema,

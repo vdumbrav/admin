@@ -11,6 +11,18 @@ export function getAvailableApiTypes(): WaitlistTasksResponseDtoTypeItem[] {
   return Object.values(ApiTypeItem);
 }
 
+export function getJoinPresetTypes(): WaitlistTasksResponseDtoTypeItem[] {
+  // Only types available for join preset
+  return [
+    ApiTypeItem.like,
+    ApiTypeItem.comment,
+    ApiTypeItem.share,
+    ApiTypeItem.join,
+    ApiTypeItem.multiple,
+    ApiTypeItem.external,
+  ];
+}
+
 export function getAvailableApiProviders(): TaskResponseDtoProvider[] {
   return Object.values(ApiProvider);
 }

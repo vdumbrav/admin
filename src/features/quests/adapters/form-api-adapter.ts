@@ -168,15 +168,18 @@ export function formToApi(formData: QuestFormValues): Partial<TaskResponseDto> {
     ...(formData.blocking_task && { blocking_task: formData.blocking_task }),
 
     // Resources with icon included - only if there's actual data
-    ...(((formData.resources && Object.values(formData.resources).some(val => val !== '' && val !== undefined)) || formData.icon) && {
+    ...(((formData.resources &&
+      Object.values(formData.resources).some((val) => val !== '' && val !== undefined)) ??
+      formData.icon) && {
       resource: filterEmptyValues({
         ...formData.resources,
         icon: formData.icon ?? formData.resources?.icon,
-      })
+      }),
     }),
 
     // Child tasks - only if there are actual children
-    ...(formData.child && formData.child.length > 0 && { child: formData.child.map(convertFormChildToApi) }),
+    ...(formData.child &&
+      formData.child.length > 0 && { child: formData.child.map(convertFormChildToApi) }),
 
     // Iterator mapping for 7-day challenge (Form → API) - only if present
     ...(formData.iterator && {
@@ -188,7 +191,7 @@ export function formToApi(formData: QuestFormValues): Partial<TaskResponseDto> {
         reward: formData.iterator.reward_map[0] ?? 0,
         day: 0,
         iterator_reward: [],
-      }
+      },
     }),
 
     // Date fields - only if not empty
