@@ -207,20 +207,32 @@ export const buildQuestFormSchema = (presetId?: string) =>
         }
       }
 
-      if (val.provider === 'twitter' && val.type !== 'multiple') {
-        if (!val.resources?.username) {
+      if (val.provider === 'twitter') {
+        // For non-multiple types, URI is required (for join/follow actions)
+        if (val.type !== 'multiple' && !val.uri) {
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
-            message: 'Username is required for Twitter provider',
-            path: ['resources', 'username'],
+            message: 'Tweet URL or ID is required for Twitter provider',
+            path: ['uri'],
           });
         }
-        if (!val.resources?.tweetId) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            message: 'Tweet ID is required for Twitter provider',
-            path: ['resources', 'tweetId'],
-          });
+
+        // For non-multiple types, also require username and tweetId in resources
+        if (val.type !== 'multiple') {
+          if (!val.resources?.username) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: 'Username is required for Twitter provider',
+              path: ['resources', 'username'],
+            });
+          }
+          if (!val.resources?.tweetId) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: 'Tweet ID is required for Twitter provider',
+              path: ['resources', 'tweetId'],
+            });
+          }
         }
       }
 

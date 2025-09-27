@@ -38,12 +38,27 @@ export const PROVIDERS = [
 
 export const CHILD_TYPES = ['like', 'share', 'comment', 'join', 'connect'] as const;
 
-// Child task type - subset of TaskResponseDto for simplified UX
+// Child task type - enhanced to support full quest functionality with inheritance
 export type ChildFormValues = Pick<TaskResponseDto, 'title' | 'group' | 'provider' | 'order_by'> & {
   description?: string; // Optional for child tasks
   reward?: number; // Optional for child tasks
   type: (typeof CHILD_TYPES)[number]; // Restricted to child-supported types
-  resources?: Pick<ResourcesDto, 'tweetId' | 'username'>; // Simplified resources
+
+  // Platform and visibility settings (inherited from parent if not specified)
+  enabled?: boolean; // Inherits from parent if undefined
+  web?: boolean; // Inherits from parent if undefined
+  twa?: boolean; // Inherits from parent if undefined
+  pinned?: boolean; // Usually false for child tasks
+  level?: number; // Usually 1 for child tasks
+
+  // Optional fields for advanced child tasks
+  uri?: string; // For join/connect type child tasks
+  icon?: string; // Custom icon for child task
+  start?: string; // Time restrictions
+  end?: string; // Time restrictions
+
+  // Resources - expanded to support more providers
+  resources?: Pick<ResourcesDto, 'tweetId' | 'username' | 'icon' | 'ui'>;
 };
 
 export interface QuestFormValues {

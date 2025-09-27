@@ -8,7 +8,7 @@ export const actionWithPostPresetConfig: PresetConfig = {
     type: 'readonly', // Always 'multiple'
     group: 'readonly', // Always 'social'
     provider: 'readonly', // Always 'twitter'
-    uri: 'hidden', // Not used for this type
+    uri: 'hidden', // Not used for multiple type - uses tweetId in resources instead
     reward: 'hidden', // Use totalReward instead
     tasks: 'visible', // Dynamic list with Like/Comment/Retweet
     dailyRewards: 'hidden',
