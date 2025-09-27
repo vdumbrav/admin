@@ -1,0 +1,375 @@
+/**
+ * Multi-task creation hook with progress tracking
+ * Handles sequential creation of main task + child tasks
+ */
+import { useCallback, useRef, useState } from 'react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
+import {
+  getAdminWaitlistTasksControllerGetWaitlistTasksQueryKey,
+  useAdminWaitlistTasksControllerCreateTask,
+} from '@/lib/api/generated/admin/admin';
+import type { CreateTaskDto } from '@/lib/api/generated/model';
+import { formToApi } from '../adapters/form-api-adapter';
+import type { ChildFormValues, QuestFormValues } from '../types/form-types';
+import type {
+  MultiTaskCreationResult,
+  MultiTaskCreationState,
+  MultiTaskProgressInfo,
+} from '../types/multi-task-types';
+
+export const useCreateMultiTask = () => {
+  const queryClient = useQueryClient();
+  const createTaskMutation = useAdminWaitlistTasksControllerCreateTask();
+  const queryKey = getAdminWaitlistTasksControllerGetWaitlistTasksQueryKey();
+
+  const [state, setState] = useState<MultiTaskCreationState>(() => ({
+    main: { status: 'pending' },
+    children: [],
+    overall: 'idle',
+    totalTasks: 0,
+    completedTasks: 0,
+    failedTasks: 0,
+  }));
+
+  // Store parent data for retry operations
+  const parentDataRef = useRef<QuestFormValues | null>(null);
+
+  const abortControllerRef = useRef<AbortController | null>(null);
+
+  // Helper to create child task data with parent_id and inheritance from parent
+  const createChildTaskData = useCallback(
+    (child: ChildFormValues, parentId: number, parentData?: QuestFormValues): CreateTaskDto => {
+      const childApiData = {
+        // Core required fields for CreateTaskDto
+        type: child.type,
+        title: child.title ?? '',
+        description: child.description ?? '',
+        group: child.group,
+        reward: child.reward ?? 0,
+
+        // Platform settings - inherit from parent if not specified
+        enabled: child.enabled ?? parentData?.enabled ?? true,
+        web: child.web ?? parentData?.web ?? true,
+        twa: child.twa ?? parentData?.twa ?? false,
+        pinned: child.pinned ?? false, // Child tasks rarely pinned
+        level: child.level ?? 1, // Child tasks are usually level 1
+
+        // Child-specific
+        parent_id: parentId,
+        provider: child.provider,
+
+        // Optional fields
+        ...(child.uri && { uri: child.uri }),
+        ...(child.icon && { icon: child.icon }),
+        ...(child.start && { start: child.start }),
+        ...(child.end && { end: child.end }),
+
+        // Resources if present
+        ...(child.resources && {
+          resource: child.resources,
+        }),
+      };
+
+      return childApiData as CreateTaskDto;
+    },
+    [],
+  );
+
+  // Progress calculation
+  const getProgressInfo = useCallback(
+    (currentState: MultiTaskCreationState): MultiTaskProgressInfo => {
+      const { main, children, completedTasks, totalTasks } = currentState;
+
+      let currentTaskName = '';
+      let phase: 'main' | 'children' = 'main';
+
+      if (main.status === 'creating') {
+        currentTaskName = 'Creating main task...';
+        phase = 'main';
+      } else if (main.status === 'success') {
+        const creatingChild = children.find((c) => c.status === 'creating');
+        if (creatingChild) {
+          currentTaskName = `Creating child task: ${creatingChild.data.title || `Task ${creatingChild.index + 1}`}`;
+          phase = 'children';
+        } else {
+          currentTaskName = 'Completed';
+        }
+      }
+
+      const current = completedTasks;
+      const percentage = totalTasks > 0 ? Math.round((current / totalTasks) * 100) : 0;
+
+      return {
+        current,
+        total: totalTasks,
+        currentTaskName,
+        percentage,
+        phase,
+      };
+    },
+    [],
+  );
+
+  // Main mutation function
+  const mutation = useMutation({
+    mutationFn: async (formData: QuestFormValues): Promise<MultiTaskCreationResult> => {
+      // Initialize abort controller
+      abortControllerRef.current = new AbortController();
+
+      // Store parent data for retry operations
+      parentDataRef.current = formData;
+
+      const children = formData.child ?? [];
+      const totalTasks = 1 + children.length; // main + children
+
+      // Initialize state
+      setState({
+        main: {
+          status: 'creating',
+          data: { ...formData, child: undefined }, // Remove child from main data
+        },
+        children: children.map((child, index) => ({
+          status: 'pending',
+          data: child,
+          index,
+        })),
+        overall: 'creating',
+        totalTasks,
+        completedTasks: 0,
+        failedTasks: 0,
+      });
+
+      const result: MultiTaskCreationResult = {
+        success: false,
+        childTasks: [],
+        errors: [],
+      };
+
+      try {
+        // Step 1: Create main task
+        const mainTaskData = formToApi({ ...formData, child: undefined });
+        const mainTask = await createTaskMutation.mutateAsync({
+          data: mainTaskData as CreateTaskDto,
+        });
+
+        result.mainTask = mainTask;
+
+        // Update state after main task creation
+        setState((prev) => ({
+          ...prev,
+          main: {
+            ...prev.main,
+            status: 'success',
+            result: mainTask,
+          },
+          completedTasks: 1,
+        }));
+
+        // Step 2: Create child tasks sequentially
+        if (children.length > 0) {
+          for (let i = 0; i < children.length; i++) {
+            // Check if aborted
+            if (abortControllerRef.current?.signal?.aborted) {
+              throw new Error('Creation cancelled');
+            }
+
+            const child = children[i];
+
+            // Update state to show current child being created
+            setState((prev) => ({
+              ...prev,
+              children: prev.children.map((c, idx) =>
+                idx === i ? { ...c, status: 'creating', parentId: mainTask.id } : c,
+              ),
+            }));
+
+            try {
+              const childTaskData = createChildTaskData(child, mainTask.id, formData);
+              const childTask = await createTaskMutation.mutateAsync({
+                data: childTaskData,
+              });
+
+              result.childTasks.push(childTask);
+
+              // Update state after successful child creation
+              setState((prev) => ({
+                ...prev,
+                children: prev.children.map((c, idx) =>
+                  idx === i ? { ...c, status: 'success', result: childTask } : c,
+                ),
+                completedTasks: prev.completedTasks + 1,
+              }));
+            } catch (childError) {
+              const errorMessage =
+                childError instanceof Error ? childError.message : 'Unknown error';
+              result.errors.push(`Failed to create child task "${child.title}": ${errorMessage}`);
+
+              // Update state after failed child creation
+              setState((prev) => ({
+                ...prev,
+                children: prev.children.map((c, idx) =>
+                  idx === i ? { ...c, status: 'error', error: errorMessage } : c,
+                ),
+                failedTasks: prev.failedTasks + 1,
+              }));
+            }
+          }
+        }
+
+        // Determine overall success
+        result.success = result.errors.length === 0;
+
+        // Update final state
+        setState((prev) => ({
+          ...prev,
+          overall: result.success ? 'completed' : 'partial_error',
+        }));
+
+        return result;
+      } catch (mainError) {
+        const errorMessage =
+          mainError instanceof Error ? mainError.message : 'Failed to create main task';
+        result.errors.push(errorMessage);
+
+        // Update state after main task failure
+        setState((prev) => ({
+          ...prev,
+          main: {
+            ...prev.main,
+            status: 'error',
+            error: errorMessage,
+          },
+          overall: 'partial_error',
+          failedTasks: prev.failedTasks + 1,
+        }));
+
+        throw mainError;
+      }
+    },
+    onSuccess: (result) => {
+      void queryClient.invalidateQueries({ queryKey });
+
+      if (result.success) {
+        toast.success(`Quest created successfully with ${result.childTasks.length} child tasks`);
+      } else {
+        const successCount = result.childTasks.length;
+        const errorCount = result.errors.length;
+        toast.warning(
+          `Quest created with ${successCount} successful and ${errorCount} failed child tasks`,
+          {
+            description: 'Use the retry button to attempt failed tasks again.',
+            duration: 5000,
+          },
+        );
+      }
+    },
+    onError: (error) => {
+      const message = error instanceof Error ? error.message : 'Failed to create quest';
+      toast.error(message, {
+        description: 'The main quest could not be created. Please try again.',
+        duration: 5000,
+      });
+    },
+  });
+
+  // Retry failed child tasks
+  const retryFailedChildren = useCallback(async () => {
+    if (!state.main.result) return;
+
+    const failedChildren = state.children.filter((c) => c.status === 'error');
+    if (failedChildren.length === 0) return;
+
+    setState((prev) => ({
+      ...prev,
+      overall: 'creating',
+    }));
+
+    for (const failedChild of failedChildren) {
+      try {
+        setState((prev) => ({
+          ...prev,
+          children: prev.children.map((c) =>
+            c.index === failedChild.index ? { ...c, status: 'creating', error: undefined } : c,
+          ),
+        }));
+
+        const childTaskData = createChildTaskData(
+          failedChild.data,
+          state.main.result?.id,
+          parentDataRef.current ?? undefined,
+        );
+        const childTask = await createTaskMutation.mutateAsync({
+          data: childTaskData,
+        });
+
+        setState((prev) => ({
+          ...prev,
+          children: prev.children.map((c) =>
+            c.index === failedChild.index ? { ...c, status: 'success', result: childTask } : c,
+          ),
+          completedTasks: prev.completedTasks + 1,
+          failedTasks: prev.failedTasks - 1,
+        }));
+
+        toast.success(`Child task "${failedChild.data.title}" created successfully`);
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        setState((prev) => ({
+          ...prev,
+          children: prev.children.map((c) =>
+            c.index === failedChild.index ? { ...c, status: 'error', error: errorMessage } : c,
+          ),
+        }));
+
+        toast.error(`Failed to retry "${failedChild.data.title}": ${errorMessage}`);
+      }
+    }
+
+    setState((prev) => ({
+      ...prev,
+      overall: prev.failedTasks === 0 ? 'completed' : 'partial_error',
+    }));
+
+    void queryClient.invalidateQueries({ queryKey });
+  }, [state, createChildTaskData, createTaskMutation, queryClient, queryKey]);
+
+  // Cancel creation
+  const cancel = useCallback(() => {
+    abortControllerRef.current?.abort();
+    setState((prev) => ({ ...prev, overall: 'idle' }));
+  }, []);
+
+  // Reset state
+  const reset = useCallback(() => {
+    setState({
+      main: { status: 'pending' },
+      children: [],
+      overall: 'idle',
+      totalTasks: 0,
+      completedTasks: 0,
+      failedTasks: 0,
+    });
+  }, []);
+
+  return {
+    // Mutation
+    mutate: mutation.mutate,
+    mutateAsync: mutation.mutateAsync,
+    isLoading: mutation.isPending,
+
+    // State
+    state,
+    progressInfo: getProgressInfo(state),
+
+    // Actions
+    retryFailedChildren,
+    cancel,
+    reset,
+
+    // Computed
+    hasFailedTasks: state.failedTasks > 0,
+    canRetry: state.overall === 'partial_error' && state.failedTasks > 0,
+    isComplete: state.overall === 'completed',
+  };
+};
