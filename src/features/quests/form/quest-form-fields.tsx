@@ -74,6 +74,7 @@ export function QuestFormFields({
 
   // Watch current type to filter compatible providers
   const currentType = form.watch('type');
+  const currentProvider = form.watch('provider');
 
   // Filter providers based on current type
   const availableProviders = useMemo(() => {
@@ -435,10 +436,14 @@ export function QuestFormFields({
           name='uri'
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Url</FormLabel>
+              <FormLabel>{currentProvider === 'twitter' ? 'Tweet URL or ID' : 'URL'}</FormLabel>
               <FormControl>
                 <Input
-                  placeholder='https://example.com'
+                  placeholder={
+                    currentProvider === 'twitter'
+                      ? 'https://twitter.com/user/status/123456789 or 123456789'
+                      : 'https://example.com'
+                  }
                   disabled={isFieldDisabled('uri', fieldStates)}
                   readOnly={isFieldReadonly('uri', fieldStates)}
                   {...field}

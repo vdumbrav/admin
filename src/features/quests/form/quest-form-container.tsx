@@ -1,10 +1,13 @@
 /**
  * Quest Form Container Component
  * Clean, focused form component using the new modular architecture
+ * Now supports multi-task creation with progress tracking
  */
 import { useState } from 'react';
 import { Form } from '@/components/ui/form';
 import { ConfirmDialog } from '@/components/confirm-dialog';
+import { MultiTaskProgress } from '../components/multi-task-progress';
+import { useCreateMultiTask } from '../hooks/use-create-multi-task';
 import type { PresetConfig } from '../presets/types';
 import type { QuestFormValues } from '../types/form-types';
 import { QuestFormFields } from './quest-form-fields';
@@ -23,6 +26,8 @@ export interface QuestFormContainerProps {
   onSubmit: (values: QuestFormValues) => Promise<void>;
   /** Cancel handler */
   onCancel: () => void;
+  /** Enable multi-task creation (default: true for create, false for edit) */
+  enableMultiTask?: boolean;
 }
 
 // ============================================================================
@@ -34,7 +39,15 @@ export function QuestFormContainer({
   initial,
   onSubmit,
   onCancel,
+  enableMultiTask = !initial, // Default: true for create, false for edit
 }: QuestFormContainerProps) {
+  // ============================================================================
+  // Multi-Task Creation
+  // ============================================================================
+
+  const multiTask = useCreateMultiTask();
+  const [showProgress, setShowProgress] = useState(false);
+
   // ============================================================================
   // Form State Management
   // ============================================================================
@@ -42,7 +55,7 @@ export function QuestFormContainer({
   const {
     form,
     fieldStates,
-    handleSubmit,
+    handleSubmit: originalHandleSubmit,
     handleCancel,
     handleImageUpload,
     connectGateWarnings,
@@ -50,9 +63,49 @@ export function QuestFormContainer({
   } = useQuestForm({
     presetConfig,
     initial,
-    onSubmit,
+    onSubmit: enableMultiTask ? handleMultiTaskSubmit : onSubmit,
     onCancel,
   });
+
+  // ============================================================================
+  // Multi-Task Submit Handler
+  // ============================================================================
+
+  async function handleMultiTaskSubmit(values: QuestFormValues) {
+    const hasChildren = values.child && values.child.length > 0;
+
+    // If no children or multi-task disabled, use original flow
+    if (!hasChildren || !enableMultiTask) {
+      return onSubmit(values);
+    }
+
+    // Use multi-task creation
+    setShowProgress(true);
+
+    try {
+      const result = await multiTask.mutateAsync(values);
+
+      if (result.success) {
+        // Success - redirect after a brief delay to show completion
+        setTimeout(() => {
+          void onSubmit(values);
+        }, 1500);
+      }
+      // If partial errors, keep progress visible for user interaction
+    } catch (error) {
+      // Main task creation failed, close progress and let error handling show
+      setShowProgress(false);
+      throw error;
+    }
+  }
+
+  // ============================================================================
+  // Handle Submit (chooses between flows)
+  // ============================================================================
+
+  const handleSubmit = async () => {
+    return originalHandleSubmit();
+  };
 
   // ============================================================================
   // Leave Confirmation (Modal)
@@ -65,12 +118,28 @@ export function QuestFormContainer({
   // ============================================================================
 
   return (
-    <div className='relative'>
+    <div className='relative space-y-6'>
+      {/* Multi-Task Progress */}
+      {enableMultiTask && showProgress && (
+        <MultiTaskProgress
+          state={multiTask.state}
+          progressInfo={multiTask.progressInfo}
+          onRetry={() => void multiTask.retryFailedChildren()}
+          onCancel={multiTask.cancel}
+          onClose={() => {
+            setShowProgress(false);
+            multiTask.reset();
+          }}
+          canRetry={multiTask.canRetry}
+        />
+      )}
+
+      {/* Main Form */}
       <Form {...form}>
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            void handleSubmit();
+            handleSubmit().catch(console.error);
           }}
           className='space-y-6'
         >
@@ -87,6 +156,7 @@ export function QuestFormContainer({
         </form>
       </Form>
 
+      {/* Confirmation Dialog */}
       <ConfirmDialog
         open={confirmOpen}
         onOpenChange={setConfirmOpen}
