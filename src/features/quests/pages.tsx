@@ -63,21 +63,67 @@ export const QuestCreatePage = () => {
 export const QuestEditPage = () => {
   const { id } = useParams({ from: '/_authenticated/quests/$id' });
   const questId = Number(id);
-  const { data } = useQuest(questId);
+  const { data, isLoading } = useQuest(questId);
   const update = useUpdateQuest(questId);
   const nav = useNavigate({});
 
-  if (!data) {
+  if (isLoading || !data) {
     return (
       <Main>
-        <div className='max-w-5xl space-y-3'>
-          <div className='bg-muted h-7 w-48 animate-pulse rounded' />
-          <div className='bg-muted h-5 w-80 animate-pulse rounded' />
-          <div className='bg-muted h-64 w-full animate-pulse rounded' />
+        <div className='max-w-5xl space-y-6'>
+          {/* Header skeleton */}
+          <div className='flex items-center justify-between'>
+            <div className='space-y-2'>
+              <div className='bg-muted h-8 w-48 animate-pulse rounded' />
+              <div className='bg-muted h-5 w-80 animate-pulse rounded' />
+            </div>
+            <div className='bg-muted h-10 w-24 animate-pulse rounded' />
+          </div>
+
+          {/* Form skeleton */}
+          <div className='space-y-6 rounded-lg border p-6'>
+            <div className='grid grid-cols-1 gap-6 md:grid-cols-2'>
+              <div className='space-y-2'>
+                <div className='bg-muted h-4 w-20 animate-pulse rounded' />
+                <div className='bg-muted h-10 w-full animate-pulse rounded' />
+              </div>
+              <div className='space-y-2'>
+                <div className='bg-muted h-4 w-24 animate-pulse rounded' />
+                <div className='bg-muted h-10 w-full animate-pulse rounded' />
+              </div>
+            </div>
+
+            <div className='space-y-2'>
+              <div className='bg-muted h-4 w-32 animate-pulse rounded' />
+              <div className='bg-muted h-24 w-full animate-pulse rounded' />
+            </div>
+
+            <div className='grid grid-cols-1 gap-6 md:grid-cols-3'>
+              <div className='space-y-2'>
+                <div className='bg-muted h-4 w-16 animate-pulse rounded' />
+                <div className='bg-muted h-10 w-full animate-pulse rounded' />
+              </div>
+              <div className='space-y-2'>
+                <div className='bg-muted h-4 w-20 animate-pulse rounded' />
+                <div className='bg-muted h-10 w-full animate-pulse rounded' />
+              </div>
+              <div className='space-y-2'>
+                <div className='bg-muted h-4 w-18 animate-pulse rounded' />
+                <div className='bg-muted h-10 w-full animate-pulse rounded' />
+              </div>
+            </div>
+
+            {/* Action buttons skeleton */}
+            <div className='flex gap-3 pt-4'>
+              <div className='bg-muted h-10 w-20 animate-pulse rounded' />
+              <div className='bg-muted h-10 w-24 animate-pulse rounded' />
+            </div>
+          </div>
         </div>
       </Main>
     );
   }
+
   return (
     <>
       <Main>

@@ -17,6 +17,10 @@ export const actionWithPostPresetConfig: PresetConfig = {
     tweetId: 'visible',
     icon: 'conditional', // visible if group === 'partner'
     partnerIcon: 'hidden', // Icon field covers this
+    buttonText: 'hidden', // Handled by business rules based on tasks
+    popupDescription: 'hidden', // Auto-generated based on tasks
+    popupButton: 'hidden', // Handled by business rules based on tasks
+    repeatable: 'hidden', // Not applicable for action-with-post quests
   },
 
   defaults: {
@@ -29,12 +33,12 @@ export const actionWithPostPresetConfig: PresetConfig = {
         'pop-up': {
           name: 'Social Quests',
           button: 'Engage',
-          description: 'Engage with Walme`s Tweet to earn XP',
+          description: 'Engage with our Tweet to earn XP',
           'additional-title': 'Connect your X',
           'additional-description': 'Before starting the quest, ensure you connected X account',
         },
       },
-      username: '', // walme_io
+      username: '', // e.g., company_handle
       // isNew: true,
     },
   },
@@ -48,6 +52,27 @@ export const actionWithPostPresetConfig: PresetConfig = {
         social: 'Social Quests',
         daily: 'Daily Quests',
         partner: 'Partner Quests',
+      },
+    },
+    {
+      condition: 'group === "partner"',
+      action: 'set resources.ui.pop-up.description = "Engage with our partner\'s Tweet to earn XP"',
+      description: 'Update description for partner quests',
+    },
+    {
+      condition: 'tasks.length > 1',
+      action: 'set resources.ui.button = "Complete Tasks"',
+      description: 'Update button text when multiple tasks are present',
+    },
+    {
+      condition: 'tasks.length === 1',
+      action: 'auto-generate resources.ui.button based on task type',
+      description: 'Set specific button text for single task type',
+      mapping: {
+        like: 'Like Tweet',
+        comment: 'Comment on Tweet',
+        retweet: 'Retweet',
+        follow: 'Follow & Engage',
       },
     },
   ],

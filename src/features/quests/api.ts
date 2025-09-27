@@ -6,6 +6,7 @@ import {
   getAdminWaitlistTasksControllerGetWaitlistTasksQueryKey,
   useAdminWaitlistTasksControllerCreateTask,
   useAdminWaitlistTasksControllerDeleteTask,
+  useAdminWaitlistTasksControllerGetTask,
   useAdminWaitlistTasksControllerGetWaitlistTasks,
   useAdminWaitlistTasksControllerUpdateTask,
 } from '@/lib/api/generated/admin/admin';
@@ -109,25 +110,28 @@ export const useQuests = (query: QuestQuery) => {
 
 export const useQuest = (id: number) => {
   const {
-    data: adminTasks,
+    data: questData,
     isLoading,
     error,
     isFetching,
-  } = useAdminWaitlistTasksControllerGetWaitlistTasks();
+    isSuccess,
+    isError,
+  } = useAdminWaitlistTasksControllerGetTask(id);
 
+  // Handle the API returning array instead of single object
   const quest = useMemo(() => {
-    const questsData = adminTasks ?? [];
-    if (!Array.isArray(questsData)) return undefined;
-    return questsData.find((task) => task.id === id);
-  }, [adminTasks, id]);
+    if (!questData) return undefined;
+    // If API returns array, take first item, otherwise use as is
+    return Array.isArray(questData) ? questData[0] : questData;
+  }, [questData]);
 
   return {
     data: quest,
     isLoading,
     error,
     isFetching,
-    isSuccess: !!quest && !isLoading && !error,
-    isError: !!error,
+    isSuccess: isSuccess && !!quest,
+    isError,
   };
 };
 
