@@ -97,9 +97,10 @@ export type QuestGroup = (typeof QUEST_GROUPS)[number];
 export type Provider = (typeof PROVIDERS)[number];
 export type ChildType = (typeof CHILD_TYPES)[number];
 
-// Default form values
+// Default form values with empty strings for user input fields
 
-export const DEFAULT_FORM_VALUES: Partial<QuestFormValues> = {
+export const DEFAULT_FORM_VALUES: QuestFormValues = {
+  // REQUIRED fields - empty strings for user input
   title: '',
   type: 'external',
   description: '',
@@ -110,20 +111,28 @@ export const DEFAULT_FORM_VALUES: Partial<QuestFormValues> = {
   twa: false,
   pinned: false,
   reward: 0,
-  totalReward: undefined, // For controlled inputs - always defined value
-  uri: '', // Empty string instead of undefined for controlled input
-  icon: '', // Empty string instead of undefined
-  provider: undefined, // For controlled Select components
-  start: undefined, // No default start time
-  end: undefined, // No default end time
+
+  // Optional fields - undefined when not set
+  totalReward: undefined,
+  uri: undefined,
+  icon: undefined,
+  provider: undefined,
+  preset: null,
+  blocking_task: undefined,
+  start: undefined,
+  end: undefined,
+  iterator: undefined,
+  child: [],
+
+  // REQUIRED resources - empty strings for user input
   resources: {
     ui: {
       button: '',
+      'pop-up': {
+        name: '',
+        button: '',
+        description: '',
+      },
     },
-    username: '', // For controlled inputs
-    tweetId: '', // For controlled inputs
-    icon: '', // For controlled inputs
   },
-  child: [],
-  iterator: undefined,
 };

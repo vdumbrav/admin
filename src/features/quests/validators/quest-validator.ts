@@ -1,6 +1,13 @@
 /**
- * Quest form validation layer
- * Validates required fields before API submission
+ * STRICT QUEST VALIDATION - ZERO TOLERANCE FOR INVALID DATA
+ *
+ * ⚠️  BREAKING: Enhanced validation that rejects previously "acceptable" data
+ *
+ * KEY CHANGES:
+ * - Strict type checking for all fields (title, reward, etc.)
+ * - No silent fallbacks - explicit errors for invalid types
+ * - Enhanced error messages with actual vs expected types
+ * - Fails fast on any validation issue
  */
 import { ValidationErrorFactory, type ValidationFieldError } from '../errors/validation-errors';
 import type { QuestFormValues } from '../types/form-types';
@@ -16,9 +23,14 @@ export interface ValidationResult {
 export function validateRequiredFields(formData: QuestFormValues): ValidationResult {
   const errors: ValidationFieldError[] = [];
 
-  // Core required fields for all types
-  if (!formData.title?.trim()) {
-    errors.push(ValidationErrorFactory.required('title', 'Quest title is required'));
+  // Core required fields for all types with strict validation
+  if (typeof formData.title !== 'string' || !formData.title.trim()) {
+    errors.push(
+      ValidationErrorFactory.required(
+        'title',
+        'Quest title is required and must be a non-empty string',
+      ),
+    );
   }
 
   if (!formData.type) {
@@ -27,6 +39,11 @@ export function validateRequiredFields(formData: QuestFormValues): ValidationRes
 
   if (!formData.group) {
     errors.push(ValidationErrorFactory.required('group', 'Quest group is required'));
+  }
+
+  // Validate reward is a valid number
+  if (typeof formData.reward !== 'number' || formData.reward < 0) {
+    errors.push(ValidationErrorFactory.invalid('reward', 'Reward must be a non-negative number'));
   }
 
   // Type-specific validation
@@ -107,7 +124,7 @@ function validateMultipleType(formData: QuestFormValues, errors: ValidationField
       if (typeof child.reward !== 'number' || child.reward < 0) {
         errors.push({
           field: `child[${index}].reward`,
-          message: `Child task ${index + 1} reward must be a positive number`,
+          message: `Child task ${index + 1} reward must be a non-negative number, got: ${typeof child.reward}`,
           type: 'invalid',
         });
       }

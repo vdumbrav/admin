@@ -3,7 +3,10 @@ import type { PresetConfig } from '../presets';
 import type { QuestFormValues } from '../types/form-types';
 
 /**
- * Apply business rules from preset configuration to form values
+ * STRICT BUSINESS RULES - FAIL FAST ON INVALID CONFIGURATIONS
+ *
+ * ⚠️  BREAKING: No longer tolerates missing resources or invalid mappings
+ * Will throw errors instead of silently skipping rules or using fallbacks
  */
 export function applyBusinessRules(
   values: Partial<QuestFormValues>,
@@ -20,29 +23,40 @@ export function applyBusinessRules(
       case 'auto-generate resources.ui.pop-up.name':
         if (rule.condition === 'group' && rule.mapping && values.group) {
           const groupName = rule.mapping[values.group];
-          if (groupName) {
-            result.resources = {
-              ...result.resources,
-              ui: {
-                ...result.resources?.ui,
-                button: result.resources?.ui?.button ?? 'Join',
-                'pop-up': {
-                  name: groupName,
-                  button: result.resources?.ui?.['pop-up']?.button ?? 'Join',
-                  description: result.resources?.ui?.['pop-up']?.description ?? '',
-                } as ResourcesUiPopUpDto,
-              },
-            };
+          if (!groupName) {
+            throw new Error(`No group mapping found for group: ${values.group}`);
           }
+
+          // STRICT: resources must exist
+          if (!result.resources?.ui) {
+            throw new Error('Resources.ui is required for auto-generation');
+          }
+
+          result.resources = {
+            ...result.resources,
+            ui: {
+              ...result.resources.ui,
+              button: result.resources.ui.button ?? 'Join',
+              'pop-up': {
+                name: groupName,
+                button: result.resources.ui['pop-up']?.button ?? 'Join',
+                description: result.resources.ui['pop-up']?.description ?? '',
+              } as ResourcesUiPopUpDto,
+            },
+          };
         }
         break;
 
       case 'set resources.ui.button = "Follow"':
         if (rule.condition === 'provider === "twitter"' && values.provider === 'twitter') {
+          if (!result.resources) {
+            throw new Error('Resources are required for Twitter provider rules');
+          }
+
           result.resources = {
             ...result.resources,
             ui: {
-              ...result.resources?.ui,
+              ...result.resources.ui,
               button: 'Follow',
             },
           };
@@ -51,27 +65,41 @@ export function applyBusinessRules(
 
       case 'set resources.ui.pop-up.button = "Follow"':
         if (rule.condition === 'provider === "twitter"' && values.provider === 'twitter') {
+          if (!result.resources?.ui) {
+            throw new Error('Resources.ui is required for Twitter provider rules');
+          }
+
           result.resources = {
             ...result.resources,
             ui: {
-              ...result.resources?.ui,
-              button: result.resources?.ui?.button ?? 'Follow',
+              ...result.resources.ui,
+              button: result.resources.ui.button ?? 'Follow',
               'pop-up': {
-                name: result.resources?.ui?.['pop-up']?.name ?? 'Social Quests',
+                name: result.resources.ui['pop-up']?.name ?? 'Social Quests',
                 button: 'Follow',
-                description: result.resources?.ui?.['pop-up']?.description ?? '',
+                description: result.resources.ui['pop-up']?.description ?? '',
               },
             },
           };
         }
         break;
 
-      case 'set totalReward from child.sum(reward)':
-        if (values.child && Array.isArray(values.child)) {
-          const totalReward = values.child.reduce((sum, task) => sum + (task.reward ?? 0), 0);
-          (result as QuestFormValues & { totalReward: number }).totalReward = totalReward; // TODO: P2 - Create proper typed interface for calculated fields
+      case 'set totalReward from child.sum(reward)': {
+        if (!values.child || !Array.isArray(values.child)) {
+          throw new Error('Child tasks array is required for totalReward calculation');
         }
+
+        const totalReward = values.child.reduce((sum, task) => {
+          if (typeof task.reward !== 'number') {
+            throw new Error(
+              `Child task reward must be a number, got ${typeof task.reward} for task: ${task.title}`,
+            );
+          }
+          return sum + task.reward;
+        }, 0);
+        (result as QuestFormValues & { totalReward: number }).totalReward = totalReward;
         break;
+      }
 
       case 'set order_by from index':
         if (values.child && Array.isArray(values.child)) {

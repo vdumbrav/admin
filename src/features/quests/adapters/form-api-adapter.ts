@@ -1,25 +1,28 @@
 /**
- * Adapter layer between form types and API types
+ * STRICT VALIDATION ADAPTER - BREAKS LEGACY DATA INTENTIONALLY
  *
- * This adapter handles the conversion between clean form types optimized for UX
- * and API types. Required because:
+ * This adapter enforces fail-fast validation with ZERO tolerance for invalid data.
  *
- * 1. Form validation and defaults don't match API expectations
- * 2. Child tasks require special handling for API compatibility
- * 3. Date fields (start/end) are form-only and not sent to API
+ * ⚠️  BREAKING CHANGES:
+ * - NO fallback patterns (|| '', ?? 0, etc.)
+ * - ALL required fields must be present and correctly typed
+ * - Throws errors instead of silent corruption
+ * - Legacy quests with missing fields WILL CRASH
+ *
+ * KEY PRINCIPLES:
+ * 1. Explicit validation with meaningful error messages
+ * 2. Fail-fast on invalid API responses
+ * 3. Strict type checking everywhere
+ * 4. No defensive programming - crash early and loudly
  *
  * MIGRATION STATUS:
- * - IteratorDto fields are now optional (iterator_resource, resource)
- * - reward_map is now number[] (was string[])
- * - type field is now single value (was array)
+ * - All fallbacks removed - strict validation only
+ * - Required fields enforced without mercy
+ * - Empty strings and undefined values rejected
  */
 import type { CreateTaskDto, TaskResponseDto } from '@/lib/api/generated/model';
 import { buildQuestFormSchema } from '../types/form-schema';
-import {
-  type ChildFormValues,
-  DEFAULT_FORM_VALUES,
-  type QuestFormValues,
-} from '../types/form-types';
+import { type ChildFormValues, type QuestFormValues } from '../types/form-types';
 import {
   formatValidationErrors,
   validateBlockingTaskDependencies,
@@ -28,58 +31,222 @@ import {
 } from '../validators/quest-validator';
 
 // ============================================================================
+// Data validation helpers
+// ============================================================================
+
+/**
+ * AGGRESSIVE API DATA VALIDATION - FAIL FAST ON INVALID DATA
+ *
+ * ⚠️  BREAKING: No fallbacks, no mercy for missing or invalid fields
+ * Legacy data with issues will throw errors immediately
+ */
+function validateRequiredApiData(apiData: Partial<TaskResponseDto>): void {
+  const errors: string[] = [];
+
+  // ALL core fields are REQUIRED - no optionals, no fallbacks
+  if (typeof apiData.title !== 'string' || !apiData.title.trim()) {
+    errors.push('title must be a non-empty string');
+  }
+
+  if (typeof apiData.description !== 'string') {
+    errors.push('description must be a string');
+  }
+
+  if (!apiData.type) {
+    errors.push('type is required');
+  }
+
+  if (!apiData.group) {
+    errors.push('group is required');
+  }
+
+  if (typeof apiData.reward !== 'number') {
+    errors.push(`reward must be a number, got: ${typeof apiData.reward}`);
+  }
+
+  if (typeof apiData.order_by !== 'number') {
+    errors.push(`order_by must be a number, got: ${typeof apiData.order_by}`);
+  }
+
+  if (typeof apiData.enabled !== 'boolean') {
+    errors.push(`enabled must be a boolean, got: ${typeof apiData.enabled}`);
+  }
+
+  // Resource validation - no fallbacks
+  if (!apiData.resource) {
+    errors.push('resource object is required');
+  }
+
+  if (errors.length > 0) {
+    console.error('STRICT API validation failed:', { apiData, errors });
+    throw new Error(`INVALID API DATA - FAIL FAST: ${errors.join(', ')}`);
+  }
+}
+
+/**
+ * Safely extract string value with validation
+ */
+function getRequiredString(value: unknown, fieldName: string): string {
+  if (typeof value !== 'string') {
+    throw new Error(`${fieldName} must be a string, got: ${typeof value}`);
+  }
+  return value;
+}
+
+/**
+ * Safely extract number value with validation
+ */
+function getRequiredNumber(value: unknown, fieldName: string): number {
+  if (typeof value !== 'number') {
+    throw new Error(`${fieldName} must be a number, got: ${typeof value}`);
+  }
+  return value;
+}
+
+/**
+ * Safely extract boolean value with validation
+ */
+function getRequiredBoolean(value: unknown, fieldName: string): boolean {
+  if (typeof value !== 'boolean') {
+    throw new Error(`${fieldName} must be a boolean, got: ${typeof value}`);
+  }
+  return value;
+}
+
+/**
+ * Validate required boolean field - throw if not boolean
+ */
+function validateRequiredBoolean(value: unknown, fieldName: string): boolean {
+  if (typeof value !== 'boolean') {
+    throw new Error(`${fieldName} is required and must be a boolean, got: ${typeof value}`);
+  }
+  return value;
+}
+
+/**
+ * Validate optional string - must be string if present, null/undefined allowed
+ */
+function validateOptionalString(value: unknown, fieldName: string): string | undefined {
+  if (value === null || value === undefined) {
+    return undefined;
+  }
+  if (typeof value !== 'string') {
+    throw new Error(`${fieldName} must be a string if provided, got: ${typeof value}`);
+  }
+  return value;
+}
+
+/**
+ * STRICT RESOURCE VALIDATION - NO FALLBACKS
+ *
+ * ⚠️  BREAKING: Resources are now REQUIRED - will crash if missing
+ */
+function validateAndExtractResources(resource: unknown): QuestFormValues['resources'] {
+  if (!resource) {
+    throw new Error('Resources are REQUIRED - no fallback allowed (legacy data incompatible)');
+  }
+
+  if (typeof resource !== 'object' || resource === null) {
+    throw new Error(`Resources must be an object, got: ${typeof resource}`);
+  }
+
+  // Return as-is but remove icon to avoid duplication
+  const { icon, ...otherResources } = resource as Record<string, unknown>;
+  return otherResources as QuestFormValues['resources'];
+}
+
+/**
+ * Validate and extract children with strict validation
+ */
+function validateAndExtractChildren(child: unknown): QuestFormValues['child'] {
+  if (!child) {
+    return []; // Empty array is valid for non-multiple types
+  }
+
+  if (!Array.isArray(child)) {
+    throw new Error(`Children must be an array, got: ${typeof child}`);
+  }
+
+  return child.map(convertApiChildToForm);
+}
+
+// ============================================================================
 // API to Form conversion
 // ============================================================================
 
 /**
- * Convert API response to form values
+ * STRICT API TO FORM CONVERSION - NO FALLBACKS ALLOWED
  *
- * Transforms API data structure to form-optimized structure:
- * - Ensures all required fields have default values
- * - Converts nullable API fields to form-friendly types
- * - Handles nested resources structure transformation
+ * ⚠️  BREAKING CHANGE: This function will CRASH on invalid data
  *
- * @param apiData - Partial task data from API response
- * @returns Complete form values ready for react-hook-form
+ * Transforms API data with ZERO tolerance for missing/invalid fields:
+ * - ALL required fields must be present and correctly typed
+ * - Throws descriptive errors instead of silent corruption
+ * - No empty string fallbacks - fails fast on missing data
+ *
+ * @param apiData - API response data (MUST contain all required fields)
+ * @returns Strictly validated form values
+ * @throws Error if any required field is missing or invalid
  */
 export function apiToForm(apiData: Partial<TaskResponseDto>): QuestFormValues {
+  // Validate required fields first
+  validateRequiredApiData(apiData);
+
   return {
-    // Core fields with fallback to defaults
-    title: apiData.title ?? '',
-    type: apiData.type === 'dummy' ? 'external' : (apiData.type ?? 'external'),
-    description: apiData.description ?? '',
-    group: apiData.group ?? 'all',
-    order_by: apiData.order_by ?? 0,
+    // Core fields - ALL REQUIRED, NO FALLBACKS
+    title: getRequiredString(apiData.title, 'title'),
+    type:
+      apiData.type === 'dummy'
+        ? 'external'
+        : (getRequiredString(apiData.type, 'type') as QuestFormValues['type']),
+    description: getRequiredString(apiData.description, 'description'),
+    group: getRequiredString(apiData.group, 'group') as QuestFormValues['group'],
+    order_by: getRequiredNumber(apiData.order_by, 'order_by'),
 
-    // Optional fields
+    // Optional fields (but validate if present)
     provider: apiData.provider,
-    uri: apiData.uri ?? undefined,
-    reward: apiData.reward ?? 0,
-    enabled: apiData.enabled ?? true,
-    preset: apiData.preset,
+    uri: validateOptionalString(apiData.uri, 'uri'),
+    reward: getRequiredNumber(apiData.reward, 'reward'),
+    enabled: getRequiredBoolean(apiData.enabled, 'enabled'),
+    preset: validateOptionalString(apiData.preset, 'preset'),
     blocking_task: apiData.blocking_task,
-    icon: apiData.resource?.icon ?? undefined,
+    icon: validateOptionalString(apiData.resource?.icon, 'icon'),
 
-    // Resources directly from API (excluding icon which is handled separately)
-    resources: apiData.resource
-      ? {
-          ...apiData.resource,
-          icon: undefined, // Remove icon from resources to avoid duplication
-        }
-      : DEFAULT_FORM_VALUES.resources,
-    child: apiData.child ? apiData.child.map(convertApiChildToForm) : [],
+    // Resources - strict validation, no fallbacks
+    resources: validateAndExtractResources(apiData.resource),
+    child: validateAndExtractChildren(apiData.child),
 
     // Schedule mapping for edit mode
-    start: apiData.started_at ?? undefined,
-    end: apiData.completed_at ?? undefined,
+    start: apiData.started_at,
+    end: apiData.completed_at,
 
     // Iterator mapping for 7-day challenge (API → Form)
-    iterator: apiData.iterator
-      ? {
-          days: typeof apiData.iterator.days === 'number' ? apiData.iterator.days : undefined,
-          reward_map: apiData.iterator.reward_map,
-        }
-      : undefined,
+    iterator: apiData.iterator ? validateAndExtractIterator(apiData.iterator) : undefined,
+  };
+}
+
+/**
+ * Validate and extract iterator data with strict type checking
+ */
+function validateAndExtractIterator(iterator: unknown): QuestFormValues['iterator'] {
+  if (!iterator || typeof iterator !== 'object') {
+    throw new Error('Iterator must be an object');
+  }
+
+  const iteratorObj = iterator as Record<string, unknown>;
+
+  if (!Array.isArray(iteratorObj.reward_map)) {
+    throw new Error('Iterator reward_map must be an array');
+  }
+
+  const rewardMap = iteratorObj.reward_map as unknown[];
+  if (!rewardMap.every((reward) => typeof reward === 'number')) {
+    throw new Error('Iterator reward_map must contain only numbers');
+  }
+
+  return {
+    days: typeof iteratorObj.days === 'number' ? iteratorObj.days : undefined,
+    reward_map: rewardMap,
   };
 }
 
@@ -105,27 +272,41 @@ function extractChildResources(resourceData: unknown): ChildFormValues['resource
 }
 
 /**
- * Convert API child task to form child with minimal casting
+ * Convert API child task to form child with strict validation
  */
 function convertApiChildToForm(apiChild: TaskResponseDto): ChildFormValues {
-  const resourceData = apiChild.resource;
+  // Validate required child fields
+  if (typeof apiChild.title !== 'string') {
+    throw new Error(`Child task title must be a string, got: ${typeof apiChild.title}`);
+  }
+
+  if (typeof apiChild.reward !== 'number') {
+    throw new Error(`Child task reward must be a number, got: ${typeof apiChild.reward}`);
+  }
+
+  if (typeof apiChild.order_by !== 'number') {
+    throw new Error(`Child task order_by must be a number, got: ${typeof apiChild.order_by}`);
+  }
 
   // Ensure child task type is valid for child tasks (filter out parent-only types)
   const childTypes = ['like', 'share', 'comment', 'join', 'connect'] as const;
   type ChildTypeUnion = (typeof childTypes)[number];
-  const validChildType = childTypes.includes(apiChild.type as ChildTypeUnion)
-    ? (apiChild.type as ChildFormValues['type'])
-    : 'like';
+
+  if (!childTypes.includes(apiChild.type as ChildTypeUnion)) {
+    throw new Error(
+      `Invalid child task type: ${apiChild.type}. Must be one of: ${childTypes.join(', ')}`,
+    );
+  }
 
   return {
     title: apiChild.title,
     description: apiChild.description,
-    type: validChildType,
+    type: apiChild.type as ChildFormValues['type'],
     group: apiChild.group,
     provider: apiChild.provider,
     reward: apiChild.reward,
     order_by: apiChild.order_by,
-    resources: extractChildResources(resourceData),
+    resources: extractChildResources(apiChild.resource),
   };
 }
 
@@ -152,15 +333,15 @@ export function formToApi(formData: QuestFormValues): Omit<CreateTaskDto, 'paren
     type: formData.type,
     description: formData.description || '',
     group: formData.group,
-    // For multiple type, reward should be total of all child rewards
+    // For multiple type, reward should be total of all child rewards - STRICT
     reward:
       formData.type === 'multiple'
-        ? (formData.totalReward ?? calculateTotalRewardFromChildren(formData.child) ?? 0)
+        ? (formData.totalReward ?? calculateTotalRewardFromChildren(formData.child))
         : formData.reward,
-    enabled: formData.enabled ?? true, // Required boolean for CreateTaskDto
-    web: formData.web ?? true, // Required boolean for CreateTaskDto
-    twa: formData.twa ?? false, // Required boolean for CreateTaskDto
-    pinned: formData.pinned ?? false, // Required boolean for CreateTaskDto
+    enabled: validateRequiredBoolean(formData.enabled, 'enabled'),
+    web: validateRequiredBoolean(formData.web, 'web'),
+    twa: validateRequiredBoolean(formData.twa, 'twa'),
+    pinned: validateRequiredBoolean(formData.pinned, 'pinned'),
     level: 1, // Required field for CreateTaskDto - form doesn't have this field
 
     // Include preset if specified
@@ -207,41 +388,44 @@ export function formToApi(formData: QuestFormValues): Omit<CreateTaskDto, 'paren
 // ============================================================================
 
 /**
- * Get default form values for creating a new quest
- *
- * Provides clean starting state for new quest creation with sensible defaults
- *
- * @returns Complete default form values
+ * Default form values for new quest creation
  */
 export function getDefaultFormValues(): QuestFormValues {
   return {
-    ...DEFAULT_FORM_VALUES,
+    // User input fields - empty strings for forms
     title: '',
     type: 'external',
     description: '',
     group: 'all',
     order_by: 0,
+    reward: 0,
     enabled: true,
     web: true,
     twa: false,
     pinned: false,
-    // Ensure values for all possible fields to avoid uncontrolled->controlled warning
-    reward: 0,
+
+    // Optional fields - undefined when not set
     totalReward: undefined,
-    uri: '',
-    icon: '',
-    provider: undefined, // For controlled Select components
+    uri: undefined,
+    icon: undefined,
+    provider: undefined,
+    preset: undefined,
+    blocking_task: undefined,
     child: [],
-    start: '',
-    end: '',
+    start: undefined,
+    end: undefined,
     iterator: undefined,
+
+    // Resources - empty strings for user input
     resources: {
       ui: {
         button: '',
+        'pop-up': {
+          name: '',
+          button: '',
+          description: '',
+        },
       },
-      username: '',
-      tweetId: '',
-      icon: '',
     },
   };
 }
@@ -288,13 +472,20 @@ export function validateAndConvertToApi(
 // ============================================================================
 
 /**
- * Calculate total reward from children array - safe fallback
+ * STRICT CHILD REWARD CALCULATION - FAIL FAST ON INVALID DATA
+ *
+ * ⚠️  BREAKING: No longer accepts empty arrays or invalid rewards
+ * Will throw error instead of returning 0 fallback
  */
 function calculateTotalRewardFromChildren(children?: ChildFormValues[]): number {
-  if (!children || children.length === 0) return 0;
+  if (!children || children.length === 0) {
+    throw new Error('Cannot calculate total reward: children array is empty or undefined');
+  }
 
   return children.reduce((total, child) => {
-    const reward = typeof child.reward === 'number' ? child.reward : 0;
-    return total + reward;
+    if (typeof child.reward !== 'number') {
+      throw new Error(`Child reward must be a number, got: ${typeof child.reward}`);
+    }
+    return total + child.reward;
   }, 0);
 }

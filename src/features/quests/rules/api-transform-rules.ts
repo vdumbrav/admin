@@ -1,6 +1,14 @@
 /**
- * API transformation business rules
- * Handles data calculation, field population, and API-specific logic
+ * STRICT API TRANSFORMATION RULES - FAIL-FAST VALIDATION
+ *
+ * ⚠️  BREAKING: No longer tolerates invalid data or missing fields
+ * Throws errors instead of silent corruption or fallback values
+ *
+ * KEY CHANGES:
+ * - Multiple type quests MUST have provider and child tasks
+ * - Child rewards MUST be numbers - no fallbacks to 0
+ * - Seven-day challenge MUST have valid iterator configuration
+ * - Empty arrays and undefined values trigger immediate errors
  */
 import type { PresetConfig } from '../presets/types';
 import type { ChildFormValues, QuestFormValues } from '../types/form-types';
@@ -70,16 +78,26 @@ function applyRewardCalculations(values: QuestFormValues): void {
 }
 
 /**
- * Calculate total reward from child tasks
+ * STRICT CHILD REWARD CALCULATION - NO MERCY FOR INVALID DATA
+ *
+ * ⚠️  BREAKING: Empty arrays now throw error instead of returning 0
+ * All child rewards MUST be valid numbers or function will crash
  */
 function calculateTotalReward(children: ChildFormValues[]): number {
   if (!children.length) {
-    return 0;
+    throw new Error('Cannot calculate total reward: children array is empty');
   }
 
   return children.reduce((total, child) => {
-    const reward = typeof child.reward === 'number' ? child.reward : 0;
-    return total + reward;
+    if (typeof child.reward !== 'number') {
+      console.error(`STRICT VALIDATION FAILED: Invalid child task reward`, {
+        expected: 'number',
+        got: typeof child.reward,
+        task: child,
+      });
+      throw new Error(`FAIL-FAST: Child task reward must be a number, got: ${typeof child.reward}`);
+    }
+    return total + child.reward;
   }, 0);
 }
 
@@ -88,32 +106,40 @@ function calculateTotalReward(children: ChildFormValues[]): number {
 // ============================================================================
 
 /**
- * Apply child task rules
+ * Apply child task rules - STRICT validation
  */
 function applyChildTaskRules(values: QuestFormValues): void {
-  // Auto-create first child task for multiple type quests
-  if (values.type === 'multiple' && (!values.child || values.child.length === 0)) {
-    values.child = [createDefaultChildTask(values)];
-  }
-
-  // Update child order_by indices and ensure provider inheritance
-  if (values.child) {
-    values.child = updateChildOrderBy(values.child);
-
-    // For multiple type, ensure all child tasks inherit provider from parent
-    if (values.type === 'multiple' && values.provider) {
-      values.child = values.child.map((child) => ({
-        ...child,
-        provider: child.provider ?? values.provider,
-      }));
+  // STRICT: multiple type MUST have child tasks
+  if (values.type === 'multiple') {
+    if (!values.child || values.child.length === 0) {
+      if (!values.provider) {
+        throw new Error('Multiple type quest requires provider to auto-create child tasks');
+      }
+      values.child = [createDefaultChildTask(values)];
     }
+
+    // STRICT: provider is REQUIRED for multiple type
+    if (!values.provider) {
+      throw new Error('Multiple type quest must have provider');
+    }
+
+    // Update child order_by indices and ENFORCE provider inheritance
+    values.child = updateChildOrderBy(values.child);
+    values.child = values.child.map((child) => {
+      child.provider ??= values.provider;
+      return child;
+    });
   }
 }
 
 /**
- * Create default child task for multiple type quests
+ * Create default child task for multiple type quests - STRICT requirements
  */
 function createDefaultChildTask(parentValues: QuestFormValues): ChildFormValues {
+  if (!parentValues.provider) {
+    throw new Error('Parent quest must have provider to create child task');
+  }
+
   return {
     title: '',
     description: '',
@@ -244,28 +270,6 @@ function applySevenDayChallengeAPIRules(values: QuestFormValues): void {
   }
 }
 
-/**
- * Apply API rules for multiple type quests
- * TODO: This function is currently unused but may be needed for future multiple type handling
- */
-// function applyMultipleTypeAPIRules(values: QuestFormValues): void {
-//   // Ensure at least one child task exists
-//   if (!values.child || values.child.length === 0) {
-//     values.child = [createDefaultChildTask(values)];
-//   }
-
-//   // Validate all child tasks have required fields
-//   values.child = values.child.map((child) => ({
-//     ...child,
-//     // Ensure required fields have defaults
-//     title: child.title ?? '',
-//     type: child.type ?? 'like',
-//     group: child.group ?? 'social',
-//     reward: typeof child.reward === 'number' ? child.reward : 0,
-//     provider: child.provider ?? values.provider,
-//   }));
-// }
-
 // ============================================================================
 // Validation Helpers
 // ============================================================================
@@ -296,17 +300,28 @@ export function validateIteratorConfig(iterator: QuestFormValues['iterator']): b
 }
 
 /**
- * Validate child tasks configuration
+ * Validate child tasks configuration - STRICT, throw on invalid
  */
-export function validateChildTasks(children: ChildFormValues[]): boolean {
-  if (!children || children.length === 0) return false;
+export function validateChildTasks(children: ChildFormValues[]): void {
+  if (!children || children.length === 0) {
+    throw new Error('Child tasks array cannot be empty');
+  }
 
-  return children.every(
-    (child) =>
-      child.title &&
-      child.type &&
-      child.group &&
-      typeof child.reward === 'number' &&
-      child.reward >= 0,
-  );
+  children.forEach((child, index) => {
+    if (!child.title || typeof child.title !== 'string') {
+      throw new Error(`Child task ${index + 1} must have a valid title`);
+    }
+
+    if (!child.type) {
+      throw new Error(`Child task ${index + 1} must have a type`);
+    }
+
+    if (!child.group) {
+      throw new Error(`Child task ${index + 1} must have a group`);
+    }
+
+    if (typeof child.reward !== 'number' || child.reward < 0) {
+      throw new Error(`Child task ${index + 1} reward must be a non-negative number`);
+    }
+  });
 }
