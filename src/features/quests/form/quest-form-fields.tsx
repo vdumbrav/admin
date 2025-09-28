@@ -31,7 +31,6 @@ import { ChildrenEditor } from '../components/children-editor';
 import { DailyRewardsEditor } from '../components/daily-rewards-editor';
 import { IconUpload } from '../components/icon-upload';
 import { ManagedField } from '../components/managed-field';
-import { TasksEditor } from '../components/tasks-editor';
 import { TwitterPreview } from '../components/twitter-preview';
 import { getCompatibleProviders, groups, providers, types } from '../data/data';
 import type { PresetConfig } from '../presets/types';
@@ -358,7 +357,7 @@ export function QuestFormFields({
               <FormControl>
                 <Textarea
                   placeholder='Enter popup description'
-                  rows={3}
+                  rows={2}
                   disabled={isFieldDisabled('popupDescription', fieldStates)}
                   readOnly={isFieldReadonly('popupDescription', fieldStates)}
                   {...field}
@@ -396,31 +395,6 @@ export function QuestFormFields({
         </>
       )}
 
-      {/* Twitter Username Field - show if fieldVisible OR if tweet embed enabled for action-with-post */}
-      {(isFieldVisible('username', fieldStates) ||
-        (presetConfig?.id === 'action-with-post' &&
-          currentType !== 'multiple' &&
-          showTweetEmbed)) && (
-        <FormField
-          control={form.control}
-          name='resources.username'
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Twitter Username</FormLabel>
-              <FormControl>
-                <Input
-                  placeholder='Enter username (without @)'
-                  disabled={isFieldDisabled('username', fieldStates)}
-                  {...field}
-                />
-              </FormControl>
-              <FormDescription>Twitter username without the @ symbol</FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      )}
-
       {/* Tweet ID Field - show if fieldVisible OR if tweet embed enabled for action-with-post */}
       {(isFieldVisible('tweetId', fieldStates) ||
         (presetConfig?.id === 'action-with-post' &&
@@ -434,12 +408,12 @@ export function QuestFormFields({
               <FormLabel>Tweet URL or ID</FormLabel>
               <FormControl>
                 <Input
-                  placeholder='https://x.com/user/status/123… or just the ID'
+                  placeholder='Tweet ID: 1234567890123456789 (19-20 digits only)'
                   disabled={isFieldDisabled('tweetId', fieldStates)}
                   value={field.value ?? ''}
                   onChange={(e) => {
                     const raw = e.target.value.trim();
-                    // Only digits allowed in the final value
+                    // Extract ID from URL or use raw digits
                     const urlMatch = /status\/(\d{19,20})/.exec(raw);
                     const digits = raw.replace(/\D/g, '');
                     const id = urlMatch?.[1] ?? digits;
@@ -463,8 +437,34 @@ export function QuestFormFields({
         />
       )}
 
+      {/* Twitter Username Field - show if fieldVisible OR if tweet embed enabled for action-with-post */}
+      {(isFieldVisible('username', fieldStates) ||
+        (presetConfig?.id === 'action-with-post' &&
+          currentType !== 'multiple' &&
+          showTweetEmbed)) && (
+        <FormField
+          control={form.control}
+          name='resources.username'
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Twitter Username</FormLabel>
+              <FormControl>
+                <Input
+                  placeholder='Username: example (without @ symbol)'
+                  disabled={isFieldDisabled('username', fieldStates)}
+                  {...field}
+                />
+              </FormControl>
+              <FormDescription>Twitter username without the @ symbol</FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      )}
+
       {/* Child Tasks Section for Multiple Type */}
-      {currentType === 'multiple' && isFieldVisible('tasks', fieldStates) && <TasksEditor />}
+      {((currentType === 'multiple' && isFieldVisible('tasks', fieldStates)) ||
+        (!presetConfig && isFieldVisible('children', fieldStates))) && <ChildrenEditor />}
 
       {/* Total Reward Display (only for multiple/iterable quests, but not for seven-day-challenge) */}
       {presetConfig?.id !== 'seven-day-challenge' && totalRewardDisplay}
@@ -711,9 +711,11 @@ export function QuestFormFields({
       })()}
 
       {/* Twitter Preview (only if username and tweetId exist) */}
-      {currentType !== 'multiple' &&
-        form.watch('resources.username') &&
-        form.watch('resources.tweetId') && <TwitterPreview />}
+      {form.watch('resources.username') && form.watch('resources.tweetId') && (
+        <div className='mt-4'>
+          <TwitterPreview />
+        </div>
+      )}
 
       {/* Universal Fields */}
 
@@ -759,9 +761,6 @@ export function QuestFormFields({
             </Button>
           </div>
         </div>
-
-        {/* Children Editor for non-preset forms */}
-        {!presetConfig && isFieldVisible('children', fieldStates) && <ChildrenEditor />}
       </div>
     </div>
   );
