@@ -62,6 +62,7 @@ export type ChildFormValues = Pick<TaskResponseDto, 'title' | 'group' | 'provide
 };
 
 export interface QuestFormValues {
+  id?: number; // Quest ID - present for updates, undefined for creation
   title: string;
   type: (typeof QUEST_TYPES)[number];
   description: string;
@@ -77,6 +78,7 @@ export interface QuestFormValues {
   pinned?: boolean;
   icon?: string;
   preset?: string | null; // Auto-generated preset ID (can be null for old quests)
+  parent_id?: number; // Parent task ID for child tasks
   blocking_task?: { id: number }; // Parent quest that blocks this quest
   resources?: ResourcesDto;
   child?: ChildFormValues[];

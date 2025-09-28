@@ -14,8 +14,10 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useAppAuth } from '@/auth/hooks';
 import { toast } from 'sonner';
 import { useAdminWaitlistTasksControllerGetWaitlistTasks } from '@/lib/api/generated/admin/admin';
+import type { WaitlistTasksResponseDtoTypeItem } from '@/lib/api/generated/model';
 import { replaceObjectUrl } from '@/utils/object-url';
 import { uploadMedia } from '../api';
+import { getTwitterOnlyTypes } from '../data/data';
 import type { PresetConfig } from '../presets/types';
 import { buildQuestFormSchema, type QuestFormValues } from '../types/form-schema';
 import {
@@ -182,7 +184,10 @@ export function useQuestForm({
       }
     }
 
-    if (values.provider === 'twitter' && values.type !== 'multiple') {
+    if (
+      values.provider === 'twitter' &&
+      getTwitterOnlyTypes().includes(values.type as WaitlistTasksResponseDtoTypeItem)
+    ) {
       if (!values.resources?.username) {
         errors['resources.username'] = 'Username is required';
       }

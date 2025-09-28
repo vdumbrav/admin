@@ -146,7 +146,7 @@ export const useCreateQuest = () => {
 
   return useMutation({
     mutationFn: async (data: QuestFormValues): Promise<TaskResponseDto> => {
-      const apiData = formToApi(data);
+      const apiData = formToApi(data); // Auto-detects CREATE (no ID)
       const result = await createTaskMutation.mutateAsync({
         data: apiData as CreateTaskDto,
       });
@@ -170,7 +170,7 @@ export const useUpdateQuest = (id: number) => {
 
   return useMutation({
     mutationFn: async (data: QuestFormValues): Promise<TaskResponseDto> => {
-      const apiData = formToApi(data) as UpdateTaskDto;
+      const apiData = formToApi(data) as UpdateTaskDto; // Auto-detects UPDATE (has ID)
       const result = await updateTaskMutation.mutateAsync({ id, data: apiData });
       return result;
     },

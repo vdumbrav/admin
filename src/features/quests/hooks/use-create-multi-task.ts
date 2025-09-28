@@ -151,7 +151,7 @@ export const useCreateMultiTask = () => {
       try {
         // Step 1: Create main task
         // Pass full formData to formToApi so it can extract static from child, but formToApi will exclude child from output
-        const mainTaskData = formToApi(formData);
+        const mainTaskData = formToApi(formData); // Auto-detects CREATE (no ID)
         const mainTask = await adminWaitlistTasksControllerCreateTask(
           mainTaskData as CreateTaskDto,
           abortControllerRef.current?.signal,

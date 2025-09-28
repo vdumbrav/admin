@@ -202,3 +202,14 @@ export function getCompatibleProviders(
 ): TaskResponseDtoProvider[] {
   return TYPE_PROVIDER_REQUIREMENTS[type] ?? getAvailableApiProviders();
 }
+
+/**
+ * Get types that work exclusively with Twitter provider
+ */
+export function getTwitterOnlyTypes(): WaitlistTasksResponseDtoTypeItem[] {
+  return Object.entries(TYPE_PROVIDER_REQUIREMENTS)
+    .filter(
+      ([, providers]) => providers.length === 1 && providers[0] === TaskResponseDtoProvider.twitter,
+    )
+    .map(([type]) => type as WaitlistTasksResponseDtoTypeItem);
+}

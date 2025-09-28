@@ -1,4 +1,6 @@
 import { z } from 'zod';
+import type { WaitlistTasksResponseDtoTypeItem } from '@/lib/api/generated/model';
+import { getTwitterOnlyTypes } from '../data/data';
 import { CHILD_TYPES, PROVIDERS, QUEST_GROUPS, QUEST_TYPES } from './form-types';
 
 // ============================================================================
@@ -253,7 +255,7 @@ export const buildQuestFormSchema = (presetId?: string) =>
       }
 
       if (val.provider === 'twitter') {
-        // For non-multiple types, URI is required (for join/follow actions)
+        // URI is required for all Twitter provider types
         if (val.type !== 'multiple' && !val.uri) {
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
@@ -271,8 +273,8 @@ export const buildQuestFormSchema = (presetId?: string) =>
           });
         }
 
-        // For non-multiple types, also require username and tweetId in resources
-        if (val.type !== 'multiple') {
+        // For tweet interaction types, also require username and tweetId in resources
+        if (getTwitterOnlyTypes().includes(val.type as WaitlistTasksResponseDtoTypeItem)) {
           if (!val.resources?.username) {
             ctx.addIssue({
               code: z.ZodIssueCode.custom,

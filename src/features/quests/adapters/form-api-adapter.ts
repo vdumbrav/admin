@@ -194,6 +194,7 @@ export function apiToForm(apiData: Partial<TaskResponseDto>): QuestFormValues {
 
   return {
     // Core fields - ALL REQUIRED, NO FALLBACKS
+    id: apiData.id, // Include ID for form (enables update detection)
     title: getRequiredString(apiData.title, 'title'),
     type: getRequiredString(apiData.type, 'type') as QuestFormValues['type'],
     description: getRequiredString(apiData.description, 'description'),
@@ -205,7 +206,11 @@ export function apiToForm(apiData: Partial<TaskResponseDto>): QuestFormValues {
     uri: validateOptionalString(apiData.uri, 'uri'),
     reward: getRequiredNumber(apiData.reward, 'reward'),
     enabled: getRequiredBoolean(apiData.enabled, 'enabled'),
+    web: getRequiredBoolean(apiData.web, 'web'),
+    twa: getRequiredBoolean(apiData.twa, 'twa'),
+    pinned: getRequiredBoolean(apiData.pinned, 'pinned'),
     preset: validateOptionalString(apiData.preset, 'preset'),
+    parent_id: apiData.parent_id,
     blocking_task: apiData.blocking_task,
     icon: validateOptionalString(apiData.resource?.icon, 'icon'),
 
@@ -319,12 +324,14 @@ function convertApiChildToForm(apiChild: TaskResponseDto): ChildFormValues {
  * - Handles nested resource structure conversion
  * - Applies proper type mappings for submission
  * - Uses proper CreateTaskDto interface (not TaskResponseDto)
+ * - Automatically detects CREATE vs UPDATE based on presence of ID
  *
  * @param formData - Complete form values from react-hook-form
  * @returns API-compatible CreateTaskDto for submission
  */
 export function formToApi(formData: QuestFormValues): Omit<CreateTaskDto, 'parent_id'> {
-  const baseData: Omit<CreateTaskDto, 'parent_id'> = {
+  const isUpdate = !!formData.id; // Detect update vs create by ID presence
+  const baseData = {
     // Core required fields
     title: formData.title,
     type: formData.type,
@@ -336,10 +343,11 @@ export function formToApi(formData: QuestFormValues): Omit<CreateTaskDto, 'paren
         ? (formData.totalReward ?? calculateTotalRewardFromChildren(formData.child))
         : formData.reward,
     enabled: validateRequiredBoolean(formData.enabled, 'enabled'),
-    web: validateRequiredBoolean(formData.web, 'web'),
-    twa: validateRequiredBoolean(formData.twa, 'twa'),
-    pinned: validateRequiredBoolean(formData.pinned, 'pinned'),
-    level: 1, // Required field for CreateTaskDto - form doesn't have this field
+    web: formData.web ?? true, // Default to true if undefined
+    twa: formData.twa ?? false, // Default to false if undefined
+    pinned: formData.pinned ?? false, // Default to false if undefined
+    // Include level only for CREATE (POST), not for UPDATE (PATCH)
+    ...(isUpdate ? {} : { level: 1 }),
 
     // Include preset if specified
     ...(formData.preset && { preset: formData.preset }),
@@ -350,11 +358,13 @@ export function formToApi(formData: QuestFormValues): Omit<CreateTaskDto, 'paren
     ...(formData.provider && { provider: formData.provider }),
     // URI is required for multiple type and must not be empty
     ...(formData.uri ? { uri: formData.uri } : {}),
-    // blocking_task if explicitly set (required for multiple type by API validation)
-    ...(formData.blocking_task ? { blocking_task: formData.blocking_task } : {}),
+    // blocking_task only for CREATE (PATCH doesn't handle ORM references properly)
+    ...(!isUpdate && formData.blocking_task ? { blocking_task: formData.blocking_task } : {}),
+    // parent_id if explicitly set (required for some child task types)
+    ...(formData.parent_id && { parent_id: formData.parent_id }),
 
-    // Include resources if present
-    ...(formData.resources && { resource: formData.resources }),
+    // Include resources - use empty object as fallback since entity requires non-null
+    resource: formData.resources ?? {},
 
     // Child tasks - NEVER include in API request, they are created separately
     // ...(formData.child && formData.child.length > 0 && { ... }),
@@ -365,7 +375,8 @@ export function formToApi(formData: QuestFormValues): Omit<CreateTaskDto, 'paren
         day: 0, // Starting day for iterator
         days: formData.iterator.days ?? 7,
         reward_map: formData.iterator.reward_map,
-        iterator_reward: [], // Will be populated by API
+        iterator_reward: formData.iterator.reward_map, // Backend expects this field
+        iterator_resource: {}, // Empty object as default
         reward: formData.iterator.reward_map[0] ?? 0, // First day reward
         reward_max: Math.max(...formData.iterator.reward_map),
       },
@@ -376,7 +387,7 @@ export function formToApi(formData: QuestFormValues): Omit<CreateTaskDto, 'paren
     ...(formData.end && { completed_at: formData.end }),
   };
 
-  return baseData;
+  return baseData as Omit<CreateTaskDto, 'parent_id'>;
 }
 
 // ============================================================================
@@ -388,6 +399,8 @@ export function formToApi(formData: QuestFormValues): Omit<CreateTaskDto, 'paren
  */
 export function getDefaultFormValues(): QuestFormValues {
   return {
+    // ID undefined for new quests (enables create detection)
+    id: undefined,
     // User input fields - empty strings for forms
     title: '',
     type: 'external',
@@ -406,6 +419,7 @@ export function getDefaultFormValues(): QuestFormValues {
     icon: undefined,
     provider: undefined,
     preset: undefined,
+    parent_id: undefined,
     blocking_task: undefined,
     child: [],
     start: undefined,
