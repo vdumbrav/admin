@@ -3,6 +3,7 @@
  * Shows progress, errors, and retry options for multi-task creation
  */
 import { AlertCircle, CheckCircle, Loader2, RotateCcw, X } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -45,8 +46,8 @@ export function MultiTaskProgress({
       <div className='flex items-center justify-between'>
         <div className='flex items-center gap-2'>
           {isCreating && <Loader2 className='h-4 w-4 animate-spin' />}
-          {isCompleted && <CheckCircle className='h-4 w-4 text-green-600' />}
-          {hasErrors && <AlertCircle className='h-4 w-4 text-amber-600' />}
+          {isCompleted && <CheckCircle className='h-4 w-4 text-green-600 dark:text-green-400' />}
+          {hasErrors && <AlertCircle className='h-4 w-4 text-orange-600 dark:text-orange-400' />}
 
           <h3 className='font-medium'>
             {isCreating && 'Creating Quest...'}
@@ -132,11 +133,11 @@ function TaskItem({ title, status, error }: TaskItemProps) {
       case 'pending':
         return <div className='border-muted h-4 w-4 rounded-full border-2' />;
       case 'creating':
-        return <Loader2 className='h-4 w-4 animate-spin text-blue-600' />;
+        return <Loader2 className='h-4 w-4 animate-spin text-blue-600 dark:text-blue-400' />;
       case 'success':
-        return <CheckCircle className='h-4 w-4 text-green-600' />;
+        return <CheckCircle className='h-4 w-4 text-green-600 dark:text-green-400' />;
       case 'error':
-        return <AlertCircle className='h-4 w-4 text-red-600' />;
+        return <AlertCircle className='text-destructive h-4 w-4' />;
       case 'skipped':
         return <X className='text-muted-foreground h-4 w-4' />;
       default:
@@ -170,22 +171,19 @@ function TaskItem({ title, status, error }: TaskItemProps) {
 
       <div className='flex items-center gap-2'>
         <span
-          className={`text-xs ${
-            status === 'success'
-              ? 'text-green-600'
-              : status === 'error'
-                ? 'text-red-600'
-                : status === 'creating'
-                  ? 'text-blue-600'
-                  : 'text-muted-foreground'
-          }`}
+          className={cn('text-xs', {
+            'text-green-600 dark:text-green-400': status === 'success',
+            'text-destructive': status === 'error',
+            'text-blue-600 dark:text-blue-400': status === 'creating',
+            'text-muted-foreground': !['success', 'error', 'creating'].includes(status),
+          })}
         >
           {getStatusText()}
         </span>
       </div>
 
       {error && (
-        <div className='mt-1 max-w-xs truncate text-xs text-red-600' title={error}>
+        <div className='text-destructive mt-1 max-w-xs truncate text-xs' title={error}>
           {error}
         </div>
       )}

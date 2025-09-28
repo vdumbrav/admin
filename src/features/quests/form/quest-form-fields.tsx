@@ -4,8 +4,10 @@
  */
 import { useMemo, useState } from 'react';
 import type { UseFormReturn } from 'react-hook-form';
+import { IconLock } from '@tabler/icons-react';
 import { Info } from 'lucide-react';
 import { type TaskResponseDtoProvider } from '@/lib/api/generated/model';
+import { cn } from '@/lib/utils';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -220,7 +222,21 @@ export function QuestFormFields({
             render={({ field }) => (
               <FormItem>
                 <div className='flex items-center justify-between'>
-                  <FormLabel>Type</FormLabel>
+                  <FormLabel className='flex items-center gap-1'>
+                    Type
+                    {isFieldReadonly('type', fieldStates) && (
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger>
+                            <IconLock className='text-muted-foreground h-3 w-3' />
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>Field is read-only for this preset</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    )}
+                  </FormLabel>
                 </div>
                 <FormControl>
                   <SelectDropdown
@@ -246,21 +262,39 @@ export function QuestFormFields({
         <FormField
           control={form.control}
           name='title'
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Title</FormLabel>
-              <FormControl>
-                <Input
-                  placeholder='Enter quest title'
-                  autoFocus
-                  disabled={isFieldDisabled('title', fieldStates)}
-                  readOnly={isFieldReadonly('title', fieldStates)}
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
+          render={({ field }) => {
+            const charCount = field.value ? field.value.length : 0;
+            const maxChars = 100;
+            const isNearLimit = charCount > maxChars * 0.8;
+            const isOverLimit = charCount > maxChars;
+
+            return (
+              <FormItem>
+                <div className='flex items-center justify-between'>
+                  <FormLabel>Title</FormLabel>
+                  <span
+                    className={cn('text-xs', {
+                      'text-destructive': isOverLimit,
+                      'text-orange-600 dark:text-orange-400': isNearLimit && !isOverLimit,
+                      'text-muted-foreground': !isNearLimit && !isOverLimit,
+                    })}
+                  >
+                    {charCount}/{maxChars}
+                  </span>
+                </div>
+                <FormControl>
+                  <Input
+                    placeholder='Enter quest title'
+                    autoFocus
+                    disabled={isFieldDisabled('title', fieldStates)}
+                    readOnly={isFieldReadonly('title', fieldStates)}
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            );
+          }}
         />
       )}
 

@@ -77,6 +77,7 @@ export const DailyRewardsEditor = () => {
                         )
                       }
                       min={0}
+                      max={10000}
                       step={1}
                       placeholder='0'
                       className='w-full [-moz-appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none'

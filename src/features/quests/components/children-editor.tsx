@@ -4,6 +4,7 @@ import { IconGripVertical } from '@tabler/icons-react';
 import { DndContext, type DragEndEvent } from '@dnd-kit/core';
 import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import {
   FormControl,
@@ -63,9 +64,22 @@ export const ChildrenEditor = () => {
   return (
     <div className='space-y-4'>
       <div className='flex items-center justify-between'>
-        <h3 className='text-sm font-medium'>Child tasks</h3>
+        <div className='flex items-center gap-2'>
+          <h3 className='text-sm font-medium'>Child tasks</h3>
+          <span
+            className={cn('rounded-full px-2 py-1 text-xs', {
+              'bg-destructive/10 text-destructive': fields.length > 10,
+              'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300':
+                fields.length > 8 && fields.length <= 10,
+              'bg-muted text-muted-foreground': fields.length <= 8,
+            })}
+          >
+            {fields.length}/10
+          </span>
+        </div>
         <Button
           type='button'
+          disabled={fields.length >= 10}
           onClick={() => {
             append({
               title: '',
