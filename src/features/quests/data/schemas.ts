@@ -190,7 +190,6 @@ export const questFormSchema = z.object({
   pinned: z.boolean().optional(),
   icon: z.string().optional(),
   preset: z.string().optional().nullable(),
-  visible: z.boolean().optional(),
   resources: resourcesSchema,
   child: z
     .array(z.lazy((): z.ZodType<TaskResponseDto> => questSchema))
@@ -198,7 +197,7 @@ export const questFormSchema = z.object({
     .optional(),
   start: z.string().optional(),
   end: z.string().optional(),
-  iterable: z.boolean().nullable().optional(),
+  iterable: z.boolean().optional(),
   iterator: iteratorSchema,
   repeatable: z.boolean().optional(),
 });
@@ -212,7 +211,7 @@ export const questQuerySchema = z.object({
   group: z.union([groupSchema, z.literal('all')]).optional(),
   type: z.string().optional(),
   provider: z.string().optional(),
-  visible: z.string().optional(),
+  enabled: z.string().optional(),
   page: z.number().min(1).optional(),
   limit: z.number().min(1).optional(),
   sort: z.string().optional(),

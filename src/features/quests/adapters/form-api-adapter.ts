@@ -395,7 +395,7 @@ export function getDefaultFormValues(): QuestFormValues {
     group: 'all',
     order_by: 0,
     reward: 0,
-    enabled: true,
+    enabled: false,
     web: true,
     twa: false,
     pinned: false,
@@ -412,8 +412,9 @@ export function getDefaultFormValues(): QuestFormValues {
     end: undefined,
     iterator: undefined,
 
-    // Resources - empty strings for user input
+    // Resources - set isNew to true by default
     resources: {
+      isNew: true,
       ui: {
         button: '',
         'pop-up': {

@@ -5,7 +5,7 @@ export const sevenDayChallengePresetConfig: PresetConfig = {
   name: 'Day challenge',
 
   fieldVisibility: {
-    type: 'readonly', // Always 'repeatable'
+    type: 'hidden', // Always 'repeatable'
     group: 'readonly', // Always 'daily'
     provider: 'hidden', // Hidden per specification
     uri: 'hidden', // Not used
@@ -17,7 +17,7 @@ export const sevenDayChallengePresetConfig: PresetConfig = {
     tweetId: 'hidden',
     icon: 'hidden',
     partnerIcon: 'hidden',
-    badge: 'visible',
+    repeatable: 'hidden', // Always true for seven-day challenges
     visible: 'visible',
   },
 
@@ -25,8 +25,11 @@ export const sevenDayChallengePresetConfig: PresetConfig = {
     type: 'repeatable',
     group: 'daily',
     provider: 'walme',
-    badge: true,
-    visible: false,
+    repeatable: true,
+    enabled: false,
+    resources: {
+      isNew: true,
+    },
     iterator: {
       days: 7,
       reward_map: [10, 20, 30, 40, 50, 70, 100],

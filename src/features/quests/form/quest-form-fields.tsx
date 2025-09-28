@@ -344,6 +344,18 @@ export function QuestFormFields({
         />
       )}
 
+      {/* Popup Button Name */}
+      {isFieldVisible('popupButton', fieldStates) && (
+        <ManagedField
+          name='resources.ui.pop-up.button'
+          label='Popup button name'
+          description='Text displayed on the button inside quest popup modal. Usually matches main button text.'
+          presetConfig={presetConfig}
+          disabled={isFieldDisabled('popupButton', fieldStates)}
+          placeholder='Override popup button label'
+        />
+      )}
+
       {/* Tweet Embed Toggle */}
       {presetConfig?.id === 'action-with-post' && currentType !== 'multiple' && (
         <>
@@ -455,18 +467,6 @@ export function QuestFormFields({
 
       {/* Daily Rewards Editor - only for iterator rewards */}
       {iterator?.reward_map && iterator.reward_map.length > 0 && <DailyRewardsEditor />}
-
-      {/* Popup Button Name */}
-      {isFieldVisible('popupButton', fieldStates) && (
-        <ManagedField
-          name='resources.ui.pop-up.button'
-          label='Popup button name'
-          description='Text displayed on the button inside quest popup modal. Usually matches main button text.'
-          presetConfig={presetConfig}
-          disabled={isFieldDisabled('popupButton', fieldStates)}
-          placeholder='Override popup button label'
-        />
-      )}
 
       {/* External URL */}
       {isFieldVisible('uri', fieldStates) && (
