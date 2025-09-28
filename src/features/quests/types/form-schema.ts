@@ -49,12 +49,17 @@ const formResourcesSchema = z
 
 const childFormSchema = z
   .object({
-    title: z.string().optional().default(''),
+    title: z.string().max(100, 'Title cannot exceed 100 characters').optional().default(''),
     description: z.string().optional(),
     type: childTypeSchema,
     group: questGroupSchema.default('social'),
     provider: providerSchema,
-    reward: z.number().min(0, 'Reward must be greater than 0').optional().default(0),
+    reward: z
+      .number()
+      .min(0, 'Reward must be 0 or greater')
+      .max(10000, 'Reward cannot exceed 10000')
+      .optional()
+      .default(0),
     order_by: z.number(),
     uri: z.string().optional(),
     resources: z
@@ -106,14 +111,16 @@ const iteratorSchema = z
       .min(3, 'Minimum 3 days required')
       .max(10, 'Maximum 10 days allowed')
       .optional(),
-    reward_map: z.array(z.number().min(0, 'Reward must be positive')),
+    reward_map: z.array(
+      z.number().min(0, 'Reward must be 0 or greater').max(10000, 'Reward cannot exceed 10000'),
+    ),
   })
   .optional();
 
 // Main quest form schema with preset-specific validation
 
 const baseQuestFormShape = {
-  title: z.string().min(1, 'Title is required'),
+  title: z.string().min(1, 'Title is required').max(100, 'Title cannot exceed 100 characters'),
   type: questTypeSchema,
   description: z.string().min(1, 'Description is required'),
   group: questGroupSchema,
@@ -122,7 +129,7 @@ const baseQuestFormShape = {
   uri: z.string().optional(),
   reward: z
     .number()
-    .min(1, 'Reward must be greater than 0')
+    .min(0, 'Reward must be 0 or greater')
     .max(10000, 'Reward cannot exceed 10000')
     .default(0),
   totalReward: z.number().optional(),

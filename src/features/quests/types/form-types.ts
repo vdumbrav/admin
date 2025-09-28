@@ -21,7 +21,6 @@ export const QUEST_TYPES = [
   'comment',
   'multiple',
   'repeatable',
-  'dummy', // Note: Not in specification but exists in API
   'external',
 ] as const;
 
