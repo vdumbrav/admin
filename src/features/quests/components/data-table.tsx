@@ -15,6 +15,7 @@ import {
   type VisibilityState,
 } from '@tanstack/react-table';
 import type { TaskResponseDto } from '@/lib/api/generated/model';
+import { cn } from '@/lib/utils';
 import { loadJSON, LS_TABLE_SIZE, LS_TABLE_SORT, LS_TABLE_VIS, saveJSON } from '@/utils/persist';
 import { Button } from '@/components/ui/button';
 import {
@@ -185,7 +186,10 @@ export const QuestsDataTable = ({ columns, isAdmin }: DataTableProps) => {
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
-                  className={`h-11 ${row.index % 2 === 0 ? 'bg-background' : 'bg-muted/20'} hover:bg-[--row-hover]`}
+                  className={cn('h-11 hover:bg-[--row-hover]', {
+                    'bg-background': row.index % 2 === 0,
+                    'bg-muted/20': row.index % 2 !== 0,
+                  })}
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id} className='px-3 py-2'>
