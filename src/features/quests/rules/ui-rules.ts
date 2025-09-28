@@ -35,7 +35,7 @@ export function applyUIRules(
         applyExploreUIRules(updatedValues);
         break;
       case 'seven-day-challenge':
-        // No specific UI rules for seven-day-challenge, uses generic rules
+        applySevenDayChallengeUIRules(updatedValues);
         break;
       default:
         // Unknown preset, use generic rules only
@@ -92,9 +92,7 @@ function applyConnectUIRules(values: QuestFormValues): void {
   if (!values.provider) return;
 
   // Ensure resources exist
-  if (!values.resources) {
-    values.resources = toApiResources(ResourcePresets.connect(values.provider));
-  }
+  values.resources ??= toApiResources(ResourcePresets.connect(values.provider));
 
   // Auto-generate popup description based on provider
   const descriptionMapping: Record<string, string> = {
@@ -156,6 +154,23 @@ function applyExploreUIRules(values: QuestFormValues): void {
 // ============================================================================
 // Generic UI Rules
 // ============================================================================
+
+/**
+ * Apply UI rules for seven-day-challenge preset
+ */
+function applySevenDayChallengeUIRules(values: QuestFormValues): void {
+  // Ensure resources exist with Daily Quests popup name
+  values.resources ??= {
+    ui: {
+      button: 'Boost XP',
+      'pop-up': {
+        name: 'Daily Quests',
+        button: 'Boost XP',
+        description: '',
+      },
+    },
+  };
+}
 
 /**
  * Apply generic UI rules that work across all presets

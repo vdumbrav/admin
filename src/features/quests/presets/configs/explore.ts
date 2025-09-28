@@ -26,36 +26,10 @@ export const explorePresetConfig: PresetConfig = {
   defaults: {
     type: 'external',
     provider: 'walme',
-    group: 'social', // Default to social group for Explore
-    // start: (() => {
-    //   const now = new Date();
-    //   now.setHours(now.getHours() + 1); // +1 hour from creation
-    //   return now.toISOString();
-    // })(),
-    resources: {
-      ui: {
-        button: 'Explore',
-        'pop-up': {
-          name: 'Social Quests', // Will be auto-generated based on group
-          button: 'Explore',
-          description: '',
-        },
-      },
-    },
+    group: 'social',
   },
 
-  businessRules: [
-    {
-      condition: 'group',
-      action: 'auto-generate resources.ui.pop-up.name',
-      description: 'Auto-generate popup name based on group',
-      mapping: {
-        social: 'Social Quests',
-        daily: 'Daily Quests',
-        partner: 'Partner Quests',
-      },
-    },
-  ],
+  businessRules: [],
 
   connectGateRules: {
     conditional: true,

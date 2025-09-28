@@ -27,30 +27,9 @@ export const sevenDayChallengePresetConfig: PresetConfig = {
       days: 7,
       reward_map: [10, 20, 30, 40, 50, 70, 100],
     },
-    resources: {
-      ui: {
-        button: 'Boost XP',
-        'pop-up': {
-          name: 'Daily Quests',
-          button: 'Boost XP',
-          description: '',
-        },
-      },
-    },
   },
 
-  businessRules: [
-    {
-      condition: 'group',
-      action: 'auto-generate resources.ui.pop-up.name',
-      description: 'Auto-generate popup name based on group',
-      mapping: {
-        social: 'Social Quests',
-        daily: 'Daily Quests',
-        partner: 'Partner Quests',
-      },
-    },
-  ],
+  businessRules: [],
 
   rewardCalculation: {
     source: 'iterator.reward_map',

@@ -26,16 +26,7 @@ export const connectPresetConfig: PresetConfig = {
   defaults: {
     type: 'connect',
     group: 'social',
-    resources: {
-      ui: {
-        button: 'Connect',
-        'pop-up': {
-          name: 'Social Quests',
-          button: 'Connect',
-          description: '',
-        },
-      },
-    },
+    // provider is selected by user (telegram, discord, twitter)
   },
 
   businessRules: [],

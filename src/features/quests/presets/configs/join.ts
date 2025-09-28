@@ -25,53 +25,9 @@ export const joinPresetConfig: PresetConfig = {
     type: 'join',
     group: 'social',
     provider: 'telegram',
-    resources: {
-      ui: {
-        button: 'Join',
-        'pop-up': {
-          name: 'Social Quests',
-          button: 'Join',
-          description: '',
-          'additional-title': '',
-          'additional-description': '',
-        },
-      },
-      // isNew: true,
-    },
   },
 
-  businessRules: [
-    {
-      condition: 'provider === "twitter"',
-      action: 'set resources.ui.button = "Follow"',
-      description: 'For Twitter change button to Follow',
-    },
-    {
-      condition: 'provider === "twitter"',
-      action: 'set resources.ui.pop-up.button = "Follow"',
-      description: 'For Twitter change popup button to Follow',
-    },
-    {
-      condition: 'provider === "telegram" || provider === "discord"',
-      action: 'set resources.ui.button = "Join"',
-      description: 'For Telegram/Discord use Join button',
-    },
-    {
-      condition: 'provider === "telegram" || provider === "discord"',
-      action: 'set resources.ui.pop-up.button = "Join"',
-      description: 'For Telegram/Discord use Join popup button',
-    },
-    {
-      condition: 'group',
-      action: 'auto-generate resources.ui.pop-up.name',
-      description: 'Auto-generate popup name based on group',
-      mapping: {
-        social: 'Social Quests',
-        daily: 'Daily Quests',
-        partner: 'Partner Quests',
-      },
-    },
-  ],
+  businessRules: [],
 
   connectGateRules: {
     required: true,
