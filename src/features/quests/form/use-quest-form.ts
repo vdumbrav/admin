@@ -282,6 +282,8 @@ export function useQuestForm({
     },
     (errors) => {
       // This runs when Zod validation fails
+      console.error('❌ Zod Form validation errors:', errors);
+      console.log('❌ Form state:', form.getValues());
 
       // Set field-level errors for proper display under form fields
       Object.entries(errors).forEach(([field, error]) => {
@@ -293,12 +295,22 @@ export function useQuestForm({
         }
       });
 
-      // Show toast for validation errors
-      const errorMessages = Object.values(errors)
-        .map((error) => error?.message)
-        .filter(Boolean);
+      // Show detailed toast for validation errors (including hidden fields)
+      const errorMessages = Object.entries(errors)
+        .map(([field, error]) => `${field}: ${error?.message}`)
+        .filter(([, message]) => Boolean(message));
+
       if (errorMessages.length > 0) {
-        toast.error(errorMessages.join(', '));
+        // Show first few errors in toast with field names
+        const displayErrors = errorMessages.slice(0, 2);
+        const moreCount = errorMessages.length - displayErrors.length;
+
+        let toastMessage = `Validation failed:\n${displayErrors.join('\n')}`;
+        if (moreCount > 0) {
+          toastMessage += `\n...and ${moreCount} more errors (check console)`;
+        }
+
+        toast.error(toastMessage);
       }
     },
   );

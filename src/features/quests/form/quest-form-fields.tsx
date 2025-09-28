@@ -213,8 +213,8 @@ export function QuestFormFields({
       </div>
 
       {/* Type Field Row */}
-      <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
-        {isFieldVisible('type', fieldStates) && (
+      {isFieldVisible('type', fieldStates) && (
+        <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
           <FormField
             control={form.control}
             name='type'
@@ -253,8 +253,8 @@ export function QuestFormFields({
               </FormItem>
             )}
           />
-        )}
-      </div>
+        </div>
+      )}
 
       {/* Title Field */}
       {isFieldVisible('title', fieldStates) && (
@@ -549,10 +549,11 @@ export function QuestFormFields({
                     step={10}
                     disabled={isFieldDisabled('reward', fieldStates)}
                     readOnly={isFieldReadonly('reward', fieldStates)}
-                    {...field}
+                    value={field.value ? field.value.toString() : ''}
                     onChange={(e) => {
+                      // NoWheelNumber already passes clean numeric string in e.target.value
                       const value = e.target.value;
-                      field.onChange(value === '' ? undefined : Number(value));
+                      field.onChange(value === '' ? 0 : Number(value));
                     }}
                   />
                 </FormControl>

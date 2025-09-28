@@ -91,8 +91,8 @@ function applyActionWithPostUIRules(values: QuestFormValues): void {
 function applyConnectUIRules(values: QuestFormValues): void {
   if (!values.provider) return;
 
-  // Ensure resources exist
-  values.resources ??= toApiResources(ResourcePresets.connect(values.provider));
+  // Create proper resources from ResourcePresets (overwrite defaults)
+  values.resources = toApiResources(ResourcePresets.connect(values.provider));
 
   // Auto-generate popup description based on provider
   const descriptionMapping: Record<string, string> = {

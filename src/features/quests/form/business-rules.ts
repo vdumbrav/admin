@@ -34,7 +34,10 @@ export function getPresetFormValues(presetConfig?: PresetConfig): QuestFormValue
     mergedValues.preset ??= presetConfig.id;
   }
 
-  return mergedValues;
+  // Apply UI rules to ensure proper resource structure from the start
+  const valuesWithUIRules = applyUIRules(mergedValues, presetConfig);
+
+  return valuesWithUIRules;
 }
 
 /**
