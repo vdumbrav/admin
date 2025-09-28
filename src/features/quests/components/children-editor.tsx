@@ -15,6 +15,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { NoWheelNumber } from '@/components/no-wheel-number';
 import { SelectDropdown } from '@/components/select-dropdown';
 import { uploadMedia } from '../api';
@@ -61,6 +62,9 @@ export const ChildrenEditor = () => {
     move(oldIndex, newIndex);
   };
 
+  const canAddMore = fields.length < 10;
+  const needsMinimum = fields.length === 0;
+
   return (
     <div className='space-y-4'>
       <div className='flex items-center justify-between'>
@@ -79,26 +83,49 @@ export const ChildrenEditor = () => {
         </div>
         <Button
           type='button'
-          disabled={fields.length >= 10}
+          disabled={!canAddMore}
           onClick={() => {
             append({
               title: '',
+              description: '',
               type: 'like',
               group: 'social',
               provider: 'twitter',
               order_by: fields.length,
+              reward: 0,
               uri: '',
+              resources: {
+                username: '',
+                tweetId: '',
+                ui: {
+                  'pop-up': {
+                    static: '',
+                  },
+                },
+              },
             });
           }}
         >
-          Add
+          Add Task
         </Button>
       </div>
+
+      {needsMinimum && (
+        <div className='rounded-md border border-orange-200 bg-orange-50 p-3 text-sm text-orange-800 dark:border-orange-800 dark:bg-orange-900/30 dark:text-orange-300'>
+          At least 1 task is required for multiple type quests.
+        </div>
+      )}
       <DndContext onDragEnd={handleDragEnd}>
         <SortableContext items={fields.map((f) => f.id)} strategy={verticalListSortingStrategy}>
           <div ref={listRef} className='space-y-4'>
             {fields.map((field, index) => (
-              <ChildRow key={field.id} id={field.id} index={index} remove={remove} />
+              <ChildRow
+                key={field.id}
+                id={field.id}
+                index={index}
+                remove={remove}
+                canRemove={fields.length > 1}
+              />
             ))}
           </div>
         </SortableContext>
@@ -111,9 +138,10 @@ interface RowProps {
   id: string;
   index: number;
   remove: (index: number) => void;
+  canRemove: boolean;
 }
 
-const ChildRow = ({ id, index, remove }: RowProps) => {
+const ChildRow = ({ id, index, remove, canRemove }: RowProps) => {
   const { control } = useFormContext<FormValues>();
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id,
@@ -129,6 +157,7 @@ const ChildRow = ({ id, index, remove }: RowProps) => {
   // Child inherits provider from parent if not explicitly set
   const provider = childProvider ?? parentProvider;
   const showTweetFields = ['like', 'share', 'comment'].includes(type) && provider === 'twitter';
+  const showProviderField = !parentProvider; // Hide if inherited from parent
 
   return (
     <div
@@ -149,6 +178,7 @@ const ChildRow = ({ id, index, remove }: RowProps) => {
           type='button'
           variant='outline'
           onClick={() => remove(index)}
+          disabled={!canRemove}
           aria-label='Remove child'
         >
           Remove
@@ -167,7 +197,21 @@ const ChildRow = ({ id, index, remove }: RowProps) => {
           </FormItem>
         )}
       />
-      <div className='grid gap-4 sm:grid-cols-3'>
+
+      <FormField
+        control={control}
+        name={`child.${index}.description`}
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Description</FormLabel>
+            <FormControl>
+              <Textarea {...field} placeholder='Enter description' rows={2} />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+      <div className={cn('grid gap-4', showProviderField ? 'sm:grid-cols-3' : 'sm:grid-cols-2')}>
         <FormField
           control={control}
           name={`child.${index}.type`}
@@ -175,6 +219,7 @@ const ChildRow = ({ id, index, remove }: RowProps) => {
             <FormItem>
               <FormLabel>Type</FormLabel>
               <SelectDropdown
+                className='w-full'
                 value={field.value}
                 onValueChange={field.onChange}
                 placeholder='Select type'
@@ -184,22 +229,24 @@ const ChildRow = ({ id, index, remove }: RowProps) => {
             </FormItem>
           )}
         />
-        <FormField
-          control={control}
-          name={`child.${index}.provider`}
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Provider</FormLabel>
-              <SelectDropdown
-                value={field.value}
-                onValueChange={field.onChange}
-                placeholder='Select provider'
-                items={childProviders}
-              />
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        {showProviderField && (
+          <FormField
+            control={control}
+            name={`child.${index}.provider`}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Provider</FormLabel>
+                <SelectDropdown
+                  value={field.value}
+                  onValueChange={field.onChange}
+                  placeholder='Select provider'
+                  items={childProviders}
+                />
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
         <FormField
           control={control}
           name={`child.${index}.reward`}
@@ -228,16 +275,16 @@ const ChildRow = ({ id, index, remove }: RowProps) => {
       {/* Task Image Upload */}
       <TaskImageUpload index={index} />
 
-      {/* URI Field for Twitter provider */}
+      {/* URL Field for Twitter provider */}
       {provider === 'twitter' && (
         <FormField
           control={control}
           name={`child.${index}.uri`}
           render={({ field }) => (
             <FormItem>
-              <FormLabel>URI (URL)</FormLabel>
+              <FormLabel>URL</FormLabel>
               <FormControl>
-                <Input {...field} placeholder='Enter URI/URL' />
+                <Input {...field} placeholder='Enter URL' />
               </FormControl>
               <FormDescription>Required for Twitter tasks</FormDescription>
               <FormMessage />
@@ -257,7 +304,7 @@ const ChildRow = ({ id, index, remove }: RowProps) => {
                 <FormControl>
                   <Input
                     {...field}
-                    placeholder='1234567890'
+                    placeholder='e.g. 1234567890123456789'
                     onBlur={(e) => field.onChange((e.target.value || '').trim())}
                   />
                 </FormControl>
@@ -274,7 +321,7 @@ const ChildRow = ({ id, index, remove }: RowProps) => {
                 <FormControl>
                   <Input
                     {...field}
-                    placeholder='Enter username (e.g. waitlist)'
+                    placeholder='e.g. username (without @)'
                     onBlur={(e) => field.onChange((e.target.value || '').trim().replace(/^@/, ''))}
                   />
                 </FormControl>
@@ -323,7 +370,6 @@ const ChildPreview = ({ index }: { index: number }) => {
 
   return (
     <div className='mt-4'>
-      <h4 className='mb-2 text-sm font-medium'>Twitter Card Preview:</h4>
       <TwitterPreview username={username} tweetId={tweetId} />
     </div>
   );
