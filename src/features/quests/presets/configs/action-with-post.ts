@@ -90,6 +90,6 @@ export const actionWithPostPresetConfig: PresetConfig = {
 
   specialComponents: [
     'TwitterPreview', // For tweet preview (timeout 8-10s, fallback placeholder with link)
-    'TasksEditor', // For Like/Comment/Retweet tasks
+    'ChildrenEditor', // For Like/Comment/Retweet tasks
   ],
 };

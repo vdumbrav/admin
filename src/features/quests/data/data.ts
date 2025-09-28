@@ -41,7 +41,7 @@ const TYPE_LABELS: Record<WaitlistTasksResponseDtoTypeItem, string> = {
   [WaitlistTasksResponseDtoTypeItem.repeatable]: 'Repeatable',
   [WaitlistTasksResponseDtoTypeItem.referral]: 'Referral',
   [WaitlistTasksResponseDtoTypeItem.external]: 'External',
-  [WaitlistTasksResponseDtoTypeItem.dummy]: 'Dummy', // Excluded from UI selects per P1 requirement
+  [WaitlistTasksResponseDtoTypeItem.dummy]: 'Dummy',
 };
 
 /**
@@ -174,7 +174,7 @@ export function isApiGroup(value: string): value is TaskResponseDtoGroup {
  * - like/comment/share only work with Twitter (Twitter intent links)
  * - connect works with all OAuth providers (matrix, discord, twitter, telegram)
  * - join removed as it has no specific implementation in waitlist project
- * - dummy removed as it has no specific implementation in waitlist project
+ * - dummy available but no specific implementation in waitlist project
  */
 export const TYPE_PROVIDER_REQUIREMENTS: Partial<
   Record<WaitlistTasksResponseDtoTypeItem, TaskResponseDtoProvider[]>
