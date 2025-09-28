@@ -19,7 +19,7 @@ export function useConnectGate(provider?: string): ConnectGateResult {
     if (!data) return { hasRequiredConnect: null, connectQuestId: null };
 
     // Find Connect quest for this provider
-    const connectQuest = data.find((t) => t.provider === provider && t.type.includes('connect'));
+    const connectQuest = data.find((t) => t.provider === provider && t.type === 'connect');
 
     return {
       hasRequiredConnect: !!connectQuest,

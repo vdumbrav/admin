@@ -69,7 +69,6 @@ const adminTaskTypeSchema = z.enum([
   WaitlistTasksResponseDtoTypeItem.comment,
   WaitlistTasksResponseDtoTypeItem.multiple,
   WaitlistTasksResponseDtoTypeItem.repeatable,
-  WaitlistTasksResponseDtoTypeItem.dummy,
   WaitlistTasksResponseDtoTypeItem.external,
 ]);
 
@@ -116,7 +115,6 @@ const taskTypeSchema = z.enum([
   WaitlistTasksResponseDtoTypeItem.comment,
   WaitlistTasksResponseDtoTypeItem.multiple,
   WaitlistTasksResponseDtoTypeItem.repeatable,
-  WaitlistTasksResponseDtoTypeItem.dummy,
   WaitlistTasksResponseDtoTypeItem.external,
 ]);
 
