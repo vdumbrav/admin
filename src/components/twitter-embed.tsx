@@ -92,15 +92,15 @@ export const TwitterEmbed = ({ username, tweetId }: TwitterEmbedProps) => {
   if (typeof window === 'undefined') return <div />;
 
   return (
-    <div style={{ position: 'relative' }}>
+    <div className='relative'>
       {isLoading && (
         <div className='flex min-h-[140px] items-center justify-center py-4'>
           <Loader2 className='text-muted-foreground h-6 w-6 animate-spin' />
         </div>
       )}
 
-      {/* Twitter Embed */}
-      <div ref={tweetRef}>
+      {/* Twitter Embed - hide during loading to avoid showing raw HTML */}
+      <div ref={tweetRef} className={isLoading ? 'hidden' : ''}>
         <blockquote
           className='twitter-tweet'
           data-theme={getEffectiveTheme()}
