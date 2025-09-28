@@ -16,7 +16,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { NoWheelNumber } from '@/components/no-wheel-number';
+import { NumberInput } from '@/components/number-input';
 import { SelectDropdown } from '@/components/select-dropdown';
 import { uploadMedia } from '../api';
 import { providers, types } from '../data/data';
@@ -254,16 +254,10 @@ const ChildRow = ({ id, index, remove, canRemove }: RowProps) => {
             <FormItem>
               <FormLabel>Reward, XP</FormLabel>
               <FormControl>
-                <NoWheelNumber
-                  {...field}
-                  value={field.value ?? ''}
-                  onChange={(e) =>
-                    field.onChange(
-                      Number.isNaN(e.target.valueAsNumber) ? undefined : e.target.valueAsNumber,
-                    )
-                  }
+                <NumberInput
+                  value={field.value}
+                  onChange={field.onChange}
                   min={0}
-                  step={1}
                 />
               </FormControl>
               <FormMessage />

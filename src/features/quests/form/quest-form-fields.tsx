@@ -24,7 +24,7 @@ import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { DatePicker } from '@/components/date-picker';
-import { NoWheelNumber } from '@/components/no-wheel-number';
+import { NumberInput } from '@/components/number-input';
 import { SelectDropdown } from '@/components/select-dropdown';
 import { TwitterEmbed } from '@/components/twitter-embed';
 import { ChildrenEditor } from '../components/children-editor';
@@ -95,10 +95,10 @@ export function QuestFormFields({
 
     return shouldShow ? (
       <div className='space-y-2'>
-        <label className='text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70'>
+        <label className='text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70 '>
           Total Reward
         </label>
-        <div className='bg-muted/50 rounded-md border px-3 py-2 text-sm'>
+        <div className='bg-muted/50 rounded-md border px-3 py-2 text-sm mt-1'>
           {totalRewardValue ?? 0}
         </div>
         <p className='text-muted-foreground text-sm'>
@@ -463,14 +463,15 @@ export function QuestFormFields({
       )}
 
       {/* Child Tasks Section for Multiple Type */}
-      {((currentType === 'multiple' && isFieldVisible('tasks', fieldStates)) ||
-        (!presetConfig && isFieldVisible('children', fieldStates))) && <ChildrenEditor />}
+      {(currentType === 'multiple' &&
+        (isFieldVisible('tasks', fieldStates) || !presetConfig)) && <ChildrenEditor />}
 
-      {/* Total Reward Display (only for multiple/iterable quests, but not for seven-day-challenge) */}
-      {presetConfig?.id !== 'seven-day-challenge' && totalRewardDisplay}
+      {/* Total Reward Display - disabled to avoid duplication with DailyRewardsEditor */}
+      {/* {presetConfig?.id !== 'seven-day-challenge' && totalRewardDisplay} */}
 
       {/* Daily Rewards Editor for 7-Day Challenge */}
-      {presetConfig?.id === 'seven-day-challenge' &&
+      {(presetConfig?.id === 'seven-day-challenge' ||
+        (currentType === 'dummy' && !presetConfig)) &&
         isFieldVisible('dailyRewards', fieldStates) && <DailyRewardsEditor />}
 
       {/* Popup Button Name */}
@@ -544,17 +545,13 @@ export function QuestFormFields({
               <FormItem>
                 <FormLabel>Reward, XP</FormLabel>
                 <FormControl>
-                  <NoWheelNumber
+                  <NumberInput
                     placeholder='Enter reward amount'
-                    step={10}
                     disabled={isFieldDisabled('reward', fieldStates)}
                     readOnly={isFieldReadonly('reward', fieldStates)}
-                    value={field.value ? field.value.toString() : ''}
-                    onChange={(e) => {
-                      // NoWheelNumber already passes clean numeric string in e.target.value
-                      const value = e.target.value;
-                      field.onChange(value === '' ? 0 : Number(value));
-                    }}
+                    value={field.value}
+                    onChange={field.onChange}
+                    min={0}
                   />
                 </FormControl>
                 <FormMessage />
