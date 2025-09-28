@@ -4,6 +4,7 @@
  * Now supports multi-task creation with progress tracking
  */
 import { useState } from 'react';
+import { useNavigate } from '@tanstack/react-router';
 import { Form } from '@/components/ui/form';
 import { ConfirmDialog } from '@/components/confirm-dialog';
 import { MultiTaskProgress } from '../components/multi-task-progress';
@@ -47,6 +48,7 @@ export function QuestFormContainer({
 
   const multiTask = useCreateMultiTask();
   const [showProgress, setShowProgress] = useState(false);
+  const navigate = useNavigate();
 
   // ============================================================================
   // Form State Management
@@ -85,10 +87,18 @@ export function QuestFormContainer({
       const result = await multiTask.mutateAsync(values);
 
       if (result.success) {
-        // Success - redirect after a brief delay to show completion
-        setTimeout(() => {
-          void onSubmit(values);
-        }, 1500);
+        // Success - immediately switch to edit mode for parent task
+        if (result.mainTask?.id) {
+          const mainTaskId = result.mainTask.id;
+          setTimeout(() => {
+            void navigate({ to: `/quests/${mainTaskId}` });
+          }, 1500);
+        } else {
+          // Fallback to original behavior if no main task ID
+          setTimeout(() => {
+            void onSubmit(values);
+          }, 1500);
+        }
       }
       // If partial errors, keep progress visible for user interaction
     } catch (error) {

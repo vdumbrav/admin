@@ -156,9 +156,10 @@ Form fields adapt based on selected preset:
 For complex quest campaigns:
 
 1. **Main Quest** → Created first as container
-2. **Sub-tasks** → Added sequentially with `parent_id`
-3. **Progress Tracking** → Real-time creation status
-4. **Error Handling** → Individual retry for failed tasks
+2. **Auto-Navigation** → Immediate redirect to edit mode `/quests/{id}`
+3. **Sub-tasks** → Added sequentially with `parent_id` (in background)
+4. **Progress Tracking** → Real-time creation status on edit page
+5. **Error Handling** → Individual retry for failed tasks
 
 #### Sub-task Management
 
@@ -383,7 +384,8 @@ Natural language development with AI:
 **Implemented Features:**
 
 - ✅ Complete quest management system with 5 presets
-- ✅ Multi-task creation with progress tracking
+- ✅ Multi-task creation with automatic navigation to edit mode
+- ✅ Progress tracking on edit page during sub-task creation
 - ✅ OIDC authentication with Keycloak
 - ✅ Role-based access control (admin/moderator)
 - ✅ Auto-generated type-safe API client
