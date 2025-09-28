@@ -1,15 +1,25 @@
 import { useEffect, useRef } from 'react';
 import { useFieldArray, useFormContext, useWatch } from 'react-hook-form';
+import { IconGripVertical } from '@tabler/icons-react';
 import { DndContext, type DragEndEvent } from '@dnd-kit/core';
 import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { Button } from '@/components/ui/button';
-import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import {
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { NoWheelNumber } from '@/components/no-wheel-number';
 import { SelectDropdown } from '@/components/select-dropdown';
+import { uploadMedia } from '../api';
 import type { Quest } from '../data/types';
+import { IconUpload as ImageUpload } from './icon-upload';
 import { TwitterPreview } from './twitter-preview';
 
 // Ограничиваем типы для Action with post
@@ -24,6 +34,11 @@ interface TaskItem {
   resources?: {
     username?: string;
     tweetId?: string;
+    ui?: {
+      'pop-up'?: {
+        static?: string;
+      };
+    };
   };
 }
 
@@ -41,11 +56,15 @@ const taskTypes = [
 // Provider is readonly for action-with-post preset
 
 export const TasksEditor = () => {
-  const { control, setValue } = useFormContext(); // Remove type assertion to let TS infer from usage
+  const { control, setValue, watch } = useFormContext(); // Remove type assertion to let TS infer from usage
   const { fields, append, remove, move } = useFieldArray({
     control,
     name: 'child',
   });
+
+  // Get provider from parent form to inherit in child tasks
+  const parentProvider = watch('provider');
+
   const listRef = useRef<HTMLDivElement>(null);
 
   // Auto-recalculate order_by when fields change (debounced to avoid excessive updates)
@@ -97,9 +116,15 @@ export const TasksEditor = () => {
               group: 'social',
               order_by: fields.length,
               reward: 0,
+              provider: parentProvider, // Inherit provider from parent
               resources: {
                 username: '',
                 tweetId: '',
+                ui: {
+                  'pop-up': {
+                    static: '',
+                  },
+                },
               },
             })
           }
@@ -157,14 +182,18 @@ const TaskRow = ({ id, index, remove, canRemove }: RowProps) => {
       ref={setNodeRef}
       style={style}
       data-dragging={isDragging}
-      className='space-y-2 rounded-md border p-4 transition-shadow data-[dragging=true]:shadow-lg'
+      className='space-y-4 rounded-md border p-4 transition-shadow data-[dragging=true]:shadow-lg'
     >
       <div className='flex justify-between'>
         <div className='flex items-center gap-2'>
-          <span {...attributes} {...listeners} className='text-muted-foreground cursor-move'>
-            ⋮⋮
+          <span
+            {...attributes}
+            {...listeners}
+            className='text-muted-foreground cursor-move select-none'
+          >
+            <IconGripVertical size={16} />
           </span>
-          <span className='text-muted-foreground text-xs'>#{index + 1}</span>
+          <span className='text-muted-foreground text-xs'># Task {index + 1}</span>
         </div>
         <Button
           type='button'
@@ -214,6 +243,7 @@ const TaskRow = ({ id, index, remove, canRemove }: RowProps) => {
             <FormItem>
               <FormLabel>Type</FormLabel>
               <SelectDropdown
+                className='w-full'
                 value={field.value as string}
                 onValueChange={field.onChange}
                 placeholder='Select type'
@@ -248,17 +278,21 @@ const TaskRow = ({ id, index, remove, canRemove }: RowProps) => {
         />
       </div>
 
-      {/* Twitter fields for this task */}
+      {/* Task Image Upload */}
+      <TaskImageUpload index={index} />
+
+      {/* Optional Twitter fields */}
       <div className='grid gap-4 sm:grid-cols-2'>
         <FormField
           control={control}
           name={`child.${index}.resources.username`}
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Twitter Username</FormLabel>
+              <FormLabel>Twitter Username (optional)</FormLabel>
               <FormControl>
                 <Input {...field} placeholder='Enter username (without @)' />
               </FormControl>
+              <FormDescription>Optional: For Twitter card display</FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -268,7 +302,7 @@ const TaskRow = ({ id, index, remove, canRemove }: RowProps) => {
           name={`child.${index}.resources.tweetId`}
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Tweet URL or ID</FormLabel>
+              <FormLabel>Tweet URL or ID (optional)</FormLabel>
               <FormControl>
                 <Input
                   {...field}
@@ -283,6 +317,7 @@ const TaskRow = ({ id, index, remove, canRemove }: RowProps) => {
                   }}
                 />
               </FormControl>
+              <FormDescription>Optional: For Twitter card display</FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -295,7 +330,26 @@ const TaskRow = ({ id, index, remove, canRemove }: RowProps) => {
   );
 };
 
-// Child Twitter Preview Component for individual tasks
+// Task Image Upload Component
+const TaskImageUpload = ({ index }: { index: number }) => {
+  const { control, setValue } = useFormContext();
+  const image = useWatch({ control, name: `child.${index}.resources.ui.pop-up.static` });
+
+  return (
+    <div>
+      <h4 className='mb-2 text-sm font-medium'>Task Image *</h4>
+      <ImageUpload
+        value={image}
+        onChange={(url) =>
+          setValue(`child.${index}.resources.ui.pop-up.static`, url, { shouldDirty: true })
+        }
+        onImageUpload={uploadMedia}
+      />
+    </div>
+  );
+};
+
+// Child Task Preview Component - shows Twitter card preview
 const ChildTwitterPreview = ({ index }: { index: number }) => {
   const { control } = useFormContext();
   const username = useWatch({ control, name: `child.${index}.resources.username` });
@@ -304,13 +358,11 @@ const ChildTwitterPreview = ({ index }: { index: number }) => {
   // Check if we have twitter data to preview
   const hasTwitterData = !!(username && tweetId);
 
-  if (!hasTwitterData) {
-    return null;
-  }
+  if (!hasTwitterData) return null;
 
-  // Create a form context wrapper for TwitterPreview
   return (
     <div className='mt-4'>
+      <h4 className='mb-2 text-sm font-medium'>Twitter Card Preview:</h4>
       <TwitterPreview username={username} tweetId={tweetId} />
     </div>
   );

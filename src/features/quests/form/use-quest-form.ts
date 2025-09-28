@@ -255,7 +255,6 @@ export function useQuestForm({
     },
     (errors) => {
       // This runs when Zod validation fails
-      console.log('Zod validation errors:', errors);
 
       // Set field-level errors for proper display under form fields
       Object.entries(errors).forEach(([field, error]) => {

@@ -57,7 +57,7 @@ export const useCreateMultiTask = () => {
 
         // Child-specific
         parent_id: parentId,
-        provider: child.provider,
+        provider: child.provider ?? parentData?.provider, // Inherit provider from parent if not set
 
         // Optional fields
         ...(child.uri && { uri: child.uri }),
@@ -124,10 +124,11 @@ export const useCreateMultiTask = () => {
       const totalTasks = 1 + children.length; // main + children
 
       // Initialize state
+      const { child: _, ...mainData } = formData;
       setState({
         main: {
           status: 'creating',
-          data: { ...formData, child: undefined }, // Remove child from main data
+          data: mainData as QuestFormValues, // Remove child from main data
         },
         children: children.map((child, index) => ({
           status: 'pending',
@@ -148,7 +149,8 @@ export const useCreateMultiTask = () => {
 
       try {
         // Step 1: Create main task
-        const mainTaskData = formToApi({ ...formData, child: undefined });
+        // Pass full formData to formToApi so it can extract static from child, but formToApi will exclude child from output
+        const mainTaskData = formToApi(formData);
         const mainTask = await createTaskMutation.mutateAsync({
           data: mainTaskData as CreateTaskDto,
         });

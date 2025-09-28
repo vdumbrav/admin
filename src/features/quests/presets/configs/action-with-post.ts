@@ -8,13 +8,13 @@ export const actionWithPostPresetConfig: PresetConfig = {
     type: 'readonly', // Always 'multiple'
     group: 'readonly', // Always 'social'
     provider: 'readonly', // Always 'twitter'
-    uri: 'hidden', // Not used for multiple type - uses tweetId in resources instead
+    uri: 'visible', // Required by backend for multiple type (URL to main post)
     reward: 'hidden', // Use totalReward instead
     tasks: 'visible', // Dynamic list with Like/Comment/Retweet
     dailyRewards: 'hidden',
     totalReward: 'readonly', // Calculated from task rewards
-    username: 'visible',
-    tweetId: 'visible',
+    username: 'hidden', // Used only in child tasks for multiple type
+    tweetId: 'hidden', // Used only in child tasks for multiple type
     icon: 'conditional', // visible if group === 'partner'
     partnerIcon: 'hidden', // Icon field covers this
     buttonText: 'hidden', // Handled by business rules based on tasks
@@ -71,8 +71,8 @@ export const actionWithPostPresetConfig: PresetConfig = {
       mapping: {
         like: 'Like Tweet',
         comment: 'Comment on Tweet',
-        retweet: 'Retweet',
-        follow: 'Follow & Engage',
+        share: 'Share Tweet',
+        connect: 'Follow & Engage',
       },
     },
   ],

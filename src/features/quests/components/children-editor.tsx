@@ -1,15 +1,26 @@
 import { useEffect, useRef } from 'react';
 import { useFieldArray, useFormContext, useWatch } from 'react-hook-form';
+import { IconGripVertical } from '@tabler/icons-react';
 import { DndContext, type DragEndEvent } from '@dnd-kit/core';
 import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { Button } from '@/components/ui/button';
-import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import {
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { NoWheelNumber } from '@/components/no-wheel-number';
 import { SelectDropdown } from '@/components/select-dropdown';
+import { uploadMedia } from '../api';
 import { providers, types } from '../data/data';
 import type { ChildFormValues } from '../types/form-types';
+import { IconUpload as ImageUpload } from './icon-upload';
+import { TwitterPreview } from './twitter-preview';
 
 interface FormValues {
   child: ChildFormValues[];
@@ -104,11 +115,15 @@ const ChildRow = ({ id, index, remove }: RowProps) => {
       ref={setNodeRef}
       style={style}
       data-dragging={isDragging}
-      className='space-y-2 rounded-md border p-4 transition-shadow data-[dragging=true]:shadow-lg'
+      className='space-y-4 rounded-md border p-4 transition-shadow data-[dragging=true]:shadow-lg'
     >
       <div className='flex justify-between'>
-        <span {...attributes} {...listeners} className='cursor-move'>
-          ::
+        <span
+          {...attributes}
+          {...listeners}
+          className='text-muted-foreground cursor-move select-none'
+        >
+          <IconGripVertical size={16} />
         </span>
         <Button
           type='button'
@@ -189,6 +204,28 @@ const ChildRow = ({ id, index, remove }: RowProps) => {
           )}
         />
       </div>
+
+      {/* Task Image Upload */}
+      <TaskImageUpload index={index} />
+
+      {/* URI Field for Twitter provider */}
+      {provider === 'twitter' && (
+        <FormField
+          control={control}
+          name={`child.${index}.uri`}
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>URI (URL)</FormLabel>
+              <FormControl>
+                <Input {...field} placeholder='Enter URI/URL' />
+              </FormControl>
+              <FormDescription>Required for Twitter tasks</FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      )}
+
       {showTweetFields && (
         <div className='grid gap-4 sm:grid-cols-2'>
           <FormField
@@ -227,6 +264,47 @@ const ChildRow = ({ id, index, remove }: RowProps) => {
           />
         </div>
       )}
+
+      {/* Preview Component */}
+      <ChildPreview index={index} />
+    </div>
+  );
+};
+
+// Task Image Upload Component
+const TaskImageUpload = ({ index }: { index: number }) => {
+  const { control, setValue } = useFormContext<FormValues>();
+  const image = useWatch({ control, name: `child.${index}.resources.ui.pop-up.static` });
+
+  return (
+    <div>
+      <h4 className='mb-2 text-sm font-medium'>Task Image *</h4>
+      <ImageUpload
+        value={image}
+        onChange={(url) =>
+          setValue(`child.${index}.resources.ui.pop-up.static`, url, { shouldDirty: true })
+        }
+        onImageUpload={uploadMedia}
+      />
+    </div>
+  );
+};
+
+// Child Preview Component - shows Twitter card preview
+const ChildPreview = ({ index }: { index: number }) => {
+  const { control } = useFormContext<FormValues>();
+  const username = useWatch({ control, name: `child.${index}.resources.username` });
+  const tweetId = useWatch({ control, name: `child.${index}.resources.tweetId` });
+
+  // Check if we have twitter data to preview
+  const hasTwitterData = !!(username && tweetId);
+
+  if (!hasTwitterData) return null;
+
+  return (
+    <div className='mt-4'>
+      <h4 className='mb-2 text-sm font-medium'>Twitter Card Preview:</h4>
+      <TwitterPreview username={username} tweetId={tweetId} />
     </div>
   );
 };
