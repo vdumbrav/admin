@@ -50,7 +50,6 @@ export function validateRequiredFields(formData: QuestFormValues): ValidationRes
     case 'share':
     case 'like':
     case 'comment':
-    case 'dummy':
       // These types don't require specific validation beyond core fields
       break;
     default:

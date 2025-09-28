@@ -46,7 +46,7 @@ export function apiToForm(apiData: Partial<TaskResponseDto>): QuestFormValues {
   return {
     // Core fields with fallback to defaults
     title: apiData.title ?? '',
-    type: apiData.type ?? 'external',
+    type: apiData.type === 'dummy' ? 'external' : (apiData.type ?? 'external'),
     description: apiData.description ?? '',
     group: apiData.group ?? 'all',
     order_by: apiData.order_by ?? 0,
@@ -171,8 +171,8 @@ export function formToApi(formData: QuestFormValues): Omit<CreateTaskDto, 'paren
 
     // Optional fields - only include if not empty
     ...(formData.provider && { provider: formData.provider }),
-    // URI is required for multiple type even if empty
-    ...(formData.uri || formData.type === 'multiple' ? { uri: formData.uri ?? '' } : {}),
+    // URI is required for multiple type and must not be empty
+    ...(formData.uri ? { uri: formData.uri } : {}),
     // blocking_task if explicitly set (required for multiple type by API validation)
     ...(formData.blocking_task ? { blocking_task: formData.blocking_task } : {}),
 

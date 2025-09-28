@@ -39,9 +39,9 @@ const TYPE_LABELS: Record<WaitlistTasksResponseDtoTypeItem, string> = {
   [WaitlistTasksResponseDtoTypeItem.connect]: 'Connect',
   [WaitlistTasksResponseDtoTypeItem.multiple]: 'Multiple',
   [WaitlistTasksResponseDtoTypeItem.repeatable]: 'Repeatable',
-  [WaitlistTasksResponseDtoTypeItem.dummy]: 'Dummy',
   [WaitlistTasksResponseDtoTypeItem.referral]: 'Referral',
   [WaitlistTasksResponseDtoTypeItem.external]: 'External',
+  [WaitlistTasksResponseDtoTypeItem.dummy]: 'Dummy', // Excluded from UI selects per P1 requirement
 };
 
 /**
