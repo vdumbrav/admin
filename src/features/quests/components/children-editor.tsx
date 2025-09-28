@@ -254,11 +254,7 @@ const ChildRow = ({ id, index, remove, canRemove }: RowProps) => {
             <FormItem>
               <FormLabel>Reward, XP</FormLabel>
               <FormControl>
-                <NumberInput
-                  value={field.value}
-                  onChange={field.onChange}
-                  min={0}
-                />
+                <NumberInput value={field.value} onChange={field.onChange} min={0} />
               </FormControl>
               <FormMessage />
             </FormItem>

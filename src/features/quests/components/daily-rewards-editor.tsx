@@ -21,7 +21,6 @@ export const DailyRewardsEditor = () => {
   const { control, setValue } = useFormContext<FormValues>();
 
   const rewardMap = useWatch({ control, name: 'iterator.reward_map' });
-  const totalReward = useWatch({ control, name: 'totalReward' });
 
   const addDay = () => {
     const currentMap = rewardMap ?? [];
@@ -117,10 +116,12 @@ export const DailyRewardsEditor = () => {
             <FormControl>
               <input
                 type='number'
-                value={rewardMap?.reduce((sum, reward) => {
-                  const validReward = typeof reward === 'number' && !isNaN(reward) ? reward : 0;
-                  return sum + validReward;
-                }, 0) || 0}
+                value={
+                  rewardMap?.reduce((sum, reward) => {
+                    const validReward = typeof reward === 'number' && !isNaN(reward) ? reward : 0;
+                    return sum + validReward;
+                  }, 0) || 0
+                }
                 readOnly
                 className='border-input bg-muted ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex h-10 w-full rounded-md border px-3 py-2 text-sm [-moz-appearance:textfield] file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none'
               />

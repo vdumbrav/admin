@@ -1,9 +1,10 @@
 import * as React from 'react';
 import { NumericFormat } from 'react-number-format';
-import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
+import { Input } from '@/components/ui/input';
 
-interface NumberInputProps extends Omit<React.ComponentProps<typeof Input>, 'onChange' | 'value'> {
+interface NumberInputProps
+  extends Omit<React.ComponentProps<typeof Input>, 'onChange' | 'value' | 'type' | 'defaultValue'> {
   value?: number;
   onChange?: (value: number) => void;
   thousandSeparator?: boolean;
@@ -14,7 +15,20 @@ interface NumberInputProps extends Omit<React.ComponentProps<typeof Input>, 'onC
 }
 
 export const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
-  ({ value, onChange, thousandSeparator = true, decimalScale = 0, allowNegative = false, min, max, className, ...props }, ref) => {
+  (
+    {
+      value,
+      onChange,
+      thousandSeparator = true,
+      decimalScale = 0,
+      allowNegative = false,
+      min,
+      max,
+      className,
+      ...props
+    },
+    ref,
+  ) => {
     return (
       <NumericFormat
         getInputRef={ref}
@@ -36,8 +50,8 @@ export const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
         }}
         className={cn(
           // Disable mouse wheel
-          "[&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [-moz-appearance:textfield]",
-          className
+          '[-moz-appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none',
+          className,
         )}
         onWheel={(e) => {
           e.currentTarget.blur();
@@ -45,7 +59,7 @@ export const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
         {...props}
       />
     );
-  }
+  },
 );
 
 NumberInput.displayName = 'NumberInput';
