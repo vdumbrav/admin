@@ -18,8 +18,9 @@ export const connectPresetConfig: PresetConfig = {
     icon: 'hidden',
     partnerIcon: 'hidden',
     buttonText: 'hidden',
-    popupDescription: 'hidden',
+    popupDescription: 'hidden', // Auto-generated based on provider
     popupButton: 'hidden',
+    repeatable: 'hidden', // Connect tasks are not repeatable
   },
 
   defaults: {
@@ -37,28 +38,7 @@ export const connectPresetConfig: PresetConfig = {
     },
   },
 
-  businessRules: [
-    {
-      condition: 'provider === "matrix"',
-      action: 'set resources.ui.button = "Add"',
-      description: 'For Matrix change button to Add',
-    },
-    {
-      condition: 'provider === "matrix"',
-      action: 'set resources.ui.pop-up.button = "Add"',
-      description: 'For Matrix change popup button to Add',
-    },
-    {
-      condition: 'group',
-      action: 'auto-generate resources.ui.pop-up.name',
-      description: 'Auto-generate popup name based on group',
-      mapping: {
-        social: 'Social Quests',
-        daily: 'Daily Quests',
-        partner: 'Partner Quests',
-      },
-    },
-  ],
+  businessRules: [],
 
   specialComponents: [],
 };

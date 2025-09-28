@@ -47,6 +47,32 @@ export function applyBusinessRules(
         }
         break;
 
+      case 'auto-generate resources.ui.pop-up.description':
+        if (rule.condition === 'provider' && rule.mapping && values.provider) {
+          const description = rule.mapping[values.provider];
+          if (!description) {
+            throw new Error(`No provider mapping found for provider: ${values.provider}`);
+          }
+
+          // STRICT: resources must exist
+          if (!result.resources?.ui) {
+            throw new Error('Resources.ui is required for description auto-generation');
+          }
+
+          result.resources = {
+            ...result.resources,
+            ui: {
+              ...result.resources.ui,
+              'pop-up': {
+                name: result.resources.ui['pop-up']?.name ?? 'Social Quests',
+                button: result.resources.ui['pop-up']?.button ?? 'Connect',
+                description: description,
+              } as ResourcesUiPopUpDto,
+            },
+          };
+        }
+        break;
+
       case 'set resources.ui.button = "Follow"':
         if (rule.condition === 'provider === "twitter"' && values.provider === 'twitter') {
           if (!result.resources) {

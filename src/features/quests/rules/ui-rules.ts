@@ -91,11 +91,26 @@ function applyActionWithPostUIRules(values: QuestFormValues): void {
 function applyConnectUIRules(values: QuestFormValues): void {
   if (!values.provider) return;
 
+  // Ensure resources exist
+  if (!values.resources) {
+    values.resources = toApiResources(ResourcePresets.connect(values.provider));
+  }
+
+  // Auto-generate popup description based on provider
+  const descriptionMapping: Record<string, string> = {
+    telegram: 'Connect your Telegram account to earn XP',
+    discord: 'Connect your Discord account to earn XP',
+    twitter: 'Connect your X account to earn XP',
+  };
+
+  const description = descriptionMapping[values.provider];
+  if (description && values.resources.ui?.['pop-up']) {
+    values.resources.ui['pop-up'].description = description;
+  }
+
   // Auto-update button text for Matrix provider
   if (values.provider === 'matrix') {
-    if (!values.resources) {
-      values.resources = toApiResources(ResourcePresets.connect(values.provider));
-    } else if (values.resources.ui) {
+    if (values.resources.ui) {
       values.resources.ui.button = 'Add';
       if (values.resources.ui['pop-up']) {
         values.resources.ui['pop-up'].button = 'Add';

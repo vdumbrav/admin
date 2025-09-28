@@ -345,8 +345,7 @@ export function formToApi(formData: QuestFormValues): Omit<CreateTaskDto, 'paren
     level: 1, // Required field for CreateTaskDto - form doesn't have this field
 
     // Include preset if specified
-    // TEMPORARILY DISABLED: preset field not supported by API
-    // ...(formData.preset && { preset: formData.preset }),
+    ...(formData.preset && { preset: formData.preset }),
 
     // Exclude form-only fields like order_by, totalReward, etc.
 
