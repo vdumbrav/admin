@@ -6,8 +6,8 @@ import { useCallback, useRef, useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import {
+  adminWaitlistTasksControllerCreateTask,
   getAdminWaitlistTasksControllerGetWaitlistTasksQueryKey,
-  useAdminWaitlistTasksControllerCreateTask,
 } from '@/lib/api/generated/admin/admin';
 import type { CreateTaskDto } from '@/lib/api/generated/model';
 import { formToApi } from '../adapters/form-api-adapter';
@@ -20,7 +20,6 @@ import type {
 
 export const useCreateMultiTask = () => {
   const queryClient = useQueryClient();
-  const createTaskMutation = useAdminWaitlistTasksControllerCreateTask();
   const queryKey = getAdminWaitlistTasksControllerGetWaitlistTasksQueryKey();
 
   const [state, setState] = useState<MultiTaskCreationState>(() => ({
@@ -47,6 +46,7 @@ export const useCreateMultiTask = () => {
         description: child.description ?? '',
         group: child.group,
         reward: child.reward ?? 0,
+        order_by: child.order_by ?? 0,
 
         // Platform settings - inherit from parent if not specified
         enabled: child.enabled ?? parentData?.enabled ?? true,
@@ -62,8 +62,9 @@ export const useCreateMultiTask = () => {
         // Optional fields
         ...(child.uri && { uri: child.uri }),
         ...(child.icon && { icon: child.icon }),
-        ...(child.start && { start: child.start }),
-        ...(child.end && { end: child.end }),
+        // Inherit time frames from parent if not set on child
+        ...((child.start ?? parentData?.start) && { start: child.start ?? parentData?.start }),
+        ...((child.end ?? parentData?.end) && { end: child.end ?? parentData?.end }),
 
         // Resources if present
         ...(child.resources && {
@@ -151,9 +152,10 @@ export const useCreateMultiTask = () => {
         // Step 1: Create main task
         // Pass full formData to formToApi so it can extract static from child, but formToApi will exclude child from output
         const mainTaskData = formToApi(formData);
-        const mainTask = await createTaskMutation.mutateAsync({
-          data: mainTaskData as CreateTaskDto,
-        });
+        const mainTask = await adminWaitlistTasksControllerCreateTask(
+          mainTaskData as CreateTaskDto,
+          abortControllerRef.current?.signal,
+        );
 
         result.mainTask = mainTask;
 
@@ -188,9 +190,10 @@ export const useCreateMultiTask = () => {
 
             try {
               const childTaskData = createChildTaskData(child, mainTask.id, formData);
-              const childTask = await createTaskMutation.mutateAsync({
-                data: childTaskData,
-              });
+              const childTask = await adminWaitlistTasksControllerCreateTask(
+                childTaskData,
+                abortControllerRef.current?.signal,
+              );
 
               result.childTasks.push(childTask);
 
@@ -301,9 +304,10 @@ export const useCreateMultiTask = () => {
           state.main.result?.id,
           parentDataRef.current ?? undefined,
         );
-        const childTask = await createTaskMutation.mutateAsync({
-          data: childTaskData,
-        });
+        const childTask = await adminWaitlistTasksControllerCreateTask(
+          childTaskData,
+          abortControllerRef.current?.signal,
+        );
 
         setState((prev) => ({
           ...prev,
@@ -334,7 +338,7 @@ export const useCreateMultiTask = () => {
     }));
 
     void queryClient.invalidateQueries({ queryKey });
-  }, [state, createChildTaskData, createTaskMutation, queryClient, queryKey]);
+  }, [state, createChildTaskData, queryClient, queryKey]);
 
   // Cancel creation
   const cancel = useCallback(() => {

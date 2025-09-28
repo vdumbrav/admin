@@ -14,7 +14,7 @@ export const joinPresetConfig: PresetConfig = {
     totalReward: 'hidden',
     username: 'conditional', // visible for telegram
     tweetId: 'hidden',
-    icon: 'conditional', // visible if group === 'partner'
+    icon: 'hidden', // Hidden per specification
     partnerIcon: 'hidden', // Icon field covers this
     buttonText: 'hidden', // handled by Connect Gate Requirements (Join/Follow)
     popupDescription: 'hidden', // handled by Connect Gate Requirements
