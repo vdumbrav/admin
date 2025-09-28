@@ -685,9 +685,9 @@ export function QuestFormFields({
 
       {/* Connect Gate Warnings */}
       {connectGateWarnings.length > 0 && (
-        <div className='rounded-md border border-yellow-200 bg-yellow-50 p-4'>
-          <h4 className='text-sm font-medium text-yellow-800'>Connect Gate Requirements</h4>
-          <ul className='mt-2 text-sm text-yellow-700'>
+        <div className='rounded-md border border-amber-200 bg-amber-50 p-4 dark:border-amber-800 dark:bg-amber-950'>
+          <h4 className='text-sm font-medium text-amber-800 dark:text-amber-200'>Connect Gate Requirements</h4>
+          <ul className='mt-2 text-sm text-amber-700 dark:text-amber-300'>
             {connectGateWarnings.map((warning, index) => (
               <li key={index}>• {warning}</li>
             ))}
