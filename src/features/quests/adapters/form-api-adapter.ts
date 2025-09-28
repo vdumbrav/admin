@@ -21,7 +21,6 @@
  * - Empty strings and undefined values rejected
  */
 import type { CreateTaskDto, TaskResponseDto } from '@/lib/api/generated/model';
-import { detectPreset } from '../presets/preset-manager';
 import { buildQuestFormSchema } from '../types/form-schema';
 import { type ChildFormValues, type QuestFormValues } from '../types/form-types';
 import {

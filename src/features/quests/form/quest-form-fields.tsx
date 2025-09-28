@@ -70,8 +70,6 @@ export function QuestFormFields({
   // Total Reward Display memoized calculation
   const childTasks = form.watch('child');
   const iterator = form.watch('iterator');
-  const totalRewardValue = form.watch('totalReward');
-
   // Watch current type to filter compatible providers
   const currentType = form.watch('type');
   const currentProvider = form.watch('provider');
@@ -85,29 +83,6 @@ export function QuestFormFields({
       compatibleProviders.includes(provider.value as TaskResponseDtoProvider),
     );
   }, [currentType]);
-
-  const totalRewardDisplay = useMemo(() => {
-    const hasChildTasks = childTasks && childTasks.length > 0;
-    const hasIteratorRewards = iterator?.reward_map && iterator.reward_map.length > 0;
-    const shouldShow =
-      (Boolean(hasChildTasks) || Boolean(hasIteratorRewards)) &&
-      isFieldVisible('totalReward', fieldStates);
-
-    return shouldShow ? (
-      <div className='space-y-2'>
-        <label className='text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70 '>
-          Total Reward
-        </label>
-        <div className='bg-muted/50 rounded-md border px-3 py-2 text-sm mt-1'>
-          {totalRewardValue ?? 0}
-        </div>
-        <p className='text-muted-foreground text-sm'>
-          Automatically calculated from {hasChildTasks ? 'child tasks' : 'daily rewards'}
-        </p>
-      </div>
-    ) : null;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [childTasks, iterator, totalRewardValue]);
 
   // ============================================================================
   // Basic Fields
@@ -463,16 +438,23 @@ export function QuestFormFields({
       )}
 
       {/* Child Tasks Section for Multiple Type */}
-      {(currentType === 'multiple' &&
-        (isFieldVisible('tasks', fieldStates) || !presetConfig)) && <ChildrenEditor />}
+      {currentType === 'multiple' && (isFieldVisible('tasks', fieldStates) || !presetConfig) && (
+        <ChildrenEditor />
+      )}
 
-      {/* Total Reward Display - disabled to avoid duplication with DailyRewardsEditor */}
-      {/* {presetConfig?.id !== 'seven-day-challenge' && totalRewardDisplay} */}
+      {/* Total reward, XP - for child tasks */}
+      {childTasks && childTasks.length > 0 && (
+        <div className='space-y-2'>
+          <label className='text-sm leading-none font-medium'>Total reward, XP</label>
+          <div className='bg-muted/50 mt-1 rounded-md border px-3 py-2 text-sm'>
+            {childTasks.reduce((sum, child) => sum + (child.reward ?? 0), 0)}
+          </div>
+          <p className='text-muted-foreground text-sm'>Automatically calculated from child tasks</p>
+        </div>
+      )}
 
-      {/* Daily Rewards Editor for 7-Day Challenge */}
-      {(presetConfig?.id === 'seven-day-challenge' ||
-        (currentType === 'dummy' && !presetConfig)) &&
-        isFieldVisible('dailyRewards', fieldStates) && <DailyRewardsEditor />}
+      {/* Daily Rewards Editor - only for iterator rewards */}
+      {iterator?.reward_map && iterator.reward_map.length > 0 && <DailyRewardsEditor />}
 
       {/* Popup Button Name */}
       {isFieldVisible('popupButton', fieldStates) && (

@@ -10,7 +10,7 @@ export const actionWithPostPresetConfig: PresetConfig = {
     provider: 'readonly', // Always 'twitter' (readonly per spec)
     uri: 'visible', // Required for main post URL in action-with-post quests
     reward: 'hidden', // Use totalReward instead
-    tasks: 'visible', // Visible per specification (subtasks = visible for action-with-post)
+    tasks: 'conditional', // Only visible for multiple type
     dailyRewards: 'hidden', // Hidden per specification
     totalReward: 'readonly', // Calculated from task rewards
     username: 'hidden', // Used only in child tasks for multiple type

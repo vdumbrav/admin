@@ -154,5 +154,12 @@ function evaluateConditionalVisibility(
     state.visible = isPartnerGroup;
   }
 
+  // Child tasks visibility rules
+  if (fieldName === 'child' || fieldName === 'children' || fieldName === 'tasks') {
+    // Child tasks only visible for multiple type
+    const isMultipleType = currentValues?.type === 'multiple';
+    state.visible = isMultipleType;
+  }
+
   return state;
 }
