@@ -6,6 +6,7 @@ import { useMemo, useState } from 'react';
 import type { UseFormReturn } from 'react-hook-form';
 import { Info } from 'lucide-react';
 import { type TaskResponseDtoProvider } from '@/lib/api/generated/model';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
@@ -49,7 +50,6 @@ export interface QuestFormFieldsProps {
   fieldStates: FieldStatesMatrix;
   presetConfig?: PresetConfig;
   onImageUpload: (file: File) => Promise<string>;
-  connectGateWarnings: string[];
   availableQuests?: { id: number; title: string; type: string[] }[];
 }
 
@@ -62,7 +62,6 @@ export function QuestFormFields({
   fieldStates,
   presetConfig,
   onImageUpload,
-  connectGateWarnings,
   availableQuests = [],
 }: QuestFormFieldsProps) {
   const [showTweetEmbed, setShowTweetEmbed] = useState(false);
@@ -668,11 +667,12 @@ export function QuestFormFields({
           : null;
 
         return blockingTask && foundQuest ? (
-          <div className='border-muted bg-muted/50 rounded-md border p-3'>
-            <p className='text-muted-foreground text-sm'>
+          <Alert>
+            <Info className='h-4 w-4' />
+            <AlertDescription>
               This quest will be linked to "{foundQuest.title}" as a dependency
-            </p>
-          </div>
+            </AlertDescription>
+          </Alert>
         ) : null;
       })()}
 
@@ -682,18 +682,6 @@ export function QuestFormFields({
         form.watch('resources.tweetId') && <TwitterPreview />}
 
       {/* Universal Fields */}
-
-      {/* Connect Gate Warnings */}
-      {connectGateWarnings.length > 0 && (
-        <div className='rounded-md border border-amber-200 bg-amber-50 p-4 dark:border-amber-800 dark:bg-amber-950'>
-          <h4 className='text-sm font-medium text-amber-800 dark:text-amber-200'>Connect Gate Requirements</h4>
-          <ul className='mt-2 text-sm text-amber-700 dark:text-amber-300'>
-            {connectGateWarnings.map((warning, index) => (
-              <li key={index}>• {warning}</li>
-            ))}
-          </ul>
-        </div>
-      )}
 
       {/* Advanced Settings */}
       <div className='space-y-4'>

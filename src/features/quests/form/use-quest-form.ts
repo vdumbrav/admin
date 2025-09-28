@@ -136,11 +136,16 @@ export function useQuestForm({
   // ============================================================================
 
   const connectGateWarnings = useMemo(() => {
-    return getConnectGateWarnings(presetConfig, watchedValues.provider, watchedValues.uri);
-  }, [presetConfig, watchedValues.provider, watchedValues.uri]);
+    return getConnectGateWarnings(
+      presetConfig,
+      watchedValues.provider,
+      watchedValues.uri,
+      watchedValues.blocking_task,
+    );
+  }, [presetConfig, watchedValues.provider, watchedValues.uri, watchedValues.blocking_task]);
 
   // Validate provider dependencies - Join/Action quests need Connect quest first
-  const { hasRequiredConnect } = useConnectGate(watchedValues.provider);
+  const { hasRequiredConnect, connectQuestId } = useConnectGate(watchedValues.provider);
 
   // Get available quests for blocking_task selection
   const { data: allQuests } = useAdminWaitlistTasksControllerGetWaitlistTasks();
@@ -217,6 +222,28 @@ export function useQuestForm({
       form.setValue('group', 'social', { shouldDirty: true, shouldValidate: false });
     }
   }, [presetConfig?.id, watchedValues.group, form]);
+
+  // Auto-set blocking_task for quests that need Connect gate
+  useEffect(() => {
+    if (
+      connectQuestId &&
+      watchedValues.provider &&
+      watchedValues.type !== 'connect' &&
+      !watchedValues.blocking_task
+    ) {
+      form.setValue(
+        'blocking_task',
+        { id: connectQuestId },
+        { shouldDirty: true, shouldValidate: false },
+      );
+    }
+  }, [
+    connectQuestId,
+    watchedValues.provider,
+    watchedValues.type,
+    watchedValues.blocking_task,
+    form,
+  ]);
 
   // ============================================================================
   // Form Handlers

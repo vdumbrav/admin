@@ -29,8 +29,9 @@ interface TaskItem {
   title: string;
   description?: string;
   type: TaskType;
-  reward?: number;
+  reward: number;
   order_by: number;
+  uri: string;
   resources?: {
     username?: string;
     tweetId?: string;
@@ -117,6 +118,7 @@ export const TasksEditor = () => {
               order_by: fields.length,
               reward: 0,
               provider: parentProvider, // Inherit provider from parent
+              uri: '',
               resources: {
                 username: '',
                 tweetId: '',
@@ -278,6 +280,22 @@ const TaskRow = ({ id, index, remove, canRemove }: RowProps) => {
         />
       </div>
 
+      {/* URI Field for Twitter tasks */}
+      <FormField
+        control={control}
+        name={`child.${index}.uri`}
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Tweet URL</FormLabel>
+            <FormControl>
+              <Input {...field} placeholder='Enter Tweet URL' />
+            </FormControl>
+            <FormDescription>Required for Twitter tasks</FormDescription>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
       {/* Task Image Upload */}
       <TaskImageUpload index={index} />
 
@@ -337,7 +355,7 @@ const TaskImageUpload = ({ index }: { index: number }) => {
 
   return (
     <div>
-      <h4 className='mb-2 text-sm font-medium'>Task Image *</h4>
+      <h4 className='mb-2 text-sm font-medium'>Task Image</h4>
       <ImageUpload
         value={image}
         onChange={(url) =>

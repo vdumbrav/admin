@@ -24,6 +24,7 @@ import { TwitterPreview } from './twitter-preview';
 
 interface FormValues {
   child: ChildFormValues[];
+  provider?: string;
 }
 
 const childTypes = types.filter((type) =>
@@ -65,15 +66,16 @@ export const ChildrenEditor = () => {
         <h3 className='text-sm font-medium'>Child tasks</h3>
         <Button
           type='button'
-          onClick={() =>
+          onClick={() => {
             append({
               title: '',
               type: 'like',
               group: 'social',
               provider: 'twitter',
               order_by: fields.length,
-            })
-          }
+              uri: '',
+            });
+          }}
         >
           Add
         </Button>
@@ -107,7 +109,11 @@ const ChildRow = ({ id, index, remove }: RowProps) => {
     transition,
   };
   const type = useWatch({ control, name: `child.${index}.type` });
-  const provider = useWatch({ control, name: `child.${index}.provider` });
+  const childProvider = useWatch({ control, name: `child.${index}.provider` });
+  const parentProvider = useWatch({ control, name: 'provider' });
+
+  // Child inherits provider from parent if not explicitly set
+  const provider = childProvider ?? parentProvider;
   const showTweetFields = ['like', 'share', 'comment'].includes(type) && provider === 'twitter';
 
   return (
@@ -278,7 +284,7 @@ const TaskImageUpload = ({ index }: { index: number }) => {
 
   return (
     <div>
-      <h4 className='mb-2 text-sm font-medium'>Task Image *</h4>
+      <h4 className='mb-2 text-sm font-medium'>Task Image</h4>
       <ImageUpload
         value={image}
         onChange={(url) =>

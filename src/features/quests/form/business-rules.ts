@@ -106,6 +106,7 @@ export function getConnectGateWarnings(
   presetConfig?: PresetConfig,
   provider?: string,
   uri?: string,
+  blockingTask?: { id: number } | null,
 ): string[] {
   if (!presetConfig) return [];
 
@@ -125,7 +126,8 @@ export function getConnectGateWarnings(
   }
 
   // Check provider-based connect gate for Join and Action with Post
-  if (connectGateRules.required && provider) {
+  // Only show warning if blocking_task is not set
+  if (connectGateRules.required && provider && !blockingTask) {
     const message = PROVIDER_CONNECT_MESSAGES[provider];
     if (message) {
       warnings.push(message);

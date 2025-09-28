@@ -173,11 +173,8 @@ export function formToApi(formData: QuestFormValues): Omit<CreateTaskDto, 'paren
     ...(formData.provider && { provider: formData.provider }),
     // URI is required for multiple type even if empty
     ...(formData.uri || formData.type === 'multiple' ? { uri: formData.uri ?? '' } : {}),
-    // blocking_task for multiple type or if explicitly set
-    // For multiple type, blocking_task is REQUIRED by API validation
-    ...(formData.blocking_task || formData.type === 'multiple'
-      ? { blocking_task: formData.blocking_task ?? { id: 1 } }
-      : {}),
+    // blocking_task if explicitly set (required for multiple type by API validation)
+    ...(formData.blocking_task ? { blocking_task: formData.blocking_task } : {}),
 
     // Include resources if present
     ...(formData.resources && { resource: formData.resources }),

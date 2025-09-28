@@ -47,21 +47,55 @@ const formResourcesSchema = z
 
 // Child quest schema for multi-step quests
 
-const childFormSchema = z.object({
-  title: z.string().optional().default(''),
-  description: z.string().optional(),
-  type: childTypeSchema,
-  group: questGroupSchema.default('social'),
-  provider: providerSchema,
-  reward: z.number().min(0, 'Reward must be greater than 0').optional().default(0),
-  order_by: z.number(),
-  resources: z
-    .object({
-      tweetId: z.string().optional(),
-      username: z.string().optional(),
-    })
-    .optional(),
-});
+const childFormSchema = z
+  .object({
+    title: z.string().optional().default(''),
+    description: z.string().optional(),
+    type: childTypeSchema,
+    group: questGroupSchema.default('social'),
+    provider: providerSchema,
+    reward: z.number().min(0, 'Reward must be greater than 0').optional().default(0),
+    order_by: z.number(),
+    uri: z.string().optional(),
+    resources: z
+      .object({
+        tweetId: z.string().optional(),
+        username: z.string().optional(),
+        ui: z
+          .object({
+            'pop-up': z
+              .object({
+                static: z.string().optional(),
+              })
+              .optional(),
+          })
+          .optional(),
+      })
+      .optional()
+      .superRefine((resources, ctx) => {
+        // Either both tweetId and username are provided, or static image is provided
+        const hasTweetData = resources?.tweetId && resources?.username;
+        const hasStaticImage = resources?.ui?.['pop-up']?.static;
+
+        if (!hasTweetData && !hasStaticImage) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: 'Either provide Tweet ID and Username, or upload a task image',
+            path: ['ui', 'pop-up', 'static'],
+          });
+        }
+      }),
+  })
+  .superRefine((child, ctx) => {
+    // URI is required for Twitter provider in child tasks
+    if (child.provider === 'twitter' && !child.uri) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Tweet URL is required for Twitter tasks',
+        path: ['uri'],
+      });
+    }
+  });
 
 // Daily rewards iterator for challenge-type quests
 
