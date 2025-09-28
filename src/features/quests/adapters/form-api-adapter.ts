@@ -21,6 +21,7 @@
  * - Empty strings and undefined values rejected
  */
 import type { CreateTaskDto, TaskResponseDto } from '@/lib/api/generated/model';
+import { detectPreset } from '../presets/preset-manager';
 import { buildQuestFormSchema } from '../types/form-schema';
 import { type ChildFormValues, type QuestFormValues } from '../types/form-types';
 import {
@@ -195,10 +196,7 @@ export function apiToForm(apiData: Partial<TaskResponseDto>): QuestFormValues {
   return {
     // Core fields - ALL REQUIRED, NO FALLBACKS
     title: getRequiredString(apiData.title, 'title'),
-    type:
-      apiData.type === 'dummy'
-        ? 'external'
-        : (getRequiredString(apiData.type, 'type') as QuestFormValues['type']),
+    type: getRequiredString(apiData.type, 'type') as QuestFormValues['type'],
     description: getRequiredString(apiData.description, 'description'),
     group: getRequiredString(apiData.group, 'group') as QuestFormValues['group'],
     order_by: getRequiredNumber(apiData.order_by, 'order_by'),

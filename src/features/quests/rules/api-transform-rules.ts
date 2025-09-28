@@ -71,7 +71,11 @@ function applyRewardCalculations(values: QuestFormValues): void {
   // iterator is only for seven-day-challenge preset, other presets may have undefined
   if (values.iterator?.reward_map && Array.isArray(values.iterator.reward_map)) {
     values.totalReward = values.iterator.reward_map.reduce(
-      (sum: number, reward: number) => sum + reward,
+      (sum: number, reward: number) => {
+        // Ensure each reward is a valid number to prevent NaN
+        const validReward = typeof reward === 'number' && !isNaN(reward) ? reward : 0;
+        return sum + validReward;
+      },
       0,
     );
   }
