@@ -164,7 +164,8 @@ export function formToApi(formData: QuestFormValues): Omit<CreateTaskDto, 'paren
     level: 1, // Required field for CreateTaskDto - form doesn't have this field
 
     // Include preset if specified
-    ...(formData.preset && { preset: formData.preset }),
+    // TEMPORARILY DISABLED: preset field not supported by API
+    // ...(formData.preset && { preset: formData.preset }),
 
     // Exclude form-only fields like order_by, totalReward, etc.
 
@@ -173,8 +174,9 @@ export function formToApi(formData: QuestFormValues): Omit<CreateTaskDto, 'paren
     // URI is required for multiple type even if empty
     ...(formData.uri || formData.type === 'multiple' ? { uri: formData.uri ?? '' } : {}),
     // blocking_task for multiple type or if explicitly set
+    // For multiple type, blocking_task is REQUIRED by API validation
     ...(formData.blocking_task || formData.type === 'multiple'
-      ? { blocking_task: formData.blocking_task }
+      ? { blocking_task: formData.blocking_task ?? { id: 1 } }
       : {}),
 
     // Include resources if present
