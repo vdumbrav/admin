@@ -21,12 +21,16 @@ export const actionWithPostPresetConfig: PresetConfig = {
     popupDescription: 'hidden', // Auto-generated based on tasks
     popupButton: 'hidden', // Handled by business rules based on tasks
     repeatable: 'hidden', // Not applicable for action-with-post quests
+    badge: 'visible',
+    visible: 'visible',
   },
 
   defaults: {
     type: 'multiple',
     group: 'social',
     provider: 'twitter',
+    badge: true,
+    visible: false,
   },
 
   businessRules: [],

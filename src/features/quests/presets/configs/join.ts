@@ -19,12 +19,16 @@ export const joinPresetConfig: PresetConfig = {
     buttonText: 'hidden', // handled by Connect Gate Requirements (Join/Follow)
     popupDescription: 'hidden', // handled by Connect Gate Requirements
     popupButton: 'hidden', // handled by Connect Gate Requirements
+    badge: 'visible',
+    visible: 'visible',
   },
 
   defaults: {
     type: 'join',
     group: 'social',
     provider: 'telegram',
+    badge: true,
+    visible: false,
   },
 
   businessRules: [],

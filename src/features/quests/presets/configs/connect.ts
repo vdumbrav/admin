@@ -21,11 +21,15 @@ export const connectPresetConfig: PresetConfig = {
     popupDescription: 'hidden', // Auto-generated based on provider
     popupButton: 'hidden',
     repeatable: 'hidden', // Connect tasks are not repeatable
+    badge: 'visible',
+    visible: 'visible',
   },
 
   defaults: {
     type: 'connect',
     group: 'social',
+    badge: true,
+    visible: false,
     // provider is selected by user (telegram, discord, twitter)
   },
 

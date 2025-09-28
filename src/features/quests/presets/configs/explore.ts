@@ -21,12 +21,16 @@ export const explorePresetConfig: PresetConfig = {
     popupDescription: 'visible', // Popup description for Explore
     popupButton: 'visible', // Popup button name for Explore
     repeatable: 'visible', // Repeatable toggle for Explore
+    badge: 'visible',
+    visible: 'visible',
   },
 
   defaults: {
     type: 'external',
     provider: 'walme',
     group: 'social',
+    badge: true,
+    visible: false,
   },
 
   businessRules: [],
