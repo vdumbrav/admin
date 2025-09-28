@@ -9,11 +9,11 @@
  * 3. Date fields (start/end) are form-only and not sent to API
  *
  * MIGRATION STATUS:
- * ✅ IteratorDto fields are now optional (iterator_resource, resource)
- * ✅ reward_map is now number[] (was string[])
- * ✅ type field is now single value (was array)
+ * - IteratorDto fields are now optional (iterator_resource, resource)
+ * - reward_map is now number[] (was string[])
+ * - type field is now single value (was array)
  */
-import type { TaskResponseDto } from '@/lib/api/generated/model';
+import type { CreateTaskDto, TaskResponseDto } from '@/lib/api/generated/model';
 import { buildQuestFormSchema } from '../types/form-schema';
 import {
   type ChildFormValues,
@@ -134,32 +134,33 @@ function convertApiChildToForm(apiChild: TaskResponseDto): ChildFormValues {
 // ============================================================================
 
 /**
- * Convert form values to API format for submission
+ * Convert form values to CreateTaskDto format for submission
  *
  * Transforms form data back to API-compatible structure:
  * - Converts form strings back to nullable API fields
  * - Handles nested resource structure conversion
  * - Applies proper type mappings for submission
+ * - Uses proper CreateTaskDto interface (not TaskResponseDto)
  *
  * @param formData - Complete form values from react-hook-form
- * @returns API-compatible task data for submission
+ * @returns API-compatible CreateTaskDto for submission
  */
-export function formToApi(formData: QuestFormValues): Partial<TaskResponseDto> {
-  const baseData = {
+export function formToApi(formData: QuestFormValues): Omit<CreateTaskDto, 'parent_id'> {
+  const baseData: Omit<CreateTaskDto, 'parent_id'> = {
     // Core required fields
     title: formData.title,
     type: formData.type,
-    description: formData.description || undefined,
+    description: formData.description || '',
     group: formData.group,
     // For multiple type, reward should be total of all child rewards
     reward:
       formData.type === 'multiple'
         ? (formData.totalReward ?? calculateTotalRewardFromChildren(formData.child) ?? 0)
         : formData.reward,
-    enabled: formData.enabled,
-    web: formData.web ?? true, // Default web enabled for admin-created tasks
-    twa: formData.twa ?? false, // Default TWA disabled for admin-created tasks
-    pinned: formData.pinned ?? false, // Default not pinned
+    enabled: formData.enabled ?? true, // Required boolean for CreateTaskDto
+    web: formData.web ?? true, // Required boolean for CreateTaskDto
+    twa: formData.twa ?? false, // Required boolean for CreateTaskDto
+    pinned: formData.pinned ?? false, // Required boolean for CreateTaskDto
     level: 1, // Required field for CreateTaskDto - form doesn't have this field
 
     // Include preset if specified
@@ -182,16 +183,15 @@ export function formToApi(formData: QuestFormValues): Partial<TaskResponseDto> {
     // Child tasks - NEVER include in API request, they are created separately
     // ...(formData.child && formData.child.length > 0 && { ... }),
 
-    // Iterator mapping for 7-day challenge (Form → API) - only if present
+    // Iterator mapping for 7-day challenge (Form to API) - only if present
     ...(formData.iterator && {
       iterator: {
-        id: 0, // Will be assigned by API
+        day: 0, // Starting day for iterator
         days: formData.iterator.days ?? 7,
         reward_map: formData.iterator.reward_map,
+        iterator_reward: [], // Will be populated by API
+        reward: formData.iterator.reward_map[0] ?? 0, // First day reward
         reward_max: Math.max(...formData.iterator.reward_map),
-        reward: formData.iterator.reward_map[0] ?? 0,
-        day: 0,
-        iterator_reward: [],
       },
     }),
 
@@ -260,7 +260,7 @@ export function validateAndConvertToApi(
   formData: unknown,
   presetId?: string,
   availableConnectQuests?: Array<{ id: number; provider: string }>,
-): Partial<TaskResponseDto> {
+): Omit<CreateTaskDto, 'parent_id'> {
   // First validate with Zod schema
   const schema = buildQuestFormSchema(presetId);
   // TODO: Improve type safety - Zod parse should return proper type without casting

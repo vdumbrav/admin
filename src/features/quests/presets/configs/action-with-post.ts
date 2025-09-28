@@ -7,15 +7,15 @@ export const actionWithPostPresetConfig: PresetConfig = {
   fieldVisibility: {
     type: 'readonly', // Always 'multiple'
     group: 'readonly', // Always 'social'
-    provider: 'readonly', // Always 'twitter'
-    uri: 'visible', // Required by backend for multiple type (URL to main post)
+    provider: 'readonly', // Always 'twitter' (readonly per spec)
+    uri: 'visible', // Required for main post URL when provider is Twitter
     reward: 'hidden', // Use totalReward instead
-    tasks: 'visible', // Dynamic list with Like/Comment/Retweet
-    dailyRewards: 'hidden',
+    tasks: 'visible', // Visible per specification (subtasks = visible for action-with-post)
+    dailyRewards: 'hidden', // Hidden per specification
     totalReward: 'readonly', // Calculated from task rewards
     username: 'hidden', // Used only in child tasks for multiple type
     tweetId: 'hidden', // Used only in child tasks for multiple type
-    icon: 'conditional', // visible if group === 'partner'
+    icon: 'conditional', // Conditional per specification (visible if group === 'partner')
     partnerIcon: 'hidden', // Icon field covers this
     buttonText: 'hidden', // Handled by business rules based on tasks
     popupDescription: 'hidden', // Auto-generated based on tasks

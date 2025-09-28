@@ -7,15 +7,15 @@ export const explorePresetConfig: PresetConfig = {
   fieldVisibility: {
     type: 'hidden', // Fixed to 'external' for Explore preset
     group: 'visible', // Any group allowed
-    provider: 'readonly', // Fixed to 'internal' for Explore preset
-    uri: 'visible', // Required external URL
+    provider: 'hidden', // Hidden per specification (provider selection = hidden for explore)
+    uri: 'visible', // Visible per specification (URL field = visible for explore)
     reward: 'visible',
-    tasks: 'hidden',
-    dailyRewards: 'hidden',
+    tasks: 'hidden', // Hidden per specification (subtasks = hidden for explore)
+    dailyRewards: 'hidden', // Hidden per specification (reward map = hidden for explore)
     totalReward: 'hidden',
     username: 'hidden',
     tweetId: 'hidden',
-    icon: 'visible', // Always available (not only Partner)
+    icon: 'visible', // Visible per specification (icon = visible for explore)
     partnerIcon: 'hidden', // Icon field covers this
     buttonText: 'visible', // Button name for Explore
     popupDescription: 'visible', // Popup description for Explore

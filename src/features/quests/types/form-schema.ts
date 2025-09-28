@@ -86,7 +86,11 @@ const baseQuestFormShape = {
   order_by: z.number(),
   provider: providerSchema,
   uri: z.string().optional(),
-  reward: z.number().min(1, 'Reward must be greater than 0').default(0),
+  reward: z
+    .number()
+    .min(1, 'Reward must be greater than 0')
+    .max(10000, 'Reward cannot exceed 10000')
+    .default(0),
   totalReward: z.number().optional(),
   enabled: z.boolean().optional(),
   web: z.boolean().optional(),
@@ -96,7 +100,7 @@ const baseQuestFormShape = {
   preset: z.string().optional().nullable(), // Auto-generated preset ID (can be null for old quests)
   blocking_task: z.object({ id: z.number() }).optional(), // Parent quest that blocks this quest
   resources: formResourcesSchema,
-  child: z.array(childFormSchema).optional(),
+  child: z.array(childFormSchema).max(10, 'Maximum 10 subtasks allowed').optional(),
   start: z.string().optional(),
   end: z.string().optional(),
   iterator: iteratorSchema,
@@ -253,6 +257,32 @@ export const buildQuestFormSchema = (presetId?: string) =>
             path: ['iterator', 'reward_map'],
           });
         }
+      }
+
+      // SPECIFICATION: multiple type must have at least 1 child task
+      if (val.type === 'multiple') {
+        if (!val.child || val.child.length === 0) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: 'Multiple quests must have at least one subtask',
+            path: ['child'],
+          });
+        }
+      }
+
+      // SPECIFICATION: partner quests can only be in partner group
+      if (val.group === 'partner' && val.type !== 'external') {
+        // Allow all types in partner group, but warn for best practices
+        console.warn('Partner group is typically used with external type quests');
+      }
+
+      // SPECIFICATION: connect type should require provider
+      if (val.type === 'connect' && !val.provider) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'Connect quests must specify a provider',
+          path: ['provider'],
+        });
       }
 
       if (presetId === 'explore') {

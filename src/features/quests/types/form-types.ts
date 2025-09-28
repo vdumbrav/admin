@@ -10,6 +10,7 @@ import type { ResourcesDto, TaskResponseDto } from '@/lib/api/generated/model';
  */
 
 // Form enums and constants
+// WARNING: SYNCHRONIZED with generated CreateTaskDtoType - keep in sync!
 
 export const QUEST_TYPES = [
   'referral',
@@ -20,7 +21,7 @@ export const QUEST_TYPES = [
   'comment',
   'multiple',
   'repeatable',
-  'dummy',
+  'dummy', // Note: Not in specification but exists in API
   'external',
 ] as const;
 
