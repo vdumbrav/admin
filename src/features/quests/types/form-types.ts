@@ -86,7 +86,7 @@ export interface QuestFormValues {
     days?: number;
     reward_map: number[];
   };
-  // Index signature for Zod passthrough + dynamic property access
+  // TODO: Remove index signature when all dynamic property access is replaced with proper typing
   [key: string]: unknown;
 }
 

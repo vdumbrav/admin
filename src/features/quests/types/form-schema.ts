@@ -217,6 +217,15 @@ export const buildQuestFormSchema = (presetId?: string) =>
           });
         }
 
+        // For multiple types (action-with-post), URI is also required (main post URL)
+        if (val.type === 'multiple' && !val.uri) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: 'Main post URL is required for action-with-post quests',
+            path: ['uri'],
+          });
+        }
+
         // For non-multiple types, also require username and tweetId in resources
         if (val.type !== 'multiple') {
           if (!val.resources?.username) {

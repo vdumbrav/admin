@@ -20,6 +20,12 @@ import {
   DEFAULT_FORM_VALUES,
   type QuestFormValues,
 } from '../types/form-types';
+import {
+  formatValidationErrors,
+  validateBlockingTaskDependencies,
+  validatePresetCompatibility,
+  validateRequiredFields,
+} from '../validators/quest-validator';
 
 // ============================================================================
 // API to Form conversion
@@ -103,10 +109,18 @@ function extractChildResources(resourceData: unknown): ChildFormValues['resource
  */
 function convertApiChildToForm(apiChild: TaskResponseDto): ChildFormValues {
   const resourceData = apiChild.resource;
+
+  // Ensure child task type is valid for child tasks (filter out parent-only types)
+  const childTypes = ['like', 'share', 'comment', 'join', 'connect'] as const;
+  type ChildTypeUnion = (typeof childTypes)[number];
+  const validChildType = childTypes.includes(apiChild.type as ChildTypeUnion)
+    ? (apiChild.type as ChildFormValues['type'])
+    : 'like';
+
   return {
     title: apiChild.title,
     description: apiChild.description,
-    type: apiChild.type as ChildFormValues['type'], // TODO: Remove casting when type compatibility improves (P2)
+    type: validChildType,
     group: apiChild.group,
     provider: apiChild.provider,
     reward: apiChild.reward,
@@ -131,55 +145,42 @@ function convertApiChildToForm(apiChild: TaskResponseDto): ChildFormValues {
  * @returns API-compatible task data for submission
  */
 export function formToApi(formData: QuestFormValues): Partial<TaskResponseDto> {
-  // Helper function to filter out empty values
-  const filterEmptyValues = (obj: Record<string, unknown>): Record<string, unknown> => {
-    const result: Record<string, unknown> = {};
-    for (const [key, value] of Object.entries(obj)) {
-      if (value !== '' && value !== null && value !== undefined) {
-        if (typeof value === 'object' && value !== null) {
-          const filtered = filterEmptyValues(value as Record<string, unknown>);
-          if (Object.keys(filtered).length > 0) {
-            result[key] = filtered;
-          }
-        } else {
-          result[key] = value;
-        }
-      }
-    }
-    return result;
-  };
-
   const baseData = {
     // Core required fields
     title: formData.title,
     type: formData.type,
     description: formData.description || undefined,
     group: formData.group,
-    reward: formData.reward,
+    // For multiple type, reward should be total of all child rewards
+    reward:
+      formData.type === 'multiple'
+        ? (formData.totalReward ?? calculateTotalRewardFromChildren(formData.child) ?? 0)
+        : formData.reward,
     enabled: formData.enabled,
     web: formData.web ?? true, // Default web enabled for admin-created tasks
     twa: formData.twa ?? false, // Default TWA disabled for admin-created tasks
     pinned: formData.pinned ?? false, // Default not pinned
     level: 1, // Required field for CreateTaskDto - form doesn't have this field
 
+    // Include preset if specified
+    ...(formData.preset && { preset: formData.preset }),
+
+    // Exclude form-only fields like order_by, totalReward, etc.
+
     // Optional fields - only include if not empty
     ...(formData.provider && { provider: formData.provider }),
-    ...(formData.uri && { uri: formData.uri }),
-    ...(formData.blocking_task && { blocking_task: formData.blocking_task }),
+    // URI is required for multiple type even if empty
+    ...(formData.uri || formData.type === 'multiple' ? { uri: formData.uri ?? '' } : {}),
+    // blocking_task for multiple type or if explicitly set
+    ...(formData.blocking_task || formData.type === 'multiple'
+      ? { blocking_task: formData.blocking_task }
+      : {}),
 
-    // Resources with icon included - only if there's actual data
-    ...(((formData.resources &&
-      Object.values(formData.resources).some((val) => val !== '' && val !== undefined)) ??
-      formData.icon) && {
-      resource: filterEmptyValues({
-        ...formData.resources,
-        icon: formData.icon ?? formData.resources?.icon,
-      }),
-    }),
+    // Include resources if present
+    ...(formData.resources && { resource: formData.resources }),
 
-    // Child tasks - only if there are actual children
-    ...(formData.child &&
-      formData.child.length > 0 && { child: formData.child.map(convertFormChildToApi) }),
+    // Child tasks - NEVER include in API request, they are created separately
+    // ...(formData.child && formData.child.length > 0 && { ... }),
 
     // Iterator mapping for 7-day challenge (Form → API) - only if present
     ...(formData.iterator && {
@@ -200,46 +201,6 @@ export function formToApi(formData: QuestFormValues): Partial<TaskResponseDto> {
   };
 
   return baseData;
-}
-
-/**
- * Convert form child to API child
- *
- * @param formChild - Child form values
- * @returns Complete Task object for API
- */
-function convertFormChildToApi(formChild: ChildFormValues): TaskResponseDto {
-  return {
-    title: formChild.title,
-    type: formChild.type,
-    description: formChild.description,
-    group: formChild.group,
-    order_by: formChild.order_by,
-    provider: formChild.provider,
-    reward: formChild.reward,
-    enabled: true,
-    web: true,
-    twa: false,
-    pinned: false,
-    child: [],
-    level: 1,
-    blocking_task: { id: 0, title: '' }, // BlockingTaskDto structure
-    started_at: undefined,
-    completed_at: undefined,
-    iterable: false,
-    // Include relevant resources for children
-    resource: formChild.resources
-      ? {
-          tweetId: formChild.resources.tweetId,
-          username: formChild.resources.username,
-        }
-      : undefined,
-    // Required fields for TaskResponseDto
-    id: 0, // Will be assigned by API
-    blocking_task_id: 0,
-    total_reward: 0,
-    total_users: 0,
-  } as TaskResponseDto; // TODO: Remove casting when CreateTaskDto matches TaskResponseDto structure (P2)
 }
 
 // ============================================================================
@@ -289,16 +250,52 @@ export function getDefaultFormValues(): QuestFormValues {
 /**
  * Validate form data and convert to API format
  *
- * TODO: Consider simplifying when Create/Update DTOs match TaskResponseDto structure (P2)
- * Currently needed for:
- * - Zod validation
- * - Enum compatibility (CreateTaskDtoType vs TaskResponseDtoTypeItem)
+ * Performs comprehensive validation before API submission:
+ * - Required field validation
+ * - Type-specific validation
+ * - Preset compatibility
+ * - Zod schema validation
  */
 export function validateAndConvertToApi(
   formData: unknown,
   presetId?: string,
+  availableConnectQuests?: Array<{ id: number; provider: string }>,
 ): Partial<TaskResponseDto> {
+  // First validate with Zod schema
   const schema = buildQuestFormSchema(presetId);
+  // TODO: Improve type safety - Zod parse should return proper type without casting
   const validatedData = schema.parse(formData) as QuestFormValues;
+
+  // Then validate business rules
+
+  const requiredFieldsResult = validateRequiredFields(validatedData);
+  const presetErrors = validatePresetCompatibility(validatedData, presetId);
+  const dependencyErrors = availableConnectQuests
+    ? validateBlockingTaskDependencies(validatedData, availableConnectQuests)
+    : [];
+
+  const allErrors = [...requiredFieldsResult.errors, ...presetErrors, ...dependencyErrors];
+
+  if (allErrors.length > 0) {
+    const errorMessage = formatValidationErrors(allErrors);
+    throw new Error(`Validation failed:\n${errorMessage}`);
+  }
+
   return formToApi(validatedData);
+}
+
+// ============================================================================
+// Helper functions
+// ============================================================================
+
+/**
+ * Calculate total reward from children array - safe fallback
+ */
+function calculateTotalRewardFromChildren(children?: ChildFormValues[]): number {
+  if (!children || children.length === 0) return 0;
+
+  return children.reduce((total, child) => {
+    const reward = typeof child.reward === 'number' ? child.reward : 0;
+    return total + reward;
+  }, 0);
 }
