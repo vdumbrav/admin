@@ -208,6 +208,13 @@ function applyGenericUIRules(values: QuestFormValues): void {
 // ============================================================================
 
 /**
+ * Get default button text based on task type
+ */
+export function getDefaultButtonText(type: string): string {
+  return TASK_BUTTON_MAPPING[type] ?? 'Complete';
+}
+
+/**
  * Generate button text based on child tasks
  */
 function generateTaskButtonText(children: QuestFormValues['child']): string | null {
@@ -276,7 +283,7 @@ const GROUP_POPUP_NAMES: Record<string, string> = {
 /**
  * Mapping of child task types to button text
  */
-const TASK_BUTTON_MAPPING: Record<string, string> = {
+export const TASK_BUTTON_MAPPING: Record<string, string> = {
   like: 'Like Tweet',
   comment: 'Comment on Tweet',
   share: 'Share Tweet',
