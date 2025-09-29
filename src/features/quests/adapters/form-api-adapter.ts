@@ -26,7 +26,6 @@ import { type ChildFormValues, type QuestFormValues } from '../types/form-types'
 import {
   formatValidationErrors,
   validateBlockingTaskDependencies,
-  validateConnectUniqueness,
   validateMultipleURIUniqueness,
   validatePresetCompatibility,
   validateRequiredFields,
@@ -485,7 +484,6 @@ export function validateAndConvertToApi(
     : [];
   const uniquenessErrors = existingQuests
     ? [
-        ...validateConnectUniqueness(validatedData, existingQuests),
         ...validateMultipleURIUniqueness(validatedData, existingQuests),
       ]
     : [];

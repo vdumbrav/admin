@@ -326,10 +326,13 @@ export function formatValidationErrors(errors: ValidationFieldError[]): string {
 
   const grouped = errors.reduce<Record<string, string[]>>(
     (acc, error) => {
+      if (!acc[error.type]) {
+        acc[error.type] = [];
+      }
       acc[error.type].push(error.message);
       return acc;
     },
-    { required: [], invalid: [], dependency: [] },
+    { required: [], invalid: [], dependency: [], constraint: [], duplicate: [] },
   );
 
   let message = '';
@@ -340,42 +343,18 @@ export function formatValidationErrors(errors: ValidationFieldError[]): string {
     message += `Invalid values:\n${grouped.invalid.map((msg) => `• ${msg}`).join('\n')}\n\n`;
   }
   if (grouped.dependency.length > 0) {
-    message += `Dependencies:\n${grouped.dependency.map((msg) => `• ${msg}`).join('\n')}`;
+    message += `Dependencies:\n${grouped.dependency.map((msg) => `• ${msg}`).join('\n')}\n\n`;
+  }
+  if (grouped.constraint.length > 0) {
+    message += `Constraint violations:\n${grouped.constraint.map((msg) => `• ${msg}`).join('\n')}\n\n`;
+  }
+  if (grouped.duplicate.length > 0) {
+    message += `Duplicate values:\n${grouped.duplicate.map((msg) => `• ${msg}`).join('\n')}`;
   }
 
   return message.trim();
 }
 
-/**
- * Validate connect quest uniqueness per provider
- */
-export function validateConnectUniqueness(
-  formData: QuestFormValues,
-  existingQuests: Array<{ id: number; type: string; provider?: string }>,
-): ValidationFieldError[] {
-  const errors: ValidationFieldError[] = [];
-
-  // Only validate for connect type quests
-  if (formData.type !== 'connect' || !formData.provider) {
-    return errors;
-  }
-
-  // Check if there's already a connect quest for this provider
-  const duplicateConnect = existingQuests.find(
-    (quest) =>
-      quest.type === 'connect' && quest.provider === formData.provider && quest.id !== formData.id, // Exclude current quest if editing
-  );
-
-  if (duplicateConnect) {
-    errors.push({
-      field: 'provider',
-      message: `A Connect quest for ${formData.provider} already exists (ID: ${duplicateConnect.id}). Only one Connect quest per provider is allowed.`,
-      type: 'duplicate',
-    });
-  }
-
-  return errors;
-}
 
 /**
  * Validate multiple quest uniqueness per URI
