@@ -17,7 +17,6 @@ import {
 } from '@/lib/api/generated/model';
 import { validateAndConvertToApi } from './adapters/form-api-adapter';
 import type { QuestQuery, QuestsResponse } from './data/types';
-import { useExistingQuests } from './hooks/use-existing-quests';
 import type { QuestFormValues } from './types/form-types';
 
 export const useQuests = (query: QuestQuery) => {
@@ -144,11 +143,10 @@ export const useCreateQuest = () => {
   const queryClient = useQueryClient();
   const createTaskMutation = useAdminWaitlistTasksControllerCreateTask();
   const queryKey = getAdminWaitlistTasksControllerGetWaitlistTasksQueryKey();
-  const { existingQuests } = useExistingQuests();
 
   return useMutation({
     mutationFn: async (data: QuestFormValues): Promise<TaskResponseDto> => {
-      const apiData = validateAndConvertToApi(data, undefined, undefined, existingQuests); // Client-side validation first
+      const apiData = validateAndConvertToApi(data, undefined, undefined); // Client-side validation first
       const result = await createTaskMutation.mutateAsync({
         data: apiData as CreateTaskDto,
       });
@@ -192,7 +190,6 @@ export const useUpdateQuest = (id: number) => {
   const queryClient = useQueryClient();
   const updateTaskMutation = useAdminWaitlistTasksControllerUpdateTask();
   const queryKey = getAdminWaitlistTasksControllerGetWaitlistTasksQueryKey();
-  const { existingQuests } = useExistingQuests();
 
   return useMutation({
     mutationFn: async (data: QuestFormValues): Promise<TaskResponseDto> => {
@@ -200,7 +197,6 @@ export const useUpdateQuest = (id: number) => {
         data,
         undefined,
         undefined,
-        existingQuests,
       ) as UpdateTaskDto; // Client-side validation first
       const result = await updateTaskMutation.mutateAsync({ id, data: apiData });
       return result;

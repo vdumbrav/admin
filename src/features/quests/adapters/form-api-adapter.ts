@@ -26,7 +26,6 @@ import { type ChildFormValues, type QuestFormValues } from '../types/form-types'
 import {
   formatValidationErrors,
   validateBlockingTaskDependencies,
-  validateMultipleURIUniqueness,
   validatePresetCompatibility,
   validateRequiredFields,
 } from '../validators/quest-validator';
@@ -397,8 +396,8 @@ export function formToApi(formData: QuestFormValues): Omit<CreateTaskDto, 'paren
     }),
 
     // Date fields - only if not empty
-    ...(formData.start && { started_at: formData.start }),
-    ...(formData.end && { completed_at: formData.end }),
+    ...(formData.start && { active_from: formData.start }),
+    ...(formData.end && { active_to: formData.end }),
   };
 
   return baseData as Omit<CreateTaskDto, 'parent_id'>;
@@ -468,7 +467,6 @@ export function validateAndConvertToApi(
   formData: unknown,
   presetId?: string,
   availableConnectQuests?: Array<{ id: number; provider: string }>,
-  existingQuests?: Array<{ id: number; type: string; provider?: string; uri?: string }>,
 ): Omit<CreateTaskDto, 'parent_id'> {
   // First validate with Zod schema
   const schema = buildQuestFormSchema(presetId);
@@ -482,15 +480,11 @@ export function validateAndConvertToApi(
   const dependencyErrors = availableConnectQuests
     ? validateBlockingTaskDependencies(validatedData, availableConnectQuests)
     : [];
-  const uniquenessErrors = existingQuests
-    ? [...validateMultipleURIUniqueness(validatedData, existingQuests)]
-    : [];
 
   const allErrors = [
     ...requiredFieldsResult.errors,
     ...presetErrors,
     ...dependencyErrors,
-    ...uniquenessErrors,
   ];
 
   if (allErrors.length > 0) {

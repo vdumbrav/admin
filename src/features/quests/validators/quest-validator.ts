@@ -355,32 +355,3 @@ export function formatValidationErrors(errors: ValidationFieldError[]): string {
   return message.trim();
 }
 
-/**
- * Validate multiple quest uniqueness per URI
- */
-export function validateMultipleURIUniqueness(
-  formData: QuestFormValues,
-  existingQuests: Array<{ id: number; type: string; uri?: string }>,
-): ValidationFieldError[] {
-  const errors: ValidationFieldError[] = [];
-
-  // Only validate for multiple type quests with URI
-  if (formData.type !== 'multiple' || !formData.uri?.trim()) {
-    return errors;
-  }
-
-  // Check if there's already a multiple quest for this URI
-  const duplicateMultiple = existingQuests.find(
-    (quest) => quest.type === 'multiple' && quest.uri === formData.uri && quest.id !== formData.id, // Exclude current quest if editing
-  );
-
-  if (duplicateMultiple) {
-    errors.push({
-      field: 'uri',
-      message: `A Multiple quest for this URL already exists (ID: ${duplicateMultiple.id}). Only one Multiple quest per URL is allowed.`,
-      type: 'duplicate',
-    });
-  }
-
-  return errors;
-}
