@@ -23,7 +23,7 @@ import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { DatePicker } from '@/components/date-picker';
+import { DateTimePicker } from '@/components/ui/date-time-picker';
 import { NumberInput } from '@/components/number-input';
 import { SelectDropdown } from '@/components/select-dropdown';
 import { TwitterEmbed } from '@/components/twitter-embed';
@@ -586,9 +586,9 @@ export function QuestFormFields({
                 <FormItem className='flex-1'>
                   <FormLabel>Start</FormLabel>
                   <FormControl>
-                    <DatePicker
-                      date={field.value ? new Date(field.value) : undefined}
-                      onSelect={(date) => field.onChange(date?.toISOString() ?? null)}
+                    <DateTimePicker
+                      value={field.value ? new Date(field.value) : undefined}
+                      onChange={(date) => field.onChange(date?.toISOString() ?? null)}
                       placeholder='Select start date'
                       disabled={isFieldDisabled('start', fieldStates)}
                     />
@@ -605,9 +605,9 @@ export function QuestFormFields({
                 <FormItem className='flex-1'>
                   <FormLabel>End</FormLabel>
                   <FormControl>
-                    <DatePicker
-                      date={field.value ? new Date(field.value) : undefined}
-                      onSelect={(date) => field.onChange(date?.toISOString() ?? null)}
+                    <DateTimePicker
+                      value={field.value ? new Date(field.value) : undefined}
+                      onChange={(date) => field.onChange(date?.toISOString() ?? null)}
                       placeholder='Select end date'
                       disabled={isFieldDisabled('end', fieldStates)}
                     />
