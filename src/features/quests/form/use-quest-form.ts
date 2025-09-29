@@ -19,6 +19,7 @@ import type { WaitlistTasksResponseDtoTypeItem } from '@/lib/api/generated/model
 import { replaceObjectUrl } from '@/utils/object-url';
 import { uploadMedia } from '../api';
 import { getTwitterOnlyTypes } from '../data/data';
+import { useExistingQuests } from '../hooks/use-existing-quests';
 import type { PresetConfig } from '../presets/types';
 import { buildQuestFormSchema, type QuestFormValues } from '../types/form-schema';
 import { cleanupIncompatibleFields, getFieldsToReset } from '../utils/preset-field-cleanup';
@@ -48,6 +49,7 @@ export interface UseQuestFormReturn {
   fieldStates: FieldStatesMatrix;
   isDirty: boolean;
   isSubmitting: boolean;
+  isValidationReady: boolean;
 
   // Form handlers
   handleSubmit: () => Promise<void>;
@@ -70,6 +72,7 @@ export function useQuestForm({
   onCancel,
 }: UseQuestFormProps): UseQuestFormReturn {
   const { user } = useAppAuth();
+  const { isLoading: isLoadingExisting } = useExistingQuests();
 
   // ============================================================================
   // Form Setup
@@ -99,6 +102,9 @@ export function useQuestForm({
   const watchedValues = form.watch();
   const isDirty = form.formState.isDirty;
   const isSubmitting = form.formState.isSubmitting;
+
+  // Block submission if validation data is still loading
+  const isValidationReady = !isLoadingExisting;
 
   // Store previous values for cleanup detection
   const prevPresetIdRef = useRef(presetConfig?.id);
@@ -306,6 +312,12 @@ export function useQuestForm({
 
   const handleSubmit = form.handleSubmit(
     async (values) => {
+      // Block submission if validation data is not ready
+      if (!isValidationReady) {
+        toast.error('Please wait while validation data is loading...');
+        return;
+      }
+
       // If Zod validation passes, run additional custom validation
       const customValidationErrors = validateForm(values);
 
@@ -337,8 +349,8 @@ export function useQuestForm({
     },
     (errors) => {
       // This runs when Zod validation fails
-      console.error('❌ Zod Form validation errors:', errors);
-      console.log('❌ Form state:', form.getValues());
+      console.error('[VALIDATION] Zod Form validation errors:', errors);
+      console.log('[VALIDATION] Form state:', form.getValues());
 
       // Set field-level errors for proper display under form fields
       Object.entries(errors).forEach(([field, error]) => {
@@ -406,6 +418,7 @@ export function useQuestForm({
     fieldStates,
     isDirty,
     isSubmitting,
+    isValidationReady,
     handleSubmit,
     handleCancel,
     handleImageUpload,

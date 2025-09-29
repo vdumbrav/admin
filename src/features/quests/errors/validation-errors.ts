@@ -229,7 +229,7 @@ export class QuestErrorHandler {
    * Log validation errors for debugging
    */
   static logValidationError(error: QuestValidationError, context?: Record<string, unknown>): void {
-    console.group('🔍 Quest Validation Error');
+    console.group('[VALIDATION] Quest Validation Error');
     console.error('Summary:', error.getSummary());
     console.table(error.errors);
     if (context) {

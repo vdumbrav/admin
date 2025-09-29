@@ -15,8 +15,9 @@ import {
   type TaskResponseDto,
   type UpdateTaskDto,
 } from '@/lib/api/generated/model';
-import { formToApi } from './adapters/form-api-adapter';
+import { validateAndConvertToApi } from './adapters/form-api-adapter';
 import type { QuestQuery, QuestsResponse } from './data/types';
+import { useExistingQuests } from './hooks/use-existing-quests';
 import type { QuestFormValues } from './types/form-types';
 
 export const useQuests = (query: QuestQuery) => {
@@ -143,10 +144,11 @@ export const useCreateQuest = () => {
   const queryClient = useQueryClient();
   const createTaskMutation = useAdminWaitlistTasksControllerCreateTask();
   const queryKey = getAdminWaitlistTasksControllerGetWaitlistTasksQueryKey();
+  const { existingQuests } = useExistingQuests();
 
   return useMutation({
     mutationFn: async (data: QuestFormValues): Promise<TaskResponseDto> => {
-      const apiData = formToApi(data); // Auto-detects CREATE (no ID)
+      const apiData = validateAndConvertToApi(data, undefined, undefined, existingQuests); // Client-side validation first
       const result = await createTaskMutation.mutateAsync({
         data: apiData as CreateTaskDto,
       });
@@ -157,8 +159,31 @@ export const useCreateQuest = () => {
       toast.success('Quest created successfully');
     },
     onError: (error) => {
-      const message = error instanceof Error ? error.message : 'Failed to create quest';
-      toast.error(message);
+      // Handle specific server validation errors
+      if (error instanceof Error) {
+        const errorMessage = error.message.toLowerCase();
+
+        // Check for duplicate connect quest error
+        if (errorMessage.includes('connect') && errorMessage.includes('provider')) {
+          toast.error(
+            'A Connect quest for this provider already exists. Only one Connect quest per provider is allowed.',
+          );
+          return;
+        }
+
+        // Check for duplicate multiple quest error
+        if (errorMessage.includes('multiple') && errorMessage.includes('url')) {
+          toast.error(
+            'A Multiple quest for this URL already exists. Only one Multiple quest per URL is allowed.',
+          );
+          return;
+        }
+
+        // Generic error
+        toast.error(error.message);
+      } else {
+        toast.error('Failed to create quest');
+      }
     },
   });
 };
@@ -167,10 +192,16 @@ export const useUpdateQuest = (id: number) => {
   const queryClient = useQueryClient();
   const updateTaskMutation = useAdminWaitlistTasksControllerUpdateTask();
   const queryKey = getAdminWaitlistTasksControllerGetWaitlistTasksQueryKey();
+  const { existingQuests } = useExistingQuests();
 
   return useMutation({
     mutationFn: async (data: QuestFormValues): Promise<TaskResponseDto> => {
-      const apiData = formToApi(data) as UpdateTaskDto; // Auto-detects UPDATE (has ID)
+      const apiData = validateAndConvertToApi(
+        data,
+        undefined,
+        undefined,
+        existingQuests,
+      ) as UpdateTaskDto; // Client-side validation first
       const result = await updateTaskMutation.mutateAsync({ id, data: apiData });
       return result;
     },
@@ -179,18 +210,41 @@ export const useUpdateQuest = (id: number) => {
       toast.success('Quest updated successfully');
     },
     onError: (error) => {
-      const message = error instanceof Error ? error.message : 'Failed to update quest';
+      // Handle specific server validation errors
+      if (error instanceof Error) {
+        const errorMessage = error.message.toLowerCase();
 
-      // Handle conflict errors with special UI
-      if (message.includes('Conflict')) {
-        toast.error(message, {
-          action: {
-            label: 'Reload form',
-            onClick: () => window.location.reload(),
-          },
-        });
+        // Check for duplicate connect quest error
+        if (errorMessage.includes('connect') && errorMessage.includes('provider')) {
+          toast.error(
+            'A Connect quest for this provider already exists. Only one Connect quest per provider is allowed.',
+          );
+          return;
+        }
+
+        // Check for duplicate multiple quest error
+        if (errorMessage.includes('multiple') && errorMessage.includes('url')) {
+          toast.error(
+            'A Multiple quest for this URL already exists. Only one Multiple quest per URL is allowed.',
+          );
+          return;
+        }
+
+        // Handle conflict errors with special UI
+        if (errorMessage.includes('conflict')) {
+          toast.error(error.message, {
+            action: {
+              label: 'Reload form',
+              onClick: () => window.location.reload(),
+            },
+          });
+          return;
+        }
+
+        // Generic error
+        toast.error(error.message);
       } else {
-        toast.error(message);
+        toast.error('Failed to update quest');
       }
     },
   });

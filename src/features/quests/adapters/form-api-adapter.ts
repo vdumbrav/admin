@@ -461,7 +461,7 @@ export function validateAndConvertToApi(
   formData: unknown,
   presetId?: string,
   availableConnectQuests?: Array<{ id: number; provider: string }>,
-  existingQuests?: Array<{ id: number; type: string; provider?: string }>,
+  existingQuests?: Array<{ id: number; type: string; provider?: string; uri?: string }>,
 ): Omit<CreateTaskDto, 'parent_id'> {
   // First validate with Zod schema
   const schema = buildQuestFormSchema(presetId);
@@ -476,10 +476,10 @@ export function validateAndConvertToApi(
     ? validateBlockingTaskDependencies(validatedData, availableConnectQuests)
     : [];
   const uniquenessErrors = existingQuests
-    ? validateConnectUniqueness(validatedData, existingQuests)
-    : [];
-  const multipleURIErrors = existingQuests
-    ? validateMultipleURIUniqueness(validatedData, existingQuests)
+    ? [
+        ...validateConnectUniqueness(validatedData, existingQuests),
+        ...validateMultipleURIUniqueness(validatedData, existingQuests),
+      ]
     : [];
 
   const allErrors = [
@@ -487,7 +487,6 @@ export function validateAndConvertToApi(
     ...presetErrors,
     ...dependencyErrors,
     ...uniquenessErrors,
-    ...multipleURIErrors,
   ];
 
   if (allErrors.length > 0) {

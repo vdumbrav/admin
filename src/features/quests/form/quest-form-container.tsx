@@ -62,6 +62,7 @@ export function QuestFormContainer({
     handleImageUpload,
     availableQuests,
     connectGateWarnings,
+    isValidationReady,
   } = useQuestForm({
     presetConfig,
     initial,
@@ -161,6 +162,7 @@ export function QuestFormContainer({
               onImageUpload={handleImageUpload}
               availableQuests={availableQuests}
               connectGateWarnings={connectGateWarnings}
+              isValidationReady={isValidationReady}
             />
           </div>
         </form>

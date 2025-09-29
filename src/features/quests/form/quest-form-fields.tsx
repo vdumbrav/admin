@@ -4,7 +4,7 @@
  */
 import { useMemo, useState } from 'react';
 import type { UseFormReturn } from 'react-hook-form';
-import { IconLock } from '@tabler/icons-react';
+import { IconLoader, IconLock, IconRotate } from '@tabler/icons-react';
 import { Info } from 'lucide-react';
 import { type TaskResponseDtoProvider } from '@/lib/api/generated/model';
 import { cn } from '@/lib/utils';
@@ -53,6 +53,7 @@ export interface QuestFormFieldsProps {
   onImageUpload: (file: File) => Promise<string>;
   availableQuests?: { id: number; title: string; type: string[] }[];
   connectGateWarnings?: string[];
+  isValidationReady?: boolean;
 }
 
 // ============================================================================
@@ -66,6 +67,7 @@ export function QuestFormFields({
   connectGateWarnings = [],
   onImageUpload,
   availableQuests = [],
+  isValidationReady = true,
 }: QuestFormFieldsProps) {
   const [showTweetEmbed, setShowTweetEmbed] = useState(false);
 
@@ -753,8 +755,9 @@ export function QuestFormFields({
             <Button variant='secondary' type='button' onClick={() => window.history.back()}>
               Cancel
             </Button>
-            <Button type='submit' disabled={form.formState.isSubmitting}>
-              {form.formState.isSubmitting && <span className='mr-2'>⏳</span>}
+            <Button type='submit' disabled={form.formState.isSubmitting || !isValidationReady}>
+              {form.formState.isSubmitting && <IconLoader className='mr-2 h-4 w-4 animate-spin' />}
+              {!isValidationReady && <IconRotate className='mr-2 h-4 w-4 animate-spin' />}
               Save
             </Button>
           </div>
