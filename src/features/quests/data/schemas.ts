@@ -177,7 +177,11 @@ export const questFormSchema = z.object({
   title: z.string().min(1, 'Title is required').max(100, 'Title too long'),
   description: z.string().optional().default(''),
   blocking_task: z.number().nullable().optional(),
-  reward: z.number().min(1, 'Reward must be greater than 0').default(0),
+  reward: z
+    .number()
+    .min(0, 'Reward must be 0 or greater')
+    .max(10000, 'Reward cannot exceed 10000')
+    .default(0),
   totalReward: z.number().optional(),
   level: z.number().optional(),
   group: taskGroupSchema,

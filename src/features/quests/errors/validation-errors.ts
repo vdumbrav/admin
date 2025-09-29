@@ -96,7 +96,12 @@ export interface ValidationFieldError {
 /**
  * Types of validation errors
  */
-export type ValidationErrorType = 'required' | 'invalid' | 'dependency' | 'constraint';
+export type ValidationErrorType =
+  | 'required'
+  | 'invalid'
+  | 'dependency'
+  | 'constraint'
+  | 'duplicate';
 
 /**
  * Error handler for quest operations

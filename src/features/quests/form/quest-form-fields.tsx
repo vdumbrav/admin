@@ -52,6 +52,7 @@ export interface QuestFormFieldsProps {
   presetConfig?: PresetConfig;
   onImageUpload: (file: File) => Promise<string>;
   availableQuests?: { id: number; title: string; type: string[] }[];
+  connectGateWarnings?: string[];
 }
 
 // ============================================================================
@@ -62,6 +63,7 @@ export function QuestFormFields({
   form,
   fieldStates,
   presetConfig,
+  connectGateWarnings = [],
   onImageUpload,
   availableQuests = [],
 }: QuestFormFieldsProps) {
@@ -186,6 +188,22 @@ export function QuestFormFields({
           />
         )}
       </div>
+
+      {/* Connect Gate Warnings */}
+      {connectGateWarnings.length > 0 && (
+        <Alert className='border-amber-200 bg-amber-50'>
+          <Info className='h-4 w-4' />
+          <AlertDescription>
+            <ul className='space-y-1'>
+              {connectGateWarnings.map((warning, index) => (
+                <li key={index} className='text-sm text-amber-800'>
+                  {warning}
+                </li>
+              ))}
+            </ul>
+          </AlertDescription>
+        </Alert>
+      )}
 
       {/* Type Field Row */}
       {isFieldVisible('type', fieldStates) && (

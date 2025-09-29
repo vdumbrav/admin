@@ -7,8 +7,9 @@
  * - Automatic business rules application
  * - Connect-gate validation for provider dependencies
  * - Image upload with object URL management
+ * - Preset field cleanup on preset/type changes
  */
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useAppAuth } from '@/auth/hooks';
@@ -20,6 +21,7 @@ import { uploadMedia } from '../api';
 import { getTwitterOnlyTypes } from '../data/data';
 import type { PresetConfig } from '../presets/types';
 import { buildQuestFormSchema, type QuestFormValues } from '../types/form-schema';
+import { cleanupIncompatibleFields, getFieldsToReset } from '../utils/preset-field-cleanup';
 import {
   applyBusinessRules,
   applyLockedFields,
@@ -98,6 +100,10 @@ export function useQuestForm({
   const isDirty = form.formState.isDirty;
   const isSubmitting = form.formState.isSubmitting;
 
+  // Store previous values for cleanup detection
+  const prevPresetIdRef = useRef(presetConfig?.id);
+  const prevTypeRef = useRef(watchedValues.type);
+
   // Compute field visibility states
   const fieldStates = useMemo(() => {
     return computeFieldStates(presetConfig, watchedValues);
@@ -132,6 +138,50 @@ export function useQuestForm({
       }, 0);
     }
   }, [watchedValues, presetConfig, isDirty, form]);
+
+  // Cleanup incompatible fields when preset or type changes
+  useEffect(() => {
+    const currentPresetId = presetConfig?.id;
+    const currentType = watchedValues.type;
+
+    // Check if preset or type changed
+    const presetChanged = prevPresetIdRef.current !== currentPresetId;
+    const typeChanged = prevTypeRef.current !== currentType;
+
+    if (presetChanged || typeChanged) {
+      // Find old preset config for cleanup comparison
+      const oldPresetConfig = prevPresetIdRef.current
+        ? ({ id: prevPresetIdRef.current } as PresetConfig)
+        : undefined;
+
+      // Clean up incompatible fields
+      const currentValues = form.getValues();
+      const cleanedValues = cleanupIncompatibleFields(currentValues, presetConfig, oldPresetConfig);
+
+      // Apply cleaned values to form
+      Object.entries(cleanedValues).forEach(([key, value]) => {
+        const currentValue = form.getValues(key);
+        if (JSON.stringify(value) !== JSON.stringify(currentValue)) {
+          form.setValue(key, value, { shouldDirty: true });
+        }
+      });
+
+      // Apply preset defaults for required fields
+      if (presetConfig) {
+        const fieldsToReset = getFieldsToReset(presetConfig);
+        fieldsToReset.forEach((field) => {
+          const defaultValue = presetConfig.defaults?.[field];
+          if (defaultValue !== undefined) {
+            form.setValue(field as string, defaultValue, { shouldDirty: true });
+          }
+        });
+      }
+
+      // Update refs
+      prevPresetIdRef.current = currentPresetId;
+      prevTypeRef.current = currentType;
+    }
+  }, [presetConfig, watchedValues.type, form]);
 
   // ============================================================================
   // Connect Gate Warnings

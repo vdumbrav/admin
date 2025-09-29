@@ -292,6 +292,45 @@ export const buildQuestFormSchema = (presetId?: string) =>
         }
       }
 
+      // Username format validation based on provider
+      if (val.resources?.username) {
+        const username = val.resources.username.trim();
+
+        if (val.provider === 'twitter') {
+          // Twitter: 1-15 characters, alphanumeric and underscores, no @
+          if (username.startsWith('@')) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: 'Twitter username should not include @',
+              path: ['resources', 'username'],
+            });
+          } else if (!/^[A-Za-z0-9_]{1,15}$/.test(username)) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message:
+                'Twitter username must be 1-15 characters, letters, numbers, and underscores only',
+              path: ['resources', 'username'],
+            });
+          }
+        } else if (val.provider === 'telegram') {
+          // Telegram: 5-32 characters, alphanumeric and underscores, no @
+          if (username.startsWith('@')) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: 'Telegram username should not include @',
+              path: ['resources', 'username'],
+            });
+          } else if (!/^[a-zA-Z0-9_]{5,32}$/.test(username)) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message:
+                'Telegram username must be 5-32 characters, letters, numbers, and underscores only',
+              path: ['resources', 'username'],
+            });
+          }
+        }
+      }
+
       if (presetId === 'seven-day-challenge') {
         if (!val.iterator?.reward_map.length) {
           ctx.addIssue({

@@ -7,7 +7,7 @@ import { useCreateQuest, useQuest, useUpdateQuest } from './api';
 import { PresetSelection } from './components/preset-selection';
 import { defaultQuestSearch } from './default-search';
 import { QuestForm } from './form';
-import { getPreset, type PresetId } from './presets';
+import { getPreset, getPresetSafe, type PresetId } from './presets';
 import type { QuestFormValues } from './types/form-types';
 
 export const QuestCreatePage = () => {
@@ -66,6 +66,9 @@ export const QuestEditPage = () => {
   const { data, isLoading } = useQuest(questId);
   const update = useUpdateQuest(questId);
   const nav = useNavigate({});
+
+  // Get preset configuration from existing quest data
+  const presetConfig = data?.preset ? (getPresetSafe(data.preset) ?? undefined) : undefined;
 
   if (isLoading || !data) {
     return (
@@ -140,6 +143,7 @@ export const QuestEditPage = () => {
           </Button>
         </div>
         <QuestForm
+          presetConfig={presetConfig}
           initial={
             // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
             data ? apiToForm(data) : undefined

@@ -26,6 +26,8 @@ import { type ChildFormValues, type QuestFormValues } from '../types/form-types'
 import {
   formatValidationErrors,
   validateBlockingTaskDependencies,
+  validateConnectUniqueness,
+  validateMultipleURIUniqueness,
   validatePresetCompatibility,
   validateRequiredFields,
 } from '../validators/quest-validator';
@@ -352,7 +354,8 @@ export function formToApi(formData: QuestFormValues): Omit<CreateTaskDto, 'paren
     // Include preset if specified
     ...(formData.preset && { preset: formData.preset }),
 
-    // Exclude form-only fields like order_by, totalReward, etc.
+    // Include order_by for UPDATE operations (supported by UpdateTaskDto)
+    ...(isUpdate && typeof formData.order_by === 'number' && { order_by: formData.order_by }),
 
     // Optional fields - only include if not empty
     ...(formData.provider && { provider: formData.provider }),
@@ -364,7 +367,11 @@ export function formToApi(formData: QuestFormValues): Omit<CreateTaskDto, 'paren
     ...(formData.parent_id && { parent_id: formData.parent_id }),
 
     // Include resources - use empty object as fallback since entity requires non-null
-    resource: formData.resources ?? {},
+    // CRITICAL FIX: Restore icon from top-level icon field back to resources.icon
+    resource: {
+      ...(formData.resources ?? {}),
+      ...(formData.icon && { icon: formData.icon }),
+    },
 
     // Child tasks - NEVER include in API request, they are created separately
     // ...(formData.child && formData.child.length > 0 && { ... }),
@@ -375,7 +382,7 @@ export function formToApi(formData: QuestFormValues): Omit<CreateTaskDto, 'paren
         day: 0, // Starting day for iterator
         days: formData.iterator.days ?? 7,
         reward_map: formData.iterator.reward_map,
-        iterator_reward: formData.iterator.reward_map, // Backend expects this field
+        iterator_reward: formData.iterator.reward_map.map(String), // Convert number[] to string[] for DTO compatibility
         iterator_resource: {}, // Empty object as default
         reward: formData.iterator.reward_map[0] ?? 0, // First day reward
         reward_max: Math.max(...formData.iterator.reward_map),
@@ -454,6 +461,7 @@ export function validateAndConvertToApi(
   formData: unknown,
   presetId?: string,
   availableConnectQuests?: Array<{ id: number; provider: string }>,
+  existingQuests?: Array<{ id: number; type: string; provider?: string }>,
 ): Omit<CreateTaskDto, 'parent_id'> {
   // First validate with Zod schema
   const schema = buildQuestFormSchema(presetId);
@@ -467,8 +475,20 @@ export function validateAndConvertToApi(
   const dependencyErrors = availableConnectQuests
     ? validateBlockingTaskDependencies(validatedData, availableConnectQuests)
     : [];
+  const uniquenessErrors = existingQuests
+    ? validateConnectUniqueness(validatedData, existingQuests)
+    : [];
+  const multipleURIErrors = existingQuests
+    ? validateMultipleURIUniqueness(validatedData, existingQuests)
+    : [];
 
-  const allErrors = [...requiredFieldsResult.errors, ...presetErrors, ...dependencyErrors];
+  const allErrors = [
+    ...requiredFieldsResult.errors,
+    ...presetErrors,
+    ...dependencyErrors,
+    ...uniquenessErrors,
+    ...multipleURIErrors,
+  ];
 
   if (allErrors.length > 0) {
     const errorMessage = formatValidationErrors(allErrors);

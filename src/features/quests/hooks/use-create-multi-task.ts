@@ -38,7 +38,7 @@ export const useCreateMultiTask = () => {
 
   // Helper to create child task data with parent_id and inheritance from parent
   const createChildTaskData = useCallback(
-    (child: ChildFormValues, parentId: number, parentData?: QuestFormValues): CreateTaskDto => {
+    (child: ChildFormValues, parentId: number, parentData?: QuestFormValues) => {
       const childApiData = {
         // Core required fields for CreateTaskDto
         type: child.type,
@@ -53,7 +53,7 @@ export const useCreateMultiTask = () => {
         web: child.web ?? parentData?.web ?? true,
         twa: child.twa ?? parentData?.twa ?? false,
         pinned: child.pinned ?? false, // Child tasks rarely pinned
-        level: child.level ?? 1, // Child tasks are usually level 1
+        level: child.level ?? parentData?.level ?? 1, // Inherit level from parent, fallback to 1
 
         // Child-specific
         parent_id: parentId,
@@ -61,7 +61,8 @@ export const useCreateMultiTask = () => {
 
         // Optional fields
         ...(child.uri && { uri: child.uri }),
-        ...(child.icon && { icon: child.icon }),
+        // Icon inheritance: use child icon if set, otherwise inherit from parent
+        ...((child.icon ?? parentData?.icon) && { icon: child.icon ?? parentData?.icon }),
         // Inherit time frames from parent if not set on child
         ...((child.start ?? parentData?.start) && { start: child.start ?? parentData?.start }),
         ...((child.end ?? parentData?.end) && { end: child.end ?? parentData?.end }),
@@ -72,7 +73,7 @@ export const useCreateMultiTask = () => {
         }),
       };
 
-      return childApiData as CreateTaskDto;
+      return childApiData;
     },
     [],
   );
@@ -191,7 +192,7 @@ export const useCreateMultiTask = () => {
             try {
               const childTaskData = createChildTaskData(child, mainTask.id, formData);
               const childTask = await adminWaitlistTasksControllerCreateTask(
-                childTaskData,
+                childTaskData as unknown as CreateTaskDto,
                 abortControllerRef.current?.signal,
               );
 
@@ -305,7 +306,7 @@ export const useCreateMultiTask = () => {
           parentDataRef.current ?? undefined,
         );
         const childTask = await adminWaitlistTasksControllerCreateTask(
-          childTaskData,
+          childTaskData as unknown as CreateTaskDto,
           abortControllerRef.current?.signal,
         );
 

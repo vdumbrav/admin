@@ -343,3 +343,64 @@ export function formatValidationErrors(errors: ValidationFieldError[]): string {
 
   return message.trim();
 }
+
+/**
+ * Validate connect quest uniqueness per provider
+ */
+export function validateConnectUniqueness(
+  formData: QuestFormValues,
+  existingQuests: Array<{ id: number; type: string; provider?: string }>,
+): ValidationFieldError[] {
+  const errors: ValidationFieldError[] = [];
+
+  // Only validate for connect type quests
+  if (formData.type !== 'connect' || !formData.provider) {
+    return errors;
+  }
+
+  // Check if there's already a connect quest for this provider
+  const duplicateConnect = existingQuests.find(
+    (quest) =>
+      quest.type === 'connect' && quest.provider === formData.provider && quest.id !== formData.id, // Exclude current quest if editing
+  );
+
+  if (duplicateConnect) {
+    errors.push({
+      field: 'provider',
+      message: `A Connect quest for ${formData.provider} already exists (ID: ${duplicateConnect.id}). Only one Connect quest per provider is allowed.`,
+      type: 'duplicate',
+    });
+  }
+
+  return errors;
+}
+
+/**
+ * Validate multiple quest uniqueness per URI
+ */
+export function validateMultipleURIUniqueness(
+  formData: QuestFormValues,
+  existingQuests: Array<{ id: number; type: string; uri?: string }>,
+): ValidationFieldError[] {
+  const errors: ValidationFieldError[] = [];
+
+  // Only validate for multiple type quests with URI
+  if (formData.type !== 'multiple' || !formData.uri?.trim()) {
+    return errors;
+  }
+
+  // Check if there's already a multiple quest for this URI
+  const duplicateMultiple = existingQuests.find(
+    (quest) => quest.type === 'multiple' && quest.uri === formData.uri && quest.id !== formData.id, // Exclude current quest if editing
+  );
+
+  if (duplicateMultiple) {
+    errors.push({
+      field: 'uri',
+      message: `A Multiple quest for this URL already exists (ID: ${duplicateMultiple.id}). Only one Multiple quest per URL is allowed.`,
+      type: 'duplicate',
+    });
+  }
+
+  return errors;
+}
