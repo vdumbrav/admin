@@ -197,10 +197,10 @@ export const getColumns = (isAdmin: boolean): ColumnDef<TaskResponseDto>[] => {
     },
     // 12. Start date
     {
-      accessorKey: 'started_at',
+      accessorKey: 'active_from',
       header: ({ column }) => <DataTableColumnHeader column={column} title='Start date' />,
       cell: ({ row }) => {
-        const date = row.original.started_at;
+        const date = row.original.active_from;
         return date ? formatDateDMY(date) : '–';
       },
       size: 160,
@@ -209,10 +209,10 @@ export const getColumns = (isAdmin: boolean): ColumnDef<TaskResponseDto>[] => {
     },
     // 13. End date
     {
-      accessorKey: 'completed_at',
+      accessorKey: 'active_to',
       header: ({ column }) => <DataTableColumnHeader column={column} title='End date' />,
       cell: ({ row }) => {
-        const date = row.original.completed_at;
+        const date = row.original.active_to;
         return date ? formatDateDMY(date) : '–';
       },
       size: 160,

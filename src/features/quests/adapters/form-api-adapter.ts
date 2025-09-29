@@ -220,8 +220,8 @@ export function apiToForm(apiData: Partial<TaskResponseDto>): QuestFormValues {
     child: validateAndExtractChildren(apiData.child),
 
     // Schedule mapping for edit mode
-    start: apiData.started_at,
-    end: apiData.completed_at,
+    start: apiData.active_from,
+    end: apiData.active_to,
 
     // Iterator mapping for 7-day challenge (API → Form)
     iterator: apiData.iterator ? validateAndExtractIterator(apiData.iterator) : undefined,

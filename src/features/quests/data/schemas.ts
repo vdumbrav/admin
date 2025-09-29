@@ -3,7 +3,6 @@ import {
   type TaskResponseDto,
   TaskResponseDtoGroup,
   TaskResponseDtoProvider,
-  WaitlistTasksResponseDtoStatus,
   WaitlistTasksResponseDtoTypeItem,
 } from '@/lib/api/generated/model';
 
@@ -92,15 +91,6 @@ const groupSchema = z.enum([
   TaskResponseDtoGroup.partner,
 ]);
 
-const statusSchema = z
-  .enum([
-    WaitlistTasksResponseDtoStatus.new,
-    WaitlistTasksResponseDtoStatus.started,
-    WaitlistTasksResponseDtoStatus.completed,
-    WaitlistTasksResponseDtoStatus.failed,
-    WaitlistTasksResponseDtoStatus.locked,
-  ])
-  .optional();
 
 // ============================================================================
 // Form-compatible schemas (with extended types)
@@ -153,16 +143,12 @@ export const questSchema: z.ZodType<TaskResponseDto> = z.object({
     .optional(),
   resource: resourcesSchema,
   iterator: iteratorSchema,
+  active_from: z.string().optional(),
+  active_to: z.string().optional(),
+  preset: z.string(),
   iterable: z.boolean(),
   child: z.array(z.lazy((): z.ZodType<TaskResponseDto> => questSchema)),
-  blocking_task_id: z.number(),
   order_by: z.number(),
-  status: statusSchema,
-  error: z.string().optional(),
-  started_at: z.string().optional(),
-  completed_at: z.string().optional(),
-  resources: resourcesSchema,
-  next_tick: z.string().optional(),
   total_reward: z.number(),
   total_users: z.number(),
 });
