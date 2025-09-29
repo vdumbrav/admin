@@ -5,14 +5,22 @@
 !/src
 !index.html
 !package.json
+!package-lock.json
 !tailwind.config.js
 !tsconfig.json
 !tsconfig.node.json
+!tsconfig.*.json
 !vite.config.ts
 !.prettierrc
+!.prettierrc.*
 !README.md
+!*.md
 !eslint.config.js
 !postcss.config.js
+!orval.config.ts
+!*.json
+!*.yaml
+!*.yml
 
 # Ignore auto generated routeTree.gen.ts
 /src/routeTree.gen.ts

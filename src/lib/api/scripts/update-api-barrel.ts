@@ -1,9 +1,7 @@
 import { readdirSync, statSync, writeFileSync } from 'node:fs';
-import { dirname, join, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { join, resolve } from 'node:path';
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const PROJECT_ROOT = resolve(__dirname, '../../../..');
+const PROJECT_ROOT = process.cwd();
 const GENERATED_ROOT = resolve(PROJECT_ROOT, 'src/lib/api/generated');
 const HEADER = [
   '/* eslint-disable */',

@@ -19,7 +19,7 @@
 - `npm run lint` — run ESLint across the repo.
 - `npm run format` / `npm run format:check` — apply/verify Prettier formatting.
 - `npm run generate:api` — regenerate OpenAPI client via Orval.
-Note: pnpm is supported. Replace `npm run` with `pnpm` if using pnpm.
+  Note: pnpm is supported. Replace `npm run` with `pnpm` if using pnpm.
 
 ## Coding Style & Naming Conventions
 
