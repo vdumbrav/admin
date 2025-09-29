@@ -92,14 +92,11 @@ export function QuestFormContainer({
         // Success - immediately switch to edit mode for parent task
         if (result.mainTask?.id) {
           const mainTaskId = result.mainTask.id;
-          setTimeout(() => {
-            void navigate({ to: `/quests/${mainTaskId}` });
-          }, 1500);
+          console.log('Multi-task success! Navigating to main task:', mainTaskId);
+          void navigate({ to: `/quests/${mainTaskId}` });
         } else {
-          // Fallback to original behavior if no main task ID
-          setTimeout(() => {
-            void onSubmit(values);
-          }, 1500);
+          console.log('No mainTask.id found, using fallback');
+          void onSubmit(values);
         }
       }
       // If partial errors, keep progress visible for user interaction
