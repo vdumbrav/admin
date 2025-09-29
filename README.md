@@ -17,7 +17,7 @@ Modern admin interface built with React 19, TypeScript, and shadcn/ui. Features 
 - **Validation**: Zod schemas
 - **Types**: TypeScript 5 (strict mode)
 
-## Quick Start
+## 🚀 Quick Start
 
 ### Prerequisites
 
@@ -63,7 +63,7 @@ npm run api:update   # Force update API client
 npm run api:ensure   # Ensure API exists (with fallback)
 ```
 
-## Authentication
+## 🔐 Authentication
 
 ### Flow
 
@@ -86,9 +86,9 @@ npm run api:ensure   # Ensure API exists (with fallback)
 - Clear error messaging
 - Manual account switching
 
-## Features
+## ✨ Features
 
-### Quest Management System
+### 🎯 Quest Management System
 
 Advanced quest creation with preset-based configuration:
 
@@ -145,11 +145,11 @@ Form fields adapt based on selected preset:
 
 | Field       | action-with-post | connect | join | explore | seven-day |
 | ----------- | :--------------: | :-----: | :--: | :-----: | :-------: |
-| URL field   |        ❌        |   ❌    |  ✅  |   ✅    |    ❌     |
-| Provider    |   🔒 readonly    |   ✅    |  ✅  |   ❌    |    ❌     |
-| Sub-tasks   |        ✅        |   ❌    |  ❌  |   ❌    |    ❌     |
-| Reward map  |        ❌        |   ❌    |  ❌  |   ❌    |    ✅     |
-| Icon upload |  ➕ conditional  |   ❌    |  ❌  |   ✅    |    ❌     |
+| URL field   |      Hidden      | Hidden  | Show |  Show   |  Hidden   |
+| Provider    |     Readonly     |  Show   | Show | Hidden  |  Hidden   |
+| Sub-tasks   |       Show       | Hidden  | Hide | Hidden  |  Hidden   |
+| Reward map  |      Hidden      | Hidden  | Hide | Hidden  |   Show    |
+| Icon upload |   Conditional    | Hidden  | Hide |  Show   |  Hidden   |
 
 ### Multi-Task Creation
 
@@ -169,13 +169,20 @@ For complex quest campaigns:
 - **Type-specific fields**
 - **Inheritance** from parent quest
 
-### Validation System
+### ✅ Validation System
 
-**Three-level validation:**
+**Strong client-side validation implemented:**
 
-1. **Form Level** - Real-time UI validation
-2. **Business Rules** - Preset-specific requirements
-3. **API Level** - Server-side final validation
+1. **Form Level** - Real-time UI validation with uniqueness checks
+2. **Business Rules** - Preset-specific requirements + uniqueness enforcement
+3. **API Level** - Server-side final validation (backup only)
+
+#### Uniqueness Validation
+
+- **Connect quests** - Only one per provider (checked before API call)
+- **Multiple quests** - Only one per URL (checked before API call)
+- **Loading states** - Form disabled during validation data loading
+- **User feedback** - Clear error messages for duplicates
 
 #### Automatic Features
 
@@ -222,7 +229,7 @@ src/lib/api/generated/
 └── model/         # TypeScript types
 ```
 
-## Architecture
+## 🏗️ Architecture
 
 ### Project Structure
 
@@ -265,19 +272,20 @@ src/
 - `RoleGuard` - Component-level protection
 - `ProtectedRoute` - Route-level guards
 
-## Development
+## 🛠️ Development
 
 ### Debug Tools
 
 **Console Logs** (development only):
 
-- `⚙️ [OIDC]` - Configuration
-- `🔍 [AUTH]` - Role extraction
-- `🛡️ [GUARD]` - Route protection
-- `🔑 [SIGN_IN]` - Login flow
+- `[OIDC]` - Configuration logs
+- `[AUTH]` - Role extraction info
+- `[GUARD]` - Route protection status
+- `[SIGN_IN]` - Login flow tracking
+- `[VALIDATION]` - Form validation errors
 
 **Visual Debug Panel:**
-Click "🔍 Auth Debug" (bottom-left) to inspect:
+Click "Auth Debug" (bottom-left) to inspect:
 
 - Authentication status
 - User roles and permissions
@@ -313,7 +321,7 @@ rm -rf src/lib/api/generated/
 npm run api:ensure
 ```
 
-## Security
+## 🔒 Security
 
 ### OIDC Configuration
 
@@ -329,7 +337,7 @@ npm run api:ensure
 - **Clear error messages** - users know why access denied
 - **Manual account switching** - user-controlled
 
-### Production Checklist
+### ✅ Production Checklist
 
 - [ ] HTTPS enabled for all URLs
 - [ ] OIDC authority configured properly
@@ -338,7 +346,7 @@ npm run api:ensure
 - [ ] Token lifetimes set appropriately
 - [ ] Security headers configured (CSP, HSTS)
 
-## AI Integration (MCP)
+## 🤖 AI Integration (MCP)
 
 ### Configured Servers
 
@@ -379,18 +387,19 @@ Natural language development with AI:
 
 ## Production Status
 
-### ✅ Ready for Production
+### 🚀 Ready for Production
 
 **Implemented Features:**
 
 - ✅ Complete quest management system with 5 presets
 - ✅ Multi-task creation with automatic navigation to edit mode
 - ✅ Progress tracking on edit page during sub-task creation
+- ✅ **Strong client-side validation** with uniqueness checks
 - ✅ OIDC authentication with Keycloak
 - ✅ Role-based access control (admin/moderator)
 - ✅ Auto-generated type-safe API client
-- ✅ Dynamic form system with validation
-- ✅ Professional UI with shadcn/ui
+- ✅ Dynamic form system with comprehensive validation
+- ✅ Professional UI with @tabler/icons-react (no emoji)
 - ✅ Comprehensive error handling
 - ✅ Development debug tools
 
