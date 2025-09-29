@@ -471,7 +471,19 @@ export function QuestFormFields({
 
       {/* Child Tasks Section for Multiple Type */}
       {currentType === 'multiple' && (isFieldVisible('tasks', fieldStates) || !presetConfig) && (
-        <ChildrenEditor />
+        <div className='space-y-4'>
+          {/* Warning for editing multiple quests */}
+          {form.watch('id') && (
+            <Alert>
+              <Info className='h-4 w-4' />
+              <AlertDescription>
+                Sub-tasks are edited separately. Changes made here won't affect existing sub-tasks.
+                Edit individual sub-tasks from the quest list to modify them.
+              </AlertDescription>
+            </Alert>
+          )}
+          <ChildrenEditor />
+        </div>
       )}
 
       {/* Total reward, XP - for child tasks */}

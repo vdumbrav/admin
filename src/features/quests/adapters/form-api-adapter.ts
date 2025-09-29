@@ -244,13 +244,19 @@ function validateAndExtractIterator(iterator: unknown): QuestFormValues['iterato
   }
 
   const rewardMap = iteratorObj.reward_map as unknown[];
-  if (!rewardMap.every((reward) => typeof reward === 'number')) {
-    throw new Error('Iterator reward_map must contain only numbers');
-  }
+  // Handle both number[] and string[] formats from API
+  const parsedRewardMap = rewardMap.map((reward) => {
+    if (typeof reward === 'number') return reward;
+    if (typeof reward === 'string') {
+      const parsed = Number(reward);
+      return isNaN(parsed) ? 0 : parsed;
+    }
+    return 0;
+  });
 
   return {
     days: typeof iteratorObj.days === 'number' ? iteratorObj.days : undefined,
-    reward_map: rewardMap,
+    reward_map: parsedRewardMap,
   };
 }
 
@@ -382,7 +388,9 @@ export function formToApi(formData: QuestFormValues): Omit<CreateTaskDto, 'paren
         day: 0, // Starting day for iterator
         days: formData.iterator.days ?? 7,
         reward_map: formData.iterator.reward_map,
-        iterator_reward: formData.iterator.reward_map.map(String), // API requires string[] while UI uses number[] - validated conversion
+        iterator_reward: formData.iterator.reward_map.map((reward) =>
+          typeof reward === 'number' ? String(reward) : '0',
+        ), // Backend API requires string[] format - safe conversion from number[]
         iterator_resource: {}, // Empty object as default
         reward: formData.iterator.reward_map[0] ?? 0, // First day reward
         reward_max: Math.max(...formData.iterator.reward_map),

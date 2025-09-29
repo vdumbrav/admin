@@ -140,6 +140,13 @@ Advanced quest creation with preset-based configuration:
 - Automatic total calculation
 - Type-safe number to string conversion for API compatibility
 
+**6. Dummy Quest Support** (`dummy`)
+
+- Available in all environments (dev/staging/prod)
+- No preset required - uses generic form mode
+- Minimal validation (title, description, group, reward only)
+- Used for testing and development purposes
+
 #### Dynamic Forms
 
 Form fields adapt based on selected preset:
@@ -170,6 +177,12 @@ For complex quest campaigns:
 - **Type-specific fields**
 - **Inheritance** from parent quest
 
+**⚠️ Edit Mode Warning:**
+
+- When editing Multiple quests, UI shows warning that sub-tasks are edited separately
+- Changes to parent quest don't affect existing sub-tasks
+- Individual sub-tasks must be edited from quest list
+
 ### ✅ Validation System
 
 **Strong client-side validation implemented:**
@@ -178,12 +191,20 @@ For complex quest campaigns:
 2. **Business Rules** - Preset-specific requirements + uniqueness enforcement
 3. **API Level** - Server-side final validation (backup only)
 
-#### Uniqueness Validation
+#### 🔒 Uniqueness Validation
+
+**Client-side validation (immediate feedback):**
 
 - **Connect quests** - Only one per provider (checked before API call)
 - **Multiple quests** - Only one per URL (checked before API call)
 - **Loading states** - Form disabled during validation data loading
 - **User feedback** - Clear error messages for duplicates
+
+**Server-side validation (final enforcement):**
+
+- Backend returns 409 Conflict for duplicate Connect/Multiple quests
+- UI handles server errors gracefully with user-friendly messages
+- Database constraints ensure data integrity
 
 #### Automatic Features
 
