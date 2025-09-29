@@ -361,7 +361,7 @@ export function formToApi(formData: QuestFormValues): Omit<CreateTaskDto, 'paren
     ...(formData.preset && { preset: formData.preset }),
 
     // Include order_by for UPDATE operations (supported by UpdateTaskDto)
-    ...(isUpdate && typeof formData.order_by === 'number' && { order_by: formData.order_by }),
+    // TEMPORARILY DISABLED: ...(isUpdate && typeof formData.order_by === 'number' && { order_by: formData.order_by }),
 
     // Optional fields - only include if not empty
     ...(formData.provider && { provider: formData.provider }),

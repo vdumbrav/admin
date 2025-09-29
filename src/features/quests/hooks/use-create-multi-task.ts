@@ -46,7 +46,7 @@ export const useCreateMultiTask = () => {
         description: child.description ?? '',
         group: child.group,
         reward: child.reward ?? 0,
-        order_by: child.order_by ?? 0,
+        // TEMPORARILY DISABLED: order_by: child.order_by ?? 0,
 
         // Platform settings - inherit from parent if not specified
         enabled: child.enabled ?? parentData?.enabled ?? true,
