@@ -8,7 +8,7 @@ import { Switch } from '@/components/ui/switch';
 import { DataTableColumnHeader } from '@/components/table/data-table-column-header';
 import { useToggleEnabled } from '../api';
 import { getBadgeClasses, getBadgeStyle, getBadgeVariant } from '../utils/badge-variants';
-import { formatDateDMY, formatNumberShort, formatXp } from '../utils/format';
+import { formatDateTime, formatNumberShort, formatXp } from '../utils/format';
 import { getProviderIcon } from '../utils/provider-icons';
 import { DataTableRowActions } from './data-table-row-actions';
 
@@ -201,7 +201,7 @@ export const getColumns = (isAdmin: boolean): ColumnDef<TaskResponseDto>[] => {
       header: ({ column }) => <DataTableColumnHeader column={column} title='Start date' />,
       cell: ({ row }) => {
         const date = row.original.active_from;
-        return date ? formatDateDMY(date) : '–';
+        return date ? formatDateTime(date) : '–';
       },
       size: 160,
       minSize: 160,
@@ -213,7 +213,7 @@ export const getColumns = (isAdmin: boolean): ColumnDef<TaskResponseDto>[] => {
       header: ({ column }) => <DataTableColumnHeader column={column} title='End date' />,
       cell: ({ row }) => {
         const date = row.original.active_to;
-        return date ? formatDateDMY(date) : '–';
+        return date ? formatDateTime(date) : '–';
       },
       size: 160,
       minSize: 160,

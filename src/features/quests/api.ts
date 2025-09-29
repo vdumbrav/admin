@@ -193,11 +193,7 @@ export const useUpdateQuest = (id: number) => {
 
   return useMutation({
     mutationFn: async (data: QuestFormValues): Promise<TaskResponseDto> => {
-      const apiData = validateAndConvertToApi(
-        data,
-        undefined,
-        undefined,
-      ) as UpdateTaskDto; // Client-side validation first
+      const apiData = validateAndConvertToApi(data, undefined, undefined) as UpdateTaskDto; // Client-side validation first
       const result = await updateTaskMutation.mutateAsync({ id, data: apiData });
       return result;
     },

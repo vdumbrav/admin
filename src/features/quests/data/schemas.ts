@@ -91,7 +91,6 @@ const groupSchema = z.enum([
   TaskResponseDtoGroup.partner,
 ]);
 
-
 // ============================================================================
 // Form-compatible schemas (with extended types)
 // ============================================================================

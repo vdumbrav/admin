@@ -481,11 +481,7 @@ export function validateAndConvertToApi(
     ? validateBlockingTaskDependencies(validatedData, availableConnectQuests)
     : [];
 
-  const allErrors = [
-    ...requiredFieldsResult.errors,
-    ...presetErrors,
-    ...dependencyErrors,
-  ];
+  const allErrors = [...requiredFieldsResult.errors, ...presetErrors, ...dependencyErrors];
 
   if (allErrors.length > 0) {
     const errorMessage = formatValidationErrors(allErrors);

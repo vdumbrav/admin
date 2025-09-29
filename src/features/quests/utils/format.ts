@@ -19,6 +19,17 @@ export const formatDateDMY = (iso?: string | null): string => {
   }
 };
 
+export const formatDateTime = (iso?: string | null): string => {
+  if (!iso) return '–';
+  try {
+    const d = parseISO(iso);
+    if (Number.isNaN(d.getTime())) return '–';
+    return fmt(d, 'dd.MM.yyyy HH:mm');
+  } catch {
+    return '–';
+  }
+};
+
 export const formatXp = (n?: number | null): string => {
   if (n === null || n === undefined) return '–';
   return `${n} XP`;
