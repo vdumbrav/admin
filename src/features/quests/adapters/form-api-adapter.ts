@@ -395,9 +395,9 @@ export function formToApi(formData: QuestFormValues): Omit<CreateTaskDto, 'paren
       },
     }),
 
-    // Date fields - only if not empty
-    ...(formData.start && { active_from: formData.start }),
-    ...(formData.end && { active_to: formData.end }),
+    // Date fields - only if not empty, convert to ISO string
+    ...(formData.start && { active_from: new Date(formData.start).toISOString() }),
+    ...(formData.end && { active_to: new Date(formData.end).toISOString() }),
   };
 
   return baseData as Omit<CreateTaskDto, 'parent_id'>;
