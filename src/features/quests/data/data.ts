@@ -123,21 +123,21 @@ export const enabledOptions = [
  * @returns Human-readable label
  */
 export function getGroupLabel(value: TaskResponseDtoGroup): string {
-  return GROUP_LABELS[value] ?? value;
+  return GROUP_LABELS[value] || value;
 }
 
 /**
  * Get display label for a type value
  */
 export function getTypeLabel(value: WaitlistTasksResponseDtoTypeItem): string {
-  return TYPE_LABELS[value] ?? value;
+  return TYPE_LABELS[value] || value;
 }
 
 /**
  * Get display label for a provider value
  */
 export function getProviderLabel(value: TaskResponseDtoProvider): string {
-  return PROVIDER_LABELS[value] ?? value;
+  return PROVIDER_LABELS[value] || value;
 }
 
 /**

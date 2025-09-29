@@ -23,14 +23,14 @@ export const DailyRewardsEditor = () => {
   const rewardMap = useWatch({ control, name: 'iterator.reward_map' });
 
   const addDay = () => {
-    const currentMap = rewardMap ?? [];
+    const currentMap = rewardMap || [];
     if (currentMap.length < MAX_DAYS) {
       setValue('iterator.reward_map', [...currentMap, 0], { shouldDirty: true });
     }
   };
 
   const removeDay = (index: number) => {
-    const currentMap = rewardMap ?? [];
+    const currentMap = rewardMap || [];
     if (currentMap.length > MIN_DAYS) {
       const newMap = currentMap.filter((_, i) => i !== index);
       setValue('iterator.reward_map', newMap, { shouldDirty: true });
@@ -40,7 +40,7 @@ export const DailyRewardsEditor = () => {
   // Auto-calculate total reward when reward map changes
   // This provides real-time feedback in UI while editing 7-day challenge
   useEffect(() => {
-    if (rewardMap && Array.isArray(rewardMap)) {
+    if (rewardMap) {
       const total = rewardMap.reduce((sum, reward) => {
         return sum + (typeof reward === 'number' && reward >= 0 ? reward : 0);
       }, 0);
@@ -79,7 +79,7 @@ export const DailyRewardsEditor = () => {
                   </FormControl>
                   <FormMessage />
                 </FormItem>
-                {(rewardMap?.length ?? 0) > MIN_DAYS && (
+                {rewardMap && rewardMap.length > MIN_DAYS && (
                   <Button
                     type='button'
                     variant='ghost'
@@ -96,7 +96,7 @@ export const DailyRewardsEditor = () => {
         ))}
 
         {/* Add Day Button */}
-        {(rewardMap?.length ?? 0) < MAX_DAYS && (
+        {(!rewardMap || rewardMap.length < MAX_DAYS) && (
           <Button
             type='button'
             variant='secondary'
@@ -109,7 +109,7 @@ export const DailyRewardsEditor = () => {
         )}
       </div>
 
-      {rewardMap?.length && (
+      {rewardMap && rewardMap.length > 0 && (
         <div className='grid grid-cols-3 gap-4'>
           <FormItem>
             <FormLabel>Total reward, XP</FormLabel>
@@ -117,10 +117,13 @@ export const DailyRewardsEditor = () => {
               <input
                 type='number'
                 value={
-                  rewardMap?.reduce((sum, reward) => {
-                    const validReward = typeof reward === 'number' && !isNaN(reward) ? reward : 0;
-                    return sum + validReward;
-                  }, 0) || 0
+                  rewardMap
+                    ? rewardMap.reduce((sum, reward) => {
+                        const validReward =
+                          typeof reward === 'number' && !isNaN(reward) ? reward : 0;
+                        return sum + validReward;
+                      }, 0)
+                    : 0
                 }
                 readOnly
                 className='border-input bg-muted ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex h-10 w-full rounded-md border px-3 py-2 text-sm [-moz-appearance:textfield] file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none'
