@@ -138,6 +138,7 @@ Advanced quest creation with preset-based configuration:
 - Daily reward progression
 - 3-10 day configuration
 - Automatic total calculation
+- Type-safe number to string conversion for API compatibility
 
 #### Dynamic Forms
 

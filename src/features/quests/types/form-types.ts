@@ -22,6 +22,7 @@ export const QUEST_TYPES = [
   'multiple',
   'repeatable',
   'external',
+  'dummy',
 ] as const;
 
 export const QUEST_GROUPS = ['all', 'social', 'daily', 'referral', 'partner'] as const;
