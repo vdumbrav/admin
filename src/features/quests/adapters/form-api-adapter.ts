@@ -483,9 +483,7 @@ export function validateAndConvertToApi(
     ? validateBlockingTaskDependencies(validatedData, availableConnectQuests)
     : [];
   const uniquenessErrors = existingQuests
-    ? [
-        ...validateMultipleURIUniqueness(validatedData, existingQuests),
-      ]
+    ? [...validateMultipleURIUniqueness(validatedData, existingQuests)]
     : [];
 
   const allErrors = [

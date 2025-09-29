@@ -26,24 +26,19 @@ export function DatePicker({
     <Popover>
       <PopoverTrigger asChild>
         <Button
-          variant="outline"
+          variant='outline'
           className={cn(
             'min-w-[184px] justify-start text-left font-normal',
             !value && 'text-muted-foreground',
           )}
           disabled={disabled}
         >
-          <CalendarIcon className="mr-2 h-4 w-4" />
+          <CalendarIcon className='mr-2 h-4 w-4' />
           {value ? format(value, 'dd/MM/yyyy') : <span>{placeholder}</span>}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-auto p-0">
-        <Calendar
-          mode="single"
-          selected={value}
-          onSelect={handleDateSelect}
-          initialFocus
-        />
+      <PopoverContent className='w-auto p-0'>
+        <Calendar mode='single' selected={value} onSelect={handleDateSelect} initialFocus />
       </PopoverContent>
     </Popover>
   );

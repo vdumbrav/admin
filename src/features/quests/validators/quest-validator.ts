@@ -355,7 +355,6 @@ export function formatValidationErrors(errors: ValidationFieldError[]): string {
   return message.trim();
 }
 
-
 /**
  * Validate multiple quest uniqueness per URI
  */
