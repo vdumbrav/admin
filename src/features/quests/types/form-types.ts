@@ -77,6 +77,8 @@ export interface QuestFormValues {
   web?: boolean;
   twa?: boolean;
   pinned?: boolean;
+  repeatable?: boolean; // For repeatable quests (7-day challenge)
+  level?: number; // Quest level (default 1)
   icon?: string;
   preset?: string | null; // Auto-generated preset ID (can be null for old quests)
   parent_id?: number; // Parent task ID for child tasks
@@ -89,7 +91,7 @@ export interface QuestFormValues {
     days?: number;
     reward_map: number[];
   };
-  // TODO: Remove index signature when all dynamic property access is replaced with proper typing
+  // Temporary index signature for dynamic form access - to be removed when react-hook-form is fully typed
   [key: string]: unknown;
 }
 

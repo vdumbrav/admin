@@ -27,7 +27,7 @@ export function getPresetFormValues(presetConfig?: PresetConfig): QuestFormValue
   const presetDefaults = presetConfig.defaults;
 
   // Deep merge preset defaults with form defaults
-  const mergedValues = deepMerge(defaultValues, presetDefaults);
+  const mergedValues = deepMerge(defaultValues, presetDefaults as Partial<QuestFormValues>);
 
   // Auto-set preset ID from preset config
   if (presetConfig?.id && typeof presetConfig.id === 'string') {

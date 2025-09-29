@@ -31,8 +31,7 @@ export interface AdsgramConfig extends Omit<AdsgramDto, 'type' | 'subtype'> {
   blockId: string;
   type?: string;
   subtype?: string;
-  // TODO: Add specific adsgram properties when requirements are known
-  [key: string]: unknown;
+  // Additional adsgram properties can be added here when requirements are known
 }
 
 /**

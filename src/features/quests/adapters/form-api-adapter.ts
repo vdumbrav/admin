@@ -465,7 +465,7 @@ export function validateAndConvertToApi(
 ): Omit<CreateTaskDto, 'parent_id'> {
   // First validate with Zod schema
   const schema = buildQuestFormSchema(presetId);
-  // TODO: Improve type safety - Zod parse should return proper type without casting
+  // Zod parse returns correct type but TypeScript needs help with inference
   const validatedData = schema.parse(formData) as QuestFormValues;
 
   // Then validate business rules
