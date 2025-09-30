@@ -323,7 +323,6 @@ export const useCreateMultiTask = () => {
       const message = error instanceof Error ? error.message : 'Failed to create quest';
       toast.error(message, {
         description: 'The main quest could not be created. Please try again.',
-        duration: 5000,
       });
     },
   });
