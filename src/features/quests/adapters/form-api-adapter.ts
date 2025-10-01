@@ -394,6 +394,8 @@ export function formToApi(formData: QuestFormValues): Omit<CreateTaskDto, 'paren
     resource: {
       ...(formData.resources ?? {}),
       ...(formData.icon && { icon: formData.icon }),
+      // Include isNew badge if present
+      ...(formData.resources?.isNew !== undefined && { isNew: formData.resources.isNew }),
     },
 
     // Child tasks - NEVER include in API request, they are created separately
