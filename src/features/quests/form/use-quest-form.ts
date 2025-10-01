@@ -277,13 +277,6 @@ export function useQuestForm({
     return errors;
   };
 
-  // Auto-set group to social for action-with-post preset
-  useEffect(() => {
-    if (presetConfig?.id === 'action-with-post' && watchedValues.group !== 'social') {
-      form.setValue('group', 'social', { shouldDirty: true, shouldValidate: false });
-    }
-  }, [presetConfig?.id, watchedValues.group, form]);
-
   // Auto-set blocking_task for quests that need Connect gate
   useEffect(() => {
     if (

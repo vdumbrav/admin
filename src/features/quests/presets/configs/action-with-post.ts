@@ -6,7 +6,7 @@ export const actionWithPostPresetConfig: PresetConfig = {
 
   fieldVisibility: {
     type: 'hidden', // Always 'multiple' - hidden per spec
-    group: 'visible', // social OR partner
+    group: 'visible', // Visible but auto-reset to 'social'
     provider: 'readonly', // Always 'twitter' (readonly per spec)
     uri: 'visible', // Tweet URL - visible, auto-parsed to username + tweetId
     reward: 'hidden', // Use totalReward instead
@@ -15,7 +15,7 @@ export const actionWithPostPresetConfig: PresetConfig = {
     totalReward: 'readonly', // Calculated from task rewards
     username: 'hidden', // Parsed from uri field
     tweetId: 'hidden', // Parsed from uri field
-    icon: 'conditional', // Conditional per specification (visible if group === 'partner')
+    icon: 'conditional', // Visible if group === 'partner'
     partnerIcon: 'hidden', // Icon field covers this
     buttonText: 'hidden', // Handled by business rules based on tasks
     popupDescription: 'hidden', // Auto-generated based on tasks
@@ -31,6 +31,27 @@ export const actionWithPostPresetConfig: PresetConfig = {
     provider: 'twitter',
     badge: true,
     visible: false,
+    child: [
+      {
+        title: '',
+        description: '',
+        type: 'like',
+        group: 'social',
+        provider: 'twitter',
+        order_by: 0,
+        reward: 0,
+        uri: '',
+        resources: {
+          username: '',
+          tweetId: '',
+          ui: {
+            'pop-up': {
+              static: '',
+            },
+          },
+        },
+      },
+    ],
   },
 
   businessRules: [],

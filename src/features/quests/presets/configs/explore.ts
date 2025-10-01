@@ -15,7 +15,7 @@ export const explorePresetConfig: PresetConfig = {
     totalReward: 'hidden',
     username: 'hidden',
     tweetId: 'hidden',
-    icon: 'visible', // Visible per specification (icon = visible for explore)
+    icon: 'conditional', // Always visible for explore, or if group === 'partner' for other groups
     partnerIcon: 'hidden', // Icon field covers this
     buttonText: 'visible', // Button name for Explore
     popupDescription: 'visible', // Popup description for Explore
@@ -33,9 +33,9 @@ export const explorePresetConfig: PresetConfig = {
     visible: false,
     resources: {
       ui: {
-        button: 'Boost XP',
+        button: 'Explore',
         'pop-up': {
-          button: 'Boost XP',
+          button: 'Explore',
         },
       },
     },

@@ -64,7 +64,12 @@ export function computeFieldStates(
 
       case 'conditional':
         // Handle conditional visibility based on current form values
-        Object.assign(state, evaluateConditionalVisibility(fieldName, currentValues, presetConfig));
+        const conditionalState = evaluateConditionalVisibility(fieldName, currentValues, presetConfig);
+        Object.assign(state, conditionalState);
+        // If no visibility was set, default to hidden for conditional fields
+        if (conditionalState.visible === undefined) {
+          state.visible = false;
+        }
         break;
 
       case 'visible':
@@ -127,12 +132,11 @@ function evaluateConditionalVisibility(
     if (presetConfig?.id === 'explore') {
       state.visible = true;
     }
-    // Join/Action with Post: visible if group === 'partner'
-    else if (presetConfig?.id === 'join' || presetConfig?.id === 'action-with-post') {
+    // All other presets: visible if group === 'partner'
+    else {
       const isPartnerGroup = currentValues?.group === 'partner';
       state.visible = isPartnerGroup;
     }
-    // Connect/7-day: hidden (default from preset config)
   }
 
   // Username field visibility rules

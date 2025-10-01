@@ -15,9 +15,13 @@ export const sevenDayChallengePresetConfig: PresetConfig = {
     totalReward: 'readonly', // Sum of daily rewards
     username: 'hidden',
     tweetId: 'hidden',
-    icon: 'hidden',
+    icon: 'conditional', // Visible if group === 'partner'
     partnerIcon: 'hidden',
+    buttonText: 'visible', // Button name - default "Boost XP"
+    popupButton: 'visible', // Popup button name - default "Boost XP"
+    popupDescription: 'hidden', // Auto-generated
     repeatable: 'hidden', // Always true for seven-day challenges
+    badge: 'visible',
     visible: 'visible',
   },
 
@@ -29,6 +33,12 @@ export const sevenDayChallengePresetConfig: PresetConfig = {
     enabled: false,
     resources: {
       isNew: true,
+      ui: {
+        button: 'Boost XP',
+        'pop-up': {
+          button: 'Boost XP',
+        },
+      },
     },
     iterator: {
       days: 7,

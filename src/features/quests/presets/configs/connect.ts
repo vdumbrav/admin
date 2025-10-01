@@ -15,7 +15,7 @@ export const connectPresetConfig: PresetConfig = {
     totalReward: 'hidden',
     username: 'hidden',
     tweetId: 'hidden',
-    icon: 'hidden',
+    icon: 'conditional', // Visible if group === 'partner'
     partnerIcon: 'hidden',
     buttonText: 'hidden',
     popupDescription: 'hidden', // Auto-generated based on provider
