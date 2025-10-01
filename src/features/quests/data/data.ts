@@ -63,14 +63,21 @@ const PROVIDER_LABELS: Record<TaskResponseDtoProvider, string> = {
 // ============================================================================
 
 /**
- * Groups dropdown options (API-synced)
+ * Groups dropdown options (API-synced, filtered to allowed groups only)
  */
-export const groups = getAvailableApiGroups().map(
-  (group): DropdownOption => ({
-    value: group,
-    label: GROUP_LABELS[group],
-  }),
-);
+export const groups = getAvailableApiGroups()
+  .filter(
+    (group) =>
+      group === TaskResponseDtoGroup.social ||
+      group === TaskResponseDtoGroup.daily ||
+      group === TaskResponseDtoGroup.partner,
+  )
+  .map(
+    (group): DropdownOption => ({
+      value: group,
+      label: GROUP_LABELS[group],
+    }),
+  );
 
 /**
  * Types dropdown options (API-synced)
@@ -94,15 +101,21 @@ export const joinPresetTypes = getJoinPresetTypes().map(
 );
 
 /**
- * Providers dropdown options (API-synced)
- * All available quest providers from the API
+ * Providers dropdown options (API-synced, filtered to allowed providers only)
  */
-export const providers = getAvailableApiProviders().map(
-  (provider): DropdownOption => ({
-    value: provider,
-    label: PROVIDER_LABELS[provider],
-  }),
-);
+export const providers = getAvailableApiProviders()
+  .filter(
+    (provider) =>
+      provider !== TaskResponseDtoProvider.matrix &&
+      provider !== TaskResponseDtoProvider.adsgram &&
+      provider !== TaskResponseDtoProvider.monetag,
+  )
+  .map(
+    (provider): DropdownOption => ({
+      value: provider,
+      label: PROVIDER_LABELS[provider],
+    }),
+  );
 
 /**
  * Enabled status dropdown options

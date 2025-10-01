@@ -88,13 +88,6 @@ export function QuestFormFields({
     );
   }, [currentType]);
 
-  // Filter groups based on preset - only social, partner, daily allowed
-  const availableGroups = useMemo(() => {
-    return groups.filter(
-      (g) => g.value === 'social' || g.value === 'partner' || g.value === 'daily',
-    );
-  }, []);
-
   // ============================================================================
   // Basic Fields
   // ============================================================================
@@ -169,7 +162,7 @@ export function QuestFormFields({
                           <div>
                             <SelectDropdown
                               className='w-full'
-                              items={availableGroups}
+                              items={groups}
                               placeholder='Select group'
                               disabled={isFieldDisabled('group', fieldStates)}
                               {...field}
@@ -184,7 +177,7 @@ export function QuestFormFields({
                   ) : (
                     <SelectDropdown
                       className='w-full'
-                      items={availableGroups}
+                      items={groups}
                       placeholder='Select group'
                       disabled={isFieldDisabled('group', fieldStates)}
                       {...field}
