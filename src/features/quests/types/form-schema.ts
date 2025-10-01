@@ -15,15 +15,15 @@ const childTypeSchema = z.enum(CHILD_TYPES);
 
 const formPopupResourcesSchema = z.object({
   name: z.string().optional(),
-  button: z.string().optional(),
-  description: z.string().optional(),
+  button: z.string().max(50, 'Button text cannot exceed 50 characters').optional(),
+  description: z.string().max(100, 'Popup description cannot exceed 100 characters').optional(),
   static: z.string().optional(),
   'additional-title': z.string().optional(),
   'additional-description': z.string().optional(),
 });
 
 const formUIResourcesSchema = z.object({
-  button: z.string().optional(),
+  button: z.string().max(50, 'Button text cannot exceed 50 characters').optional(),
   'pop-up': formPopupResourcesSchema.optional(),
 });
 
@@ -49,8 +49,8 @@ const formResourcesSchema = z
 
 const childFormSchema = z
   .object({
-    title: z.string().max(100, 'Title cannot exceed 100 characters').optional().default(''),
-    description: z.string().optional(),
+    title: z.string().max(80, 'Title cannot exceed 80 characters').optional().default(''),
+    description: z.string().max(100, 'Description cannot exceed 100 characters').optional(),
     type: childTypeSchema,
     group: questGroupSchema.default('social'),
     provider: providerSchema,
@@ -107,9 +107,9 @@ const iteratorSchema = z
 // Main quest form schema with preset-specific validation
 
 const baseQuestFormShape = {
-  title: z.string().min(1, 'Title is required').max(100, 'Title cannot exceed 100 characters'),
+  title: z.string().min(1, 'Title is required').max(80, 'Title cannot exceed 80 characters'),
   type: questTypeSchema,
-  description: z.string().min(1, 'Description is required'),
+  description: z.string().min(1, 'Description is required').max(100, 'Description cannot exceed 100 characters'),
   group: questGroupSchema,
   order_by: z.number(),
   provider: providerSchema,
