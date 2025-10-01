@@ -44,7 +44,8 @@ export const QuestCreatePage = () => {
                   await create.mutateAsync(v);
                   void nav({ to: '/quests', search: defaultQuestSearch });
                 } catch (e) {
-                  // Error toast already shown by mutation hook
+                  // Error already handled by mutation onError hook in api.ts
+                  // Adding toast here would create duplicate error messages
                   console.error('Quest creation failed:', e);
                 }
               }}

@@ -275,6 +275,23 @@ export function fromApiResources(resources: ResourcesDto): StrictResourcesDto {
 }
 
 /**
+ * Group to popup name mapping
+ */
+export const GROUP_POPUP_NAMES: Record<string, string> = {
+  social: 'Social Quests',
+  partner: 'Partner Quests',
+  referral: 'Referral Quests',
+  daily: 'Daily Quests',
+};
+
+/**
+ * Get popup name for a given group
+ */
+export function getPopupNameForGroup(group?: string): string {
+  return GROUP_POPUP_NAMES[group || 'social'] || 'Social Quests';
+}
+
+/**
  * Preset-specific resource builders
  */
 export const ResourcePresets = {
@@ -285,16 +302,16 @@ export const ResourcePresets = {
     username?: string;
     buttonText?: string;
     popupName?: string;
-    isPartner?: boolean;
+    group?: string;
   }): StrictResourcesDto => {
     return new ResourcesBuilder()
       .username(options.username ?? '')
       .ui((ui) =>
         ui.button(options.buttonText ?? 'Engage').popup((popup) =>
           popup
-            .name(options.popupName ?? (options.isPartner ? 'Partner Quests' : 'Social Quests'))
+            .name(options.popupName ?? getPopupNameForGroup(options.group))
             .description(
-              options.isPartner
+              options.group === 'partner'
                 ? "Engage with our partner's Tweet to earn XP"
                 : 'Engage with our Tweet to earn XP',
             )
@@ -309,13 +326,13 @@ export const ResourcePresets = {
   /**
    * Build resources for connect preset
    */
-  connect: (provider: string): StrictResourcesDto => {
+  connect: (provider: string, group?: string): StrictResourcesDto => {
     const providerName = provider === 'twitter' ? 'X' : provider;
     return new ResourcesBuilder()
       .ui((ui) =>
         ui.button(provider === 'matrix' ? 'Add' : 'Connect').popup((popup) =>
           popup
-            .name('Social Quests')
+            .name(getPopupNameForGroup(group))
             .description(`Connect your ${providerName} account`)
             .button(provider === 'matrix' ? 'Add' : 'Connect'),
         ),
@@ -326,13 +343,13 @@ export const ResourcePresets = {
   /**
    * Build resources for join preset
    */
-  join: (provider: string): StrictResourcesDto => {
+  join: (provider: string, group?: string): StrictResourcesDto => {
     const buttonText = provider === 'twitter' ? 'Follow' : 'Join';
     return new ResourcesBuilder()
       .ui((ui) =>
         ui.button(buttonText).popup((popup) =>
           popup
-            .name('Social Quests')
+            .name(getPopupNameForGroup(group))
             .description(`${buttonText} to earn XP`)
             .button(buttonText)
             .additionalTitle(`Connect your ${provider === 'twitter' ? 'X' : provider}`)

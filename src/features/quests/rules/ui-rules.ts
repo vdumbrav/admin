@@ -4,7 +4,7 @@
  */
 import type { PresetConfig } from '../presets/types';
 import type { QuestFormValues } from '../types/form-types';
-import { ResourcePresets, toApiResources } from '../types/resources-types';
+import { getPopupNameForGroup, ResourcePresets, toApiResources } from '../types/resources-types';
 
 // ============================================================================
 // UI Rules Application
@@ -61,7 +61,7 @@ function applyActionWithPostUIRules(values: QuestFormValues): void {
     values.resources = toApiResources(
       ResourcePresets.actionWithPost({
         username: '',
-        isPartner: values.group === 'partner',
+        group: values.group,
       }),
     );
     return;
@@ -92,7 +92,7 @@ function applyConnectUIRules(values: QuestFormValues): void {
   if (!values.provider) return;
 
   // Create proper resources from ResourcePresets (overwrite defaults)
-  values.resources = toApiResources(ResourcePresets.connect(values.provider));
+  values.resources = toApiResources(ResourcePresets.connect(values.provider, values.group));
 
   // Auto-generate popup description based on provider
   const descriptionMapping: Record<string, string> = {
@@ -126,7 +126,7 @@ function applyJoinUIRules(values: QuestFormValues): void {
   // Auto-update button text for Twitter provider
   if (values.provider === 'twitter') {
     if (!values.resources) {
-      values.resources = toApiResources(ResourcePresets.join(values.provider));
+      values.resources = toApiResources(ResourcePresets.join(values.provider, values.group));
     } else if (values.resources.ui) {
       values.resources.ui.button = 'Follow';
       if (values.resources.ui['pop-up']) {
@@ -178,7 +178,7 @@ function applySevenDayChallengeUIRules(values: QuestFormValues): void {
 function applyGenericUIRules(values: QuestFormValues): void {
   // Auto-generate popup name based on group
   if (!values.resources?.ui?.['pop-up']?.name) {
-    const popupName = getPopupNameByGroup(values.group);
+    const popupName = getPopupNameForGroup(values.group);
     if (popupName) {
       ensureResourcesStructure(values);
       if (values.resources?.ui?.['pop-up']) {
@@ -259,26 +259,9 @@ function ensureResourcesStructure(values: QuestFormValues): void {
   };
 }
 
-/**
- * Get popup name based on quest group
- */
-function getPopupNameByGroup(group: string): string | null {
-  return GROUP_POPUP_NAMES[group] ?? null;
-}
-
 // ============================================================================
 // Constants
 // ============================================================================
-
-/**
- * Mapping of quest groups to popup names
- */
-const GROUP_POPUP_NAMES: Record<string, string> = {
-  social: 'Social Quests',
-  daily: 'Daily Quests',
-  partner: 'Partner Quests',
-  referral: 'Referral Quests',
-};
 
 /**
  * Mapping of child task types to button text

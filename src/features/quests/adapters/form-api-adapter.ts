@@ -23,6 +23,7 @@
 import type { CreateTaskDto, TaskResponseDto } from '@/lib/api/generated/model';
 import { buildQuestFormSchema } from '../types/form-schema';
 import { type ChildFormValues, type QuestFormValues } from '../types/form-types';
+import { getPopupNameForGroup } from '../types/resources-types';
 import {
   formatValidationErrors,
   validateBlockingTaskDependencies,
@@ -192,13 +193,24 @@ export function apiToForm(apiData: Partial<TaskResponseDto>): QuestFormValues {
   // Validate required fields first
   validateRequiredApiData(apiData);
 
+  const group = getRequiredString(apiData.group, 'group') as QuestFormValues['group'];
+  const resources = validateAndExtractResources(apiData.resource);
+
+  // Sync popup name with group (fix legacy data)
+  if (resources?.ui?.['pop-up']?.name) {
+    const expectedName = getPopupNameForGroup(group);
+    if (resources.ui['pop-up'].name !== expectedName) {
+      resources.ui['pop-up'].name = expectedName;
+    }
+  }
+
   return {
     // Core fields - ALL REQUIRED, NO FALLBACKS
     id: apiData.id, // Include ID for form (enables update detection)
     title: getRequiredString(apiData.title, 'title'),
     type: getRequiredString(apiData.type, 'type') as QuestFormValues['type'],
     description: getRequiredString(apiData.description, 'description'),
-    group: getRequiredString(apiData.group, 'group') as QuestFormValues['group'],
+    group,
     order_by: getRequiredNumber(apiData.order_by, 'order_by'),
 
     // Optional fields (but validate if present)
@@ -219,7 +231,7 @@ export function apiToForm(apiData: Partial<TaskResponseDto>): QuestFormValues {
     icon: validateOptionalString(apiData.resource?.icon, 'icon'),
 
     // Resources - strict validation, no fallbacks
-    resources: validateAndExtractResources(apiData.resource),
+    resources,
     child: validateAndExtractChildren(apiData.child),
 
     // Schedule mapping for edit mode
