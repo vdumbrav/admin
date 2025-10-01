@@ -49,7 +49,7 @@ const TYPE_LABELS: Record<WaitlistTasksResponseDtoTypeItem, string> = {
  * Maps API enum values to user-friendly display names
  */
 const PROVIDER_LABELS: Record<TaskResponseDtoProvider, string> = {
-  [TaskResponseDtoProvider.twitter]: 'Twitter',
+  [TaskResponseDtoProvider.twitter]: 'X',
   [TaskResponseDtoProvider.telegram]: 'Telegram',
   [TaskResponseDtoProvider.discord]: 'Discord',
   [TaskResponseDtoProvider.matrix]: 'Matrix',
