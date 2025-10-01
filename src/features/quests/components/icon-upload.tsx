@@ -1,6 +1,8 @@
 import { useState } from 'react';
+import { IconX } from '@tabler/icons-react';
 import { useDropzone } from 'react-dropzone';
 import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
 import { FormMessage } from '@/components/ui/form';
 
 interface IconUploadProps {
@@ -17,7 +19,7 @@ const MAX_SIZE = 1024 * 1024; // 1MB
 export const IconUpload = ({
   value,
   onChange,
-  onClear: _onClear,
+  onClear,
   disabled,
   onImageUpload,
 }: IconUploadProps) => {
@@ -99,7 +101,24 @@ export const IconUpload = ({
           </div>
         ) : value ? (
           <div className='flex flex-col items-center gap-2'>
-            <img src={value} alt='Icon preview' className='h-16 w-16 rounded object-cover' />
+            <div className='relative'>
+              <img src={value} alt='Icon preview' className='h-16 w-16 rounded object-cover' />
+              {onClear && (
+                <Button
+                  type='button'
+                  variant='destructive'
+                  size='icon'
+                  className='absolute -top-2 -right-2 h-6 w-6 rounded-full'
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onClear();
+                    setError(null);
+                  }}
+                >
+                  <IconX className='h-4 w-4' />
+                </Button>
+              )}
+            </div>
             <p className='text-sm text-gray-600 dark:text-gray-300'>
               Drop image or click here to change
             </p>

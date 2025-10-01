@@ -8,7 +8,7 @@ import { IconLoader, IconLock, IconRotate } from '@tabler/icons-react';
 import { Info } from 'lucide-react';
 import { type TaskResponseDtoProvider } from '@/lib/api/generated/model';
 import { cn } from '@/lib/utils';
-import { Alert, AlertTitle } from '@/components/ui/alert';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { DateTimePicker } from '@/components/ui/date-time-picker';
@@ -165,7 +165,8 @@ export function QuestFormFields({
                               items={groups}
                               placeholder='Select group'
                               disabled={isFieldDisabled('group', fieldStates)}
-                              {...field}
+                              value={field.value}
+                              onValueChange={field.onChange}
                             />
                           </div>
                         </TooltipTrigger>
@@ -180,7 +181,8 @@ export function QuestFormFields({
                       items={groups}
                       placeholder='Select group'
                       disabled={isFieldDisabled('group', fieldStates)}
-                      {...field}
+                      value={field.value}
+                      onValueChange={field.onChange}
                     />
                   )}
                 </FormControl>
