@@ -1,5 +1,4 @@
 import { Outlet, useNavigate, useParams, useRouterState, useSearch } from '@tanstack/react-router';
-import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Main } from '@/components/layout/main';
 import { apiToForm } from './adapters/form-api-adapter';
@@ -43,10 +42,10 @@ export const QuestCreatePage = () => {
               onSubmit={async (v: QuestFormValues) => {
                 try {
                   await create.mutateAsync(v);
-                  toast.success('Quest saved successfully');
                   void nav({ to: '/quests', search: defaultQuestSearch });
                 } catch (e) {
-                  toast.error(e instanceof Error ? e.message : 'Failed to save');
+                  // Error toast already shown by mutation hook
+                  console.error('Quest creation failed:', e);
                 }
               }}
               onCancel={() => void nav({ to: '/quests', search: defaultQuestSearch })}
@@ -151,10 +150,10 @@ export const QuestEditPage = () => {
           onSubmit={async (v: QuestFormValues) => {
             try {
               await update.mutateAsync(v);
-              toast.success('Quest saved successfully');
               void nav({ to: '/quests', search: defaultQuestSearch });
             } catch (e) {
-              toast.error(e instanceof Error ? e.message : 'Failed to save');
+              // Error toast already shown by mutation hook
+              console.error('Quest update failed:', e);
             }
           }}
           onCancel={() => void nav({ to: '/quests', search: defaultQuestSearch })}
@@ -193,10 +192,10 @@ export const QuestCreateWithPresetPage = () => {
           onSubmit={async (v: QuestFormValues) => {
             try {
               await create.mutateAsync(v);
-              toast.success('Quest saved successfully');
               void nav({ to: '/quests', search: defaultQuestSearch });
             } catch (e) {
-              toast.error(e instanceof Error ? e.message : 'Failed to save');
+              // Error toast already shown by mutation hook
+              console.error('Quest creation failed:', e);
             }
           }}
           onCancel={() => void nav({ to: '/quests', search: defaultQuestSearch })}
