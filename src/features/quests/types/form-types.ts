@@ -55,8 +55,8 @@ export type ChildFormValues = Pick<TaskResponseDto, 'title' | 'group' | 'provide
   // Optional fields for advanced child tasks
   uri?: string; // For join/connect type child tasks
   icon?: string; // Custom icon for child task
-  start?: string; // Time restrictions
-  end?: string; // Time restrictions
+  start?: string | null; // Time restrictions
+  end?: string | null; // Time restrictions
 
   // Resources - expanded to support more providers
   resources?: Pick<ResourcesDto, 'tweetId' | 'username' | 'icon' | 'ui'>;
@@ -82,11 +82,11 @@ export interface QuestFormValues {
   icon?: string;
   preset?: string | null; // Auto-generated preset ID (can be null for old quests)
   parent_id?: number; // Parent task ID for child tasks
-  blocking_task?: { id: number }; // Parent quest that blocks this quest
+  blocking_task?: { id: number } | null; // Parent quest that blocks this quest
   resources?: ResourcesDto;
   child?: ChildFormValues[];
-  start?: string;
-  end?: string;
+  start?: string | null;
+  end?: string | null;
   iterator?: {
     days?: number;
     reward_map: number[];

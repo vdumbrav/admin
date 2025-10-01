@@ -211,7 +211,11 @@ export function apiToForm(apiData: Partial<TaskResponseDto>): QuestFormValues {
     pinned: getRequiredBoolean(apiData.pinned, 'pinned'),
     preset: validateOptionalString(apiData.preset, 'preset'),
     parent_id: apiData.parent_id,
-    blocking_task: apiData.blocking_task,
+    // Normalize blocking_task: only include if it has valid id, otherwise undefined
+    blocking_task:
+      apiData.blocking_task && typeof apiData.blocking_task.id === 'number'
+        ? apiData.blocking_task
+        : undefined,
     icon: validateOptionalString(apiData.resource?.icon, 'icon'),
 
     // Resources - strict validation, no fallbacks
@@ -366,7 +370,10 @@ export function formToApi(formData: QuestFormValues): Omit<CreateTaskDto, 'paren
     // URI is required for multiple type and must not be empty
     ...(formData.uri ? { uri: formData.uri } : {}),
     // blocking_task only for CREATE (PATCH doesn't handle ORM references properly)
-    ...(!isUpdate && formData.blocking_task ? { blocking_task: formData.blocking_task } : {}),
+    // Only include if it has a valid id (number)
+    ...(!isUpdate && formData.blocking_task?.id != null && typeof formData.blocking_task.id === 'number'
+      ? { blocking_task: formData.blocking_task }
+      : {}),
     // parent_id if explicitly set (required for some child task types)
     ...(formData.parent_id && { parent_id: formData.parent_id }),
 

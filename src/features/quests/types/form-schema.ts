@@ -126,11 +126,11 @@ const baseQuestFormShape = {
   pinned: z.boolean().optional(),
   icon: z.string().optional(),
   preset: z.string().optional().nullable(), // Auto-generated preset ID (can be null for old quests)
-  blocking_task: z.object({ id: z.number() }).optional(), // Parent quest that blocks this quest
+  blocking_task: z.object({ id: z.number() }).nullable().optional(), // Parent quest that blocks this quest
   resources: formResourcesSchema,
   child: z.array(childFormSchema).max(10, 'Maximum 10 subtasks allowed').optional(),
-  start: z.string().optional(),
-  end: z.string().optional(),
+  start: z.string().nullable().optional(),
+  end: z.string().nullable().optional(),
   iterator: iteratorSchema,
 } as const;
 

@@ -33,7 +33,6 @@ const resourcesSchema = z
     tweetId: z.string().optional(),
     username: z.string().optional(),
     isNew: z.boolean().optional(),
-    blocking_task: z.object({ id: z.number() }).optional(),
     adsgram: z
       .object({
         type: z.string().optional(), // More flexible for API compatibility
@@ -184,8 +183,8 @@ export const questFormSchema = z.object({
     .array(z.lazy((): z.ZodType<TaskResponseDto> => questSchema))
     .nullable()
     .optional(),
-  start: z.string().optional(),
-  end: z.string().optional(),
+  start: z.string().nullable().optional(),
+  end: z.string().nullable().optional(),
   iterable: z.boolean().optional(),
   iterator: iteratorSchema,
   repeatable: z.boolean().optional(),
