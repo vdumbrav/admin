@@ -84,7 +84,7 @@ export function MultiTaskProgress({
           {children.map((child) => (
             <TaskItem
               key={child.index}
-              title={child.data.title || `Child Task ${child.index + 1}`}
+              title={child.data.title ?? `Child Task ${child.index + 1}`}
               status={child.status}
               error={child.error}
             />

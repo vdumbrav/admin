@@ -325,9 +325,7 @@ export function QuestFormFields({
                       <Info className='text-muted-foreground h-4 w-4 cursor-help' />
                     </TooltipTrigger>
                     <TooltipContent className='max-w-[300px]'>
-                      <p>
-                        Description shown in quest popup modal.
-                      </p>
+                      <p>Description shown in quest popup modal.</p>
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>

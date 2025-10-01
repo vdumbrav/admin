@@ -109,7 +109,10 @@ const iteratorSchema = z
 const baseQuestFormShape = {
   title: z.string().min(1, 'Title is required').max(80, 'Title cannot exceed 80 characters'),
   type: questTypeSchema,
-  description: z.string().min(1, 'Description is required').max(100, 'Description cannot exceed 100 characters'),
+  description: z
+    .string()
+    .min(1, 'Description is required')
+    .max(100, 'Description cannot exceed 100 characters'),
   group: questGroupSchema,
   order_by: z.number(),
   provider: providerSchema,
@@ -257,7 +260,6 @@ export const buildQuestFormSchema = (presetId?: string) =>
             path: ['uri'],
           });
         }
-
       }
 
       // Username format validation based on provider

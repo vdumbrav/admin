@@ -145,9 +145,7 @@ function applyJoinUIRules(values: QuestFormValues): void {
   if (!values.resources.ui['pop-up']) return;
 
   // Set popup button only if missing
-  if (!values.resources.ui['pop-up'].button) {
-    values.resources.ui['pop-up'].button = values.resources.ui.button;
-  }
+  values.resources.ui['pop-up'].button ??= values.resources.ui.button;
 
   // Set additional-title only if missing
   if (!values.resources.ui['pop-up']['additional-title']) {

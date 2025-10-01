@@ -141,7 +141,7 @@ export const useCreateMultiTask = () => {
       } else if (main.status === 'success') {
         const creatingChild = children.find((c) => c.status === 'creating');
         if (creatingChild) {
-          currentTaskName = `Creating child task: ${creatingChild.data.title || `Task ${creatingChild.index + 1}`}`;
+          currentTaskName = `Creating child task: ${creatingChild.data.title ?? `Task ${creatingChild.index + 1}`}`;
           phase = 'children';
         } else {
           currentTaskName = 'Completed';

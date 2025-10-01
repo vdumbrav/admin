@@ -23,11 +23,7 @@ import { useExistingQuests } from '../hooks/use-existing-quests';
 import type { PresetConfig } from '../presets/types';
 import { buildQuestFormSchema, type QuestFormValues } from '../types/form-schema';
 import { cleanupIncompatibleFields, getFieldsToReset } from '../utils/preset-field-cleanup';
-import {
-  applyBusinessRules,
-  applyLockedFields,
-  getPresetFormValues,
-} from './business-rules';
+import { applyBusinessRules, applyLockedFields, getPresetFormValues } from './business-rules';
 import { computeFieldStates, type FieldStatesMatrix } from './field-state';
 import { useConnectGate } from './use-connect-gate';
 

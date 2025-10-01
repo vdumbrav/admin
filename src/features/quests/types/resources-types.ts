@@ -288,7 +288,7 @@ export const GROUP_POPUP_NAMES: Record<string, string> = {
  * Get popup name for a given group
  */
 export function getPopupNameForGroup(group?: string): string {
-  return GROUP_POPUP_NAMES[group || 'social'] || 'Social Quests';
+  return GROUP_POPUP_NAMES[group ?? 'social'] ?? 'Social Quests';
 }
 
 /**

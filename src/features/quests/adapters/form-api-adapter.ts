@@ -383,7 +383,10 @@ export function formToApi(formData: QuestFormValues): Omit<CreateTaskDto, 'paren
     ...(formData.uri ? { uri: formData.uri } : {}),
     // blocking_task only for CREATE (PATCH doesn't handle ORM references properly)
     // Only include if it has a valid id (number)
-    ...(!isUpdate && formData.blocking_task?.id != null && typeof formData.blocking_task.id === 'number'
+    ...(!isUpdate &&
+    formData.blocking_task?.id !== null &&
+    formData.blocking_task?.id !== undefined &&
+    typeof formData.blocking_task.id === 'number'
       ? { blocking_task: formData.blocking_task }
       : {}),
     // parent_id if explicitly set (required for some child task types)

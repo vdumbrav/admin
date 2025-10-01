@@ -96,4 +96,3 @@ export function updateChildOrderBy(children: ChildFormValues[]): ChildFormValues
     order_by: index,
   }));
 }
-
