@@ -7,6 +7,7 @@ export const joinPresetConfig: PresetConfig = {
   fieldVisibility: {
     group: 'visible', // social OR partner
     provider: 'visible', // telegram, discord, twitter (X)
+    type: 'hidden', // Always 'join' - hidden per spec
     uri: 'visible', // Join URL
     reward: 'visible',
     tasks: 'hidden',
@@ -14,11 +15,12 @@ export const joinPresetConfig: PresetConfig = {
     totalReward: 'hidden',
     username: 'conditional', // visible for telegram
     tweetId: 'hidden',
-    icon: 'hidden', // Hidden per specification
+    icon: 'conditional', // visible if group === 'partner'
     partnerIcon: 'hidden', // Icon field covers this
     buttonText: 'hidden', // handled by Connect Gate Requirements (Join/Follow)
     popupDescription: 'hidden', // handled by Connect Gate Requirements
     popupButton: 'hidden', // handled by Connect Gate Requirements
+    repeatable: 'hidden', // hidden per spec
     badge: 'visible',
     visible: 'visible',
   },

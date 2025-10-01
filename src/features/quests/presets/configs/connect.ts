@@ -5,7 +5,7 @@ export const connectPresetConfig: PresetConfig = {
   name: 'Connect Telegram, Discord, X',
 
   fieldVisibility: {
-    group: 'visible', // Allow group selection
+    group: 'readonly', // Always 'social' - readonly per spec
     provider: 'visible', // telegram, discord, twitter
     type: 'hidden', // Always 'connect'
     uri: 'hidden', // Show static text "URL: User's data"

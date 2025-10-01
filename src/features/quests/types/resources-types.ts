@@ -357,11 +357,11 @@ export const ResourcePresets = {
     return new ResourcesBuilder()
       .icon(options.icon ?? '')
       .ui((ui) =>
-        ui.button(options.buttonText ?? 'Visit').popup((popup) =>
+        ui.button(options.buttonText ?? 'Boost XP').popup((popup) =>
           popup
             .name('Explore Quests')
             .description(options.popupDescription ?? 'Visit the link to complete this quest')
-            .button(options.buttonText ?? 'Visit'),
+            .button(options.buttonText ?? 'Boost XP'),
         ),
       )
       .build();

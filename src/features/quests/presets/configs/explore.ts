@@ -31,6 +31,14 @@ export const explorePresetConfig: PresetConfig = {
     group: 'social',
     badge: true,
     visible: false,
+    resources: {
+      ui: {
+        button: 'Boost XP',
+        'pop-up': {
+          button: 'Boost XP',
+        },
+      },
+    },
   },
 
   businessRules: [],

@@ -34,6 +34,11 @@ export const useQuests = (query: QuestQuery) => {
 
     // Client-side filtering - no server-side filtering needed
     let filteredItems = questsData.filter((item: TaskResponseDto) => {
+      // Exclude referral type quests
+      if (item.type === 'referral') {
+        return false;
+      }
+
       const matchesSearch =
         !query.search ||
         item.title?.toLowerCase().includes(query.search.toLowerCase()) ||

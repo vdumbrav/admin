@@ -30,7 +30,7 @@ interface FormValues {
 }
 
 const childTypes = types.filter((type) =>
-  ['like', 'share', 'comment', 'join'].includes(type.value),
+  ['like', 'share', 'comment'].includes(type.value),
 );
 
 const childProviders = providers;

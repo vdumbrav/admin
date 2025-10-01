@@ -88,6 +88,13 @@ export function QuestFormFields({
     );
   }, [currentType]);
 
+  // Filter groups based on preset - only social, partner, daily allowed
+  const availableGroups = useMemo(() => {
+    return groups.filter(
+      (g) => g.value === 'social' || g.value === 'partner' || g.value === 'daily',
+    );
+  }, []);
+
   // ============================================================================
   // Basic Fields
   // ============================================================================
@@ -162,7 +169,7 @@ export function QuestFormFields({
                           <div>
                             <SelectDropdown
                               className='w-full'
-                              items={groups}
+                              items={availableGroups}
                               placeholder='Select group'
                               disabled={isFieldDisabled('group', fieldStates)}
                               {...field}
@@ -177,7 +184,7 @@ export function QuestFormFields({
                   ) : (
                     <SelectDropdown
                       className='w-full'
-                      items={groups}
+                      items={availableGroups}
                       placeholder='Select group'
                       disabled={isFieldDisabled('group', fieldStates)}
                       {...field}
@@ -507,7 +514,7 @@ export function QuestFormFields({
           name='uri'
           render={({ field }) => (
             <FormItem>
-              <FormLabel>{currentProvider === 'twitter' ? 'Tweet URL or ID' : 'URL'}</FormLabel>
+              <FormLabel>URL</FormLabel>
               <FormControl>
                 <Input
                   placeholder={
@@ -518,6 +525,24 @@ export function QuestFormFields({
                   disabled={isFieldDisabled('uri', fieldStates)}
                   readOnly={isFieldReadonly('uri', fieldStates)}
                   {...field}
+                  onChange={(e) => {
+                    const url = e.target.value.trim();
+                    field.onChange(url);
+
+                    // Parse tweet URL for action-with-post preset
+                    if (presetConfig?.id === 'action-with-post' && currentProvider === 'twitter') {
+                      // Pattern: https://twitter.com/username/status/1234567890
+                      const tweetUrlMatch =
+                        /(?:https?:\/\/)?(?:www\.)?(?:twitter\.com|x\.com)\/([^/]+)\/status\/(\d{19,20})/.exec(
+                          url,
+                        );
+                      if (tweetUrlMatch) {
+                        const [, username, tweetId] = tweetUrlMatch;
+                        form.setValue('resources.username', username, { shouldDirty: true });
+                        form.setValue('resources.tweetId', tweetId, { shouldDirty: true });
+                      }
+                    }
+                  }}
                 />
               </FormControl>
               <FormMessage />

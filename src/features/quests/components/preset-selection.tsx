@@ -7,7 +7,7 @@ import { listPresets } from '../presets';
 
 export const PresetSelection = () => {
   const navigate = useNavigate();
-  const [selectedPreset, setSelectedPreset] = useState<string>('');
+  const [selectedPreset, setSelectedPreset] = useState<string>('explore'); // Default to 'explore'
 
   const presets = listPresets();
   const presetItems = presets.map((p) => ({ value: p.id, label: p.name }));
