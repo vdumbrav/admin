@@ -1,6 +1,4 @@
 import { z } from 'zod';
-import type { WaitlistTasksResponseDtoTypeItem } from '@/lib/api/generated/model';
-import { getTwitterOnlyTypes } from '../data/data';
 import { CHILD_TYPES, PROVIDERS, QUEST_GROUPS, QUEST_TYPES } from './form-types';
 
 // ============================================================================
@@ -78,20 +76,7 @@ const childFormSchema = z
           })
           .optional(),
       })
-      .optional()
-      .superRefine((resources, ctx) => {
-        // Either both tweetId and username are provided, or static image is provided
-        const hasTweetData = resources?.tweetId && resources?.username;
-        const hasStaticImage = resources?.ui?.['pop-up']?.static;
-
-        if (!hasTweetData && !hasStaticImage) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            message: 'Either provide Tweet ID and Username, or upload a task image',
-            path: ['ui', 'pop-up', 'static'],
-          });
-        }
-      }),
+      .optional(),
   })
   .superRefine((child, ctx) => {
     // URI is required for Twitter provider in child tasks
@@ -273,23 +258,6 @@ export const buildQuestFormSchema = (presetId?: string) =>
           });
         }
 
-        // For tweet interaction types, also require username and tweetId in resources
-        if (getTwitterOnlyTypes().includes(val.type as WaitlistTasksResponseDtoTypeItem)) {
-          if (!val.resources?.username) {
-            ctx.addIssue({
-              code: z.ZodIssueCode.custom,
-              message: 'Username is required for Twitter provider',
-              path: ['resources', 'username'],
-            });
-          }
-          if (!val.resources?.tweetId) {
-            ctx.addIssue({
-              code: z.ZodIssueCode.custom,
-              message: 'Tweet ID is required for Twitter provider',
-              path: ['resources', 'tweetId'],
-            });
-          }
-        }
       }
 
       // Username format validation based on provider
