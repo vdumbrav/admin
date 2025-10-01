@@ -56,11 +56,6 @@ export const actionWithPostPresetConfig: PresetConfig = {
 
   businessRules: [],
 
-  connectGateRules: {
-    required: true,
-    provider: 'match', // Must have Connect quest for Twitter
-  },
-
   rewardCalculation: {
     source: 'tasks',
     field: 'totalReward',

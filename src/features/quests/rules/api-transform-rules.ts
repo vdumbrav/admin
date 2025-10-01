@@ -23,7 +23,6 @@ import type { ChildFormValues, QuestFormValues } from '../types/form-types';
 export function applyAPITransformRules(
   values: QuestFormValues,
   presetConfig?: PresetConfig,
-  findConnectQuestByProvider?: (provider: string) => number | null,
 ): QuestFormValues {
   const updatedValues = { ...values };
 
@@ -32,9 +31,6 @@ export function applyAPITransformRules(
 
   // Apply child task management
   applyChildTaskRules(updatedValues);
-
-  // Auto-select blocking_task for quests that need Connect gate
-  applyConnectGateRules(updatedValues, findConnectQuestByProvider);
 
   // Apply preset-specific API rules
   if (presetConfig) {
@@ -169,30 +165,6 @@ function updateChildOrderBy(children: ChildFormValues[]): ChildFormValues[] {
     ...child,
     order_by: index,
   }));
-}
-
-// ============================================================================
-// Connect Gate Rules
-// ============================================================================
-
-/**
- * Apply connect gate rules for automatic blocking_task assignment
- */
-function applyConnectGateRules(
-  values: QuestFormValues,
-  findConnectQuestByProvider?: (provider: string) => number | null,
-): void {
-  if (
-    values.provider &&
-    values.type !== 'connect' &&
-    !values.blocking_task &&
-    findConnectQuestByProvider
-  ) {
-    const connectQuestId = findConnectQuestByProvider(values.provider);
-    if (connectQuestId) {
-      values.blocking_task = { id: connectQuestId };
-    }
-  }
 }
 
 // ============================================================================

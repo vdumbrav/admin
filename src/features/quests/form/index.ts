@@ -31,5 +31,4 @@ export {
   applyBusinessRules,
   calculateTotalReward,
   updateChildOrderBy,
-  getConnectGateWarnings,
 } from './business-rules';

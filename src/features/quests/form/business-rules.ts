@@ -2,7 +2,7 @@
  * Business Rules for Quest Form
  * Orchestrates UI rules and API transformation rules
  */
-import { deepMerge, getConnectGateMessage, isSocialDomain } from '@/utils';
+import { deepMerge } from '@/utils';
 import { getDefaultFormValues } from '../adapters/form-api-adapter';
 import type { PresetConfig } from '../presets/types';
 import { applyAPITransformRules } from '../rules/api-transform-rules';
@@ -61,7 +61,6 @@ export function applyLockedFields(
 export function applyBusinessRules(
   values: QuestFormValues,
   presetConfig?: PresetConfig,
-  findConnectQuestByProvider?: (provider: string) => number | null,
 ): QuestFormValues {
   let updatedValues = { ...values };
 
@@ -69,7 +68,7 @@ export function applyBusinessRules(
   updatedValues = applyUIRules(updatedValues, presetConfig);
 
   // Apply API transformation rules (calculations, field population, etc.)
-  updatedValues = applyAPITransformRules(updatedValues, presetConfig, findConnectQuestByProvider);
+  updatedValues = applyAPITransformRules(updatedValues, presetConfig);
 
   return updatedValues;
 }
@@ -98,68 +97,3 @@ export function updateChildOrderBy(children: ChildFormValues[]): ChildFormValues
   }));
 }
 
-// ============================================================================
-// Connect Gate Validation
-// ============================================================================
-
-/**
- * Get connect-gate warnings for the current quest configuration
- */
-export function getConnectGateWarnings(
-  presetConfig?: PresetConfig,
-  provider?: string,
-  uri?: string,
-  blockingTask?: { id: number } | null,
-): string[] {
-  if (!presetConfig) return [];
-
-  const warnings: string[] = [];
-  const connectGateRules = presetConfig.connectGateRules;
-
-  if (!connectGateRules) return warnings;
-
-  // Check domain-based connect gate for Explore preset
-  if (connectGateRules.conditional && uri) {
-    if (isSocialDomain(uri)) {
-      const message = getConnectGateMessage(uri);
-      if (message) {
-        warnings.push(message);
-      }
-    }
-  }
-
-  // Check provider-based connect gate for Join and Action with Post
-  // Only show warning if blocking_task is not set
-  if (connectGateRules.required && provider && !blockingTask) {
-    const message = PROVIDER_CONNECT_MESSAGES[provider];
-    if (message) {
-      warnings.push(message);
-    }
-  }
-
-  return warnings;
-}
-
-// Helper: detect social platform link for Explore preset
-export function getExploreDomainWarning(uri?: string): string | null {
-  if (!uri) return null;
-  if (!isSocialDomain(uri)) return null;
-  return 'This link looks like a social platform. Consider using a Connect or Join quest instead.';
-}
-
-// ============================================================================
-// Constants
-// ============================================================================
-
-/**
- * Provider-specific connect-gate warning messages
- */
-const PROVIDER_CONNECT_MESSAGES: Record<string, string> = {
-  twitter: 'Requires Connect Twitter quest',
-  discord: 'Requires Connect Discord quest',
-  telegram: 'Requires Connect Telegram quest',
-  matrix: 'Requires Connect Matrix quest',
-  walme: 'Requires Connect Internal quest',
-  monetag: 'Requires Connect Monetag quest',
-  adsgram: 'Requires Connect Adsgram quest',
-};

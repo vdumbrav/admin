@@ -26,7 +26,6 @@ import { cleanupIncompatibleFields, getFieldsToReset } from '../utils/preset-fie
 import {
   applyBusinessRules,
   applyLockedFields,
-  getConnectGateWarnings,
   getPresetFormValues,
 } from './business-rules';
 import { computeFieldStates, type FieldStatesMatrix } from './field-state';
@@ -57,7 +56,6 @@ export interface UseQuestFormReturn {
   handleImageUpload: (file: File) => Promise<string>;
 
   // Business logic
-  connectGateWarnings: string[];
   availableQuests: { id: number; title: string; type: string[] }[];
 }
 
@@ -188,19 +186,6 @@ export function useQuestForm({
       prevTypeRef.current = currentType;
     }
   }, [presetConfig, watchedValues.type, form]);
-
-  // ============================================================================
-  // Connect Gate Warnings
-  // ============================================================================
-
-  const connectGateWarnings = useMemo(() => {
-    return getConnectGateWarnings(
-      presetConfig,
-      watchedValues.provider,
-      watchedValues.uri,
-      watchedValues.blocking_task,
-    );
-  }, [presetConfig, watchedValues.provider, watchedValues.uri, watchedValues.blocking_task]);
 
   // Validate provider dependencies - Join/Action quests need Connect quest first
   const { hasRequiredConnect, connectQuestId } = useConnectGate(watchedValues.provider);
@@ -415,7 +400,6 @@ export function useQuestForm({
     handleSubmit,
     handleCancel,
     handleImageUpload,
-    connectGateWarnings,
     availableQuests,
   };
 }

@@ -8,7 +8,7 @@ import { IconLoader, IconLock, IconRotate } from '@tabler/icons-react';
 import { Info } from 'lucide-react';
 import { type TaskResponseDtoProvider } from '@/lib/api/generated/model';
 import { cn } from '@/lib/utils';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { DateTimePicker } from '@/components/ui/date-time-picker';
@@ -52,7 +52,6 @@ export interface QuestFormFieldsProps {
   presetConfig?: PresetConfig;
   onImageUpload: (file: File) => Promise<string>;
   availableQuests?: { id: number; title: string; type: string[] }[];
-  connectGateWarnings?: string[];
   isValidationReady?: boolean;
 }
 
@@ -64,7 +63,6 @@ export function QuestFormFields({
   form,
   fieldStates,
   presetConfig,
-  connectGateWarnings = [],
   onImageUpload,
   availableQuests = [],
   isValidationReady = true,
@@ -192,24 +190,6 @@ export function QuestFormFields({
           />
         )}
       </div>
-
-      {/* Connect Gate Warnings */}
-      {connectGateWarnings.length > 0 && (
-        <Alert>
-          <Info />
-          <AlertTitle>
-            {connectGateWarnings.length === 1 ? (
-              connectGateWarnings[0]
-            ) : (
-              <ul className='list-inside list-disc space-y-1'>
-                {connectGateWarnings.map((warning, index) => (
-                  <li key={index}>{warning}</li>
-                ))}
-              </ul>
-            )}
-          </AlertTitle>
-        </Alert>
-      )}
 
       {/* Type Field Row */}
       {isFieldVisible('type', fieldStates) && (
@@ -346,8 +326,7 @@ export function QuestFormFields({
                     </TooltipTrigger>
                     <TooltipContent className='max-w-[300px]'>
                       <p>
-                        Description shown in quest popup modal. For join quests, Connect Gate
-                        auto-fills additional connection requirements.
+                        Description shown in quest popup modal.
                       </p>
                     </TooltipContent>
                   </Tooltip>

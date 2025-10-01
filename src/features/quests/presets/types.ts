@@ -73,16 +73,6 @@ export const presetConfigSchema = z.object({
     )
     .optional(),
 
-  connectGateRules: z
-    .object({
-      required: z.boolean().optional(),
-      conditional: z.boolean().optional(),
-      provider: z.enum(['match']).optional(),
-      trigger: z.string().optional(),
-      domains: z.array(z.string()).optional(),
-    })
-    .optional(),
-
   rewardCalculation: z
     .object({
       source: z.enum(['tasks', 'iterator.reward_map']),

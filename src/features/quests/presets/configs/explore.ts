@@ -43,11 +43,5 @@ export const explorePresetConfig: PresetConfig = {
 
   businessRules: [],
 
-  connectGateRules: {
-    conditional: true,
-    trigger: 'uri_domain', // Only if URI matches social domains
-    domains: ['x.com', 'twitter.com', 't.me', 'discord.com', 'discord.gg'],
-  },
-
   specialComponents: [],
 };
