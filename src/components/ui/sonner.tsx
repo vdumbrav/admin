@@ -10,7 +10,8 @@ const Toaster = ({ ...props }: ToasterProps) => {
       className='toaster group [&_div[data-content]]:w-full'
       toastOptions={{
         classNames: {
-          toast: 'group-[.toaster]:border-border group-[.toaster]:bg-popover group-[.toaster]:text-popover-foreground',
+          toast:
+            'group-[.toaster]:border-border group-[.toaster]:bg-popover group-[.toaster]:text-popover-foreground',
           closeButton: 'group-[.toaster]:border-border group-[.toaster]:bg-background',
         },
       }}

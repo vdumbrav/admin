@@ -13,7 +13,7 @@ export const joinPresetConfig: PresetConfig = {
     tasks: 'hidden',
     dailyRewards: 'hidden',
     totalReward: 'hidden',
-    username: 'conditional', // visible for telegram
+    username: 'hidden', // parsed from URI under the hood
     tweetId: 'hidden',
     icon: 'conditional', // visible if group === 'partner'
     partnerIcon: 'hidden', // Icon field covers this

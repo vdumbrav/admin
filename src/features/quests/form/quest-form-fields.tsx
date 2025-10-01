@@ -8,7 +8,7 @@ import { IconLoader, IconLock, IconRotate } from '@tabler/icons-react';
 import { Info } from 'lucide-react';
 import { type TaskResponseDtoProvider } from '@/lib/api/generated/model';
 import { cn } from '@/lib/utils';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Alert, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { DateTimePicker } from '@/components/ui/date-time-picker';
@@ -193,17 +193,19 @@ export function QuestFormFields({
 
       {/* Connect Gate Warnings */}
       {connectGateWarnings.length > 0 && (
-        <Alert className='border-amber-200 bg-amber-50'>
-          <Info className='h-4 w-4' />
-          <AlertDescription>
-            <ul className='space-y-1'>
-              {connectGateWarnings.map((warning, index) => (
-                <li key={index} className='text-sm text-amber-800'>
-                  {warning}
-                </li>
-              ))}
-            </ul>
-          </AlertDescription>
+        <Alert>
+          <Info />
+          <AlertTitle>
+            {connectGateWarnings.length === 1 ? (
+              connectGateWarnings[0]
+            ) : (
+              <ul className='list-inside list-disc space-y-1'>
+                {connectGateWarnings.map((warning, index) => (
+                  <li key={index}>{warning}</li>
+                ))}
+              </ul>
+            )}
+          </AlertTitle>
         </Alert>
       )}
 
@@ -438,31 +440,6 @@ export function QuestFormFields({
                 />
               </FormControl>
               <FormDescription>Tweet ID auto-extracted from URL (only digits kept)</FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      )}
-
-      {/* Twitter Username Field - show if fieldVisible OR if tweet embed enabled for action-with-post */}
-      {(isFieldVisible('username', fieldStates) ||
-        (presetConfig?.id === 'action-with-post' &&
-          currentType !== 'multiple' &&
-          showTweetEmbed)) && (
-        <FormField
-          control={form.control}
-          name='resources.username'
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Twitter Username</FormLabel>
-              <FormControl>
-                <Input
-                  placeholder='Username: example (without @ symbol)'
-                  disabled={isFieldDisabled('username', fieldStates)}
-                  {...field}
-                />
-              </FormControl>
-              <FormDescription>Twitter username without the @ symbol</FormDescription>
               <FormMessage />
             </FormItem>
           )}

@@ -29,9 +29,7 @@ interface FormValues {
   provider?: string;
 }
 
-const childTypes = types.filter((type) =>
-  ['like', 'share', 'comment'].includes(type.value),
-);
+const childTypes = types.filter((type) => ['like', 'share', 'comment'].includes(type.value));
 
 const childProviders = providers;
 
@@ -284,42 +282,23 @@ const ChildRow = ({ id, index, remove, canRemove }: RowProps) => {
       )}
 
       {showTweetFields && (
-        <div className='grid gap-4 sm:grid-cols-2'>
-          <FormField
-            control={control}
-            name={`child.${index}.resources.tweetId`}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Tweet URL or ID</FormLabel>
-                <FormControl>
-                  <Input
-                    {...field}
-                    placeholder='e.g. 1234567890123456789'
-                    onBlur={(e) => field.onChange((e.target.value || '').trim())}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={control}
-            name={`child.${index}.resources.username`}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Twitter Username</FormLabel>
-                <FormControl>
-                  <Input
-                    {...field}
-                    placeholder='e.g. username (without @)'
-                    onBlur={(e) => field.onChange((e.target.value || '').trim().replace(/^@/, ''))}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
+        <FormField
+          control={control}
+          name={`child.${index}.resources.tweetId`}
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Tweet URL or ID</FormLabel>
+              <FormControl>
+                <Input
+                  {...field}
+                  placeholder='e.g. 1234567890123456789'
+                  onBlur={(e) => field.onChange((e.target.value || '').trim())}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
       )}
 
       {/* Preview Component */}
