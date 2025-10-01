@@ -72,11 +72,7 @@ export function DateTimePicker({
           disabled={disabled}
         >
           <CalendarIcon className='mr-2 h-4 w-4' />
-          {internalDate ? (
-            format(internalDate, 'dd/MM/yyyy HH:mm')
-          ) : (
-            <span>{placeholder}</span>
-          )}
+          {internalDate ? format(internalDate, 'dd/MM/yyyy HH:mm') : <span>{placeholder}</span>}
         </Button>
       </PopoverTrigger>
 
@@ -94,9 +90,7 @@ export function DateTimePicker({
 
           {/* Time picker (24h, no native input) */}
           <div className='mt-3 border-t pt-3'>
-            <label className='mb-2 block text-sm font-medium'>
-              Time
-            </label>
+            <label className='mb-2 block text-sm font-medium'>Time</label>
             <div className='flex items-center gap-2'>
               {/* Hours */}
               <Select
@@ -145,7 +139,9 @@ export function DateTimePicker({
                 Done
               </Button>
             </div>
-            <p className='text-muted-foreground mt-2 text-xs'>Time is set +1 hour from current timezone</p>
+            <p className='text-muted-foreground mt-2 text-xs'>
+              Time is set +1 hour from current timezone
+            </p>
           </div>
         </div>
       </PopoverContent>

@@ -286,7 +286,9 @@ const ChildRow = ({ id, index, remove, canRemove }: RowProps) => {
                       );
                     if (tweetUrlMatch) {
                       const [, username, tweetId] = tweetUrlMatch;
-                      setValue(`child.${index}.resources.username`, username, { shouldDirty: true });
+                      setValue(`child.${index}.resources.username`, username, {
+                        shouldDirty: true,
+                      });
                       setValue(`child.${index}.resources.tweetId`, tweetId, { shouldDirty: true });
                     }
                   }}

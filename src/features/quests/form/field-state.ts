@@ -62,15 +62,20 @@ export function computeFieldStates(
         state.tooltip = 'Managed by preset';
         break;
 
-      case 'conditional':
+      case 'conditional': {
         // Handle conditional visibility based on current form values
-        const conditionalState = evaluateConditionalVisibility(fieldName, currentValues, presetConfig);
+        const conditionalState = evaluateConditionalVisibility(
+          fieldName,
+          currentValues,
+          presetConfig,
+        );
         Object.assign(state, conditionalState);
         // If no visibility was set, default to hidden for conditional fields
         if (conditionalState.visible === undefined) {
           state.visible = false;
         }
         break;
+      }
 
       case 'visible':
       default:

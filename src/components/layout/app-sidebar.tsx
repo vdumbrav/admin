@@ -50,9 +50,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
   return (
     <Sidebar collapsible='icon' variant='floating' {...props}>
-      <SidebarHeader>
-        <TeamSwitcher teams={sidebarData.teams} />
-      </SidebarHeader>
+      {sidebarData.teams && (
+        <SidebarHeader>
+          <TeamSwitcher teams={sidebarData.teams} />
+        </SidebarHeader>
+      )}
       <SidebarContent>
         {navGroups.map((props) => (
           <NavGroup key={props.title} {...props} />
