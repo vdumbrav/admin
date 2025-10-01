@@ -411,6 +411,10 @@ export function formToApi(formData: QuestFormValues): Omit<CreateTaskDto, 'paren
  * Default form values for new quest creation
  */
 export function getDefaultFormValues(): QuestFormValues {
+  // Get current date/time + 1 hour for start date
+  const now = new Date();
+  const oneHourLater = new Date(now.getTime() + 60 * 60 * 1000);
+
   return {
     // ID undefined for new quests (enables create detection)
     id: undefined,
@@ -435,7 +439,7 @@ export function getDefaultFormValues(): QuestFormValues {
     parent_id: undefined,
     blocking_task: undefined,
     child: [],
-    start: undefined,
+    start: oneHourLater.toISOString(),
     end: undefined,
     iterator: undefined,
 
