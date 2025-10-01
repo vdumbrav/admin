@@ -140,7 +140,7 @@ interface RowProps {
 }
 
 const ChildRow = ({ id, index, remove, canRemove }: RowProps) => {
-  const { control } = useFormContext<FormValues>();
+  const { control, setValue } = useFormContext<FormValues>();
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id,
   });
@@ -272,9 +272,27 @@ const ChildRow = ({ id, index, remove, canRemove }: RowProps) => {
             <FormItem>
               <FormLabel>URL</FormLabel>
               <FormControl>
-                <Input {...field} placeholder='Enter URL' />
+                <Input
+                  {...field}
+                  placeholder='https://twitter.com/user/status/123456789'
+                  onChange={(e) => {
+                    const url = e.target.value.trim();
+                    field.onChange(url);
+
+                    // Parse tweet URL to extract username and tweetId
+                    const tweetUrlMatch =
+                      /(?:https?:\/\/)?(?:www\.)?(?:twitter\.com|x\.com)\/([^/]+)\/status\/(\d{19,20})/.exec(
+                        url,
+                      );
+                    if (tweetUrlMatch) {
+                      const [, username, tweetId] = tweetUrlMatch;
+                      setValue(`child.${index}.resources.username`, username, { shouldDirty: true });
+                      setValue(`child.${index}.resources.tweetId`, tweetId, { shouldDirty: true });
+                    }
+                  }}
+                />
               </FormControl>
-              <FormDescription>Required for Twitter tasks</FormDescription>
+              <FormDescription>Tweet URL - username and ID auto-extracted</FormDescription>
               <FormMessage />
             </FormItem>
           )}

@@ -501,8 +501,8 @@ export function QuestFormFields({
                     const url = e.target.value.trim();
                     field.onChange(url);
 
-                    // Parse tweet URL for action-with-post preset
-                    if (presetConfig?.id === 'action-with-post' && currentProvider === 'twitter') {
+                    // Parse tweet URL for all Twitter providers
+                    if (currentProvider === 'twitter') {
                       // Pattern: https://twitter.com/username/status/1234567890
                       const tweetUrlMatch =
                         /(?:https?:\/\/)?(?:www\.)?(?:twitter\.com|x\.com)\/([^/]+)\/status\/(\d{19,20})/.exec(
