@@ -123,18 +123,51 @@ function applyConnectUIRules(values: QuestFormValues): void {
 function applyJoinUIRules(values: QuestFormValues): void {
   if (!values.provider) return;
 
-  // Auto-update button text for Twitter provider
-  if (values.provider === 'twitter') {
-    if (!values.resources) {
-      values.resources = toApiResources(ResourcePresets.join(values.provider, values.group));
-    } else if (values.resources.ui) {
+  // Create resources if missing
+  if (!values.resources) {
+    values.resources = toApiResources(ResourcePresets.join(values.provider, values.group));
+    return;
+  }
+
+  // Ensure UI structure exists
+  if (!values.resources.ui) return;
+
+  // Set button text only if missing
+  if (!values.resources.ui.button) {
+    if (values.provider === 'twitter') {
       values.resources.ui.button = 'Follow';
-      if (values.resources.ui['pop-up']) {
-        values.resources.ui['pop-up'].button = 'Follow';
-        values.resources.ui['pop-up']['additional-title'] = 'Connect your X';
-        values.resources.ui['pop-up']['additional-description'] =
-          'Before starting the quest, ensure you connected X account';
-      }
+    } else {
+      values.resources.ui.button = 'Join';
+    }
+  }
+
+  // Handle popup configuration
+  if (!values.resources.ui['pop-up']) return;
+
+  // Set popup button only if missing
+  if (!values.resources.ui['pop-up'].button) {
+    values.resources.ui['pop-up'].button = values.resources.ui.button;
+  }
+
+  // Set additional-title only if missing
+  if (!values.resources.ui['pop-up']['additional-title']) {
+    if (values.provider === 'twitter') {
+      values.resources.ui['pop-up']['additional-title'] = 'Connect your X';
+    } else {
+      const providerName = values.provider.charAt(0).toUpperCase() + values.provider.slice(1);
+      values.resources.ui['pop-up']['additional-title'] = `Connect your ${providerName}`;
+    }
+  }
+
+  // Set additional-description only if missing
+  if (!values.resources.ui['pop-up']['additional-description']) {
+    if (values.provider === 'twitter') {
+      values.resources.ui['pop-up']['additional-description'] =
+        'Before starting the quest, ensure you connected X account';
+    } else {
+      const providerName = values.provider.charAt(0).toUpperCase() + values.provider.slice(1);
+      values.resources.ui['pop-up']['additional-description'] =
+        `Before starting the quest, ensure you connected ${providerName} account`;
     }
   }
 }

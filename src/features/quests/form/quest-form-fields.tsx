@@ -406,47 +406,7 @@ export function QuestFormFields({
         </>
       )}
 
-      {/* Tweet ID Field - show if fieldVisible OR if tweet embed enabled for action-with-post */}
-      {(isFieldVisible('tweetId', fieldStates) ||
-        (presetConfig?.id === 'action-with-post' &&
-          currentType !== 'multiple' &&
-          showTweetEmbed)) && (
-        <FormField
-          control={form.control}
-          name='resources.tweetId'
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Tweet URL or ID</FormLabel>
-              <FormControl>
-                <Input
-                  placeholder='Tweet ID: 1234567890123456789 (19-20 digits only)'
-                  disabled={isFieldDisabled('tweetId', fieldStates)}
-                  value={field.value ?? ''}
-                  onChange={(e) => {
-                    const raw = e.target.value.trim();
-                    // Extract ID from URL or use raw digits
-                    const urlMatch = /status\/(\d{19,20})/.exec(raw);
-                    const digits = raw.replace(/\D/g, '');
-                    const id = urlMatch?.[1] ?? digits;
-                    field.onChange(id);
-                    // Immediate feedback only if invalid after processing
-                    if (id && !/^\d{19,20}$/.test(id)) {
-                      form.setError('resources.tweetId' as never, {
-                        type: 'custom',
-                        message: 'Enter a valid Tweet ID (19–20 digits) or tweet URL',
-                      });
-                    } else {
-                      form.clearErrors('resources.tweetId' as never);
-                    }
-                  }}
-                />
-              </FormControl>
-              <FormDescription>Tweet ID auto-extracted from URL (only digits kept)</FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      )}
+      {/* Tweet URL or ID field - hidden (data still available in form state) */}
 
       {/* Child Tasks Section for Multiple Type */}
       {currentType === 'multiple' && (isFieldVisible('tasks', fieldStates) || !presetConfig) && (

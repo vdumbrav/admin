@@ -148,13 +148,11 @@ const ChildRow = ({ id, index, remove, canRemove }: RowProps) => {
     transform: CSS.Transform.toString(transform),
     transition,
   };
-  const type = useWatch({ control, name: `child.${index}.type` });
   const childProvider = useWatch({ control, name: `child.${index}.provider` });
   const parentProvider = useWatch({ control, name: 'provider' });
 
   // Child inherits provider from parent if not explicitly set
   const provider = childProvider ?? parentProvider;
-  const showTweetFields = ['like', 'share', 'comment'].includes(type) && provider === 'twitter';
   const showProviderField = !parentProvider; // Hide if inherited from parent
 
   return (
@@ -301,25 +299,7 @@ const ChildRow = ({ id, index, remove, canRemove }: RowProps) => {
         />
       )}
 
-      {showTweetFields && (
-        <FormField
-          control={control}
-          name={`child.${index}.resources.tweetId`}
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Tweet URL or ID</FormLabel>
-              <FormControl>
-                <Input
-                  {...field}
-                  placeholder='e.g. 1234567890123456789'
-                  onBlur={(e) => field.onChange((e.target.value || '').trim())}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      )}
+      {/* Tweet URL or ID field - hidden (data still available in form state) */}
 
       {/* Preview Component */}
       <ChildPreview index={index} />
