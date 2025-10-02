@@ -79,14 +79,7 @@ const childFormSchema = z
       .optional(),
   })
   .superRefine((child, ctx) => {
-    // URI is required for Twitter provider in child tasks
-    if (child.provider === 'twitter' && !child.uri) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: 'Tweet URL is required for Twitter tasks',
-        path: ['uri'],
-      });
-    }
+    // No validation needed for Twitter provider in child tasks
   });
 
 // Daily rewards iterator for challenge-type quests
@@ -242,25 +235,7 @@ export const buildQuestFormSchema = (presetId?: string) =>
         }
       }
 
-      if (val.provider === 'twitter') {
-        // URI is required for all Twitter provider types
-        if (val.type !== 'multiple' && !val.uri) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            message: 'Tweet URL or ID is required for Twitter provider',
-            path: ['uri'],
-          });
-        }
-
-        // For multiple types (action-with-post), URI is also required (main post URL)
-        if (val.type === 'multiple' && !val.uri) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            message: 'Main post URL is required for action-with-post quests',
-            path: ['uri'],
-          });
-        }
-      }
+      // Twitter provider validation removed - URI and username are optional
 
       // Username format validation based on provider
       if (val.resources?.username) {
