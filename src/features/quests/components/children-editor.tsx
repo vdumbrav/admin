@@ -320,7 +320,9 @@ const TaskImageUpload = ({ index }: { index: number }) => {
         onChange={(url) =>
           setValue(`child.${index}.resources.ui.pop-up.static`, url, { shouldDirty: true })
         }
-        onClear={() => setValue(`child.${index}.resources.ui.pop-up.static`, '', { shouldDirty: true })}
+        onClear={() =>
+          setValue(`child.${index}.resources.ui.pop-up.static`, '', { shouldDirty: true })
+        }
         onImageUpload={uploadMedia}
       />
     </div>

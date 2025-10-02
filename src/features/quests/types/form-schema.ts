@@ -47,40 +47,36 @@ const formResourcesSchema = z
 
 // Child quest schema for multi-step quests
 
-const childFormSchema = z
-  .object({
-    title: z.string().max(80, 'Title cannot exceed 80 characters').optional().default(''),
-    description: z.string().max(100, 'Description cannot exceed 100 characters').optional(),
-    type: childTypeSchema,
-    group: questGroupSchema.default('social'),
-    provider: providerSchema,
-    reward: z
-      .number()
-      .min(0, 'Reward must be 0 or greater')
-      .max(10000, 'Reward cannot exceed 10000')
-      .optional()
-      .default(0),
-    order_by: z.number(),
-    uri: z.string().optional(),
-    resources: z
-      .object({
-        tweetId: z.string().optional(),
-        username: z.string().optional(),
-        ui: z
-          .object({
-            'pop-up': z
-              .object({
-                static: z.string().optional(),
-              })
-              .optional(),
-          })
-          .optional(),
-      })
-      .optional(),
-  })
-  .superRefine((child, ctx) => {
-    // No validation needed for Twitter provider in child tasks
-  });
+const childFormSchema = z.object({
+  title: z.string().max(80, 'Title cannot exceed 80 characters').optional().default(''),
+  description: z.string().max(100, 'Description cannot exceed 100 characters').optional(),
+  type: childTypeSchema,
+  group: questGroupSchema.default('social'),
+  provider: providerSchema,
+  reward: z
+    .number()
+    .min(0, 'Reward must be 0 or greater')
+    .max(10000, 'Reward cannot exceed 10000')
+    .optional()
+    .default(0),
+  order_by: z.number(),
+  uri: z.string().optional(),
+  resources: z
+    .object({
+      tweetId: z.string().optional(),
+      username: z.string().optional(),
+      ui: z
+        .object({
+          'pop-up': z
+            .object({
+              static: z.string().optional(),
+            })
+            .optional(),
+        })
+        .optional(),
+    })
+    .optional(),
+});
 
 // Daily rewards iterator for challenge-type quests
 
