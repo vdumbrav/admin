@@ -561,7 +561,7 @@ export function QuestFormFields({
               <FormItem className='mt-5 flex flex-row items-center gap-3'>
                 <FormControl>
                   <Switch
-                    checked={field.value}
+                    checked={field.value ?? false}
                     onCheckedChange={field.onChange}
                     className='scale-125'
                   />

@@ -91,8 +91,16 @@ function applyActionWithPostUIRules(values: QuestFormValues): void {
 function applyConnectUIRules(values: QuestFormValues): void {
   if (!values.provider) return;
 
+  // Preserve isNew value before overwriting resources
+  const existingIsNew = values.resources?.isNew;
+
   // Create proper resources from ResourcePresets (overwrite defaults)
   values.resources = toApiResources(ResourcePresets.connect(values.provider, values.group));
+
+  // Restore isNew value
+  if (existingIsNew !== undefined) {
+    values.resources.isNew = existingIsNew;
+  }
 
   // Auto-generate popup description based on provider
   const descriptionMapping: Record<string, string> = {
@@ -174,12 +182,14 @@ function applyJoinUIRules(values: QuestFormValues): void {
  * Apply UI rules for explore preset
  */
 function applyExploreUIRules(values: QuestFormValues): void {
-  values.resources ??= toApiResources(
-    ResourcePresets.explore({
-      buttonText: 'Visit',
-      popupDescription: 'Visit the link to complete this quest',
-    }),
-  );
+  if (!values.resources) {
+    values.resources = toApiResources(
+      ResourcePresets.explore({
+        buttonText: 'Visit',
+        popupDescription: 'Visit the link to complete this quest',
+      }),
+    );
+  }
 }
 
 // ============================================================================
@@ -191,16 +201,18 @@ function applyExploreUIRules(values: QuestFormValues): void {
  */
 function applySevenDayChallengeUIRules(values: QuestFormValues): void {
   // Ensure resources exist with Daily Quests popup name
-  values.resources ??= {
-    ui: {
-      button: 'Boost XP',
-      'pop-up': {
-        name: 'Daily Quests',
+  if (!values.resources) {
+    values.resources = {
+      ui: {
         button: 'Boost XP',
-        description: '',
+        'pop-up': {
+          name: 'Daily Quests',
+          button: 'Boost XP',
+          description: '',
+        },
       },
-    },
-  };
+    };
+  }
 }
 
 /**

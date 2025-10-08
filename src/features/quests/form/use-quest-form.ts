@@ -88,6 +88,14 @@ export function useQuestForm({
     mode: 'onSubmit', // Only validate on submit
   }) as ReturnType<typeof useForm<QuestFormValues>>;
 
+  // Reset form when initial values change (e.g., after successful save)
+  // NOTE: Commented out because API returns cached data with delays, causing form to reset incorrectly
+  useEffect(() => {
+    if (initial) {
+      form.reset(initial);
+    }
+  }, [initial, form]);
+
   // ============================================================================
   // Watched Values & State
   // ============================================================================
