@@ -222,8 +222,7 @@ function applyActionWithPostAPIRules(values: QuestFormValues): void {
  * Apply API rules for seven-day challenge preset
  */
 function applySevenDayChallengeAPIRules(values: QuestFormValues): void {
-  // Ensure type is repeatable
-  values.type = 'repeatable';
+  // Type is 'dummy' per preset defaults - don't override
 
   // Ensure iterator configuration exists
   values.iterator ??= {

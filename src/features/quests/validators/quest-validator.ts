@@ -293,10 +293,10 @@ export function validatePresetCompatibility(
       break;
 
     case 'seven-day-challenge':
-      if (formData.type !== 'repeatable') {
+      if (formData.type !== 'dummy') {
         errors.push({
           field: 'type',
-          message: 'Seven day challenge preset requires repeatable type',
+          message: 'Seven day challenge preset requires dummy type',
           type: 'invalid',
         });
       }

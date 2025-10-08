@@ -114,6 +114,12 @@ export function useQuestForm({
   // ============================================================================
 
   // Auto-apply business rules when form changes (e.g., set group=social for action-with-post)
+  // Watch specific fields that should trigger business rules
+  const currentType = watchedValues.type;
+  const currentGroup = watchedValues.group;
+  const currentProvider = watchedValues.provider;
+  const childTasksJson = JSON.stringify(watchedValues.child);
+
   useEffect(() => {
     if (!isDirty) return;
 
@@ -137,7 +143,8 @@ export function useQuestForm({
         });
       }, 0);
     }
-  }, [watchedValues, presetConfig, isDirty, form]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentType, currentGroup, currentProvider, childTasksJson, presetConfig?.id, isDirty]);
 
   // Cleanup incompatible fields when preset or type changes
   useEffect(() => {
