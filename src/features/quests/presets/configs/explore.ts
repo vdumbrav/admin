@@ -26,7 +26,7 @@ export const explorePresetConfig: PresetConfig = {
   },
 
   defaults: {
-    type: 'external',
+    type: 'dummy',
     provider: 'walme',
     group: 'social',
     badge: true,
