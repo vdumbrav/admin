@@ -204,6 +204,12 @@ export function apiToForm(apiData: Partial<TaskResponseDto>): QuestFormValues {
     }
   }
 
+  // Reconstruct Tweet URL from username and tweetId if uri is missing
+  const reconstructedUri =
+    !apiData.uri && apiData.resource?.username && apiData.resource?.tweetId
+      ? `https://x.com/${apiData.resource.username}/status/${apiData.resource.tweetId}`
+      : validateOptionalString(apiData.uri, 'uri');
+
   return {
     // Core fields - ALL REQUIRED, NO FALLBACKS
     id: apiData.id, // Include ID for form (enables update detection)
@@ -215,7 +221,7 @@ export function apiToForm(apiData: Partial<TaskResponseDto>): QuestFormValues {
 
     // Optional fields (but validate if present)
     provider: apiData.provider,
-    uri: validateOptionalString(apiData.uri, 'uri'),
+    uri: reconstructedUri,
     reward: getRequiredNumber(apiData.reward, 'reward'),
     enabled: getRequiredBoolean(apiData.enabled, 'enabled'),
     web: getRequiredBoolean(apiData.web, 'web'),
@@ -323,6 +329,7 @@ function convertApiChildToForm(apiChild: TaskResponseDto): ChildFormValues {
   }
 
   return {
+    id: apiChild.id, // Include ID for update detection
     title: apiChild.title,
     description: apiChild.description,
     type: apiChild.type as ChildFormValues['type'],

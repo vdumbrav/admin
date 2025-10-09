@@ -41,6 +41,7 @@ export const CHILD_TYPES = ['like', 'share', 'comment', 'join', 'connect'] as co
 
 // Child task type - enhanced to support full quest functionality with inheritance
 export type ChildFormValues = Pick<TaskResponseDto, 'title' | 'group' | 'provider' | 'order_by'> & {
+  id?: number; // Child task ID - present for updates, undefined for creation
   description?: string; // Optional for child tasks
   reward?: number; // Optional for child tasks
   type: (typeof CHILD_TYPES)[number]; // Restricted to child-supported types
