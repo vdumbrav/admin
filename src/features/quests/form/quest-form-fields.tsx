@@ -32,7 +32,7 @@ import { DailyRewardsEditor } from '../components/daily-rewards-editor';
 import { IconUpload } from '../components/icon-upload';
 import { ManagedField } from '../components/managed-field';
 import { TwitterPreview } from '../components/twitter-preview';
-import { getCompatibleProviders, groups, providers, types } from '../data/data';
+import { getCompatibleProviders, groups, joinPresetTypes, providers, types } from '../data/data';
 import type { PresetConfig } from '../presets/types';
 import type { QuestFormValues } from '../types/form-types';
 import {
@@ -75,6 +75,15 @@ export function QuestFormFields({
   // Watch current type to filter compatible providers
   const currentType = form.watch('type');
   const currentProvider = form.watch('provider');
+
+  // Filter types based on preset
+  const availableTypes = useMemo(() => {
+    // For join preset, only allow join and dummy types
+    if (presetConfig?.id === 'join') {
+      return joinPresetTypes;
+    }
+    return types;
+  }, [presetConfig?.id]);
 
   // Filter providers based on current type
   const availableProviders = useMemo(() => {
@@ -221,7 +230,7 @@ export function QuestFormFields({
                     className='w-full'
                     value={field.value}
                     onValueChange={field.onChange}
-                    items={types}
+                    items={availableTypes}
                     placeholder='Select quest type'
                     disabled={
                       isFieldDisabled('type', fieldStates) || isFieldReadonly('type', fieldStates)

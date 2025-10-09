@@ -57,7 +57,8 @@ export function getFieldsToReset(presetConfig: PresetConfig): Array<keyof QuestF
   const fieldsToReset: Array<keyof QuestFormValues> = [];
 
   // Always reset type and group to preset defaults
-  if (presetConfig.defaults?.type) {
+  // EXCEPT for join preset where type is user-editable (join vs dummy)
+  if (presetConfig.defaults?.type && presetConfig.id !== 'join') {
     fieldsToReset.push('type');
   }
   if (presetConfig.defaults?.group) {
