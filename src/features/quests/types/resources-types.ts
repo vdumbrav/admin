@@ -368,6 +368,7 @@ export const ResourcePresets = {
    */
   explore: (options: {
     buttonText?: string;
+    popupButton?: string;
     popupDescription?: string;
     icon?: string;
   }): StrictResourcesDto => {
@@ -378,7 +379,7 @@ export const ResourcePresets = {
           popup
             .name('Explore Quests')
             .description(options.popupDescription ?? 'Visit the link to complete this quest')
-            .button(options.buttonText ?? 'Explore'),
+            .button(options.popupButton ?? options.buttonText ?? 'Explore'),
         ),
       )
       .build();

@@ -183,10 +183,19 @@ function applyJoinUIRules(values: QuestFormValues): void {
  * Apply UI rules for explore preset
  */
 function applyExploreUIRules(values: QuestFormValues): void {
-  values.resources ??= toApiResources(
+  // Extract existing values to preserve user input
+  const existingButtonText = values.resources?.ui?.button;
+  const existingPopupButton = values.resources?.ui?.['pop-up']?.button;
+  const existingPopupDescription = values.resources?.ui?.['pop-up']?.description;
+  const existingIcon = values.resources?.icon;
+
+  // Create resources with user input or defaults
+  values.resources = toApiResources(
     ResourcePresets.explore({
-      buttonText: 'Visit',
-      popupDescription: 'Visit the link to complete this quest',
+      buttonText: existingButtonText ?? 'Visit',
+      popupButton: existingPopupButton,
+      popupDescription: existingPopupDescription ?? 'Visit the link to complete this quest',
+      icon: existingIcon,
     }),
   );
 }
