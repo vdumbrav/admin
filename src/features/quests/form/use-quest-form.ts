@@ -74,7 +74,8 @@ export function useQuestForm({
 
   const defaultValues = useMemo(() => {
     if (initial) {
-      return initial;
+      // Apply UI rules to initial values to ensure button text is correct
+      return applyBusinessRules(initial, presetConfig);
     }
 
     // Use preset defaults

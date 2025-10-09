@@ -140,8 +140,9 @@ function applyJoinUIRules(values: QuestFormValues): void {
   // Ensure UI structure exists
   if (!values.resources.ui) return;
 
-  // Set button text only if missing
-  if (!values.resources.ui.button) {
+  // Set button text based on type and provider
+  // Only apply for 'join' type tasks
+  if (values.type === 'join') {
     if (values.provider === 'twitter') {
       values.resources.ui.button = 'Follow';
     } else {
@@ -152,8 +153,8 @@ function applyJoinUIRules(values: QuestFormValues): void {
   // Handle popup configuration
   if (!values.resources.ui['pop-up']) return;
 
-  // Set popup button only if missing
-  values.resources.ui['pop-up'].button ??= values.resources.ui.button;
+  // Always sync popup button with main button
+  values.resources.ui['pop-up'].button = values.resources.ui.button;
 
   // Set additional-title only if missing
   if (!values.resources.ui['pop-up']['additional-title']) {
