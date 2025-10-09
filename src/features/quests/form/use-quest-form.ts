@@ -52,7 +52,7 @@ export interface UseQuestFormReturn {
   handleImageUpload: (file: File) => Promise<string>;
 
   // Business logic
-  availableQuests: { id: number; title: string; type: string[] }[];
+  availableQuests: { id: number; title: string; type: string[]; provider?: string }[];
 }
 
 // ============================================================================
@@ -210,8 +210,31 @@ export function useQuestForm({
       id: quest.id,
       title: quest.title,
       type: [quest.type], // Wrap single type in array for consistency
+      provider: quest.provider, // Include provider for dynamic blocking task text
     }));
   }, [allQuests]);
+
+  // Auto-select blocking_task (Connect quest) when provider changes
+  useEffect(() => {
+    if (!isDirty || !currentProvider) return;
+
+    // Only auto-select for join and multiple types
+    if (currentType !== 'join' && currentType !== 'multiple') return;
+
+    // Find Connect quest for this provider
+    const connectQuest = availableQuests.find(
+      (q) => q.type.includes('connect') && q.provider === currentProvider,
+    );
+
+    if (connectQuest) {
+      const currentBlockingTask = form.getValues('blocking_task');
+
+      // Only update if different from current blocking_task
+      if (currentBlockingTask?.id !== connectQuest.id) {
+        form.setValue('blocking_task', { id: connectQuest.id }, { shouldDirty: true });
+      }
+    }
+  }, [currentProvider, currentType, availableQuests, form, isDirty]);
 
   // Additional validation beyond Zod - preset-specific business rules
   const validateForm = (values: QuestFormValues) => {
@@ -273,28 +296,6 @@ export function useQuestForm({
 
     return errors;
   };
-
-  // Auto-set blocking_task for quests that need Connect gate
-  useEffect(() => {
-    if (
-      connectQuestId &&
-      watchedValues.provider &&
-      watchedValues.type !== 'connect' &&
-      !watchedValues.blocking_task
-    ) {
-      form.setValue(
-        'blocking_task',
-        { id: connectQuestId },
-        { shouldDirty: true, shouldValidate: false },
-      );
-    }
-  }, [
-    connectQuestId,
-    watchedValues.provider,
-    watchedValues.type,
-    watchedValues.blocking_task,
-    form,
-  ]);
 
   // ============================================================================
   // Form Handlers

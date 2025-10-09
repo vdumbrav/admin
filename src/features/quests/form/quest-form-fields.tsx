@@ -51,7 +51,7 @@ export interface QuestFormFieldsProps {
   fieldStates: FieldStatesMatrix;
   presetConfig?: PresetConfig;
   onImageUpload: (file: File) => Promise<string>;
-  availableQuests?: { id: number; title: string; type: string[] }[];
+  availableQuests?: { id: number; title: string; type: string[]; provider?: string }[];
   isValidationReady?: boolean;
 }
 
