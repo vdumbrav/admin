@@ -432,13 +432,30 @@ export function formToApi(formData: QuestFormValues): Omit<CreateTaskDto, 'paren
     ...(formData.provider && { provider: formData.provider }),
     // URI is required for multiple type and must not be empty
     ...(formData.uri ? { uri: formData.uri } : {}),
-    // blocking_task only for CREATE (PATCH doesn't handle ORM references properly)
-    // Only include if it has a valid id (number)
-    ...(!isUpdate &&
-    formData.blocking_task?.id !== null &&
-    formData.blocking_task?.id !== undefined &&
-    typeof formData.blocking_task.id === 'number'
-      ? { blocking_task: formData.blocking_task }
+    // blocking_task handling:
+    // - For CREATE with provider (except connect type): blocking_task is REQUIRED
+    // - For CREATE without provider: blocking_task is optional (can be null)
+    // - For UPDATE: skip blocking_task (PATCH doesn't handle ORM references properly)
+    ...(!isUpdate
+      ? (() => {
+          const hasProvider = !!formData.provider;
+          const isConnectType = formData.type === 'connect';
+          const hasBlockingTask =
+            formData.blocking_task?.id !== null &&
+            formData.blocking_task?.id !== undefined &&
+            typeof formData.blocking_task.id === 'number';
+
+          // For any quest type with provider (except connect), blocking_task is REQUIRED
+          if (hasProvider && !isConnectType && !hasBlockingTask) {
+            throw new Error(
+              `Connect quest is required for ${formData.provider} provider. Please create a Connect ${formData.provider} quest first or select an existing one.`,
+            );
+          }
+
+          return {
+            blocking_task: hasBlockingTask ? formData.blocking_task : null,
+          };
+        })()
       : {}),
     // parent_id if explicitly set (required for some child task types)
     ...(formData.parent_id && { parent_id: formData.parent_id }),

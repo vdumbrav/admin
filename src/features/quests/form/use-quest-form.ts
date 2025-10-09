@@ -302,6 +302,18 @@ export function useQuestForm({
       }
     }
 
+    // Global validation: any quest with provider (except connect) requires blocking_task
+    if (values.provider && values.type !== 'connect') {
+      // Check if Connect quest exists for this provider
+      if (hasRequiredConnect === false) {
+        errors.provider = `Requires Connect ${values.provider} quest`;
+      }
+      // Check if blocking_task is set
+      if (!values.blocking_task?.id) {
+        errors.blocking_task = `Connect ${values.provider} quest must be selected`;
+      }
+    }
+
     return errors;
   };
 
