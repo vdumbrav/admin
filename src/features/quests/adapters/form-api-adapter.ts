@@ -21,6 +21,7 @@
  * - Empty strings and undefined values rejected
  */
 import type { CreateTaskDto, TaskResponseDto } from '@/lib/api/generated/model';
+import { isSocialProvider } from '../constants';
 import { buildQuestFormSchema } from '../types/form-schema';
 import { type ChildFormValues, type QuestFormValues } from '../types/form-types';
 import { getPopupNameForGroup } from '../types/resources-types';
@@ -310,7 +311,7 @@ function extractChildResources(resourceData: unknown): ChildFormValues['resource
   let uiResources: ChildUIResources = undefined;
 
   if (isValidResourceData(resourceData.ui)) {
-    const popupData = (resourceData.ui)['pop-up'];
+    const popupData = resourceData.ui['pop-up'];
     if (isValidResourceData(popupData)) {
       const staticImage = typeof popupData.static === 'string' ? popupData.static : undefined;
       if (staticImage) {
@@ -438,15 +439,14 @@ export function formToApi(formData: QuestFormValues): Omit<CreateTaskDto, 'paren
     // - For UPDATE: skip blocking_task (PATCH doesn't handle ORM references properly)
     ...(!isUpdate
       ? (() => {
-          const hasProvider = !!formData.provider;
           const isConnectType = formData.type === 'connect';
           const hasBlockingTask =
             formData.blocking_task?.id !== null &&
             formData.blocking_task?.id !== undefined &&
             typeof formData.blocking_task.id === 'number';
 
-          // For any quest type with provider (except connect), blocking_task is REQUIRED
-          if (hasProvider && !isConnectType && !hasBlockingTask) {
+          // Social providers (telegram, discord, twitter) require blocking_task (except connect type)
+          if (isSocialProvider(formData.provider) && !isConnectType && !hasBlockingTask) {
             throw new Error(
               `Connect quest is required for ${formData.provider} provider. Please create a Connect ${formData.provider} quest first or select an existing one.`,
             );

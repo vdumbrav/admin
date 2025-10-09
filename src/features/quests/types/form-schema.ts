@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { isSocialProvider } from '../constants';
 import { CHILD_TYPES, PROVIDERS, QUEST_GROUPS, QUEST_TYPES } from './form-types';
 
 // ============================================================================
@@ -349,8 +350,8 @@ export const buildQuestFormSchema = (presetId?: string) =>
         }
       }
 
-      // Global validation: any quest with provider (except connect) requires blocking_task
-      if (val.provider && val.type !== 'connect' && !val.blocking_task?.id) {
+      // Global validation: social providers (telegram, discord, twitter) require blocking_task (except connect)
+      if (isSocialProvider(val.provider) && val.type !== 'connect' && !val.blocking_task?.id) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           message: `Connect quest is required. Please create a Connect ${val.provider} quest first.`,

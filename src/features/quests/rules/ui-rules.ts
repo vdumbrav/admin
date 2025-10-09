@@ -187,17 +187,44 @@ function applyExploreUIRules(values: QuestFormValues): void {
   const existingButtonText = values.resources?.ui?.button;
   const existingPopupButton = values.resources?.ui?.['pop-up']?.button;
   const existingPopupDescription = values.resources?.ui?.['pop-up']?.description;
+  const existingPopupName = values.resources?.ui?.['pop-up']?.name;
   const existingIcon = values.resources?.icon;
 
-  // Create resources with user input or defaults
-  values.resources = toApiResources(
-    ResourcePresets.explore({
-      buttonText: existingButtonText ?? 'Visit',
-      popupButton: existingPopupButton,
-      popupDescription: existingPopupDescription ?? 'Visit the link to complete this quest',
-      icon: existingIcon,
-    }),
-  );
+  // Only use strict builder if all required fields are present
+  // This prevents errors during initial form setup when fields are empty
+  const hasRequiredFields = existingPopupDescription && (existingPopupButton ?? existingButtonText);
+
+  if (hasRequiredFields) {
+    // Use strict builder for validation when fields are filled
+    values.resources = toApiResources(
+      ResourcePresets.explore({
+        buttonText: existingButtonText ?? 'Visit',
+        popupButton: existingPopupButton,
+        popupDescription: existingPopupDescription,
+        icon: existingIcon,
+      }),
+    );
+  } else {
+    // Manual construction without strict validation for initial form setup
+    ensureResourcesStructure(values);
+
+    // Set button text
+    if (values.resources?.ui) {
+      values.resources.ui.button = existingButtonText ?? 'Visit';
+
+      // Set popup fields
+      if (values.resources.ui['pop-up']) {
+        values.resources.ui['pop-up'].name = existingPopupName ?? 'Explore Quests';
+        values.resources.ui['pop-up'].description = existingPopupDescription ?? '';
+        values.resources.ui['pop-up'].button = existingPopupButton ?? existingButtonText ?? 'Visit';
+      }
+    }
+
+    // Set icon
+    if (existingIcon && values.resources) {
+      values.resources.icon = existingIcon;
+    }
+  }
 }
 
 // ============================================================================

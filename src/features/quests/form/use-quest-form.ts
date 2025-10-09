@@ -18,6 +18,7 @@ import { useAdminWaitlistTasksControllerGetWaitlistTasks } from '@/lib/api/gener
 import type { WaitlistTasksResponseDtoTypeItem } from '@/lib/api/generated/model';
 import { replaceObjectUrl } from '@/utils/object-url';
 import { uploadMedia } from '../api';
+import { isSocialProvider } from '../constants';
 import { getTwitterOnlyTypes } from '../data/data';
 import { useExistingQuests } from '../hooks/use-existing-quests';
 import type { PresetConfig } from '../presets/types';
@@ -226,8 +227,11 @@ export function useQuestForm({
   useEffect(() => {
     if (!isDirty || !currentProvider) return;
 
-    // Only auto-select for join and multiple types
-    if (currentType !== 'join' && currentType !== 'multiple') return;
+    // Skip auto-select for connect type (connect quests don't need blocking_task)
+    if (currentType === 'connect') return;
+
+    // Auto-select for all social providers (telegram, discord, twitter)
+    if (!isSocialProvider(currentProvider)) return;
 
     // Find Connect quest for this provider
     const connectQuest = availableQuests.find(
@@ -302,8 +306,8 @@ export function useQuestForm({
       }
     }
 
-    // Global validation: any quest with provider (except connect) requires blocking_task
-    if (values.provider && values.type !== 'connect') {
+    // Global validation: social providers (telegram, discord, twitter) require blocking_task (except connect)
+    if (isSocialProvider(values.provider) && values.type !== 'connect') {
       // Check if Connect quest exists for this provider
       if (hasRequiredConnect === false) {
         errors.provider = `Requires Connect ${values.provider} quest`;
