@@ -408,9 +408,7 @@ export function formToApi(formData: QuestFormValues): Omit<CreateTaskDto, 'paren
         day: 0, // Starting day for iterator
         days: formData.iterator.days ?? 7,
         reward_map: formData.iterator.reward_map,
-        iterator_reward: formData.iterator.reward_map.map((reward) =>
-          typeof reward === 'number' ? String(reward) : '0',
-        ), // Backend API requires string[] format - safe conversion from number[]
+        iterator_reward: formData.iterator.reward_map, // Backend expects number[] array
         iterator_resource: {}, // Empty object as default
         reward: formData.iterator.reward_map[0] ?? 0, // First day reward
         reward_max: Math.max(...formData.iterator.reward_map),
