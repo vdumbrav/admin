@@ -48,23 +48,12 @@ async function runBarrelGenerator() {
 }
 
 function runPrettier() {
-  const prettierBin = resolve(
-    PROJECT_ROOT,
-    'node_modules',
-    '.pnpm',
-    'prettier@3.6.2',
-    'node_modules',
-    'prettier',
-    'bin',
-    'prettier.cjs',
-  );
-  const result = spawnSync(
-    process.execPath,
-    [prettierBin, '--loglevel', 'warn', '--write', GENERATED_DIR],
-    {
-      stdio: 'inherit',
-    },
-  );
+  // Use npx to run prettier, which will find it correctly regardless of package manager
+  const result = spawnSync('npx', ['prettier', '--loglevel', 'warn', '--write', GENERATED_DIR], {
+    stdio: 'inherit',
+    shell: true,
+    cwd: PROJECT_ROOT,
+  });
 
   if (result.status !== 0) {
     throw new Error(`Prettier failed with exit code ${result.status ?? 1}`);
