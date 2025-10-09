@@ -19,7 +19,7 @@ export const sevenDayChallengePresetConfig: PresetConfig = {
     partnerIcon: 'hidden',
     buttonText: 'visible', // Button name - default "Boost XP"
     popupButton: 'visible', // Popup button name - default "Boost XP"
-    popupDescription: 'hidden', // Auto-generated
+    popupDescription: 'visible', // Can enter any text
     repeatable: 'hidden', // Always true for seven-day challenges
     badge: 'visible',
     visible: 'visible',
