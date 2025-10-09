@@ -152,7 +152,6 @@ export function useQuestForm({
         });
       }, 0);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentType, currentGroup, currentProvider, childTasksJson, presetConfig?.id, isDirty]);
 
   // Cleanup incompatible fields when preset or type changes
@@ -200,7 +199,7 @@ export function useQuestForm({
   }, [presetConfig, watchedValues.type, form]);
 
   // Validate provider dependencies - Join/Action quests need Connect quest first
-  const { hasRequiredConnect, connectQuestId } = useConnectGate(watchedValues.provider);
+  const { hasRequiredConnect } = useConnectGate(watchedValues.provider);
 
   // Get available quests for blocking_task selection
   const { data: allQuests } = useAdminWaitlistTasksControllerGetWaitlistTasks();
