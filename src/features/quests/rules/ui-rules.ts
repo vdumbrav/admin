@@ -274,7 +274,7 @@ function generateTaskButtonText(children: QuestFormValues['child']): string | nu
     return TASK_BUTTON_MAPPING[taskType] ?? 'Engage';
   }
 
-  return 'Complete Tasks';
+  return 'Engage';
 }
 
 /**
