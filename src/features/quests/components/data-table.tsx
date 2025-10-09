@@ -84,12 +84,15 @@ export const QuestsDataTable = ({ columns, isAdmin }: DataTableProps) => {
     sort,
   });
 
-  // Maintain current sort but move pinned items to the top while keeping relative order
+  // Filter out child quests and maintain current sort but move pinned items to the top while keeping relative order
   const rows = React.useMemo(() => {
     const items = data?.items ?? [];
     const pinned: TaskResponseDto[] = [];
     const others: TaskResponseDto[] = [];
     for (const it of items) {
+      // Skip child quests (quests with parent_id)
+      if (it.parent_id) continue;
+
       if (it.pinned) pinned.push(it);
       else others.push(it);
     }

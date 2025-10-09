@@ -1,7 +1,7 @@
 /**
  * Quest Form Container Component
  * Clean, focused form component using the new modular architecture
- * Now supports multi-task creation with progress tracking
+ * Now supports multi-task creation and update with progress tracking
  */
 import { useState } from 'react';
 import { useNavigate } from '@tanstack/react-router';
@@ -9,6 +9,7 @@ import { Form } from '@/components/ui/form';
 import { ConfirmDialog } from '@/components/confirm-dialog';
 import { MultiTaskProgress } from '../components/multi-task-progress';
 import { useCreateMultiTask } from '../hooks/use-create-multi-task';
+import { useUpdateMultiTask } from '../hooks/use-update-multi-task';
 import type { PresetConfig } from '../presets/types';
 import type { QuestFormValues } from '../types/form-types';
 import { QuestFormFields } from './quest-form-fields';
@@ -40,13 +41,16 @@ export function QuestFormContainer({
   initial,
   onSubmit,
   onCancel,
-  enableMultiTask = !initial, // Default: true for create, false for edit
+  enableMultiTask = true, // Always enable for both create and edit
 }: QuestFormContainerProps) {
   // ============================================================================
-  // Multi-Task Creation
+  // Multi-Task Creation/Update
   // ============================================================================
 
-  const multiTask = useCreateMultiTask();
+  const isEdit = !!initial?.id;
+  const createMultiTask = useCreateMultiTask();
+  const updateMultiTask = useUpdateMultiTask(initial?.id ?? 0);
+  const multiTask = isEdit ? updateMultiTask : createMultiTask;
   const [showProgress, setShowProgress] = useState(false);
   const navigate = useNavigate();
 
@@ -81,26 +85,28 @@ export function QuestFormContainer({
       return onSubmit(values);
     }
 
-    // Use multi-task creation
+    // Use multi-task creation/update
     setShowProgress(true);
 
     try {
       const result = await multiTask.mutateAsync(values);
 
       if (result.success) {
-        // Success - immediately switch to edit mode for parent task
-        if (result.mainTask?.id) {
+        // Success - for create, navigate to edit mode; for edit, reload to see changes
+        if (!isEdit && result.mainTask?.id) {
           const mainTaskId = result.mainTask.id;
-          console.log('Multi-task success! Navigating to main task:', mainTaskId);
+          console.log('Multi-task create success! Navigating to edit:', mainTaskId);
           void navigate({ to: `/quests/${mainTaskId}` });
         } else {
-          console.log('No mainTask.id found, using fallback');
+          console.log('Multi-task update success! Reloading...');
+          // For edit mode, close progress and let parent handle navigation
+          setShowProgress(false);
           void onSubmit(values);
         }
       }
       // If partial errors, keep progress visible for user interaction
     } catch (error) {
-      // Main task creation failed, close progress and let error handling show
+      // Main task creation/update failed, close progress and let error handling show
       setShowProgress(false);
       throw error;
     }
