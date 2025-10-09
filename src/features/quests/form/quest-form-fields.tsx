@@ -276,8 +276,8 @@ export function QuestFormFields({
               <Info className='h-4 w-4' />
               <AlertTitle>Discord Bot Verification Required</AlertTitle>
               <AlertDescription>
-                For automatic verification, the verification bot must be added to the Discord
-                server with permission to view members.
+                For automatic verification, the verification bot must be added to the Discord server
+                with permission to view members.
                 <br />
                 <br />
                 <strong>Partner Discord without bot?</strong> Change Type to "Dummy" for manual
@@ -292,8 +292,8 @@ export function QuestFormFields({
           <Alert>
             <Info className='h-4 w-4' />
             <AlertDescription>
-              Type "Join" requires automatic verification. If verification is not available,
-              change Type to "Dummy" for manual completion.
+              Type "Join" requires automatic verification. If verification is not available, change
+              Type to "Dummy" for manual completion.
             </AlertDescription>
           </Alert>
         );

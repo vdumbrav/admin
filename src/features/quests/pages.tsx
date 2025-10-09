@@ -144,10 +144,7 @@ export const QuestEditPage = () => {
         </div>
         <QuestForm
           presetConfig={presetConfig}
-          initial={
-            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-            data ? apiToForm(data) : undefined
-          }
+          initial={data ? apiToForm(data) : undefined}
           onSubmit={async (v: QuestFormValues) => {
             try {
               await update.mutateAsync(v);

@@ -185,7 +185,6 @@ export const useUpdateMultiTask = (parentId: number) => {
         const mainTask = await adminWaitlistTasksControllerUpdateTask(
           parentId,
           mainTaskData as UpdateTaskDto,
-          abortControllerRef.current?.signal,
         );
 
         result.mainTask = mainTask;
@@ -224,7 +223,6 @@ export const useUpdateMultiTask = (parentId: number) => {
                 ? await adminWaitlistTasksControllerUpdateTask(
                     child.id,
                     childTaskData as unknown as UpdateTaskDto,
-                    abortControllerRef.current?.signal,
                   )
                 : await adminWaitlistTasksControllerCreateTask(
                     childTaskData as unknown as CreateTaskDto,
@@ -337,7 +335,6 @@ export const useUpdateMultiTask = (parentId: number) => {
           ? await adminWaitlistTasksControllerUpdateTask(
               failedChild.data.id,
               childTaskData as unknown as UpdateTaskDto,
-              abortControllerRef.current?.signal,
             )
           : await adminWaitlistTasksControllerCreateTask(
               childTaskData as unknown as CreateTaskDto,
