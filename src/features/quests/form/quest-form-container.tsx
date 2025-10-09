@@ -99,7 +99,7 @@ export function QuestFormContainer({
         } else {
           // For edit mode, close progress and let parent handle navigation
           setShowProgress(false);
-          void onSubmit(values);
+          await onSubmit(values);
         }
       }
       // If partial errors, keep progress visible for user interaction

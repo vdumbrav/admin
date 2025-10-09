@@ -44,6 +44,9 @@ export const useUpdateMultiTask = (parentId: number, initialChildren?: ChildForm
    * 1. Form loads with 21 child tasks → originalChildrenRef = 21 tasks
    * 2. User deletes 14 tasks in UI → form has 7 tasks
    * 3. User saves → compare original 21 vs current 7 = delete 14 tasks via API
+   *
+   * IMPORTANT: This tracks ALL originally loaded children with IDs.
+   * Any child with an ID that's not in the current form will be deleted from API.
    */
   const originalChildrenRef = useRef<ChildFormValues[]>(initialChildren ?? []);
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -338,7 +341,9 @@ export const useUpdateMultiTask = (parentId: number, initialChildren?: ChildForm
       }
     },
     onSuccess: (result) => {
+      // Invalidate and refetch to ensure fresh data from API
       void queryClient.invalidateQueries({ queryKey });
+      void queryClient.refetchQueries({ queryKey });
 
       if (result.success) {
         toast.success(`Quest updated successfully with ${result.childTasks.length} child tasks`);
