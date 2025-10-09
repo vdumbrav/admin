@@ -249,8 +249,10 @@ export function QuestFormFields({
         const currentType = form.watch('type');
         const currentProvider = form.watch('provider');
 
-        // Show alert only for join type with Telegram provider
-        if (currentType === 'join' && currentProvider === 'telegram') {
+        if (currentType !== 'join' || !currentProvider) return null;
+
+        // Telegram-specific alert
+        if (currentProvider === 'telegram') {
           return (
             <Alert>
               <Info className='h-4 w-4' />
@@ -267,20 +269,34 @@ export function QuestFormFields({
           );
         }
 
-        // Show alert for other providers with join type
-        if (currentType === 'join' && currentProvider) {
+        // Discord-specific alert
+        if (currentProvider === 'discord') {
           return (
             <Alert>
               <Info className='h-4 w-4' />
+              <AlertTitle>Discord Bot Verification Required</AlertTitle>
               <AlertDescription>
-                Type "Join" requires automatic verification. If verification is not available,
-                change Type to "Dummy" for manual completion.
+                For automatic verification, the verification bot must be added to the Discord
+                server with permission to view members.
+                <br />
+                <br />
+                <strong>Partner Discord without bot?</strong> Change Type to "Dummy" for manual
+                verification without bot.
               </AlertDescription>
             </Alert>
           );
         }
 
-        return null;
+        // Generic alert for other providers (Twitter, etc)
+        return (
+          <Alert>
+            <Info className='h-4 w-4' />
+            <AlertDescription>
+              Type "Join" requires automatic verification. If verification is not available,
+              change Type to "Dummy" for manual completion.
+            </AlertDescription>
+          </Alert>
+        );
       })()}
 
       {/* Title Field */}
