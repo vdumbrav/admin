@@ -3,7 +3,7 @@ import { AuthProvider } from 'react-oidc-context';
 import { TokenAutoRenew } from './TokenAutoRenew';
 import { oidcConfig } from './oidc';
 
-export const AppAuthProvider: React.FC<React.PropsWithChildren> = ({ children }) => {
+export const AppAuthProvider = ({ children }: React.PropsWithChildren) => {
   return (
     <AuthProvider {...oidcConfig}>
       <TokenAutoRenew />
