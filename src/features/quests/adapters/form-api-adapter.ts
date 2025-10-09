@@ -328,6 +328,12 @@ function convertApiChildToForm(apiChild: TaskResponseDto): ChildFormValues {
     );
   }
 
+  // Reconstruct Tweet URL from username and tweetId if uri is missing (for child tasks)
+  const childUri =
+    !apiChild.uri && apiChild.resource?.username && apiChild.resource?.tweetId
+      ? `https://x.com/${apiChild.resource.username}/status/${apiChild.resource.tweetId}`
+      : apiChild.uri;
+
   return {
     id: apiChild.id, // Include ID for update detection
     title: apiChild.title,
@@ -337,6 +343,7 @@ function convertApiChildToForm(apiChild: TaskResponseDto): ChildFormValues {
     provider: apiChild.provider,
     reward: apiChild.reward,
     order_by: apiChild.order_by,
+    uri: childUri, // Restored Tweet URL
     resources: extractChildResources(apiChild.resource),
   };
 }
