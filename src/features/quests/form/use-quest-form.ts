@@ -89,13 +89,22 @@ export function useQuestForm({
     mode: 'onSubmit', // Only validate on submit
   }) as ReturnType<typeof useForm<QuestFormValues>>;
 
-  // Reset form when initial values change (e.g., after successful save)
-  // NOTE: Commented out because API returns cached data with delays, causing form to reset incorrectly
-  useEffect(() => {
-    if (initial) {
-      form.reset(initial);
-    }
-  }, [initial, form]);
+  /**
+   * DISABLED: Auto-reset form when initial values change
+   *
+   * Why disabled:
+   * - React Query returns cached/stale data after mutations
+   * - This causes form to reset to old values, losing user changes
+   * - Example: User uploads image → saves → API returns cached data without image → form resets, image disappears
+   *
+   * Solution: Let user manually reload page or close/reopen form to see fresh data
+   * Alternative: Force refetch + wait for fresh data before reset (too complex)
+   */
+  // useEffect(() => {
+  //   if (initial) {
+  //     form.reset(initial);
+  //   }
+  // }, [initial, form]);
 
   // ============================================================================
   // Watched Values & State
@@ -338,9 +347,27 @@ export function useQuestForm({
       }
     },
     (errors) => {
-      // This runs when Zod validation fails
-      console.error('[VALIDATION] Zod Form validation errors:', errors);
-      console.log('[VALIDATION] Form state:', form.getValues());
+      /**
+       * Zod validation failed - log detailed errors for debugging
+       * These logs help identify which fields are failing validation
+       */
+      console.error('[VALIDATION] Form validation errors:', errors);
+
+      // Log child validation errors with details (helps debug child task issues)
+      if (errors.child) {
+        console.error('[VALIDATION] Child task validation errors:', errors.child);
+        const childValues = form.getValues('child');
+        if (Array.isArray(childValues)) {
+          childValues.forEach((child, index) => {
+            console.log(`[VALIDATION] Child ${index}:`, {
+              id: child?.id,
+              title: child?.title,
+              type: child?.type,
+              hasId: !!child?.id,
+            });
+          });
+        }
+      }
 
       // Set field-level errors for proper display under form fields
       Object.entries(errors).forEach(([field, error]) => {

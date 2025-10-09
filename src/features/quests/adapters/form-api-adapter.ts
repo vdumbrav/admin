@@ -289,6 +289,13 @@ function isValidResourceData(data: unknown): data is Record<string, unknown> {
 
 /**
  * Extract child resources from API response with proper type safety
+ *
+ * IMPORTANT: This function extracts resources for child tasks including:
+ * - tweetId, username (for Twitter tasks)
+ * - ui.pop-up.static (for uploaded Task Images)
+ *
+ * Previously only extracted tweetId/username, causing static images to be lost on form load.
+ * Now properly extracts static field from resource.ui.pop-up.static
  */
 function extractChildResources(resourceData: unknown): ChildFormValues['resources'] {
   if (!isValidResourceData(resourceData)) {
@@ -298,7 +305,34 @@ function extractChildResources(resourceData: unknown): ChildFormValues['resource
   const tweetId = typeof resourceData.tweetId === 'string' ? resourceData.tweetId : undefined;
   const username = typeof resourceData.username === 'string' ? resourceData.username : undefined;
 
-  return tweetId || username ? { tweetId, username } : undefined;
+  // Extract UI resources including static image (Task Image field)
+  type ChildUIResources = NonNullable<ChildFormValues['resources']>['ui'];
+  let uiResources: ChildUIResources = undefined;
+
+  if (isValidResourceData(resourceData.ui)) {
+    const popupData = (resourceData.ui)['pop-up'];
+    if (isValidResourceData(popupData)) {
+      const staticImage = typeof popupData.static === 'string' ? popupData.static : undefined;
+      if (staticImage) {
+        uiResources = {
+          'pop-up': {
+            static: staticImage,
+          },
+        };
+      }
+    }
+  }
+
+  // Return resources if any field is present
+  if (tweetId || username || uiResources) {
+    return {
+      ...(tweetId && { tweetId }),
+      ...(username && { username }),
+      ...(uiResources && { ui: uiResources }),
+    };
+  }
+
+  return undefined;
 }
 
 /**
@@ -334,7 +368,7 @@ function convertApiChildToForm(apiChild: TaskResponseDto): ChildFormValues {
       ? `https://x.com/${apiChild.resource.username}/status/${apiChild.resource.tweetId}`
       : apiChild.uri;
 
-  return {
+  const converted = {
     id: apiChild.id, // Include ID for update detection
     title: apiChild.title,
     description: apiChild.description,
@@ -346,6 +380,8 @@ function convertApiChildToForm(apiChild: TaskResponseDto): ChildFormValues {
     uri: childUri, // Restored Tweet URL
     resources: extractChildResources(apiChild.resource),
   };
+
+  return converted;
 }
 
 // ============================================================================
@@ -367,6 +403,7 @@ function convertApiChildToForm(apiChild: TaskResponseDto): ChildFormValues {
  */
 export function formToApi(formData: QuestFormValues): Omit<CreateTaskDto, 'parent_id'> {
   const isUpdate = !!formData.id; // Detect update vs create by ID presence
+
   const baseData = {
     // Core required fields
     title: formData.title,

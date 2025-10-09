@@ -48,6 +48,7 @@ const formResourcesSchema = z
 // Child quest schema for multi-step quests
 
 const childFormSchema = z.object({
+  id: z.number().optional(), // ID for existing child tasks (enables update detection)
   title: z.string().max(80, 'Title cannot exceed 80 characters').optional().default(''),
   description: z.string().max(100, 'Description cannot exceed 100 characters').optional(),
   type: childTypeSchema,
@@ -96,6 +97,7 @@ const iteratorSchema = z
 // Main quest form schema with preset-specific validation
 
 const baseQuestFormShape = {
+  id: z.number().optional(), // ID for existing quests (enables update detection)
   title: z.string().min(1, 'Title is required').max(80, 'Title cannot exceed 80 characters'),
   type: questTypeSchema,
   description: z
@@ -124,6 +126,7 @@ const baseQuestFormShape = {
   start: z.string().nullable().optional(),
   end: z.string().nullable().optional(),
   iterator: iteratorSchema,
+  parent_id: z.number().optional(), // Parent quest ID for child tasks
 } as const;
 
 // Base schema is used in buildQuestFormSchema function

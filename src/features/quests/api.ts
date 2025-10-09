@@ -123,12 +123,26 @@ export const useQuest = (id: number) => {
     isError,
   } = useAdminWaitlistTasksControllerGetTask(id);
 
-  // Handle the API returning array instead of single object
+  // Also fetch all tasks to get children
+  const { data: allTasks } = useAdminWaitlistTasksControllerGetWaitlistTasks();
+
+  // Handle the API returning array instead of single object and attach children
   const quest = useMemo(() => {
     if (!questData) return undefined;
     // If API returns array, take first item, otherwise use as is
-    return Array.isArray(questData) ? questData[0] : questData;
-  }, [questData]);
+    const mainQuest = Array.isArray(questData) ? questData[0] : questData;
+
+    console.log('[USE_QUEST] Main quest loaded:', {
+      id: mainQuest?.id,
+      title: mainQuest?.title,
+      hasChildInAPI: !!mainQuest?.child,
+      childCountInAPI: Array.isArray(mainQuest?.child) ? mainQuest.child.length : 0,
+    });
+
+    // Child tasks are already included in the API response
+    // No need to fetch separately or filter from allTasks
+    return mainQuest;
+  }, [questData, allTasks]);
 
   return {
     data: quest,

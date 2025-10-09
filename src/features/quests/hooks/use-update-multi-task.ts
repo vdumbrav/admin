@@ -2,11 +2,12 @@
  * Multi-task update hook with progress tracking
  * Handles updating parent task + child tasks
  */
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import {
   adminWaitlistTasksControllerCreateTask,
+  adminWaitlistTasksControllerDeleteTask,
   adminWaitlistTasksControllerUpdateTask,
   getAdminWaitlistTasksControllerGetWaitlistTasksQueryKey,
 } from '@/lib/api/generated/admin/admin';
@@ -20,7 +21,7 @@ import type {
   MultiTaskProgressInfo,
 } from '../types/multi-task-types';
 
-export const useUpdateMultiTask = (parentId: number) => {
+export const useUpdateMultiTask = (parentId: number, initialChildren?: ChildFormValues[]) => {
   const queryClient = useQueryClient();
   const queryKey = getAdminWaitlistTasksControllerGetWaitlistTasksQueryKey();
 
@@ -34,25 +35,59 @@ export const useUpdateMultiTask = (parentId: number) => {
   }));
 
   const parentDataRef = useRef<QuestFormValues | null>(null);
+
+  /**
+   * CRITICAL: Store initial children at hook creation time (before any UI deletions)
+   * This ref is used to track which child tasks were deleted in the UI.
+   *
+   * Example flow:
+   * 1. Form loads with 21 child tasks → originalChildrenRef = 21 tasks
+   * 2. User deletes 14 tasks in UI → form has 7 tasks
+   * 3. User saves → compare original 21 vs current 7 = delete 14 tasks via API
+   */
+  const originalChildrenRef = useRef<ChildFormValues[]>(initialChildren ?? []);
   const abortControllerRef = useRef<AbortController | null>(null);
+
+  /**
+   * Update originalChildrenRef when initialChildren changes (e.g., after successful save)
+   * This keeps the baseline in sync with the latest saved state
+   */
+  useEffect(() => {
+    if (initialChildren && initialChildren.length > 0) {
+      originalChildrenRef.current = initialChildren;
+    }
+  }, [initialChildren]);
 
   // Helper function to build child resources with proper inheritance
   const buildChildResources = useCallback(
     (child: ChildFormValues, parentData?: QuestFormValues) => {
-      const buildChildUI = (baseUI?: NonNullable<QuestFormValues['resources']>['ui']) => ({
-        button: getDefaultButtonText(child.type),
-        'pop-up': {
-          name: baseUI?.['pop-up']?.name ?? '',
+      const buildChildUI = (baseUI?: NonNullable<QuestFormValues['resources']>['ui']) => {
+        /**
+         * IMPORTANT: Preserve static image field from child resources
+         * The static field contains the uploaded image URL for child tasks.
+         * Must check both child.resources and baseUI to avoid data loss.
+         */
+        const staticImage = child.resources?.ui?.['pop-up']?.static ?? baseUI?.['pop-up']?.static;
+
+        return {
           button: getDefaultButtonText(child.type),
-          description: baseUI?.['pop-up']?.description ?? '',
-          ...(baseUI?.['pop-up']?.['additional-title'] && {
-            'additional-title': baseUI['pop-up']['additional-title'],
-          }),
-          ...(baseUI?.['pop-up']?.['additional-description'] && {
-            'additional-description': baseUI['pop-up']['additional-description'],
-          }),
-        },
-      });
+          'pop-up': {
+            name: baseUI?.['pop-up']?.name ?? '',
+            button: getDefaultButtonText(child.type),
+            description: baseUI?.['pop-up']?.description ?? '',
+            ...(baseUI?.['pop-up']?.['additional-title'] && {
+              'additional-title': baseUI['pop-up']['additional-title'],
+            }),
+            ...(baseUI?.['pop-up']?.['additional-description'] && {
+              'additional-description': baseUI['pop-up']['additional-description'],
+            }),
+            // Include static image if present (for Task Image uploads)
+            ...(staticImage && {
+              static: staticImage,
+            }),
+          },
+        };
+      };
 
       if (child.resources) {
         return {
@@ -151,6 +186,7 @@ export const useUpdateMultiTask = (parentId: number) => {
   const mutation = useMutation({
     mutationFn: async (formData: QuestFormValues): Promise<MultiTaskCreationResult> => {
       abortControllerRef.current = new AbortController();
+
       parentDataRef.current = formData;
 
       const children = formData.child ?? [];
@@ -199,7 +235,28 @@ export const useUpdateMultiTask = (parentId: number) => {
           completedTasks: 1,
         }));
 
-        // Step 2: Update/Create child tasks
+        // Step 2: Delete removed child tasks
+        // Use original children list to find what was deleted
+        const originalChildren = originalChildrenRef.current;
+        const currentChildIds = children.map((c) => c.id).filter((id): id is number => !!id);
+        const childrenToDelete = originalChildren.filter(
+          (original) => original.id && !currentChildIds.includes(original.id),
+        );
+
+        if (childrenToDelete.length > 0) {
+          for (const childToDelete of childrenToDelete) {
+            try {
+              // childToDelete.id is guaranteed to exist due to filter condition
+              if (!childToDelete.id) continue;
+              await adminWaitlistTasksControllerDeleteTask(childToDelete.id);
+            } catch (error) {
+              console.error(`Failed to delete child task #${childToDelete.id}:`, error);
+              // Continue with other deletions even if one fails
+            }
+          }
+        }
+
+        // Step 3: Update/Create child tasks
         if (children.length > 0) {
           for (let i = 0; i < children.length; i++) {
             if (abortControllerRef.current?.signal?.aborted) {
@@ -226,7 +283,6 @@ export const useUpdateMultiTask = (parentId: number) => {
                   )
                 : await adminWaitlistTasksControllerCreateTask(
                     childTaskData as unknown as CreateTaskDto,
-                    abortControllerRef.current?.signal,
                   );
 
               result.childTasks.push(childTask);
@@ -336,10 +392,7 @@ export const useUpdateMultiTask = (parentId: number) => {
               failedChild.data.id,
               childTaskData as unknown as UpdateTaskDto,
             )
-          : await adminWaitlistTasksControllerCreateTask(
-              childTaskData as unknown as CreateTaskDto,
-              abortControllerRef.current?.signal,
-            );
+          : await adminWaitlistTasksControllerCreateTask(childTaskData as unknown as CreateTaskDto);
 
         setState((prev) => ({
           ...prev,

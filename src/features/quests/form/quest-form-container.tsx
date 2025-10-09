@@ -49,7 +49,7 @@ export function QuestFormContainer({
 
   const isEdit = !!initial?.id;
   const createMultiTask = useCreateMultiTask();
-  const updateMultiTask = useUpdateMultiTask(initial?.id ?? 0);
+  const updateMultiTask = useUpdateMultiTask(initial?.id ?? 0, initial?.child);
   const multiTask = isEdit ? updateMultiTask : createMultiTask;
   const [showProgress, setShowProgress] = useState(false);
   const navigate = useNavigate();
@@ -95,10 +95,8 @@ export function QuestFormContainer({
         // Success - for create, navigate to edit mode; for edit, reload to see changes
         if (!isEdit && result.mainTask?.id) {
           const mainTaskId = result.mainTask.id;
-          console.log('Multi-task create success! Navigating to edit:', mainTaskId);
           void navigate({ to: `/quests/${mainTaskId}` });
         } else {
-          console.log('Multi-task update success! Reloading...');
           // For edit mode, close progress and let parent handle navigation
           setShowProgress(false);
           void onSubmit(values);
