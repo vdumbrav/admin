@@ -8,7 +8,7 @@ import { IconLoader, IconLock, IconRotate } from '@tabler/icons-react';
 import { Info } from 'lucide-react';
 import { type TaskResponseDtoProvider } from '@/lib/api/generated/model';
 import { cn } from '@/lib/utils';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { DateTimePicker } from '@/components/ui/date-time-picker';
@@ -234,6 +234,45 @@ export function QuestFormFields({
           />
         </div>
       )}
+
+      {/* Verification Alert for Join Type */}
+      {(() => {
+        const currentType = form.watch('type');
+        const currentProvider = form.watch('provider');
+
+        // Show alert only for join type with Telegram provider
+        if (currentType === 'join' && currentProvider === 'telegram') {
+          return (
+            <Alert>
+              <Info className='h-4 w-4' />
+              <AlertTitle>Telegram Bot Verification Required</AlertTitle>
+              <AlertDescription>
+                For automatic verification, add the verification bot to your Telegram channel or
+                group with permission to view members.
+                <br />
+                <br />
+                <strong>No bot access?</strong> Change Type to "Dummy" for manual verification
+                without bot.
+              </AlertDescription>
+            </Alert>
+          );
+        }
+
+        // Show alert for other providers with join type
+        if (currentType === 'join' && currentProvider) {
+          return (
+            <Alert>
+              <Info className='h-4 w-4' />
+              <AlertDescription>
+                Type "Join" requires automatic verification. If verification is not available,
+                change Type to "Dummy" for manual completion.
+              </AlertDescription>
+            </Alert>
+          );
+        }
+
+        return null;
+      })()}
 
       {/* Title Field */}
       {isFieldVisible('title', fieldStates) && (

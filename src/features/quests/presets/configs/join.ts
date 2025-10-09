@@ -7,7 +7,7 @@ export const joinPresetConfig: PresetConfig = {
   fieldVisibility: {
     group: 'visible', // social OR partner
     provider: 'visible', // telegram, discord, twitter (X)
-    type: 'hidden', // Always 'join' - hidden per spec
+    type: 'visible', // Can be 'join' (with verification) or 'dummy' (without verification)
     uri: 'visible', // Join URL
     reward: 'visible',
     tasks: 'hidden',
