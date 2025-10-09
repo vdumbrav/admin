@@ -183,14 +183,12 @@ function applyJoinUIRules(values: QuestFormValues): void {
  * Apply UI rules for explore preset
  */
 function applyExploreUIRules(values: QuestFormValues): void {
-  if (!values.resources) {
-    values.resources = toApiResources(
-      ResourcePresets.explore({
-        buttonText: 'Visit',
-        popupDescription: 'Visit the link to complete this quest',
-      }),
-    );
-  }
+  values.resources ??= toApiResources(
+    ResourcePresets.explore({
+      buttonText: 'Visit',
+      popupDescription: 'Visit the link to complete this quest',
+    }),
+  );
 }
 
 // ============================================================================
@@ -202,18 +200,16 @@ function applyExploreUIRules(values: QuestFormValues): void {
  */
 function applySevenDayChallengeUIRules(values: QuestFormValues): void {
   // Ensure resources exist with Daily Quests popup name
-  if (!values.resources) {
-    values.resources = {
-      ui: {
+  values.resources ??= {
+    ui: {
+      button: 'Boost XP',
+      'pop-up': {
+        name: 'Daily Quests',
         button: 'Boost XP',
-        'pop-up': {
-          name: 'Daily Quests',
-          button: 'Boost XP',
-          description: '',
-        },
+        description: '',
       },
-    };
-  }
+    },
+  };
 }
 
 /**
