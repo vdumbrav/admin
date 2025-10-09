@@ -316,9 +316,9 @@ function ensureResourcesStructure(values: QuestFormValues): void {
  * Mapping of child task types to button text
  */
 export const TASK_BUTTON_MAPPING: Record<string, string> = {
-  like: 'Like Tweet',
-  comment: 'Comment on Tweet',
-  share: 'Share Tweet',
+  like: 'Like',
+  comment: 'Comment',
+  share: 'Retweet',
   connect: 'Follow & Engage',
   join: 'Join',
 };
