@@ -38,12 +38,16 @@ export function useAppAuth(): AuthResult {
     return auth.user?.access_token;
   }, [auth]);
 
+  const signinRedirect = React.useCallback(() => {
+    auth.signinRedirect().catch(logError);
+  }, [auth.signinRedirect]);
+
   const signoutRedirect = React.useCallback(() => {
     Promise.resolve(auth.signoutRedirect()).catch((e: unknown) => {
       logError(e);
       toast.error('Failed to sign out');
     });
-  }, [auth]);
+  }, [auth.signoutRedirect]);
 
   const hasAllowedRoleValue = React.useMemo(() => {
     return auth.user ? hasAllowedRoleFromUser(auth.user) : false;
@@ -70,9 +74,7 @@ export function useAppAuth(): AuthResult {
     isAuthenticated: isUserAuthenticated,
     isLoading: auth.isLoading,
     user: auth.user,
-    signinRedirect: () => {
-      auth.signinRedirect().catch(logError);
-    },
+    signinRedirect,
     signoutRedirect,
     getAccessToken,
     roles,
