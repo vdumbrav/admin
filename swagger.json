@@ -6827,6 +6827,44 @@
         ]
       }
     },
+    "/admin/files/upload": {
+      "post": {
+        "description": "Upload file",
+        "operationId": "FilesController_uploadFile",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/UploadFileDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UploadFileResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "Admin"
+        ]
+      }
+    },
     "/webacy/address-risk": {
       "post": {
         "operationId": "WebacyController_checkAddressRisk",
@@ -7086,13 +7124,13 @@
             "format": "date-time",
             "type": "string",
             "description": "Premium active from",
-            "example": "2025-10-20T21:18:43.851Z"
+            "example": "2025-10-20T21:28:10.340Z"
           },
           "active_to": {
             "format": "date-time",
             "type": "string",
             "description": "Premium active to",
-            "example": "2025-10-20T21:18:43.851Z"
+            "example": "2025-10-20T21:28:10.340Z"
           }
         }
       },
@@ -7543,13 +7581,13 @@
             "format": "date-time",
             "type": "string",
             "description": "Task execution start timestamp",
-            "example": "2025-10-20T21:18:44.067Z"
+            "example": "2025-10-20T21:28:10.607Z"
           },
           "completed_at": {
             "format": "date-time",
             "type": "string",
             "description": "Task execution completion timestamp",
-            "example": "2025-10-20T21:18:44.067Z"
+            "example": "2025-10-20T21:28:10.608Z"
           },
           "resources": {
             "type": "object",
@@ -7580,7 +7618,7 @@
             "format": "date-time",
             "type": "string",
             "description": "Task next execution availability timestamp",
-            "example": "2025-10-20T21:18:44.067Z"
+            "example": "2025-10-20T21:28:10.608Z"
           }
         },
         "required": [
@@ -10030,13 +10068,13 @@
             "format": "date-time",
             "type": "string",
             "description": "Invoice expiration timestamp",
-            "example": "2025-10-20T21:18:44.102Z"
+            "example": "2025-10-20T21:28:10.634Z"
           },
           "created_at": {
             "format": "date-time",
             "type": "string",
             "description": "Invoice created timestamp",
-            "example": "2025-10-20T21:18:44.102Z"
+            "example": "2025-10-20T21:28:10.634Z"
           },
           "url": {
             "type": "string",
@@ -11236,13 +11274,13 @@
             "format": "date-time",
             "type": "string",
             "description": "Task active from timestamp",
-            "example": "2025-10-20T21:18:44.418Z"
+            "example": "2025-10-20T21:28:11.014Z"
           },
           "active_to": {
             "format": "date-time",
             "type": "string",
             "description": "Task active to timestamp",
-            "example": "2025-10-20T21:18:44.418Z"
+            "example": "2025-10-20T21:28:11.014Z"
           },
           "preset": {
             "type": "string",
@@ -11507,13 +11545,13 @@
             "format": "date-time",
             "type": "string",
             "description": "Task active from timestamp",
-            "example": "2025-10-20T21:18:44.418Z"
+            "example": "2025-10-20T21:28:11.014Z"
           },
           "active_to": {
             "format": "date-time",
             "type": "string",
             "description": "Task active to timestamp",
-            "example": "2025-10-20T21:18:44.418Z"
+            "example": "2025-10-20T21:28:11.014Z"
           },
           "preset": {
             "type": "string",
@@ -11669,13 +11707,13 @@
             "format": "date-time",
             "type": "string",
             "description": "Task active from timestamp",
-            "example": "2025-10-20T21:18:44.418Z"
+            "example": "2025-10-20T21:28:11.014Z"
           },
           "active_to": {
             "format": "date-time",
             "type": "string",
             "description": "Task active to timestamp",
-            "example": "2025-10-20T21:18:44.418Z"
+            "example": "2025-10-20T21:28:11.014Z"
           },
           "preset": {
             "type": "string",
@@ -11683,6 +11721,31 @@
             "example": "string"
           }
         }
+      },
+      "UploadFileDto": {
+        "type": "object",
+        "properties": {
+          "file": {
+            "type": "string",
+            "format": "binary"
+          }
+        },
+        "required": [
+          "file"
+        ]
+      },
+      "UploadFileResponseDto": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "File URL",
+            "example": "https://example.com/file.jpg"
+          }
+        },
+        "required": [
+          "url"
+        ]
       }
     }
   }
