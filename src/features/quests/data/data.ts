@@ -25,6 +25,7 @@ const GROUP_LABELS: Record<TaskResponseDtoGroup, string> = {
   [TaskResponseDtoGroup.daily]: 'Daily',
   [TaskResponseDtoGroup.referral]: 'Referral',
   [TaskResponseDtoGroup.partner]: 'Partner',
+  [TaskResponseDtoGroup.game]: 'Game',
 };
 
 /**
@@ -42,6 +43,9 @@ const TYPE_LABELS: Record<WaitlistTasksResponseDtoTypeItem, string> = {
   [WaitlistTasksResponseDtoTypeItem.referral]: 'Referral',
   [WaitlistTasksResponseDtoTypeItem.external]: 'External',
   [WaitlistTasksResponseDtoTypeItem.dummy]: 'Dummy',
+  [WaitlistTasksResponseDtoTypeItem['flappy-bird-wlm']]: 'Flappy Bird',
+  [WaitlistTasksResponseDtoTypeItem['tap-card']]: 'Tap Card',
+  [WaitlistTasksResponseDtoTypeItem['snake-wlm']]: 'Snake',
 };
 
 /**
@@ -56,6 +60,7 @@ const PROVIDER_LABELS: Record<TaskResponseDtoProvider, string> = {
   [TaskResponseDtoProvider.walme]: 'Internal',
   [TaskResponseDtoProvider.monetag]: 'Monetag',
   [TaskResponseDtoProvider.adsgram]: 'AdsGram',
+  [TaskResponseDtoProvider.adscard]: 'ADScard',
 };
 
 // ============================================================================
