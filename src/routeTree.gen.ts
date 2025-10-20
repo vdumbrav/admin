@@ -28,6 +28,7 @@ import { Route as AuthenticatedAdscardBalanceIndexRouteImport } from './routes/_
 import { Route as AuthenticatedUsersUserIdRouteImport } from './routes/_authenticated/users/$userId'
 import { Route as AuthenticatedQuestsNewRouteImport } from './routes/_authenticated/quests/new'
 import { Route as AuthenticatedQuestsIdRouteImport } from './routes/_authenticated/quests/$id'
+import { Route as AuthenticatedCardsCardIdRouteImport } from './routes/_authenticated/cards/$cardId'
 import { Route as AuthenticatedQuestsNewPresetRouteImport } from './routes/_authenticated/quests/new/$preset'
 
 const SignInRoute = SignInRouteImport.update({
@@ -134,6 +135,12 @@ const AuthenticatedQuestsIdRoute = AuthenticatedQuestsIdRouteImport.update({
   path: '/quests/$id',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedCardsCardIdRoute =
+  AuthenticatedCardsCardIdRouteImport.update({
+    id: '/cards/$cardId',
+    path: '/cards/$cardId',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedQuestsNewPresetRoute =
   AuthenticatedQuestsNewPresetRouteImport.update({
     id: '/$preset',
@@ -146,6 +153,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRouteRouteWithChildren
   '/sign-in': typeof SignInRoute
   '/auth/callback': typeof AuthCallbackRoute
+  '/cards/$cardId': typeof AuthenticatedCardsCardIdRoute
   '/quests/$id': typeof AuthenticatedQuestsIdRoute
   '/quests/new': typeof AuthenticatedQuestsNewRouteWithChildren
   '/users/$userId': typeof AuthenticatedUsersUserIdRoute
@@ -167,6 +175,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRouteRouteWithChildren
   '/sign-in': typeof SignInRoute
   '/auth/callback': typeof AuthCallbackRoute
+  '/cards/$cardId': typeof AuthenticatedCardsCardIdRoute
   '/quests/$id': typeof AuthenticatedQuestsIdRoute
   '/quests/new': typeof AuthenticatedQuestsNewRouteWithChildren
   '/users/$userId': typeof AuthenticatedUsersUserIdRoute
@@ -190,6 +199,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRouteRouteWithChildren
   '/sign-in': typeof SignInRoute
   '/auth/callback': typeof AuthCallbackRoute
+  '/_authenticated/cards/$cardId': typeof AuthenticatedCardsCardIdRoute
   '/_authenticated/quests/$id': typeof AuthenticatedQuestsIdRoute
   '/_authenticated/quests/new': typeof AuthenticatedQuestsNewRouteWithChildren
   '/_authenticated/users/$userId': typeof AuthenticatedUsersUserIdRoute
@@ -213,6 +223,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/sign-in'
     | '/auth/callback'
+    | '/cards/$cardId'
     | '/quests/$id'
     | '/quests/new'
     | '/users/$userId'
@@ -234,6 +245,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/sign-in'
     | '/auth/callback'
+    | '/cards/$cardId'
     | '/quests/$id'
     | '/quests/new'
     | '/users/$userId'
@@ -256,6 +268,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/sign-in'
     | '/auth/callback'
+    | '/_authenticated/cards/$cardId'
     | '/_authenticated/quests/$id'
     | '/_authenticated/quests/new'
     | '/_authenticated/users/$userId'
@@ -415,6 +428,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedQuestsIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/cards/$cardId': {
+      id: '/_authenticated/cards/$cardId'
+      path: '/cards/$cardId'
+      fullPath: '/cards/$cardId'
+      preLoaderRoute: typeof AuthenticatedCardsCardIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/quests/new/$preset': {
       id: '/_authenticated/quests/new/$preset'
       path: '/$preset'
@@ -440,6 +460,7 @@ const AuthenticatedQuestsNewRouteWithChildren =
   )
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedCardsCardIdRoute: typeof AuthenticatedCardsCardIdRoute
   AuthenticatedQuestsIdRoute: typeof AuthenticatedQuestsIdRoute
   AuthenticatedQuestsNewRoute: typeof AuthenticatedQuestsNewRouteWithChildren
   AuthenticatedUsersUserIdRoute: typeof AuthenticatedUsersUserIdRoute
@@ -457,6 +478,7 @@ interface AuthenticatedRouteRouteChildren {
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedCardsCardIdRoute: AuthenticatedCardsCardIdRoute,
   AuthenticatedQuestsIdRoute: AuthenticatedQuestsIdRoute,
   AuthenticatedQuestsNewRoute: AuthenticatedQuestsNewRouteWithChildren,
   AuthenticatedUsersUserIdRoute: AuthenticatedUsersUserIdRoute,
