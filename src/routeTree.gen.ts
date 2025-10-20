@@ -14,7 +14,17 @@ import { Route as AuthRouteRouteImport } from './routes/auth/route'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthCallbackRouteImport } from './routes/auth/callback'
+import { Route as AuthenticatedUsersIndexRouteImport } from './routes/_authenticated/users/index'
+import { Route as AuthenticatedTransactionsIndexRouteImport } from './routes/_authenticated/transactions/index'
+import { Route as AuthenticatedReferralsIndexRouteImport } from './routes/_authenticated/referrals/index'
 import { Route as AuthenticatedQuestsIndexRouteImport } from './routes/_authenticated/quests/index'
+import { Route as AuthenticatedPremiumIndexRouteImport } from './routes/_authenticated/premium/index'
+import { Route as AuthenticatedOrdersIndexRouteImport } from './routes/_authenticated/orders/index'
+import { Route as AuthenticatedNotificationsIndexRouteImport } from './routes/_authenticated/notifications/index'
+import { Route as AuthenticatedDashboardIndexRouteImport } from './routes/_authenticated/dashboard/index'
+import { Route as AuthenticatedCardsIndexRouteImport } from './routes/_authenticated/cards/index'
+import { Route as AuthenticatedAnalyticsIndexRouteImport } from './routes/_authenticated/analytics/index'
+import { Route as AuthenticatedAdscardBalanceIndexRouteImport } from './routes/_authenticated/adscard-balance/index'
 import { Route as AuthenticatedQuestsNewRouteImport } from './routes/_authenticated/quests/new'
 import { Route as AuthenticatedQuestsIdRouteImport } from './routes/_authenticated/quests/$id'
 import { Route as AuthenticatedQuestsNewPresetRouteImport } from './routes/_authenticated/quests/new/$preset'
@@ -43,10 +53,68 @@ const AuthCallbackRoute = AuthCallbackRouteImport.update({
   path: '/callback',
   getParentRoute: () => AuthRouteRoute,
 } as any)
+const AuthenticatedUsersIndexRoute = AuthenticatedUsersIndexRouteImport.update({
+  id: '/users/',
+  path: '/users/',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedTransactionsIndexRoute =
+  AuthenticatedTransactionsIndexRouteImport.update({
+    id: '/transactions/',
+    path: '/transactions/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedReferralsIndexRoute =
+  AuthenticatedReferralsIndexRouteImport.update({
+    id: '/referrals/',
+    path: '/referrals/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedQuestsIndexRoute =
   AuthenticatedQuestsIndexRouteImport.update({
     id: '/quests/',
     path: '/quests/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedPremiumIndexRoute =
+  AuthenticatedPremiumIndexRouteImport.update({
+    id: '/premium/',
+    path: '/premium/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedOrdersIndexRoute =
+  AuthenticatedOrdersIndexRouteImport.update({
+    id: '/orders/',
+    path: '/orders/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedNotificationsIndexRoute =
+  AuthenticatedNotificationsIndexRouteImport.update({
+    id: '/notifications/',
+    path: '/notifications/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardIndexRoute =
+  AuthenticatedDashboardIndexRouteImport.update({
+    id: '/dashboard/',
+    path: '/dashboard/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedCardsIndexRoute = AuthenticatedCardsIndexRouteImport.update({
+  id: '/cards/',
+  path: '/cards/',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedAnalyticsIndexRoute =
+  AuthenticatedAnalyticsIndexRouteImport.update({
+    id: '/analytics/',
+    path: '/analytics/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAdscardBalanceIndexRoute =
+  AuthenticatedAdscardBalanceIndexRouteImport.update({
+    id: '/adscard-balance/',
+    path: '/adscard-balance/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedQuestsNewRoute = AuthenticatedQuestsNewRouteImport.update({
@@ -73,7 +141,17 @@ export interface FileRoutesByFullPath {
   '/auth/callback': typeof AuthCallbackRoute
   '/quests/$id': typeof AuthenticatedQuestsIdRoute
   '/quests/new': typeof AuthenticatedQuestsNewRouteWithChildren
+  '/adscard-balance': typeof AuthenticatedAdscardBalanceIndexRoute
+  '/analytics': typeof AuthenticatedAnalyticsIndexRoute
+  '/cards': typeof AuthenticatedCardsIndexRoute
+  '/dashboard': typeof AuthenticatedDashboardIndexRoute
+  '/notifications': typeof AuthenticatedNotificationsIndexRoute
+  '/orders': typeof AuthenticatedOrdersIndexRoute
+  '/premium': typeof AuthenticatedPremiumIndexRoute
   '/quests': typeof AuthenticatedQuestsIndexRoute
+  '/referrals': typeof AuthenticatedReferralsIndexRoute
+  '/transactions': typeof AuthenticatedTransactionsIndexRoute
+  '/users': typeof AuthenticatedUsersIndexRoute
   '/quests/new/$preset': typeof AuthenticatedQuestsNewPresetRoute
 }
 export interface FileRoutesByTo {
@@ -83,7 +161,17 @@ export interface FileRoutesByTo {
   '/auth/callback': typeof AuthCallbackRoute
   '/quests/$id': typeof AuthenticatedQuestsIdRoute
   '/quests/new': typeof AuthenticatedQuestsNewRouteWithChildren
+  '/adscard-balance': typeof AuthenticatedAdscardBalanceIndexRoute
+  '/analytics': typeof AuthenticatedAnalyticsIndexRoute
+  '/cards': typeof AuthenticatedCardsIndexRoute
+  '/dashboard': typeof AuthenticatedDashboardIndexRoute
+  '/notifications': typeof AuthenticatedNotificationsIndexRoute
+  '/orders': typeof AuthenticatedOrdersIndexRoute
+  '/premium': typeof AuthenticatedPremiumIndexRoute
   '/quests': typeof AuthenticatedQuestsIndexRoute
+  '/referrals': typeof AuthenticatedReferralsIndexRoute
+  '/transactions': typeof AuthenticatedTransactionsIndexRoute
+  '/users': typeof AuthenticatedUsersIndexRoute
   '/quests/new/$preset': typeof AuthenticatedQuestsNewPresetRoute
 }
 export interface FileRoutesById {
@@ -95,7 +183,17 @@ export interface FileRoutesById {
   '/auth/callback': typeof AuthCallbackRoute
   '/_authenticated/quests/$id': typeof AuthenticatedQuestsIdRoute
   '/_authenticated/quests/new': typeof AuthenticatedQuestsNewRouteWithChildren
+  '/_authenticated/adscard-balance/': typeof AuthenticatedAdscardBalanceIndexRoute
+  '/_authenticated/analytics/': typeof AuthenticatedAnalyticsIndexRoute
+  '/_authenticated/cards/': typeof AuthenticatedCardsIndexRoute
+  '/_authenticated/dashboard/': typeof AuthenticatedDashboardIndexRoute
+  '/_authenticated/notifications/': typeof AuthenticatedNotificationsIndexRoute
+  '/_authenticated/orders/': typeof AuthenticatedOrdersIndexRoute
+  '/_authenticated/premium/': typeof AuthenticatedPremiumIndexRoute
   '/_authenticated/quests/': typeof AuthenticatedQuestsIndexRoute
+  '/_authenticated/referrals/': typeof AuthenticatedReferralsIndexRoute
+  '/_authenticated/transactions/': typeof AuthenticatedTransactionsIndexRoute
+  '/_authenticated/users/': typeof AuthenticatedUsersIndexRoute
   '/_authenticated/quests/new/$preset': typeof AuthenticatedQuestsNewPresetRoute
 }
 export interface FileRouteTypes {
@@ -107,7 +205,17 @@ export interface FileRouteTypes {
     | '/auth/callback'
     | '/quests/$id'
     | '/quests/new'
+    | '/adscard-balance'
+    | '/analytics'
+    | '/cards'
+    | '/dashboard'
+    | '/notifications'
+    | '/orders'
+    | '/premium'
     | '/quests'
+    | '/referrals'
+    | '/transactions'
+    | '/users'
     | '/quests/new/$preset'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -117,7 +225,17 @@ export interface FileRouteTypes {
     | '/auth/callback'
     | '/quests/$id'
     | '/quests/new'
+    | '/adscard-balance'
+    | '/analytics'
+    | '/cards'
+    | '/dashboard'
+    | '/notifications'
+    | '/orders'
+    | '/premium'
     | '/quests'
+    | '/referrals'
+    | '/transactions'
+    | '/users'
     | '/quests/new/$preset'
   id:
     | '__root__'
@@ -128,7 +246,17 @@ export interface FileRouteTypes {
     | '/auth/callback'
     | '/_authenticated/quests/$id'
     | '/_authenticated/quests/new'
+    | '/_authenticated/adscard-balance/'
+    | '/_authenticated/analytics/'
+    | '/_authenticated/cards/'
+    | '/_authenticated/dashboard/'
+    | '/_authenticated/notifications/'
+    | '/_authenticated/orders/'
+    | '/_authenticated/premium/'
     | '/_authenticated/quests/'
+    | '/_authenticated/referrals/'
+    | '/_authenticated/transactions/'
+    | '/_authenticated/users/'
     | '/_authenticated/quests/new/$preset'
   fileRoutesById: FileRoutesById
 }
@@ -176,11 +304,81 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthCallbackRouteImport
       parentRoute: typeof AuthRouteRoute
     }
+    '/_authenticated/users/': {
+      id: '/_authenticated/users/'
+      path: '/users'
+      fullPath: '/users'
+      preLoaderRoute: typeof AuthenticatedUsersIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/transactions/': {
+      id: '/_authenticated/transactions/'
+      path: '/transactions'
+      fullPath: '/transactions'
+      preLoaderRoute: typeof AuthenticatedTransactionsIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/referrals/': {
+      id: '/_authenticated/referrals/'
+      path: '/referrals'
+      fullPath: '/referrals'
+      preLoaderRoute: typeof AuthenticatedReferralsIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/quests/': {
       id: '/_authenticated/quests/'
       path: '/quests'
       fullPath: '/quests'
       preLoaderRoute: typeof AuthenticatedQuestsIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/premium/': {
+      id: '/_authenticated/premium/'
+      path: '/premium'
+      fullPath: '/premium'
+      preLoaderRoute: typeof AuthenticatedPremiumIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/orders/': {
+      id: '/_authenticated/orders/'
+      path: '/orders'
+      fullPath: '/orders'
+      preLoaderRoute: typeof AuthenticatedOrdersIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/notifications/': {
+      id: '/_authenticated/notifications/'
+      path: '/notifications'
+      fullPath: '/notifications'
+      preLoaderRoute: typeof AuthenticatedNotificationsIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/': {
+      id: '/_authenticated/dashboard/'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof AuthenticatedDashboardIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/cards/': {
+      id: '/_authenticated/cards/'
+      path: '/cards'
+      fullPath: '/cards'
+      preLoaderRoute: typeof AuthenticatedCardsIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/analytics/': {
+      id: '/_authenticated/analytics/'
+      path: '/analytics'
+      fullPath: '/analytics'
+      preLoaderRoute: typeof AuthenticatedAnalyticsIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/adscard-balance/': {
+      id: '/_authenticated/adscard-balance/'
+      path: '/adscard-balance'
+      fullPath: '/adscard-balance'
+      preLoaderRoute: typeof AuthenticatedAdscardBalanceIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/quests/new': {
@@ -224,13 +422,33 @@ const AuthenticatedQuestsNewRouteWithChildren =
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedQuestsIdRoute: typeof AuthenticatedQuestsIdRoute
   AuthenticatedQuestsNewRoute: typeof AuthenticatedQuestsNewRouteWithChildren
+  AuthenticatedAdscardBalanceIndexRoute: typeof AuthenticatedAdscardBalanceIndexRoute
+  AuthenticatedAnalyticsIndexRoute: typeof AuthenticatedAnalyticsIndexRoute
+  AuthenticatedCardsIndexRoute: typeof AuthenticatedCardsIndexRoute
+  AuthenticatedDashboardIndexRoute: typeof AuthenticatedDashboardIndexRoute
+  AuthenticatedNotificationsIndexRoute: typeof AuthenticatedNotificationsIndexRoute
+  AuthenticatedOrdersIndexRoute: typeof AuthenticatedOrdersIndexRoute
+  AuthenticatedPremiumIndexRoute: typeof AuthenticatedPremiumIndexRoute
   AuthenticatedQuestsIndexRoute: typeof AuthenticatedQuestsIndexRoute
+  AuthenticatedReferralsIndexRoute: typeof AuthenticatedReferralsIndexRoute
+  AuthenticatedTransactionsIndexRoute: typeof AuthenticatedTransactionsIndexRoute
+  AuthenticatedUsersIndexRoute: typeof AuthenticatedUsersIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedQuestsIdRoute: AuthenticatedQuestsIdRoute,
   AuthenticatedQuestsNewRoute: AuthenticatedQuestsNewRouteWithChildren,
+  AuthenticatedAdscardBalanceIndexRoute: AuthenticatedAdscardBalanceIndexRoute,
+  AuthenticatedAnalyticsIndexRoute: AuthenticatedAnalyticsIndexRoute,
+  AuthenticatedCardsIndexRoute: AuthenticatedCardsIndexRoute,
+  AuthenticatedDashboardIndexRoute: AuthenticatedDashboardIndexRoute,
+  AuthenticatedNotificationsIndexRoute: AuthenticatedNotificationsIndexRoute,
+  AuthenticatedOrdersIndexRoute: AuthenticatedOrdersIndexRoute,
+  AuthenticatedPremiumIndexRoute: AuthenticatedPremiumIndexRoute,
   AuthenticatedQuestsIndexRoute: AuthenticatedQuestsIndexRoute,
+  AuthenticatedReferralsIndexRoute: AuthenticatedReferralsIndexRoute,
+  AuthenticatedTransactionsIndexRoute: AuthenticatedTransactionsIndexRoute,
+  AuthenticatedUsersIndexRoute: AuthenticatedUsersIndexRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
