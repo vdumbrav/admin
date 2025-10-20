@@ -17,7 +17,7 @@ import {
   IconServer,
   IconNetwork,
   IconMoneybag,
-  IconVault,
+  IconPigMoney,
   IconLanguage,
 } from '@tabler/icons-react';
 import { type SidebarData } from '../types';
@@ -152,7 +152,7 @@ export const sidebarData: SidebarData = {
             {
               title: 'Treasuries',
               url: '/markets/treasuries',
-              icon: IconVault,
+              icon: IconPigMoney,
               isActive: (pathname: string) => pathname.startsWith('/markets/treasuries'),
             },
             {

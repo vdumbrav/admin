@@ -1,4 +1,5 @@
 import axios, { type AxiosInstance } from 'axios';
+import type { Coin } from '../types';
 
 const MARKETS_API_URL =
   import.meta.env.VITE_MARKETS_API_URL || 'https://markets.moliedev.xyz/admin/api';
@@ -70,10 +71,10 @@ class MarketsApiClient {
 
   // Resource-specific methods
   coins = {
-    getAll: () => this.getAll('coins'),
-    getOne: (id: number) => this.getOne('coins', id),
-    create: (data: unknown) => this.create('coins', data),
-    update: (id: number, data: unknown) => this.update('coins', id, data),
+    getAll: () => this.getAll<Coin>('coins'),
+    getOne: (id: number) => this.getOne<Coin>('coins', id),
+    create: (data: Partial<Coin>) => this.create<Coin, Partial<Coin>>('coins', data),
+    update: (id: number, data: Partial<Coin>) => this.update<Coin, Partial<Coin>>('coins', id, data),
     delete: (id: number) => this.delete('coins', id),
   };
 

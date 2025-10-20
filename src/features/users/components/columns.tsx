@@ -32,12 +32,6 @@ export const columns: ColumnDef<User>[] = [
     cell: ({ row }) => {
       const user = row.original;
       const displayName = user.name || user.nickname || user.email || 'Unknown';
-      const initials = displayName
-        .split(' ')
-        .map((n) => n[0])
-        .join('')
-        .toUpperCase()
-        .slice(0, 2);
 
       return (
         <div className="flex items-center gap-3">
