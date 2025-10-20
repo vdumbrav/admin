@@ -29,6 +29,14 @@ import { Route as AuthenticatedUsersUserIdRouteImport } from './routes/_authenti
 import { Route as AuthenticatedQuestsNewRouteImport } from './routes/_authenticated/quests/new'
 import { Route as AuthenticatedQuestsIdRouteImport } from './routes/_authenticated/quests/$id'
 import { Route as AuthenticatedCardsCardIdRouteImport } from './routes/_authenticated/cards/$cardId'
+import { Route as AuthenticatedMarketsTreasuriesIndexRouteImport } from './routes/_authenticated/markets/treasuries/index'
+import { Route as AuthenticatedMarketsPlatformsIndexRouteImport } from './routes/_authenticated/markets/platforms/index'
+import { Route as AuthenticatedMarketsLanguagesIndexRouteImport } from './routes/_authenticated/markets/languages/index'
+import { Route as AuthenticatedMarketsFundsIndexRouteImport } from './routes/_authenticated/markets/funds/index'
+import { Route as AuthenticatedMarketsExchangesIndexRouteImport } from './routes/_authenticated/markets/exchanges/index'
+import { Route as AuthenticatedMarketsCoinsIndexRouteImport } from './routes/_authenticated/markets/coins/index'
+import { Route as AuthenticatedMarketsChainsIndexRouteImport } from './routes/_authenticated/markets/chains/index'
+import { Route as AuthenticatedMarketsCategoriesIndexRouteImport } from './routes/_authenticated/markets/categories/index'
 import { Route as AuthenticatedQuestsNewPresetRouteImport } from './routes/_authenticated/quests/new/$preset'
 
 const SignInRoute = SignInRouteImport.update({
@@ -141,6 +149,54 @@ const AuthenticatedCardsCardIdRoute =
     path: '/cards/$cardId',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedMarketsTreasuriesIndexRoute =
+  AuthenticatedMarketsTreasuriesIndexRouteImport.update({
+    id: '/markets/treasuries/',
+    path: '/markets/treasuries/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedMarketsPlatformsIndexRoute =
+  AuthenticatedMarketsPlatformsIndexRouteImport.update({
+    id: '/markets/platforms/',
+    path: '/markets/platforms/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedMarketsLanguagesIndexRoute =
+  AuthenticatedMarketsLanguagesIndexRouteImport.update({
+    id: '/markets/languages/',
+    path: '/markets/languages/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedMarketsFundsIndexRoute =
+  AuthenticatedMarketsFundsIndexRouteImport.update({
+    id: '/markets/funds/',
+    path: '/markets/funds/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedMarketsExchangesIndexRoute =
+  AuthenticatedMarketsExchangesIndexRouteImport.update({
+    id: '/markets/exchanges/',
+    path: '/markets/exchanges/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedMarketsCoinsIndexRoute =
+  AuthenticatedMarketsCoinsIndexRouteImport.update({
+    id: '/markets/coins/',
+    path: '/markets/coins/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedMarketsChainsIndexRoute =
+  AuthenticatedMarketsChainsIndexRouteImport.update({
+    id: '/markets/chains/',
+    path: '/markets/chains/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedMarketsCategoriesIndexRoute =
+  AuthenticatedMarketsCategoriesIndexRouteImport.update({
+    id: '/markets/categories/',
+    path: '/markets/categories/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedQuestsNewPresetRoute =
   AuthenticatedQuestsNewPresetRouteImport.update({
     id: '/$preset',
@@ -169,6 +225,14 @@ export interface FileRoutesByFullPath {
   '/transactions': typeof AuthenticatedTransactionsIndexRoute
   '/users': typeof AuthenticatedUsersIndexRoute
   '/quests/new/$preset': typeof AuthenticatedQuestsNewPresetRoute
+  '/markets/categories': typeof AuthenticatedMarketsCategoriesIndexRoute
+  '/markets/chains': typeof AuthenticatedMarketsChainsIndexRoute
+  '/markets/coins': typeof AuthenticatedMarketsCoinsIndexRoute
+  '/markets/exchanges': typeof AuthenticatedMarketsExchangesIndexRoute
+  '/markets/funds': typeof AuthenticatedMarketsFundsIndexRoute
+  '/markets/languages': typeof AuthenticatedMarketsLanguagesIndexRoute
+  '/markets/platforms': typeof AuthenticatedMarketsPlatformsIndexRoute
+  '/markets/treasuries': typeof AuthenticatedMarketsTreasuriesIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -191,6 +255,14 @@ export interface FileRoutesByTo {
   '/transactions': typeof AuthenticatedTransactionsIndexRoute
   '/users': typeof AuthenticatedUsersIndexRoute
   '/quests/new/$preset': typeof AuthenticatedQuestsNewPresetRoute
+  '/markets/categories': typeof AuthenticatedMarketsCategoriesIndexRoute
+  '/markets/chains': typeof AuthenticatedMarketsChainsIndexRoute
+  '/markets/coins': typeof AuthenticatedMarketsCoinsIndexRoute
+  '/markets/exchanges': typeof AuthenticatedMarketsExchangesIndexRoute
+  '/markets/funds': typeof AuthenticatedMarketsFundsIndexRoute
+  '/markets/languages': typeof AuthenticatedMarketsLanguagesIndexRoute
+  '/markets/platforms': typeof AuthenticatedMarketsPlatformsIndexRoute
+  '/markets/treasuries': typeof AuthenticatedMarketsTreasuriesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -215,6 +287,14 @@ export interface FileRoutesById {
   '/_authenticated/transactions/': typeof AuthenticatedTransactionsIndexRoute
   '/_authenticated/users/': typeof AuthenticatedUsersIndexRoute
   '/_authenticated/quests/new/$preset': typeof AuthenticatedQuestsNewPresetRoute
+  '/_authenticated/markets/categories/': typeof AuthenticatedMarketsCategoriesIndexRoute
+  '/_authenticated/markets/chains/': typeof AuthenticatedMarketsChainsIndexRoute
+  '/_authenticated/markets/coins/': typeof AuthenticatedMarketsCoinsIndexRoute
+  '/_authenticated/markets/exchanges/': typeof AuthenticatedMarketsExchangesIndexRoute
+  '/_authenticated/markets/funds/': typeof AuthenticatedMarketsFundsIndexRoute
+  '/_authenticated/markets/languages/': typeof AuthenticatedMarketsLanguagesIndexRoute
+  '/_authenticated/markets/platforms/': typeof AuthenticatedMarketsPlatformsIndexRoute
+  '/_authenticated/markets/treasuries/': typeof AuthenticatedMarketsTreasuriesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -239,6 +319,14 @@ export interface FileRouteTypes {
     | '/transactions'
     | '/users'
     | '/quests/new/$preset'
+    | '/markets/categories'
+    | '/markets/chains'
+    | '/markets/coins'
+    | '/markets/exchanges'
+    | '/markets/funds'
+    | '/markets/languages'
+    | '/markets/platforms'
+    | '/markets/treasuries'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -261,6 +349,14 @@ export interface FileRouteTypes {
     | '/transactions'
     | '/users'
     | '/quests/new/$preset'
+    | '/markets/categories'
+    | '/markets/chains'
+    | '/markets/coins'
+    | '/markets/exchanges'
+    | '/markets/funds'
+    | '/markets/languages'
+    | '/markets/platforms'
+    | '/markets/treasuries'
   id:
     | '__root__'
     | '/'
@@ -284,6 +380,14 @@ export interface FileRouteTypes {
     | '/_authenticated/transactions/'
     | '/_authenticated/users/'
     | '/_authenticated/quests/new/$preset'
+    | '/_authenticated/markets/categories/'
+    | '/_authenticated/markets/chains/'
+    | '/_authenticated/markets/coins/'
+    | '/_authenticated/markets/exchanges/'
+    | '/_authenticated/markets/funds/'
+    | '/_authenticated/markets/languages/'
+    | '/_authenticated/markets/platforms/'
+    | '/_authenticated/markets/treasuries/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -435,6 +539,62 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCardsCardIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/markets/treasuries/': {
+      id: '/_authenticated/markets/treasuries/'
+      path: '/markets/treasuries'
+      fullPath: '/markets/treasuries'
+      preLoaderRoute: typeof AuthenticatedMarketsTreasuriesIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/markets/platforms/': {
+      id: '/_authenticated/markets/platforms/'
+      path: '/markets/platforms'
+      fullPath: '/markets/platforms'
+      preLoaderRoute: typeof AuthenticatedMarketsPlatformsIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/markets/languages/': {
+      id: '/_authenticated/markets/languages/'
+      path: '/markets/languages'
+      fullPath: '/markets/languages'
+      preLoaderRoute: typeof AuthenticatedMarketsLanguagesIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/markets/funds/': {
+      id: '/_authenticated/markets/funds/'
+      path: '/markets/funds'
+      fullPath: '/markets/funds'
+      preLoaderRoute: typeof AuthenticatedMarketsFundsIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/markets/exchanges/': {
+      id: '/_authenticated/markets/exchanges/'
+      path: '/markets/exchanges'
+      fullPath: '/markets/exchanges'
+      preLoaderRoute: typeof AuthenticatedMarketsExchangesIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/markets/coins/': {
+      id: '/_authenticated/markets/coins/'
+      path: '/markets/coins'
+      fullPath: '/markets/coins'
+      preLoaderRoute: typeof AuthenticatedMarketsCoinsIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/markets/chains/': {
+      id: '/_authenticated/markets/chains/'
+      path: '/markets/chains'
+      fullPath: '/markets/chains'
+      preLoaderRoute: typeof AuthenticatedMarketsChainsIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/markets/categories/': {
+      id: '/_authenticated/markets/categories/'
+      path: '/markets/categories'
+      fullPath: '/markets/categories'
+      preLoaderRoute: typeof AuthenticatedMarketsCategoriesIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/quests/new/$preset': {
       id: '/_authenticated/quests/new/$preset'
       path: '/$preset'
@@ -475,6 +635,14 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedReferralsIndexRoute: typeof AuthenticatedReferralsIndexRoute
   AuthenticatedTransactionsIndexRoute: typeof AuthenticatedTransactionsIndexRoute
   AuthenticatedUsersIndexRoute: typeof AuthenticatedUsersIndexRoute
+  AuthenticatedMarketsCategoriesIndexRoute: typeof AuthenticatedMarketsCategoriesIndexRoute
+  AuthenticatedMarketsChainsIndexRoute: typeof AuthenticatedMarketsChainsIndexRoute
+  AuthenticatedMarketsCoinsIndexRoute: typeof AuthenticatedMarketsCoinsIndexRoute
+  AuthenticatedMarketsExchangesIndexRoute: typeof AuthenticatedMarketsExchangesIndexRoute
+  AuthenticatedMarketsFundsIndexRoute: typeof AuthenticatedMarketsFundsIndexRoute
+  AuthenticatedMarketsLanguagesIndexRoute: typeof AuthenticatedMarketsLanguagesIndexRoute
+  AuthenticatedMarketsPlatformsIndexRoute: typeof AuthenticatedMarketsPlatformsIndexRoute
+  AuthenticatedMarketsTreasuriesIndexRoute: typeof AuthenticatedMarketsTreasuriesIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -493,6 +661,19 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedReferralsIndexRoute: AuthenticatedReferralsIndexRoute,
   AuthenticatedTransactionsIndexRoute: AuthenticatedTransactionsIndexRoute,
   AuthenticatedUsersIndexRoute: AuthenticatedUsersIndexRoute,
+  AuthenticatedMarketsCategoriesIndexRoute:
+    AuthenticatedMarketsCategoriesIndexRoute,
+  AuthenticatedMarketsChainsIndexRoute: AuthenticatedMarketsChainsIndexRoute,
+  AuthenticatedMarketsCoinsIndexRoute: AuthenticatedMarketsCoinsIndexRoute,
+  AuthenticatedMarketsExchangesIndexRoute:
+    AuthenticatedMarketsExchangesIndexRoute,
+  AuthenticatedMarketsFundsIndexRoute: AuthenticatedMarketsFundsIndexRoute,
+  AuthenticatedMarketsLanguagesIndexRoute:
+    AuthenticatedMarketsLanguagesIndexRoute,
+  AuthenticatedMarketsPlatformsIndexRoute:
+    AuthenticatedMarketsPlatformsIndexRoute,
+  AuthenticatedMarketsTreasuriesIndexRoute:
+    AuthenticatedMarketsTreasuriesIndexRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =

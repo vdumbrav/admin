@@ -10,6 +10,15 @@ import {
   IconGift,
   IconCrown,
   IconBell,
+  IconChartBar,
+  IconCoin,
+  IconCategory,
+  IconBuildingBank,
+  IconServer,
+  IconNetwork,
+  IconMoneybag,
+  IconVault,
+  IconLanguage,
 } from '@tabler/icons-react';
 import { type SidebarData } from '../types';
 
@@ -93,6 +102,66 @@ export const sidebarData: SidebarData = {
           url: '/premium',
           icon: IconCrown,
           isActive: (pathname: string) => pathname.startsWith('/premium'),
+        },
+      ],
+    },
+    {
+      title: 'Markets Data',
+      items: [
+        {
+          title: 'Markets',
+          icon: IconChartBar,
+          isActive: (pathname: string) => pathname.startsWith('/markets'),
+          items: [
+            {
+              title: 'Coins',
+              url: '/markets/coins',
+              icon: IconCoin,
+              isActive: (pathname: string) => pathname.startsWith('/markets/coins'),
+            },
+            {
+              title: 'Categories',
+              url: '/markets/categories',
+              icon: IconCategory,
+              isActive: (pathname: string) => pathname.startsWith('/markets/categories'),
+            },
+            {
+              title: 'Exchanges',
+              url: '/markets/exchanges',
+              icon: IconBuildingBank,
+              isActive: (pathname: string) => pathname.startsWith('/markets/exchanges'),
+            },
+            {
+              title: 'Platforms',
+              url: '/markets/platforms',
+              icon: IconServer,
+              isActive: (pathname: string) => pathname.startsWith('/markets/platforms'),
+            },
+            {
+              title: 'Chains',
+              url: '/markets/chains',
+              icon: IconNetwork,
+              isActive: (pathname: string) => pathname.startsWith('/markets/chains'),
+            },
+            {
+              title: 'Funds',
+              url: '/markets/funds',
+              icon: IconMoneybag,
+              isActive: (pathname: string) => pathname.startsWith('/markets/funds'),
+            },
+            {
+              title: 'Treasuries',
+              url: '/markets/treasuries',
+              icon: IconVault,
+              isActive: (pathname: string) => pathname.startsWith('/markets/treasuries'),
+            },
+            {
+              title: 'Languages',
+              url: '/markets/languages',
+              icon: IconLanguage,
+              isActive: (pathname: string) => pathname.startsWith('/markets/languages'),
+            },
+          ],
         },
       ],
     },
