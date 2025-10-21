@@ -21,7 +21,6 @@ import {
   IconLanguage,
   IconChartPie,
   IconUserCircle,
-  IconPalette,
 } from '@tabler/icons-react';
 import { type SidebarData } from '../types';
 
