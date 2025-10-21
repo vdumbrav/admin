@@ -99,6 +99,9 @@ export const columns: ColumnDef<User>[] = [
         </Badge>
       );
     },
+    filterFn: (row, id, value) => {
+      return row.getValue(id) === value;
+    },
   },
   {
     accessorKey: 'createdAt',
