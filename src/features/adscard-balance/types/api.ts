@@ -52,3 +52,43 @@ export interface BalanceInfo {
   pendingTopups: number;
   availableForCards: number;
 }
+
+// NOWPayments Topup Types
+export type CryptoNetwork = 'TRC20' | 'ERC20';
+export type CryptoCurrency = 'USDT';
+
+export interface CryptoTopupRequest {
+  amount: number; // USD amount
+  currency: CryptoCurrency;
+  network: CryptoNetwork;
+}
+
+export interface CryptoTopupResponse {
+  paymentId: string;
+  paymentUrl: string;
+  payAddress: string;
+  payAmount: number;
+  payCurrency: string;
+  priceAmount: number;
+  priceCurrency: string;
+  orderDescription: string;
+  orderId: string;
+  paymentStatus: 'waiting' | 'confirming' | 'confirmed' | 'sending' | 'partially_paid' | 'finished' | 'failed' | 'refunded' | 'expired';
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CryptoTopupStatusResponse {
+  paymentId: string;
+  paymentStatus: string;
+  payAddress: string;
+  payCurrency: string;
+  priceAmount: number;
+  priceCurrency: string;
+  actuallyPaid: number;
+  purchaseId: string;
+  orderId: string;
+  orderDescription: string;
+  outcomeAmount: number;
+  outcomeCurrency: string;
+}
