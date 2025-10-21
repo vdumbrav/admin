@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
-import { customInstance } from '@/lib/api/client/orvalMutator';
+import { orvalMutator } from '@/lib/api/client/orvalMutator';
+import { useAppAuth } from '@/auth/hooks';
 import type { User } from '../types';
 
 export interface UserListResponse {
@@ -11,6 +12,8 @@ export interface UserListResponse {
 }
 
 export const useAdminUsers = (page: number = 1, limit: number = 50, search?: string) => {
+  const auth = useAppAuth();
+
   return useQuery({
     queryKey: ['admin', 'users', page, limit, search],
     queryFn: async (): Promise<UserListResponse> => {
@@ -23,12 +26,15 @@ export const useAdminUsers = (page: number = 1, limit: number = 50, search?: str
         params.append('search', search);
       }
 
-      const response = await customInstance<UserListResponse>({
+      const token = await auth.getAccessToken();
+
+      return orvalMutator<UserListResponse>({
         url: `/admin/users?${params.toString()}`,
         method: 'GET',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
-
-      return response.data;
     },
   });
 };
