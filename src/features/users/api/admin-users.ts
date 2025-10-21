@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { orvalMutator } from '@/lib/api/client/orvalMutator';
 import { useAppAuth } from '@/auth/hooks';
 import type { User } from '../types';
@@ -170,5 +170,101 @@ export const useAdminUserDetails = (userId: string) => {
       });
     },
     enabled: !!userId,
+  });
+};
+
+// Mutation for updating user role
+export const useUpdateUserRole = () => {
+  const auth = useAppAuth();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ userId, role }: { userId: number; role: string }) => {
+      const token = await auth.getAccessToken();
+
+      return orvalMutator({
+        url: `/admin/users/${userId}/role`,
+        method: 'PUT',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        data: { role },
+      });
+    },
+    onSuccess: (_data, variables) => {
+      // Invalidate user details query to refetch
+      queryClient.invalidateQueries({ queryKey: ['admin', 'users', variables.userId.toString(), 'details'] });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
+    },
+  });
+};
+
+// Mutation for freezing a card
+export const useFreezeCard = () => {
+  const auth = useAppAuth();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ userId, cardId }: { userId: number; cardId: number }) => {
+      const token = await auth.getAccessToken();
+
+      return orvalMutator({
+        url: `/admin/users/${userId}/cards/${cardId}/freeze`,
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+    },
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'users', variables.userId.toString(), 'details'] });
+    },
+  });
+};
+
+// Mutation for unfreezing a card
+export const useUnfreezeCard = () => {
+  const auth = useAppAuth();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ userId, cardId }: { userId: number; cardId: number }) => {
+      const token = await auth.getAccessToken();
+
+      return orvalMutator({
+        url: `/admin/users/${userId}/cards/${cardId}/unfreeze`,
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+    },
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'users', variables.userId.toString(), 'details'] });
+    },
+  });
+};
+
+// Mutation for blocking a card
+export const useBlockCard = () => {
+  const auth = useAppAuth();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ userId, cardId }: { userId: number; cardId: number }) => {
+      const token = await auth.getAccessToken();
+
+      return orvalMutator({
+        url: `/admin/users/${userId}/cards/${cardId}/block`,
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+    },
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'users', variables.userId.toString(), 'details'] });
+    },
   });
 };

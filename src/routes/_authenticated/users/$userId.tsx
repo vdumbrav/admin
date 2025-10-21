@@ -25,8 +25,36 @@ import {
   IconUserPlus,
   IconKey,
   IconActivity,
+  IconSnowflake,
+  IconLock,
+  IconLockOpen,
 } from '@tabler/icons-react';
-import { useAdminUserDetails } from '@/features/users/api/admin-users';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { toast } from 'sonner';
+import {
+  useAdminUserDetails,
+  useUpdateUserRole,
+  useFreezeCard,
+  useUnfreezeCard,
+  useBlockCard,
+} from '@/features/users/api/admin-users';
+import { useState } from 'react';
 
 export const Route = createFileRoute('/_authenticated/users/$userId')({
   component: UserDetailsPage,
@@ -35,6 +63,24 @@ export const Route = createFileRoute('/_authenticated/users/$userId')({
 function UserDetailsPage() {
   const { userId } = Route.useParams();
   const { data: user, isLoading, error } = useAdminUserDetails(userId);
+  const updateRoleMutation = useUpdateUserRole();
+  const freezeCardMutation = useFreezeCard();
+  const unfreezeCardMutation = useUnfreezeCard();
+  const blockCardMutation = useBlockCard();
+
+  const [roleDialogOpen, setRoleDialogOpen] = useState(false);
+  const [selectedRole, setSelectedRole] = useState<string>('');
+  const [cardActionDialog, setCardActionDialog] = useState<{
+    open: boolean;
+    action: 'freeze' | 'unfreeze' | 'block' | null;
+    cardId: number | null;
+    cardMasked: string;
+  }>({
+    open: false,
+    action: null,
+    cardId: null,
+    cardMasked: '',
+  });
 
   if (isLoading) {
     return (
@@ -141,6 +187,55 @@ function UserDetailsPage() {
   };
 
   const timeline = generateTimeline();
+
+  const handleRoleChange = (role: string) => {
+    setSelectedRole(role);
+    setRoleDialogOpen(true);
+  };
+
+  const confirmRoleChange = async () => {
+    try {
+      await updateRoleMutation.mutateAsync({
+        userId: user.id,
+        role: selectedRole,
+      });
+      toast.success('User role updated successfully');
+      setRoleDialogOpen(false);
+    } catch (error) {
+      toast.error('Failed to update user role');
+    }
+  };
+
+  const handleCardAction = (action: 'freeze' | 'unfreeze' | 'block', cardId: number, cardMasked: string) => {
+    setCardActionDialog({
+      open: true,
+      action,
+      cardId,
+      cardMasked,
+    });
+  };
+
+  const confirmCardAction = async () => {
+    if (!cardActionDialog.cardId || !cardActionDialog.action) return;
+
+    try {
+      const mutations = {
+        freeze: freezeCardMutation,
+        unfreeze: unfreezeCardMutation,
+        block: blockCardMutation,
+      };
+
+      await mutations[cardActionDialog.action].mutateAsync({
+        userId: user.id,
+        cardId: cardActionDialog.cardId,
+      });
+
+      toast.success(`Card ${cardActionDialog.action}d successfully`);
+      setCardActionDialog({ open: false, action: null, cardId: null, cardMasked: '' });
+    } catch (error) {
+      toast.error(`Failed to ${cardActionDialog.action} card`);
+    }
+  };
 
   return (
     <div className="flex flex-col gap-6 p-6">
@@ -462,16 +557,53 @@ function UserDetailsPage() {
             {user.cards.length > 0 ? (
               <div className="space-y-3">
                 {user.cards.slice(0, 10).map((card) => (
-                  <div key={card.id} className="flex justify-between items-center p-3 rounded-lg border">
-                    <div>
-                      <p className="font-mono text-sm font-medium">{card.cardMasked}</p>
-                      {card.cardName && <p className="text-xs text-muted-foreground">{card.cardName}</p>}
+                  <div key={card.id} className="flex flex-col gap-2 p-3 rounded-lg border">
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <p className="font-mono text-sm font-medium">{card.cardMasked}</p>
+                        {card.cardName && <p className="text-xs text-muted-foreground">{card.cardName}</p>}
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm font-bold">{card.balance} {card.currency}</p>
+                        <Badge variant={card.status === 'active' ? 'default' : card.status === 'frozen' ? 'secondary' : 'destructive'} className="text-xs capitalize">
+                          {card.status}
+                        </Badge>
+                      </div>
                     </div>
-                    <div className="text-right">
-                      <p className="text-sm font-bold">{card.balance} {card.currency}</p>
-                      <Badge variant={card.status === 'active' ? 'default' : 'secondary'} className="text-xs">
-                        {card.status}
-                      </Badge>
+                    <div className="flex gap-2">
+                      {card.status === 'active' && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleCardAction('freeze', card.id, card.cardMasked)}
+                          disabled={freezeCardMutation.isPending}
+                        >
+                          <IconSnowflake className="mr-1 h-3 w-3" />
+                          Freeze
+                        </Button>
+                      )}
+                      {card.status === 'frozen' && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleCardAction('unfreeze', card.id, card.cardMasked)}
+                          disabled={unfreezeCardMutation.isPending}
+                        >
+                          <IconLockOpen className="mr-1 h-3 w-3" />
+                          Unfreeze
+                        </Button>
+                      )}
+                      {card.status !== 'blocked' && (
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          onClick={() => handleCardAction('block', card.id, card.cardMasked)}
+                          disabled={blockCardMutation.isPending}
+                        >
+                          <IconLock className="mr-1 h-3 w-3" />
+                          Block
+                        </Button>
+                      )}
                     </div>
                   </div>
                 ))}
@@ -615,19 +747,30 @@ function UserDetailsPage() {
             <div className="space-y-3">
               <div>
                 <p className="text-sm font-medium mb-2">User Management</p>
-                <div className="flex flex-wrap gap-2">
-                  <Button variant="outline" size="sm" disabled>
-                    <IconShield className="mr-2 h-4 w-4" />
-                    Change Role
-                  </Button>
-                  <Button variant="outline" size="sm" disabled>
-                    <IconBan className="mr-2 h-4 w-4" />
-                    Ban User
-                  </Button>
-                  <Button variant="outline" size="sm" disabled>
-                    <IconKey className="mr-2 h-4 w-4" />
-                    Reset Password
-                  </Button>
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-center gap-2">
+                    <IconShield className="h-4 w-4 text-muted-foreground" />
+                    <Select value={user.role} onValueChange={handleRoleChange}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select role" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Client">Client</SelectItem>
+                        <SelectItem value="Support">Support</SelectItem>
+                        <SelectItem value="Administrator">Administrator</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <Button variant="outline" size="sm" disabled>
+                      <IconBan className="mr-2 h-4 w-4" />
+                      Ban User
+                    </Button>
+                    <Button variant="outline" size="sm" disabled>
+                      <IconKey className="mr-2 h-4 w-4" />
+                      Reset Password
+                    </Button>
+                  </div>
                 </div>
               </div>
 
@@ -665,13 +808,60 @@ function UserDetailsPage() {
 
               <div className="mt-4 p-3 bg-muted rounded-lg">
                 <p className="text-xs text-muted-foreground">
-                  Admin actions are currently view-only. Feature implementation coming soon.
+                  Some admin actions are still in development.
                 </p>
               </div>
             </div>
           </CardContent>
         </Card>
       </div>
+
+      {/* Role Change Confirmation Dialog */}
+      <AlertDialog open={roleDialogOpen} onOpenChange={setRoleDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Change User Role</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to change {displayName}'s role to <strong>{selectedRole}</strong>?
+              This action will immediately update the user's permissions.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmRoleChange} disabled={updateRoleMutation.isPending}>
+              {updateRoleMutation.isPending ? 'Updating...' : 'Confirm'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Card Action Confirmation Dialog */}
+      <AlertDialog open={cardActionDialog.open} onOpenChange={(open) => !open && setCardActionDialog({ open: false, action: null, cardId: null, cardMasked: '' })}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {cardActionDialog.action === 'freeze' && 'Freeze Card'}
+              {cardActionDialog.action === 'unfreeze' && 'Unfreeze Card'}
+              {cardActionDialog.action === 'block' && 'Block Card'}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {cardActionDialog.action === 'freeze' && `Are you sure you want to freeze card ${cardActionDialog.cardMasked}? The user won't be able to use it until unfrozen.`}
+              {cardActionDialog.action === 'unfreeze' && `Are you sure you want to unfreeze card ${cardActionDialog.cardMasked}? The user will be able to use it again.`}
+              {cardActionDialog.action === 'block' && `Are you sure you want to permanently block card ${cardActionDialog.cardMasked}? This action cannot be undone.`}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmCardAction}
+              disabled={freezeCardMutation.isPending || unfreezeCardMutation.isPending || blockCardMutation.isPending}
+              className={cardActionDialog.action === 'block' ? 'bg-destructive hover:bg-destructive/90' : ''}
+            >
+              {(freezeCardMutation.isPending || unfreezeCardMutation.isPending || blockCardMutation.isPending) ? 'Processing...' : 'Confirm'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
