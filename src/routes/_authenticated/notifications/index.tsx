@@ -3,12 +3,16 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { IconBell, IconSend, IconHistory } from '@tabler/icons-react';
 import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useStatisticsControllerGetNotifications } from '@/lib/api/generated/statistics/statistics';
 
 export const Route = createFileRoute('/_authenticated/notifications/')({
   component: NotificationsPage,
 });
 
 function NotificationsPage() {
+  const { data: stats, isLoading } = useStatisticsControllerGetNotifications();
+
   return (
     <div className="flex flex-col gap-6 p-6">
       {/* Header */}
@@ -33,9 +37,13 @@ function NotificationsPage() {
             <IconBell className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">1,234</div>
+            {isLoading ? (
+              <Skeleton className="h-8 w-20" />
+            ) : (
+              <div className="text-2xl font-bold">{stats?.sentToday || 0}</div>
+            )}
             <p className="text-xs text-muted-foreground">
-              +20% from yesterday
+              Check FCM Console
             </p>
           </CardContent>
         </Card>
@@ -46,9 +54,13 @@ function NotificationsPage() {
             <IconSend className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">98.5%</div>
+            {isLoading ? (
+              <Skeleton className="h-8 w-20" />
+            ) : (
+              <div className="text-2xl font-bold">{stats?.deliveryRate || 0}%</div>
+            )}
             <p className="text-xs text-muted-foreground">
-              Excellent delivery
+              Check FCM Console
             </p>
           </CardContent>
         </Card>
@@ -59,9 +71,13 @@ function NotificationsPage() {
             <IconHistory className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">45.2%</div>
+            {isLoading ? (
+              <Skeleton className="h-8 w-20" />
+            ) : (
+              <div className="text-2xl font-bold">{stats?.openRate || 0}%</div>
+            )}
             <p className="text-xs text-muted-foreground">
-              +3.1% from last week
+              Check FCM Console
             </p>
           </CardContent>
         </Card>
@@ -72,9 +88,13 @@ function NotificationsPage() {
             <IconBell className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">45,678</div>
+            {isLoading ? (
+              <Skeleton className="h-8 w-20" />
+            ) : (
+              <div className="text-2xl font-bold">{stats?.total || 0}</div>
+            )}
             <p className="text-xs text-muted-foreground">
-              This month
+              All time
             </p>
           </CardContent>
         </Card>

@@ -8,6 +8,8 @@ import {
   IconArrowDown,
 } from '@tabler/icons-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useStatisticsControllerGetDashboard } from '@/lib/api/generated/statistics/statistics';
 
 export const Route = createFileRoute('/_authenticated/dashboard/')({
   component: DashboardPage,
@@ -15,7 +17,7 @@ export const Route = createFileRoute('/_authenticated/dashboard/')({
 
 interface MetricCardProps {
   title: string;
-  value: string | number;
+  value: string | number | React.ReactNode;
   change?: number;
   icon: React.ElementType;
   iconColor?: string;
@@ -63,16 +65,17 @@ function MetricCard({
 }
 
 function DashboardPage() {
-  // TODO: Replace with real API data
+  const { data: dashboard, isLoading } = useStatisticsControllerGetDashboard();
+
   const metrics = {
-    totalUsers: 1247,
-    totalUsersChange: 12.5,
-    activeCards: 342,
-    activeCardsChange: 8.2,
-    pendingOrders: 23,
-    pendingOrdersChange: -4.1,
-    totalRevenue: 45678,
-    totalRevenueChange: 15.3,
+    totalUsers: dashboard?.users?.total || 0,
+    totalUsersChange: dashboard?.users?.change || 0,
+    activeCards: dashboard?.cards?.active || 0,
+    activeCardsChange: dashboard?.cards?.change || 0,
+    pendingOrders: dashboard?.orders?.pending || 0,
+    pendingOrdersChange: dashboard?.orders?.change || 0,
+    totalTransactions: dashboard?.transactions?.total || 0,
+    totalTransactionsChange: dashboard?.transactions?.change || 0,
   };
 
   return (
@@ -87,29 +90,29 @@ function DashboardPage() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <MetricCard
           title="Total Users"
-          value={metrics.totalUsers.toLocaleString()}
+          value={isLoading ? <Skeleton className="h-8 w-20" /> : metrics.totalUsers.toLocaleString()}
           change={metrics.totalUsersChange}
           icon={IconUsers}
           iconColor="text-blue-600"
         />
         <MetricCard
           title="Active Cards"
-          value={metrics.activeCards.toLocaleString()}
+          value={isLoading ? <Skeleton className="h-8 w-20" /> : metrics.activeCards.toLocaleString()}
           change={metrics.activeCardsChange}
           icon={IconCreditCard}
           iconColor="text-green-600"
         />
         <MetricCard
           title="Pending Orders"
-          value={metrics.pendingOrders.toLocaleString()}
+          value={isLoading ? <Skeleton className="h-8 w-20" /> : metrics.pendingOrders.toLocaleString()}
           change={metrics.pendingOrdersChange}
           icon={IconShoppingCart}
           iconColor="text-orange-600"
         />
         <MetricCard
-          title="Total Revenue"
-          value={`$${metrics.totalRevenue.toLocaleString()}`}
-          change={metrics.totalRevenueChange}
+          title="Total Transactions"
+          value={isLoading ? <Skeleton className="h-8 w-20" /> : metrics.totalTransactions.toLocaleString()}
+          change={metrics.totalTransactionsChange}
           icon={IconTrendingUp}
           iconColor="text-purple-600"
         />
