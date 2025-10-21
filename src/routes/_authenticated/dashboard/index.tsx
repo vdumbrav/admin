@@ -15,7 +15,7 @@ import {
   useAdminStatisticsControllerGetTopUsers,
   useAdminStatisticsControllerGetRecentOrders,
 } from '@/lib/api/generated/admin-statistics/admin-statistics';
-import { ChartContainer, ChartConfig, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
+import { ChartContainer, ChartConfig, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent } from '@/components/ui/chart';
 import { Area, AreaChart, CartesianGrid, XAxis } from 'recharts';
 
 export const Route = createFileRoute('/_authenticated/dashboard/')({
@@ -165,6 +165,7 @@ function DashboardPage() {
                     axisLine={false}
                   />
                   <ChartTooltip content={<ChartTooltipContent />} />
+                  <ChartLegend content={<ChartLegendContent />} />
                   <defs>
                     <linearGradient id="fillUsers" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.4} />
@@ -235,7 +236,7 @@ function DashboardPage() {
                         <span className="text-sm font-medium text-muted-foreground">
                           #{idx + 1}
                         </span>
-                        <span className="font-medium">{user.nickname}</span>
+                        <span className="font-medium">{user.nickname || user.email}</span>
                       </div>
                       <p className="text-xs text-muted-foreground">
                         {user.transactionCount} transactions
@@ -277,7 +278,13 @@ function DashboardPage() {
                   >
                     <div className="space-y-1">
                       <div className="flex items-center gap-2">
-                        <span className="font-medium">{order.user.nickname}</span>
+                        <button
+                          onClick={() => navigator.clipboard.writeText(order.reference)}
+                          className="font-mono text-sm font-medium hover:text-primary"
+                          title="Click to copy"
+                        >
+                          {order.reference?.substring(0, 8)}...
+                        </button>
                         <span
                           className={`rounded-full px-2 py-0.5 text-xs font-medium ${
                             order.status === 'completed'
@@ -293,7 +300,7 @@ function DashboardPage() {
                         </span>
                       </div>
                       <p className="text-xs text-muted-foreground">
-                        {new Date(order.createdAt).toLocaleDateString()}
+                        {order.user.nickname || order.user.email} • {new Date(order.createdAt).toLocaleDateString()}
                       </p>
                     </div>
                     <div className="text-right">
