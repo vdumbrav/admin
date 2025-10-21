@@ -6,6 +6,7 @@ import type {
   TrcListResponse,
   TrcCancelRequest,
   TrcCancelResponse,
+  TrcTopupStatus,
   BalanceInfo,
 } from '../types/api';
 
