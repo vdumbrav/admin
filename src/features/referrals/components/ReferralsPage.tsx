@@ -1,76 +1,48 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { IconRefresh, IconCopy, IconUsers, IconGift } from '@tabler/icons-react';
-import { Badge } from '@/components/ui/badge';
+import { IconGift, IconUsers, IconTrendingUp } from '@tabler/icons-react';
 
 export function ReferralsPage() {
   return (
     <div className="flex flex-col gap-6 p-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">Referral Program</h1>
-          <p className="text-muted-foreground">
-            Manage referral codes and track referral statistics
-          </p>
-        </div>
-        <Button variant="outline">
-          <IconRefresh className="mr-2 h-4 w-4" />
-          Refresh
-        </Button>
+      <div>
+        <h1 className="text-3xl font-bold">Referral Program</h1>
+        <p className="text-muted-foreground">
+          Manage and track referral program statistics
+        </p>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid gap-4 md:grid-cols-4">
+      {/* Stats */}
+      <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Referrals</CardTitle>
-            <IconUsers className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">1,234</div>
-            <p className="text-xs text-muted-foreground">
-              +20.1% from last month
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Users</CardTitle>
             <IconGift className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">892</div>
-            <p className="text-xs text-muted-foreground">
-              72.3% conversion rate
-            </p>
+            <div className="text-2xl font-bold">-</div>
+            <p className="text-xs text-muted-foreground">See Metabase for details</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Rewards</CardTitle>
-            <IconGift className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">12,450 XP</div>
-            <p className="text-xs text-muted-foreground">
-              Distributed to users
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">This Month</CardTitle>
+            <CardTitle className="text-sm font-medium">Active Referrers</CardTitle>
             <IconUsers className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">+234</div>
-            <p className="text-xs text-muted-foreground">
-              New referrals
-            </p>
+            <div className="text-2xl font-bold">-</div>
+            <p className="text-xs text-muted-foreground">See Metabase for details</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Conversion Rate</CardTitle>
+            <IconTrendingUp className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">-</div>
+            <p className="text-xs text-muted-foreground">See Metabase for details</p>
           </CardContent>
         </Card>
       </div>
@@ -79,73 +51,28 @@ export function ReferralsPage() {
       <Card>
         <CardHeader>
           <CardTitle>Referral System</CardTitle>
-          <CardDescription>
-            Overview of the referral program configuration
-          </CardDescription>
+          <CardDescription>How the referral program works</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid gap-4 md:grid-cols-2">
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">Referrer Reward</span>
-                <Badge>100 XP</Badge>
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Reward given to the user who shares the referral code
+        <CardContent>
+          <div className="space-y-4 text-sm">
+            <div>
+              <h4 className="font-semibold mb-2">Rewards</h4>
+              <p className="text-muted-foreground">
+                Users earn rewards when their referrals complete qualifying actions
               </p>
             </div>
-
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">Referee Reward</span>
-                <Badge>50 XP</Badge>
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Reward given to the user who uses the referral code
+            <div>
+              <h4 className="font-semibold mb-2">Tracking</h4>
+              <p className="text-muted-foreground">
+                All referral activity is tracked and displayed in Metabase analytics
               </p>
             </div>
-
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">Code Format</span>
-                <Badge variant="outline">8 characters</Badge>
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Alphanumeric codes, auto-generated per user
+            <div>
+              <h4 className="font-semibold mb-2">Analytics</h4>
+              <p className="text-muted-foreground">
+                View detailed referral metrics, conversion funnels, and performance data in the Metabase dashboard
               </p>
             </div>
-
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">Code Renewal</span>
-                <Badge variant="outline">Enabled</Badge>
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Users can renew their referral code anytime
-              </p>
-            </div>
-          </div>
-
-          <div className="pt-4">
-            <Button variant="outline">
-              <IconCopy className="mr-2 h-4 w-4" />
-              View All Referral Codes
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Coming Soon Notice */}
-      <Card>
-        <CardContent className="pt-6">
-          <div className="text-center py-8">
-            <IconGift className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-            <h3 className="text-lg font-semibold mb-2">Referral Management Coming Soon</h3>
-            <p className="text-sm text-muted-foreground">
-              Advanced referral tracking, analytics, and management features will be available here.
-              <br />
-              Contact support for manual referral code management.
-            </p>
           </div>
         </CardContent>
       </Card>
