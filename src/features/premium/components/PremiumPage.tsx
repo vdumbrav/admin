@@ -83,22 +83,13 @@ export function PremiumPage() {
                 <div key={bundle.id} className="flex items-center justify-between border-b pb-4 last:border-0">
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
-                      <h3 className="font-semibold capitalize">{bundle.name}</h3>
-                      <Badge variant={bundle.active ? 'default' : 'secondary'}>
-                        {bundle.active ? 'Active' : 'Inactive'}
-                      </Badge>
+                      <h3 className="font-semibold">{bundle.title}</h3>
+                      {bundle.bestChoose && <Badge>Best Choice</Badge>}
+                      {bundle.free && <Badge variant="secondary">Free</Badge>}
                     </div>
-                    <p className="text-sm text-muted-foreground mt-1">{bundle.description || 'No description'}</p>
-                    <div className="flex gap-4 mt-2 text-xs text-muted-foreground">
-                      <span>Duration: {bundle.duration_days} days</span>
-                      {bundle.discount_percent && <span>Discount: {bundle.discount_percent}%</span>}
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-2xl font-bold">${bundle.price}</div>
-                    {bundle.original_price && bundle.original_price !== bundle.price && (
-                      <div className="text-sm text-muted-foreground line-through">${bundle.original_price}</div>
-                    )}
+                    <p className="text-sm text-muted-foreground mt-2">
+                      View detailed features and pricing information in Metabase analytics
+                    </p>
                   </div>
                 </div>
               ))}
