@@ -19,6 +19,7 @@ import {
   IconMoneybag,
   IconPigMoney,
   IconLanguage,
+  IconChartPie,
 } from '@tabler/icons-react';
 import { type SidebarData } from '../types';
 
@@ -35,9 +36,22 @@ export const sidebarData: SidebarData = {
         },
         {
           title: 'Analytics',
-          url: '/analytics',
           icon: IconChartLine,
           isActive: (pathname: string) => pathname.startsWith('/analytics'),
+          items: [
+            {
+              title: 'Overview',
+              url: '/analytics',
+              icon: IconChartLine,
+              isActive: (pathname: string) => pathname === '/analytics',
+            },
+            {
+              title: 'Metabase',
+              url: '/analytics/metabase',
+              icon: IconChartPie,
+              isActive: (pathname: string) => pathname.startsWith('/analytics/metabase'),
+            },
+          ],
         },
       ],
     },

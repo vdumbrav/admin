@@ -29,6 +29,7 @@ import { Route as AuthenticatedUsersUserIdRouteImport } from './routes/_authenti
 import { Route as AuthenticatedQuestsNewRouteImport } from './routes/_authenticated/quests/new'
 import { Route as AuthenticatedQuestsIdRouteImport } from './routes/_authenticated/quests/$id'
 import { Route as AuthenticatedCardsCardIdRouteImport } from './routes/_authenticated/cards/$cardId'
+import { Route as AuthenticatedAnalyticsMetabaseRouteImport } from './routes/_authenticated/analytics/metabase'
 import { Route as AuthenticatedMarketsTreasuriesIndexRouteImport } from './routes/_authenticated/markets/treasuries/index'
 import { Route as AuthenticatedMarketsPlatformsIndexRouteImport } from './routes/_authenticated/markets/platforms/index'
 import { Route as AuthenticatedMarketsLanguagesIndexRouteImport } from './routes/_authenticated/markets/languages/index'
@@ -149,6 +150,12 @@ const AuthenticatedCardsCardIdRoute =
     path: '/cards/$cardId',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAnalyticsMetabaseRoute =
+  AuthenticatedAnalyticsMetabaseRouteImport.update({
+    id: '/analytics/metabase',
+    path: '/analytics/metabase',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedMarketsTreasuriesIndexRoute =
   AuthenticatedMarketsTreasuriesIndexRouteImport.update({
     id: '/markets/treasuries/',
@@ -209,6 +216,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRouteRouteWithChildren
   '/sign-in': typeof SignInRoute
   '/auth/callback': typeof AuthCallbackRoute
+  '/analytics/metabase': typeof AuthenticatedAnalyticsMetabaseRoute
   '/cards/$cardId': typeof AuthenticatedCardsCardIdRoute
   '/quests/$id': typeof AuthenticatedQuestsIdRoute
   '/quests/new': typeof AuthenticatedQuestsNewRouteWithChildren
@@ -239,6 +247,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRouteRouteWithChildren
   '/sign-in': typeof SignInRoute
   '/auth/callback': typeof AuthCallbackRoute
+  '/analytics/metabase': typeof AuthenticatedAnalyticsMetabaseRoute
   '/cards/$cardId': typeof AuthenticatedCardsCardIdRoute
   '/quests/$id': typeof AuthenticatedQuestsIdRoute
   '/quests/new': typeof AuthenticatedQuestsNewRouteWithChildren
@@ -271,6 +280,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRouteRouteWithChildren
   '/sign-in': typeof SignInRoute
   '/auth/callback': typeof AuthCallbackRoute
+  '/_authenticated/analytics/metabase': typeof AuthenticatedAnalyticsMetabaseRoute
   '/_authenticated/cards/$cardId': typeof AuthenticatedCardsCardIdRoute
   '/_authenticated/quests/$id': typeof AuthenticatedQuestsIdRoute
   '/_authenticated/quests/new': typeof AuthenticatedQuestsNewRouteWithChildren
@@ -303,6 +313,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/sign-in'
     | '/auth/callback'
+    | '/analytics/metabase'
     | '/cards/$cardId'
     | '/quests/$id'
     | '/quests/new'
@@ -333,6 +344,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/sign-in'
     | '/auth/callback'
+    | '/analytics/metabase'
     | '/cards/$cardId'
     | '/quests/$id'
     | '/quests/new'
@@ -364,6 +376,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/sign-in'
     | '/auth/callback'
+    | '/_authenticated/analytics/metabase'
     | '/_authenticated/cards/$cardId'
     | '/_authenticated/quests/$id'
     | '/_authenticated/quests/new'
@@ -539,6 +552,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCardsCardIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/analytics/metabase': {
+      id: '/_authenticated/analytics/metabase'
+      path: '/analytics/metabase'
+      fullPath: '/analytics/metabase'
+      preLoaderRoute: typeof AuthenticatedAnalyticsMetabaseRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/markets/treasuries/': {
       id: '/_authenticated/markets/treasuries/'
       path: '/markets/treasuries'
@@ -620,6 +640,7 @@ const AuthenticatedQuestsNewRouteWithChildren =
   )
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAnalyticsMetabaseRoute: typeof AuthenticatedAnalyticsMetabaseRoute
   AuthenticatedCardsCardIdRoute: typeof AuthenticatedCardsCardIdRoute
   AuthenticatedQuestsIdRoute: typeof AuthenticatedQuestsIdRoute
   AuthenticatedQuestsNewRoute: typeof AuthenticatedQuestsNewRouteWithChildren
@@ -646,6 +667,7 @@ interface AuthenticatedRouteRouteChildren {
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAnalyticsMetabaseRoute: AuthenticatedAnalyticsMetabaseRoute,
   AuthenticatedCardsCardIdRoute: AuthenticatedCardsCardIdRoute,
   AuthenticatedQuestsIdRoute: AuthenticatedQuestsIdRoute,
   AuthenticatedQuestsNewRoute: AuthenticatedQuestsNewRouteWithChildren,
