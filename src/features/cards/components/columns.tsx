@@ -80,8 +80,26 @@ export const createColumns = ({
   {
     accessorKey: 'userId',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="User ID" />
+      <DataTableColumnHeader column={column} title="User" />
     ),
+    cell: ({ row }) => {
+      const card = row.original;
+      const navigate = useNavigate();
+
+      return (
+        <div className="flex flex-col gap-1">
+          <button
+            onClick={() => navigate({ to: '/users/$userId', params: { userId: String(card.userId) } })}
+            className="text-sm font-medium text-primary hover:underline text-left"
+          >
+            {card.userName || card.userEmail || `User #${card.userId}`}
+          </button>
+          {card.userEmail && card.userName && (
+            <span className="text-xs text-muted-foreground">{card.userEmail}</span>
+          )}
+        </div>
+      );
+    },
   },
   {
     accessorKey: 'balance',
