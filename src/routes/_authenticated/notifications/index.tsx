@@ -11,7 +11,10 @@ export const Route = createFileRoute('/_authenticated/notifications/')({
 });
 
 function NotificationsPage() {
-  const { data: stats, isLoading } = useAdminStatisticsControllerGetNotificationStats();
+  const { data: statsData, isLoading } = useAdminStatisticsControllerGetNotificationStats();
+
+  // Type assertion needed because backend doesn't have response DTO in swagger
+  const stats = statsData as any;
 
   return (
     <div className="flex flex-col gap-6 p-6">
