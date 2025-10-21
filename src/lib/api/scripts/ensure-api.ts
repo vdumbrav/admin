@@ -8,7 +8,27 @@ const GENERATED_DIR = resolve(PROJECT_ROOT, 'src/lib/api/generated');
 const INDEX_FILE = resolve(GENERATED_DIR, 'index.ts');
 
 async function main() {
-  // Check if generated API files exist
+  // Check if swagger.json exists - if yes, always generate from it
+  const SWAGGER_FILE = resolve(PROJECT_ROOT, 'swagger.json');
+
+  if (existsSync(SWAGGER_FILE)) {
+    // swagger.json exists, generate API from it
+    try {
+      const { execSync } = await import('node:child_process');
+      execSync('npm run generate:api', {
+        stdio: 'inherit',
+        cwd: PROJECT_ROOT,
+        env: { ...process.env },
+      });
+      return;
+    } catch (_error) {
+      // Generation failed, try fallback
+      await createFallbackApi();
+      return;
+    }
+  }
+
+  // No swagger.json, check if generated API files exist
   if (!existsSync(INDEX_FILE)) {
     try {
       await updateApi();
