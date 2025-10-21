@@ -9,7 +9,14 @@ import {
 } from '@tabler/icons-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useAdminStatisticsControllerGetDashboard } from '@/lib/api/generated/admin-statistics/admin-statistics';
+import {
+  useAdminStatisticsControllerGetDashboard,
+  useAdminStatisticsControllerGetActivity,
+  useAdminStatisticsControllerGetTopUsers,
+  useAdminStatisticsControllerGetRecentOrders,
+} from '@/lib/api/generated/admin-statistics/admin-statistics';
+import { ChartContainer, ChartConfig, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
+import { Area, AreaChart, CartesianGrid, XAxis } from 'recharts';
 
 export const Route = createFileRoute('/_authenticated/dashboard/')({
   component: DashboardPage,
@@ -66,9 +73,15 @@ function MetricCard({
 
 function DashboardPage() {
   const { data: dashboard, isLoading } = useAdminStatisticsControllerGetDashboard();
+  const { data: activityData, isLoading: isActivityLoading } = useAdminStatisticsControllerGetActivity();
+  const { data: topUsersData, isLoading: isTopUsersLoading } = useAdminStatisticsControllerGetTopUsers();
+  const { data: recentOrdersData, isLoading: isRecentOrdersLoading } = useAdminStatisticsControllerGetRecentOrders();
 
   // Type assertion needed because backend doesn't have response DTO in swagger
   const dashboardData = dashboard as any;
+  const activity = (activityData as any) || [];
+  const topUsers = (topUsersData as any) || [];
+  const recentOrders = (recentOrdersData as any) || [];
 
   const metrics = {
     totalUsers: dashboardData?.users?.total || 0,
@@ -80,6 +93,17 @@ function DashboardPage() {
     totalTransactions: dashboardData?.transactions?.total || 0,
     totalTransactionsChange: dashboardData?.transactions?.change || 0,
   };
+
+  const chartConfig = {
+    users: {
+      label: 'Users',
+      color: 'hsl(var(--chart-1))',
+    },
+    transactions: {
+      label: 'Transactions',
+      color: 'hsl(var(--chart-2))',
+    },
+  } satisfies ChartConfig;
 
   return (
     <div className="flex flex-col gap-6 p-6">
@@ -127,9 +151,51 @@ function DashboardPage() {
             <CardTitle>Recent Activity</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-sm text-muted-foreground">
-              Activity chart will be implemented here...
-            </div>
+            {isActivityLoading ? (
+              <Skeleton className="h-[250px] w-full" />
+            ) : activity.length > 0 ? (
+              <ChartContainer config={chartConfig} className="h-[250px] w-full">
+                <AreaChart data={activity}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                  <XAxis
+                    dataKey="date"
+                    stroke="hsl(var(--muted-foreground))"
+                    fontSize={12}
+                    tickLine={false}
+                    axisLine={false}
+                  />
+                  <ChartTooltip content={<ChartTooltipContent />} />
+                  <defs>
+                    <linearGradient id="fillUsers" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="hsl(var(--chart-1))" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="hsl(var(--chart-1))" stopOpacity={0} />
+                    </linearGradient>
+                    <linearGradient id="fillTransactions" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="hsl(var(--chart-2))" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="hsl(var(--chart-2))" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <Area
+                    type="monotone"
+                    dataKey="users"
+                    stroke="hsl(var(--chart-1))"
+                    fill="url(#fillUsers)"
+                    strokeWidth={2}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="transactions"
+                    stroke="hsl(var(--chart-2))"
+                    fill="url(#fillTransactions)"
+                    strokeWidth={2}
+                  />
+                </AreaChart>
+              </ChartContainer>
+            ) : (
+              <div className="flex h-[250px] items-center justify-center text-sm text-muted-foreground">
+                No activity data available
+              </div>
+            )}
           </CardContent>
         </Card>
 
@@ -151,9 +217,43 @@ function DashboardPage() {
             <CardTitle>Top Users</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-sm text-muted-foreground">
-              Top users list will be implemented here...
-            </div>
+            {isTopUsersLoading ? (
+              <div className="space-y-3">
+                {[...Array(5)].map((_, i) => (
+                  <Skeleton key={i} className="h-16 w-full" />
+                ))}
+              </div>
+            ) : topUsers.length > 0 ? (
+              <div className="space-y-3">
+                {topUsers.map((user: any, idx: number) => (
+                  <div
+                    key={user.id}
+                    className="flex items-center justify-between border-b pb-3 last:border-0"
+                  >
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium text-muted-foreground">
+                          #{idx + 1}
+                        </span>
+                        <span className="font-medium">{user.nickname}</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        {user.transactionCount} transactions
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-lg font-bold text-green-600">
+                        ${user.balance.toFixed(2)}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="flex h-32 items-center justify-center text-sm text-muted-foreground">
+                No users data available
+              </div>
+            )}
           </CardContent>
         </Card>
 
@@ -162,9 +262,54 @@ function DashboardPage() {
             <CardTitle>Recent Orders</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-sm text-muted-foreground">
-              Recent orders list will be implemented here...
-            </div>
+            {isRecentOrdersLoading ? (
+              <div className="space-y-3">
+                {[...Array(5)].map((_, i) => (
+                  <Skeleton key={i} className="h-16 w-full" />
+                ))}
+              </div>
+            ) : recentOrders.length > 0 ? (
+              <div className="space-y-3">
+                {recentOrders.map((order: any) => (
+                  <div
+                    key={order.id}
+                    className="flex items-center justify-between border-b pb-3 last:border-0"
+                  >
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium">{order.user.nickname}</span>
+                        <span
+                          className={`rounded-full px-2 py-0.5 text-xs font-medium ${
+                            order.status === 'completed'
+                              ? 'bg-green-100 text-green-700'
+                              : order.status === 'confirmed'
+                                ? 'bg-blue-100 text-blue-700'
+                                : order.status === 'failed'
+                                  ? 'bg-red-100 text-red-700'
+                                  : 'bg-gray-100 text-gray-700'
+                          }`}
+                        >
+                          {order.status}
+                        </span>
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        {new Date(order.createdAt).toLocaleDateString()}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <div className="font-bold">
+                        {order.amount} {order.currency}
+                      </div>
+                      <p className="text-xs text-muted-foreground">{order.paymentType}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="flex h-32 items-center justify-center text-sm text-muted-foreground">
+                No orders data available
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
