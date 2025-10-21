@@ -90,9 +90,30 @@ function DashboardPage() {
 
   // Type assertion needed because backend doesn't have response DTO in swagger
   const dashboardData = dashboard as any;
-  const activity = (activityData as any) || [];
-  const topUsers = (topUsersData as any) || [];
-  const recentOrders = (recentOrdersData as any) || [];
+
+  // Safely convert data to arrays with logging for debugging
+  const activity = Array.isArray(activityData) ? activityData : [];
+
+  let topUsers: any[] = [];
+  if (Array.isArray(topUsersData)) {
+    topUsers = topUsersData;
+  } else if (topUsersData && typeof topUsersData === 'object') {
+    console.warn('topUsersData is not an array:', topUsersData);
+    // If it's an object with a data property that's an array, use that
+    if (Array.isArray((topUsersData as any).data)) {
+      topUsers = (topUsersData as any).data;
+    }
+  }
+
+  let recentOrders: any[] = [];
+  if (Array.isArray(recentOrdersData)) {
+    recentOrders = recentOrdersData;
+  } else if (recentOrdersData && typeof recentOrdersData === 'object') {
+    console.warn('recentOrdersData is not an array:', recentOrdersData);
+    if (Array.isArray((recentOrdersData as any).data)) {
+      recentOrders = (recentOrdersData as any).data;
+    }
+  }
 
   const metrics = {
     totalUsers: dashboardData?.users?.total || 0,

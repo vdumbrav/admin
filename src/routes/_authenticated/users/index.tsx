@@ -9,7 +9,9 @@ export const Route = createFileRoute('/_authenticated/users/')({
 });
 
 function UsersPage() {
-  const { data, isLoading } = useAdminUsers(1, 1000);
+  const { data, isLoading, error } = useAdminUsers(1, 1000);
+
+  console.log('Users API response:', { data, isLoading, error });
 
   const users = data?.users || [];
   const total = data?.total || 0;
