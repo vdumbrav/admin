@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Button } from '@/components/ui/button';
 import {
   IconMail,
   IconCalendar,
@@ -17,6 +18,12 @@ import {
   IconCoin,
   IconListCheck,
   IconReceipt,
+  IconClock,
+  IconSettings,
+  IconBan,
+  IconUserPlus,
+  IconKey,
+  IconActivity,
 } from '@tabler/icons-react';
 import { useAdminUserDetails } from '@/features/users/api/admin-users';
 
@@ -56,6 +63,81 @@ function UserDetailsPage() {
 
   const displayName = user.name || user.nickname || user.email || `User ${user.id}`;
   const initials = displayName.substring(0, 2).toUpperCase();
+
+  // Generate activity timeline from user data
+  const generateTimeline = () => {
+    const events = [];
+
+    // User created
+    events.push({
+      type: 'user_created',
+      title: 'User Registered',
+      description: `Joined the platform`,
+      date: user.createdAt,
+      icon: IconUserPlus,
+      color: 'text-blue-600',
+      bgColor: 'bg-blue-500/10',
+    });
+
+    // Premium activation
+    if (user.premiumStatus.isActive && user.premiumStatus.activeFrom) {
+      events.push({
+        type: 'premium_activated',
+        title: 'Premium Activated',
+        description: `Subscribed to ${user.premiumStatus.bundle?.title || 'Premium'}`,
+        date: user.premiumStatus.activeFrom,
+        icon: IconCrown,
+        color: 'text-amber-600',
+        bgColor: 'bg-amber-500/10',
+      });
+    }
+
+    // Cards created
+    user.cards.slice(0, 3).forEach((card) => {
+      events.push({
+        type: 'card_created',
+        title: 'Card Issued',
+        description: `Created card ${card.cardMasked}`,
+        date: card.createdAt,
+        icon: IconCreditCard,
+        color: 'text-purple-600',
+        bgColor: 'bg-purple-500/10',
+      });
+    });
+
+    // Major quests completed
+    user.completedQuests.slice(0, 5).forEach((quest) => {
+      if (quest.completedAt) {
+        events.push({
+          type: 'quest_completed',
+          title: 'Quest Completed',
+          description: quest.taskTitle,
+          date: quest.completedAt,
+          icon: IconListCheck,
+          color: 'text-green-600',
+          bgColor: 'bg-green-500/10',
+        });
+      }
+    });
+
+    // Last login
+    if (user.lastLogin) {
+      events.push({
+        type: 'last_login',
+        title: 'Last Login',
+        description: 'Most recent platform access',
+        date: user.lastLogin,
+        icon: IconActivity,
+        color: 'text-gray-600',
+        bgColor: 'bg-gray-500/10',
+      });
+    }
+
+    // Sort by date descending
+    return events.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).slice(0, 10);
+  };
+
+  const timeline = generateTimeline();
 
   return (
     <div className="flex flex-col gap-6 p-6">
@@ -474,6 +556,116 @@ function UserDetailsPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* Activity Timeline & Admin Actions */}
+      <div className="grid gap-6 md:grid-cols-2">
+        {/* Activity Timeline */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <IconClock className="h-5 w-5 text-indigo-500" />
+              Activity Timeline
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {timeline.map((event, index) => {
+                const Icon = event.icon;
+                return (
+                  <div key={`${event.type}-${index}`} className="flex gap-3">
+                    <div className={`rounded-lg ${event.bgColor} p-2 h-fit`}>
+                      <Icon className={`h-4 w-4 ${event.color}`} />
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <p className="text-sm font-medium">{event.title}</p>
+                          <p className="text-xs text-muted-foreground">{event.description}</p>
+                        </div>
+                        <span className="text-xs text-muted-foreground whitespace-nowrap ml-2">
+                          {new Date(event.date).toLocaleDateString('en-US', {
+                            month: 'short',
+                            day: 'numeric',
+                          })}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Admin Actions */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <IconSettings className="h-5 w-5 text-gray-500" />
+              Admin Actions
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              <div>
+                <p className="text-sm font-medium mb-2">User Management</p>
+                <div className="flex flex-wrap gap-2">
+                  <Button variant="outline" size="sm" disabled>
+                    <IconShield className="mr-2 h-4 w-4" />
+                    Change Role
+                  </Button>
+                  <Button variant="outline" size="sm" disabled>
+                    <IconBan className="mr-2 h-4 w-4" />
+                    Ban User
+                  </Button>
+                  <Button variant="outline" size="sm" disabled>
+                    <IconKey className="mr-2 h-4 w-4" />
+                    Reset Password
+                  </Button>
+                </div>
+              </div>
+
+              <Separator />
+
+              <div>
+                <p className="text-sm font-medium mb-2">Rewards & XP</p>
+                <div className="flex flex-wrap gap-2">
+                  <Button variant="outline" size="sm" disabled>
+                    <IconCoin className="mr-2 h-4 w-4" />
+                    Add XP Manually
+                  </Button>
+                  <Button variant="outline" size="sm" disabled>
+                    <IconCrown className="mr-2 h-4 w-4" />
+                    Grant Premium
+                  </Button>
+                </div>
+              </div>
+
+              <Separator />
+
+              <div>
+                <p className="text-sm font-medium mb-2">Information</p>
+                <div className="flex flex-wrap gap-2">
+                  <Button variant="outline" size="sm" disabled>
+                    <IconActivity className="mr-2 h-4 w-4" />
+                    View Activity Logs
+                  </Button>
+                  <Button variant="outline" size="sm" disabled>
+                    <IconReceipt className="mr-2 h-4 w-4" />
+                    Export Data
+                  </Button>
+                </div>
+              </div>
+
+              <div className="mt-4 p-3 bg-muted rounded-lg">
+                <p className="text-xs text-muted-foreground">
+                  Admin actions are currently view-only. Feature implementation coming soon.
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
