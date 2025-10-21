@@ -14,7 +14,6 @@ import {
 } from '@/components/ui/sidebar';
 import { NavGroup } from '@/components/layout/nav-group';
 import { TeamSwitcher } from '@/components/layout/team-switcher';
-import { NavUser } from '@/components/layout/nav-user';
 import { sidebarData } from './data/sidebar-data';
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
@@ -52,8 +51,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         ))}
       </SidebarContent>
       <SidebarFooter>
-        <NavUser />
-        {/* Sidebar Toggle - improved design */}
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton
