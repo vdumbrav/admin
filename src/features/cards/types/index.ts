@@ -11,6 +11,8 @@ export interface Card {
   bin?: string;
   createdAt: string;
   lastUsed?: string | null;
+  userName?: string;
+  userEmail?: string;
 }
 
 export interface TopupSource {
