@@ -274,16 +274,16 @@ function DashboardPage() {
                 {recentOrders.map((order: any) => (
                   <div
                     key={order.id}
-                    className="flex items-center justify-between border-b pb-3 last:border-0"
+                    className="flex flex-col gap-2 border-b pb-3 last:border-0"
                   >
-                    <div className="space-y-1">
+                    <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <button
                           onClick={() => navigator.clipboard.writeText(order.reference)}
-                          className="font-mono text-sm font-medium hover:text-primary"
-                          title="Click to copy"
+                          className="font-mono text-xs font-medium hover:text-primary transition-colors"
+                          title="Click to copy reference"
                         >
-                          {order.reference?.substring(0, 8)}...
+                          {order.reference}
                         </button>
                         <span
                           className={`rounded-full px-2 py-0.5 text-xs font-medium ${
@@ -299,15 +299,17 @@ function DashboardPage() {
                           {order.status}
                         </span>
                       </div>
-                      <p className="text-xs text-muted-foreground">
-                        {order.user.nickname || order.user.email} • {new Date(order.createdAt).toLocaleDateString()}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <div className="font-bold">
-                        {order.amount} {order.currency}
+                      <div className="text-right">
+                        <div className="font-bold">
+                          {order.amount} {order.currency}
+                        </div>
                       </div>
-                      <p className="text-xs text-muted-foreground">{order.paymentType}</p>
+                    </div>
+                    <div className="flex items-center justify-between text-xs text-muted-foreground">
+                      <span>{order.user.nickname || order.user.email}</span>
+                      <span className="flex items-center gap-1">
+                        {order.paymentType} • {new Date(order.createdAt).toLocaleDateString()}
+                      </span>
                     </div>
                   </div>
                 ))}
