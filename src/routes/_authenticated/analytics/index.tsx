@@ -4,7 +4,6 @@ import {
   IconUsers,
   IconCreditCard,
   IconShoppingCart,
-  IconBell,
   IconChartBar,
   IconPercentage,
   IconClock,
@@ -19,14 +18,7 @@ import {
   useAdminStatisticsControllerGetTransactionStats,
   useAdminStatisticsControllerGetNotificationStats,
 } from '@/lib/api/generated/admin-statistics/admin-statistics';
-import {
-  ChartContainer,
-  ChartConfig,
-  ChartTooltip,
-  ChartTooltipContent,
-  ChartLegend,
-  ChartLegendContent,
-} from '@/components/ui/chart';
+import { ChartContainer, ChartConfig, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 import { Bar, BarChart, Pie, PieChart, Cell, ResponsiveContainer, XAxis, YAxis, CartesianGrid } from 'recharts';
 import { cn } from '@/lib/utils';
 
@@ -70,19 +62,13 @@ const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'
 function AnalyticsPage() {
   const [period, setPeriod] = useState<PeriodOption>('30');
 
-  const { data: userStats, isLoading: isUserStatsLoading } = useAdminStatisticsControllerGetUserStats({
-    period,
-  });
-  const { data: cardStats, isLoading: isCardStatsLoading } = useAdminStatisticsControllerGetCardStats({
-    period,
-  });
-  const { data: orderStats, isLoading: isOrderStatsLoading } = useAdminStatisticsControllerGetOrderStats({
-    period,
-  });
+  const { data: userStats, isLoading: isUserStatsLoading } = useAdminStatisticsControllerGetUserStats();
+  const { data: cardStats, isLoading: isCardStatsLoading } = useAdminStatisticsControllerGetCardStats();
+  const { data: orderStats, isLoading: isOrderStatsLoading } = useAdminStatisticsControllerGetOrderStats();
   const { data: transactionStats, isLoading: isTransactionStatsLoading } =
-    useAdminStatisticsControllerGetTransactionStats({ period });
+    useAdminStatisticsControllerGetTransactionStats();
   const { data: notificationStats, isLoading: isNotificationStatsLoading } =
-    useAdminStatisticsControllerGetNotificationStats({ period });
+    useAdminStatisticsControllerGetNotificationStats();
 
   // Type assertions because backend doesn't have DTOs in swagger
   const userStatsData = (userStats as any) || {};
@@ -114,13 +100,6 @@ function AnalyticsPage() {
         count: count,
       }))
     : [];
-
-  const cardChartConfig = {
-    count: {
-      label: 'Cards',
-      color: '#3b82f6',
-    },
-  } satisfies ChartConfig;
 
   const orderChartConfig = {
     count: {
@@ -291,7 +270,7 @@ function AnalyticsPage() {
                     fill="#8884d8"
                     dataKey="value"
                   >
-                    {cardStatusData.map((entry, index) => (
+                    {cardStatusData.map((_entry, index) => (
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>
@@ -383,7 +362,7 @@ function AnalyticsPage() {
                       fill="#8884d8"
                       dataKey="value"
                     >
-                      {orderStatusData.map((entry, index) => (
+                      {orderStatusData.map((_entry, index) => (
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                       ))}
                     </Pie>
