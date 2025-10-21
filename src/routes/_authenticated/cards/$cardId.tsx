@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
+import { PageHeader } from '@/components/layout/page-header';
 import {
   IconCreditCard,
   IconUser,
@@ -86,10 +87,15 @@ function CardDetailsPage() {
   return (
     <>
       <div className="flex flex-col gap-6 p-6">
-        <div>
-          <h1 className="text-3xl font-bold">Card Details</h1>
-          <p className="text-muted-foreground">View and manage card information</p>
-        </div>
+        <PageHeader
+          title="Card Details"
+          description="View and manage card information"
+          breadcrumbs={[
+            { label: 'Dashboard', href: '/dashboard' },
+            { label: 'Cards', href: '/cards' },
+            { label: card.cardNumber },
+          ]}
+        />
 
         <div className="grid gap-6 md:grid-cols-3">
           <Card className="md:col-span-1">

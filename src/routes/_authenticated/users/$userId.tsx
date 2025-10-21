@@ -5,6 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
+import { PageHeader } from '@/components/layout/page-header';
 import {
   IconMail,
   IconCalendar,
@@ -38,10 +39,7 @@ function UserDetailsPage() {
   if (isLoading) {
     return (
       <div className="flex flex-col gap-6 p-6">
-        <div>
-          <Skeleton className="h-9 w-64 mb-2" />
-          <Skeleton className="h-5 w-96" />
-        </div>
+        <Skeleton className="h-20 w-full" />
         <div className="grid gap-6 md:grid-cols-3">
           <Skeleton className="h-64" />
           <Skeleton className="h-64 md:col-span-2" />
@@ -53,10 +51,15 @@ function UserDetailsPage() {
   if (error || !user) {
     return (
       <div className="flex flex-col gap-6 p-6">
-        <div>
-          <h1 className="text-3xl font-bold">User Not Found</h1>
-          <p className="text-muted-foreground">The requested user could not be found.</p>
-        </div>
+        <PageHeader
+          title="User Not Found"
+          description="The requested user could not be found."
+          breadcrumbs={[
+            { label: 'Dashboard', href: '/dashboard' },
+            { label: 'Users', href: '/users' },
+            { label: 'Not Found' },
+          ]}
+        />
       </div>
     );
   }
@@ -141,12 +144,15 @@ function UserDetailsPage() {
 
   return (
     <div className="flex flex-col gap-6 p-6">
-      <div>
-        <h1 className="text-3xl font-bold">User Details</h1>
-        <p className="text-muted-foreground">
-          Comprehensive information for {displayName}
-        </p>
-      </div>
+      <PageHeader
+        title="User Details"
+        description={`Comprehensive information for ${displayName}`}
+        breadcrumbs={[
+          { label: 'Dashboard', href: '/dashboard' },
+          { label: 'Users', href: '/users' },
+          { label: displayName },
+        ]}
+      />
 
       {/* Profile and Basic Info */}
       <div className="grid gap-6 md:grid-cols-3">
