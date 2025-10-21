@@ -4894,8 +4894,8 @@
         "parameters": [
           {
             "name": "userId",
-            "required": true,
             "in": "path",
+            "required": true,
             "schema": {
               "type": "string"
             }
@@ -6868,7 +6868,18 @@
     "/admin/statistics/dashboard": {
       "get": {
         "operationId": "AdminStatisticsController_getDashboard",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "period",
+            "required": false,
+            "in": "query",
+            "description": "Period in days (7, 30, or 90)",
+            "schema": {
+              "example": 30,
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Dashboard statistics retrieved successfully"
@@ -7008,10 +7019,21 @@
     "/admin/statistics/activity": {
       "get": {
         "operationId": "AdminStatisticsController_getActivity",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "period",
+            "required": false,
+            "in": "query",
+            "description": "Period in days (7, 30, or 90)",
+            "schema": {
+              "example": 30,
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
-            "description": "Activity data for the last 30 days"
+            "description": "Activity data for the specified period"
           }
         },
         "security": [
@@ -7381,13 +7403,13 @@
             "format": "date-time",
             "type": "string",
             "description": "Premium active from",
-            "example": "2025-10-21T15:10:07.661Z"
+            "example": "2025-10-21T15:59:52.632Z"
           },
           "active_to": {
             "format": "date-time",
             "type": "string",
             "description": "Premium active to",
-            "example": "2025-10-21T15:10:07.661Z"
+            "example": "2025-10-21T15:59:52.633Z"
           }
         }
       },
@@ -7838,13 +7860,13 @@
             "format": "date-time",
             "type": "string",
             "description": "Task execution start timestamp",
-            "example": "2025-10-21T15:10:07.850Z"
+            "example": "2025-10-21T15:59:52.873Z"
           },
           "completed_at": {
             "format": "date-time",
             "type": "string",
             "description": "Task execution completion timestamp",
-            "example": "2025-10-21T15:10:07.850Z"
+            "example": "2025-10-21T15:59:52.873Z"
           },
           "resources": {
             "type": "object",
@@ -7875,7 +7897,7 @@
             "format": "date-time",
             "type": "string",
             "description": "Task next execution availability timestamp",
-            "example": "2025-10-21T15:10:07.850Z"
+            "example": "2025-10-21T15:59:52.873Z"
           }
         },
         "required": [
@@ -10325,13 +10347,13 @@
             "format": "date-time",
             "type": "string",
             "description": "Invoice expiration timestamp",
-            "example": "2025-10-21T15:10:07.865Z"
+            "example": "2025-10-21T15:59:52.885Z"
           },
           "created_at": {
             "format": "date-time",
             "type": "string",
             "description": "Invoice created timestamp",
-            "example": "2025-10-21T15:10:07.865Z"
+            "example": "2025-10-21T15:59:52.885Z"
           },
           "url": {
             "type": "string",
@@ -11531,13 +11553,13 @@
             "format": "date-time",
             "type": "string",
             "description": "Task active from timestamp",
-            "example": "2025-10-21T15:10:08.265Z"
+            "example": "2025-10-21T15:59:53.242Z"
           },
           "active_to": {
             "format": "date-time",
             "type": "string",
             "description": "Task active to timestamp",
-            "example": "2025-10-21T15:10:08.265Z"
+            "example": "2025-10-21T15:59:53.242Z"
           },
           "preset": {
             "type": "string",
@@ -11801,13 +11823,13 @@
             "format": "date-time",
             "type": "string",
             "description": "Task active from timestamp",
-            "example": "2025-10-21T15:10:08.265Z"
+            "example": "2025-10-21T15:59:53.242Z"
           },
           "active_to": {
             "format": "date-time",
             "type": "string",
             "description": "Task active to timestamp",
-            "example": "2025-10-21T15:10:08.265Z"
+            "example": "2025-10-21T15:59:53.242Z"
           },
           "preset": {
             "type": "string",
@@ -11963,13 +11985,13 @@
             "format": "date-time",
             "type": "string",
             "description": "Task active from timestamp",
-            "example": "2025-10-21T15:10:08.265Z"
+            "example": "2025-10-21T15:59:53.242Z"
           },
           "active_to": {
             "format": "date-time",
             "type": "string",
             "description": "Task active to timestamp",
-            "example": "2025-10-21T15:10:08.265Z"
+            "example": "2025-10-21T15:59:53.242Z"
           },
           "preset": {
             "type": "string",
@@ -12004,6 +12026,11 @@
         ]
       },
       "PaybisControllerCurrencyPairs200Pairs": {
+        "items": {
+          "type": "string"
+        }
+      },
+      "PaybisControllerCurrencyPairs200PairsProperty": {
         "items": {
           "type": "string"
         },

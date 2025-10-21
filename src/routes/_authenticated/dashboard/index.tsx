@@ -1,4 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
+import { useState } from 'react';
 import {
   IconUsers,
   IconCreditCard,
@@ -71,9 +72,19 @@ function MetricCard({
   );
 }
 
+type PeriodOption = '7' | '30' | '90';
+
+const PERIOD_OPTIONS = [
+  { value: '7' as PeriodOption, label: '7 days' },
+  { value: '30' as PeriodOption, label: '30 days' },
+  { value: '90' as PeriodOption, label: '90 days' },
+];
+
 function DashboardPage() {
-  const { data: dashboard, isLoading } = useAdminStatisticsControllerGetDashboard();
-  const { data: activityData, isLoading: isActivityLoading } = useAdminStatisticsControllerGetActivity();
+  const [period, setPeriod] = useState<PeriodOption>('30');
+
+  const { data: dashboard, isLoading } = useAdminStatisticsControllerGetDashboard({ period });
+  const { data: activityData, isLoading: isActivityLoading } = useAdminStatisticsControllerGetActivity({ period });
   const { data: topUsersData, isLoading: isTopUsersLoading } = useAdminStatisticsControllerGetTopUsers();
   const { data: recentOrdersData, isLoading: isRecentOrdersLoading } = useAdminStatisticsControllerGetRecentOrders();
 
@@ -107,11 +118,28 @@ function DashboardPage() {
 
   return (
     <div className="flex flex-col gap-6 p-6">
-      <div>
-        <h1 className="text-3xl font-bold">Dashboard</h1>
-        <p className="text-muted-foreground">
-          Overview of your platform metrics and activity
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold">Dashboard</h1>
+          <p className="text-muted-foreground">
+            Overview of your platform metrics and activity
+          </p>
+        </div>
+        <div className="flex gap-2">
+          {PERIOD_OPTIONS.map((option) => (
+            <button
+              key={option.value}
+              onClick={() => setPeriod(option.value)}
+              className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                period === option.value
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
+              }`}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
