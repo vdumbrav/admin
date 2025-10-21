@@ -305,13 +305,7 @@ function UsersPage() {
               ))}
             </div>
           ) : users.length > 0 ? (
-            <>
-              <div className="text-sm text-muted-foreground mb-4">
-                Showing {users.length} of {total} users
-                {hasActiveFilters && ' (filtered)'}
-              </div>
-              <UsersTable users={users} />
-            </>
+            <UsersTable users={users} />
           ) : (
             <div className="flex flex-col h-32 items-center justify-center gap-2">
               {hasActiveFilters ? (

@@ -140,8 +140,11 @@ export const useAdminUsers = (
 ) => {
   const auth = useAppAuth();
 
+  // Serialize filters for stable query key to prevent infinite loops
+  const queryKey = ['admin', 'users', page, limit, JSON.stringify(filters || {})];
+
   return useQuery({
-    queryKey: ['admin', 'users', page, limit, filters],
+    queryKey,
     queryFn: async (): Promise<UserListResponse> => {
       const params = new URLSearchParams({
         page: page.toString(),
