@@ -4869,10 +4869,10 @@
         "parameters": [
           {
             "name": "userId",
-            "required": true,
             "in": "path",
+            "required": true,
             "schema": {
-              "type": "number"
+              "type": "string"
             }
           }
         ],
@@ -4894,8 +4894,8 @@
         "parameters": [
           {
             "name": "userId",
-            "required": true,
             "in": "path",
+            "required": true,
             "schema": {
               "type": "string"
             }
@@ -5025,7 +5025,10 @@
                   "type": "object",
                   "properties": {
                     "pairs": {
-                      "type": "array"
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
                     }
                   }
                 }
@@ -5078,7 +5081,10 @@
                   "type": "object",
                   "properties": {
                     "methods": {
-                      "type": "array"
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
                     }
                   }
                 }
@@ -5189,7 +5195,10 @@
                   "type": "object",
                   "properties": {
                     "currencies": {
-                      "type": "array"
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
                     }
                   }
                 }
@@ -6635,6 +6644,449 @@
         ]
       }
     },
+    "/admin/tasks": {
+      "get": {
+        "description": "Get waitlist tasks",
+        "operationId": "AdminWaitlistTasksController_getWaitlistTasks",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TaskResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "Admin"
+        ]
+      },
+      "post": {
+        "description": "Create new waitlist task",
+        "operationId": "AdminWaitlistTasksController_createTask",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTaskDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaskResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "Admin"
+        ]
+      }
+    },
+    "/admin/tasks/{id}": {
+      "get": {
+        "description": "Get waitlist task by ID",
+        "operationId": "AdminWaitlistTasksController_getTask",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Task ID",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaskResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "Admin"
+        ]
+      },
+      "patch": {
+        "description": "Update waitlist task",
+        "operationId": "AdminWaitlistTasksController_updateTask",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Task ID",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateTaskDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaskResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "Admin"
+        ]
+      },
+      "delete": {
+        "description": "Delete waitlist task",
+        "operationId": "AdminWaitlistTasksController_deleteTask",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Task ID",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "Admin"
+        ]
+      }
+    },
+    "/admin/files/upload": {
+      "post": {
+        "description": "Upload file",
+        "operationId": "FilesController_uploadFile",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/UploadFileDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UploadFileResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "Admin"
+        ]
+      }
+    },
+    "/admin/statistics/dashboard": {
+      "get": {
+        "operationId": "AdminStatisticsController_getDashboard",
+        "parameters": [
+          {
+            "name": "period",
+            "required": false,
+            "in": "query",
+            "description": "Period in days (7, 30, or 90)",
+            "schema": {
+              "example": 30,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Dashboard statistics retrieved successfully"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get dashboard overview statistics",
+        "tags": [
+          "Admin - Statistics"
+        ]
+      }
+    },
+    "/admin/statistics/users": {
+      "get": {
+        "operationId": "AdminStatisticsController_getUserStats",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "User statistics retrieved successfully"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get user statistics",
+        "tags": [
+          "Admin - Statistics"
+        ]
+      }
+    },
+    "/admin/statistics/users/total": {
+      "get": {
+        "operationId": "AdminStatisticsController_getUsersTotal",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Total users count retrieved successfully"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get total users count",
+        "tags": [
+          "Admin - Statistics"
+        ]
+      }
+    },
+    "/admin/statistics/cards": {
+      "get": {
+        "operationId": "AdminStatisticsController_getCardStats",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Card statistics retrieved successfully"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get card statistics",
+        "tags": [
+          "Admin - Statistics"
+        ]
+      }
+    },
+    "/admin/statistics/orders": {
+      "get": {
+        "operationId": "AdminStatisticsController_getOrderStats",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Order statistics retrieved successfully"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get order statistics",
+        "tags": [
+          "Admin - Statistics"
+        ]
+      }
+    },
+    "/admin/statistics/transactions": {
+      "get": {
+        "operationId": "AdminStatisticsController_getTransactionStats",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Transaction statistics retrieved successfully"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get transaction statistics",
+        "tags": [
+          "Admin - Statistics"
+        ]
+      }
+    },
+    "/admin/statistics/notifications": {
+      "get": {
+        "operationId": "AdminStatisticsController_getNotificationStats",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Notification statistics retrieved successfully"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get notification statistics",
+        "tags": [
+          "Admin - Statistics"
+        ]
+      }
+    },
+    "/admin/statistics/activity": {
+      "get": {
+        "operationId": "AdminStatisticsController_getActivity",
+        "parameters": [
+          {
+            "name": "period",
+            "required": false,
+            "in": "query",
+            "description": "Period in days (7, 30, or 90)",
+            "schema": {
+              "example": 30,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Activity data for the specified period"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get activity chart data",
+        "tags": [
+          "Admin - Statistics"
+        ]
+      }
+    },
+    "/admin/statistics/top-users": {
+      "get": {
+        "operationId": "AdminStatisticsController_getTopUsers",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Top 10 users with highest balances"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get top users by balance",
+        "tags": [
+          "Admin - Statistics"
+        ]
+      }
+    },
+    "/admin/statistics/recent-orders": {
+      "get": {
+        "operationId": "AdminStatisticsController_getRecentOrders",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Latest 10 card orders"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get recent card orders",
+        "tags": [
+          "Admin - Statistics"
+        ]
+      }
+    },
     "/webacy/address-risk": {
       "post": {
         "operationId": "WebacyController_checkAddressRisk",
@@ -6744,6 +7196,63 @@
         },
         "tags": [
           "Webacy"
+        ]
+      }
+    },
+    "/metabase/embed-url": {
+      "get": {
+        "operationId": "MetabaseController_getEmbedUrl",
+        "parameters": [
+          {
+            "name": "dashboardId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "theme",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "light",
+                "night"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "bordered",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "titled",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get signed Metabase embed URL",
+        "tags": [
+          "metabase"
         ]
       }
     }
@@ -6894,13 +7403,13 @@
             "format": "date-time",
             "type": "string",
             "description": "Premium active from",
-            "example": "2025-10-20T00:13:00.939Z"
+            "example": "2025-10-21T15:59:52.632Z"
           },
           "active_to": {
             "format": "date-time",
             "type": "string",
             "description": "Premium active to",
-            "example": "2025-10-20T00:13:00.939Z"
+            "example": "2025-10-21T15:59:52.633Z"
           }
         }
       },
@@ -7351,13 +7860,13 @@
             "format": "date-time",
             "type": "string",
             "description": "Task execution start timestamp",
-            "example": "2025-10-20T00:13:01.254Z"
+            "example": "2025-10-21T15:59:52.873Z"
           },
           "completed_at": {
             "format": "date-time",
             "type": "string",
             "description": "Task execution completion timestamp",
-            "example": "2025-10-20T00:13:01.262Z"
+            "example": "2025-10-21T15:59:52.873Z"
           },
           "resources": {
             "type": "object",
@@ -7388,7 +7897,7 @@
             "format": "date-time",
             "type": "string",
             "description": "Task next execution availability timestamp",
-            "example": "2025-10-20T00:13:01.263Z"
+            "example": "2025-10-21T15:59:52.873Z"
           }
         },
         "required": [
@@ -9500,7 +10009,7 @@
           },
           "cardsCost": {
             "type": "number",
-            "description": "Total cost of cards (count \u00d7 price)",
+            "description": "Total cost of cards (count × price)",
             "example": 6
           },
           "platformFee": {
@@ -9838,13 +10347,13 @@
             "format": "date-time",
             "type": "string",
             "description": "Invoice expiration timestamp",
-            "example": "2025-10-20T00:13:01.287Z"
+            "example": "2025-10-21T15:59:52.885Z"
           },
           "created_at": {
             "format": "date-time",
             "type": "string",
             "description": "Invoice created timestamp",
-            "example": "2025-10-20T00:13:01.287Z"
+            "example": "2025-10-21T15:59:52.885Z"
           },
           "url": {
             "type": "string",
@@ -10702,6 +11211,830 @@
           "leaderboard",
           "total_players"
         ]
+      },
+      "BlockingTaskDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number",
+            "description": "Blocking task ID",
+            "example": 1
+          }
+        },
+        "required": [
+          "id"
+        ]
+      },
+      "ResourcesUiPopUpDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name",
+            "example": "name"
+          },
+          "button": {
+            "type": "string",
+            "description": "Button",
+            "example": "button"
+          },
+          "description": {
+            "type": "string",
+            "description": "Description",
+            "example": "description"
+          },
+          "static": {
+            "type": "string",
+            "description": "Static",
+            "example": "static"
+          },
+          "additional-title": {
+            "type": "string",
+            "description": "Additional title",
+            "example": "additional title \"video-ad\" | \"post-style-image\""
+          },
+          "additional-description": {
+            "type": "string",
+            "description": "Additional description",
+            "example": "additional description  \"video-ad\" | \"post-style-image\""
+          }
+        }
+      },
+      "ResourcesUiDto": {
+        "type": "object",
+        "properties": {
+          "button": {
+            "type": "string",
+            "description": "Button",
+            "example": "button"
+          },
+          "pop-up": {
+            "description": "Pop-up",
+            "example": "pop-up",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ResourcesUiPopUpDto"
+              }
+            ]
+          }
+        }
+      },
+      "AdsgramDto": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "Type",
+            "example": "task"
+          },
+          "subtype": {
+            "type": "string",
+            "description": "Subtype",
+            "example": "video-ad"
+          }
+        }
+      },
+      "ResourcesDto": {
+        "type": "object",
+        "properties": {
+          "icon": {
+            "type": "string",
+            "description": "Icon URL",
+            "example": "https://example.com/icon.jpg"
+          },
+          "username": {
+            "type": "string",
+            "description": "Username",
+            "example": "username"
+          },
+          "tweetId": {
+            "type": "string",
+            "description": "Tweet ID",
+            "example": "1234567890"
+          },
+          "isNew": {
+            "type": "boolean",
+            "description": "Is new",
+            "example": true
+          },
+          "block_id": {
+            "type": "string",
+            "description": "Block ID",
+            "example": "1234567890"
+          },
+          "ui": {
+            "description": "UI",
+            "example": "ui",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ResourcesUiDto"
+              }
+            ]
+          },
+          "adsgram": {
+            "description": "Adsgram",
+            "example": "adsgram",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AdsgramDto"
+              }
+            ]
+          }
+        }
+      },
+      "IteratorResponseDto": {
+        "type": "object",
+        "properties": {
+          "day": {
+            "type": "number",
+            "description": "Day",
+            "example": 0
+          },
+          "days": {
+            "type": "number",
+            "description": "Days",
+            "example": 1
+          },
+          "reward_map": {
+            "description": "Reward map",
+            "example": [
+              1,
+              2,
+              3
+            ],
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
+          "iterator_reward": {
+            "description": "Iterator reward",
+            "example": [
+              1,
+              2,
+              3
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "iterator_resource": {
+            "type": "object",
+            "description": "Iterator resource",
+            "example": {
+              "tick": 3600
+            }
+          },
+          "reward": {
+            "type": "number",
+            "description": "Reward max",
+            "example": 1
+          },
+          "reward_max": {
+            "type": "number",
+            "description": "Reward max",
+            "example": 1
+          },
+          "resource": {
+            "type": "object",
+            "description": "Resource",
+            "example": {
+              "tick": 3600
+            }
+          },
+          "id": {
+            "type": "number",
+            "description": "Task iterator ID",
+            "example": 1
+          }
+        },
+        "required": [
+          "day",
+          "days",
+          "reward_map",
+          "iterator_reward",
+          "reward",
+          "reward_max",
+          "id"
+        ]
+      },
+      "TaskResponseDto": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "Task type",
+            "enum": [
+              "referral",
+              "connect",
+              "join",
+              "share",
+              "like",
+              "comment",
+              "multiple",
+              "repeatable",
+              "dummy",
+              "external",
+              "flappy-bird-wlm",
+              "tap-card",
+              "snake-wlm"
+            ],
+            "example": "like"
+          },
+          "provider": {
+            "type": "string",
+            "description": "Task provider",
+            "enum": [
+              "walme",
+              "matrix",
+              "twitter",
+              "telegram",
+              "discord",
+              "adsgram",
+              "monetag",
+              "adscard"
+            ],
+            "example": "twitter"
+          },
+          "web": {
+            "type": "boolean",
+            "description": "Task web",
+            "example": true
+          },
+          "twa": {
+            "type": "boolean",
+            "description": "Task twa",
+            "example": true
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "Task enabled",
+            "example": true
+          },
+          "group": {
+            "type": "string",
+            "description": "Task group",
+            "enum": [
+              "all",
+              "referral",
+              "social",
+              "daily",
+              "partner",
+              "game"
+            ],
+            "example": "social"
+          },
+          "level": {
+            "type": "number",
+            "description": "Task level",
+            "example": 1
+          },
+          "reward": {
+            "type": "number",
+            "description": "Task reward",
+            "example": 50
+          },
+          "title": {
+            "type": "string",
+            "description": "Task title",
+            "example": "Like, Retweet & Comment on Walme Tweet"
+          },
+          "description": {
+            "type": "string",
+            "description": "Task description",
+            "example": "Engage with Walme's Tweet to earn XP"
+          },
+          "pinned": {
+            "type": "boolean",
+            "description": "Task pinned",
+            "example": false
+          },
+          "uri": {
+            "type": "string",
+            "description": "Task URL or ID (required if provider = twitter)",
+            "example": "https://x.com/walme_io/1101998877"
+          },
+          "parent_id": {
+            "type": "number",
+            "description": "Parent task ID",
+            "example": 1
+          },
+          "blocking_task": {
+            "description": "Blocking task",
+            "example": 1,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/BlockingTaskDto"
+              }
+            ]
+          },
+          "resource": {
+            "description": "Task additional resources",
+            "example": {},
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ResourcesDto"
+              }
+            ]
+          },
+          "iterator": {
+            "description": "Task iterator",
+            "example": {
+              "tick": 3600
+            },
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/IteratorResponseDto"
+              }
+            ]
+          },
+          "active_from": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Task active from timestamp",
+            "example": "2025-10-21T15:59:53.242Z"
+          },
+          "active_to": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Task active to timestamp",
+            "example": "2025-10-21T15:59:53.242Z"
+          },
+          "preset": {
+            "type": "string",
+            "description": "Task preset",
+            "example": "string"
+          },
+          "id": {
+            "type": "number",
+            "description": "Task ID",
+            "example": 2
+          },
+          "iterable": {
+            "type": "boolean",
+            "description": "Task is iterable",
+            "example": true
+          },
+          "child": {
+            "description": "Child tasks (for type 'multiple')",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TaskResponseDto"
+            }
+          },
+          "order_by": {
+            "type": "number",
+            "description": "Task order",
+            "example": 1
+          },
+          "total_reward": {
+            "type": "number",
+            "description": "Total reward earned by users for this task",
+            "example": 1500
+          },
+          "total_users": {
+            "type": "number",
+            "description": "Total number of users who completed this task",
+            "example": 25
+          }
+        },
+        "required": [
+          "type",
+          "web",
+          "twa",
+          "enabled",
+          "group",
+          "level",
+          "reward",
+          "title",
+          "description",
+          "pinned",
+          "preset",
+          "id",
+          "iterable",
+          "order_by",
+          "total_reward",
+          "total_users"
+        ]
+      },
+      "IteratorDto": {
+        "type": "object",
+        "properties": {
+          "day": {
+            "type": "number",
+            "description": "Day",
+            "example": 0
+          },
+          "days": {
+            "type": "number",
+            "description": "Days",
+            "example": 1
+          },
+          "reward_map": {
+            "description": "Reward map",
+            "example": [
+              1,
+              2,
+              3
+            ],
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
+          "iterator_reward": {
+            "description": "Iterator reward",
+            "example": [
+              1,
+              2,
+              3
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "iterator_resource": {
+            "type": "object",
+            "description": "Iterator resource",
+            "example": {
+              "tick": 3600
+            }
+          },
+          "reward": {
+            "type": "number",
+            "description": "Reward max",
+            "example": 1
+          },
+          "reward_max": {
+            "type": "number",
+            "description": "Reward max",
+            "example": 1
+          },
+          "resource": {
+            "type": "object",
+            "description": "Resource",
+            "example": {
+              "tick": 3600
+            }
+          }
+        },
+        "required": [
+          "day",
+          "days",
+          "reward_map",
+          "iterator_reward",
+          "reward",
+          "reward_max"
+        ]
+      },
+      "CreateTaskDto": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "Task type",
+            "enum": [
+              "referral",
+              "connect",
+              "join",
+              "share",
+              "like",
+              "comment",
+              "multiple",
+              "repeatable",
+              "dummy",
+              "external",
+              "flappy-bird-wlm",
+              "tap-card",
+              "snake-wlm"
+            ],
+            "example": "like"
+          },
+          "provider": {
+            "type": "string",
+            "description": "Task provider",
+            "enum": [
+              "walme",
+              "matrix",
+              "twitter",
+              "telegram",
+              "discord",
+              "adsgram",
+              "monetag",
+              "adscard"
+            ],
+            "example": "twitter"
+          },
+          "web": {
+            "type": "boolean",
+            "description": "Task web",
+            "example": true
+          },
+          "twa": {
+            "type": "boolean",
+            "description": "Task twa",
+            "example": true
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "Task enabled",
+            "example": true
+          },
+          "group": {
+            "type": "string",
+            "description": "Task group",
+            "enum": [
+              "all",
+              "referral",
+              "social",
+              "daily",
+              "partner",
+              "game"
+            ],
+            "example": "social"
+          },
+          "level": {
+            "type": "number",
+            "description": "Task level",
+            "example": 1
+          },
+          "reward": {
+            "type": "number",
+            "description": "Task reward",
+            "example": 50
+          },
+          "title": {
+            "type": "string",
+            "description": "Task title",
+            "example": "Like, Retweet & Comment on Walme Tweet"
+          },
+          "description": {
+            "type": "string",
+            "description": "Task description",
+            "example": "Engage with Walme's Tweet to earn XP"
+          },
+          "pinned": {
+            "type": "boolean",
+            "description": "Task pinned",
+            "example": false
+          },
+          "uri": {
+            "type": "string",
+            "description": "Task URL or ID (required if provider = twitter)",
+            "example": "https://x.com/walme_io/1101998877"
+          },
+          "parent_id": {
+            "type": "number",
+            "description": "Parent task ID",
+            "example": 1
+          },
+          "blocking_task": {
+            "description": "Blocking task ID",
+            "example": 1,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/BlockingTaskDto"
+              }
+            ]
+          },
+          "resource": {
+            "description": "Task additional resources",
+            "example": {},
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ResourcesDto"
+              }
+            ]
+          },
+          "iterator": {
+            "description": "Iterator resource",
+            "example": {
+              "tick": 3600
+            },
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/IteratorDto"
+              }
+            ]
+          },
+          "active_from": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Task active from timestamp",
+            "example": "2025-10-21T15:59:53.242Z"
+          },
+          "active_to": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Task active to timestamp",
+            "example": "2025-10-21T15:59:53.242Z"
+          },
+          "preset": {
+            "type": "string",
+            "description": "Task preset",
+            "example": "string"
+          }
+        },
+        "required": [
+          "type",
+          "web",
+          "twa",
+          "enabled",
+          "group",
+          "level",
+          "reward",
+          "title",
+          "description",
+          "pinned",
+          "preset"
+        ]
+      },
+      "UpdateTaskDto": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "Task type",
+            "enum": [
+              "referral",
+              "connect",
+              "join",
+              "share",
+              "like",
+              "comment",
+              "multiple",
+              "repeatable",
+              "dummy",
+              "external",
+              "flappy-bird-wlm",
+              "tap-card",
+              "snake-wlm"
+            ],
+            "example": "like"
+          },
+          "provider": {
+            "type": "string",
+            "description": "Task provider",
+            "enum": [
+              "walme",
+              "matrix",
+              "twitter",
+              "telegram",
+              "discord",
+              "adsgram",
+              "monetag",
+              "adscard"
+            ],
+            "example": "twitter"
+          },
+          "web": {
+            "type": "boolean",
+            "description": "Task web",
+            "example": true
+          },
+          "twa": {
+            "type": "boolean",
+            "description": "Task twa",
+            "example": true
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "Task enabled",
+            "example": true
+          },
+          "group": {
+            "type": "string",
+            "description": "Task group",
+            "enum": [
+              "all",
+              "referral",
+              "social",
+              "daily",
+              "partner",
+              "game"
+            ],
+            "example": "social"
+          },
+          "level": {
+            "type": "number",
+            "description": "Task level",
+            "example": 1
+          },
+          "reward": {
+            "type": "number",
+            "description": "Task reward",
+            "example": 50
+          },
+          "title": {
+            "type": "string",
+            "description": "Task title",
+            "example": "Like, Retweet & Comment on Walme Tweet"
+          },
+          "description": {
+            "type": "string",
+            "description": "Task description",
+            "example": "Engage with Walme's Tweet to earn XP"
+          },
+          "pinned": {
+            "type": "boolean",
+            "description": "Task pinned",
+            "example": false
+          },
+          "uri": {
+            "type": "string",
+            "description": "Task URL or ID (required if provider = twitter)",
+            "example": "https://x.com/walme_io/1101998877"
+          },
+          "parent_id": {
+            "type": "number",
+            "description": "Parent task ID",
+            "example": 1
+          },
+          "blocking_task": {
+            "description": "Blocking task ID",
+            "example": 1,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/BlockingTaskDto"
+              }
+            ]
+          },
+          "resource": {
+            "description": "Task additional resources",
+            "example": {},
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ResourcesDto"
+              }
+            ]
+          },
+          "iterator": {
+            "description": "Iterator resource",
+            "example": {
+              "tick": 3600
+            },
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/IteratorDto"
+              }
+            ]
+          },
+          "active_from": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Task active from timestamp",
+            "example": "2025-10-21T15:59:53.242Z"
+          },
+          "active_to": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Task active to timestamp",
+            "example": "2025-10-21T15:59:53.242Z"
+          },
+          "preset": {
+            "type": "string",
+            "description": "Task preset",
+            "example": "string"
+          }
+        }
+      },
+      "UploadFileDto": {
+        "type": "object",
+        "properties": {
+          "file": {
+            "type": "string",
+            "format": "binary"
+          }
+        },
+        "required": [
+          "file"
+        ]
+      },
+      "UploadFileResponseDto": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "File URL",
+            "example": "https://example.com/file.jpg"
+          }
+        },
+        "required": [
+          "url"
+        ]
+      },
+      "PaybisControllerCurrencyPairs200Pairs": {
+        "items": {
+          "type": "string"
+        }
+      },
+      "PaybisControllerCurrencyPairs200PairsProperty": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
       }
     }
   }
