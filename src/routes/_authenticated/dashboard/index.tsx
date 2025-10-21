@@ -67,15 +67,18 @@ function MetricCard({
 function DashboardPage() {
   const { data: dashboard, isLoading } = useAdminStatisticsControllerGetDashboard();
 
+  // Type assertion needed because backend doesn't have response DTO in swagger
+  const dashboardData = dashboard as any;
+
   const metrics = {
-    totalUsers: dashboard?.users?.total || 0,
-    totalUsersChange: dashboard?.users?.change || 0,
-    activeCards: dashboard?.cards?.active || 0,
-    activeCardsChange: dashboard?.cards?.change || 0,
-    pendingOrders: dashboard?.orders?.pending || 0,
-    pendingOrdersChange: dashboard?.orders?.change || 0,
-    totalTransactions: dashboard?.transactions?.total || 0,
-    totalTransactionsChange: dashboard?.transactions?.change || 0,
+    totalUsers: dashboardData?.users?.total || 0,
+    totalUsersChange: dashboardData?.users?.change || 0,
+    activeCards: dashboardData?.cards?.active || 0,
+    activeCardsChange: dashboardData?.cards?.change || 0,
+    pendingOrders: dashboardData?.orders?.pending || 0,
+    pendingOrdersChange: dashboardData?.orders?.change || 0,
+    totalTransactions: dashboardData?.transactions?.total || 0,
+    totalTransactionsChange: dashboardData?.transactions?.change || 0,
   };
 
   return (

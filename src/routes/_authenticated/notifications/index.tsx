@@ -4,14 +4,14 @@ import { Button } from '@/components/ui/button';
 import { IconBell, IconSend, IconHistory } from '@tabler/icons-react';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useAdminStatisticsControllerGetNotifications } from '@/lib/api/generated/admin-statistics/admin-statistics';
+import { useAdminStatisticsControllerGetNotificationStats } from '@/lib/api/generated/admin-statistics/admin-statistics';
 
 export const Route = createFileRoute('/_authenticated/notifications/')({
   component: NotificationsPage,
 });
 
 function NotificationsPage() {
-  const { data: stats, isLoading } = useAdminStatisticsControllerGetNotifications();
+  const { data: stats, isLoading } = useAdminStatisticsControllerGetNotificationStats();
 
   return (
     <div className="flex flex-col gap-6 p-6">
