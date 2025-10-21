@@ -4,69 +4,54 @@ import {
   IconUsers,
   IconCreditCard,
   IconShoppingCart,
+  IconBell,
+  IconChartBar,
+  IconPercentage,
+  IconClock,
   IconTrendingUp,
-  IconArrowUp,
-  IconArrowDown,
 } from '@tabler/icons-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
-  useAdminStatisticsControllerGetDashboard,
-  useAdminStatisticsControllerGetActivity,
-  useAdminStatisticsControllerGetTopUsers,
-  useAdminStatisticsControllerGetRecentOrders,
+  useAdminStatisticsControllerGetUserStats,
+  useAdminStatisticsControllerGetCardStats,
+  useAdminStatisticsControllerGetOrderStats,
+  useAdminStatisticsControllerGetTransactionStats,
+  useAdminStatisticsControllerGetNotificationStats,
 } from '@/lib/api/generated/admin-statistics/admin-statistics';
-import { ChartContainer, ChartConfig, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent } from '@/components/ui/chart';
-import { Area, AreaChart, CartesianGrid, XAxis } from 'recharts';
+import {
+  ChartContainer,
+  ChartConfig,
+  ChartTooltip,
+  ChartTooltipContent,
+  ChartLegend,
+  ChartLegendContent,
+} from '@/components/ui/chart';
+import { Bar, BarChart, Pie, PieChart, Cell, ResponsiveContainer, XAxis, YAxis, CartesianGrid } from 'recharts';
+import { cn } from '@/lib/utils';
 
 export const Route = createFileRoute('/_authenticated/analytics/')({
   component: AnalyticsPage,
 });
 
-interface MetricCardProps {
+interface StatCardProps {
   title: string;
   value: string | number | React.ReactNode;
-  change?: number;
+  description?: string;
   icon: React.ElementType;
   iconColor?: string;
 }
 
-function MetricCard({
-  title,
-  value,
-  change,
-  icon: Icon,
-  iconColor = 'text-primary',
-}: MetricCardProps) {
-  const isPositive = change && change > 0;
-  const isNegative = change && change < 0;
-
+function StatCard({ title, value, description, icon: Icon, iconColor = 'text-primary' }: StatCardProps) {
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium">{title}</CardTitle>
-        <Icon className={`h-4 w-4 ${iconColor}`} />
+        <Icon className={cn('h-4 w-4', iconColor)} />
       </CardHeader>
       <CardContent>
         <div className="text-2xl font-bold">{value}</div>
-        {change !== undefined && (
-          <p
-            className={`text-xs flex items-center gap-1 ${
-              isPositive
-                ? 'text-green-600'
-                : isNegative
-                  ? 'text-red-600'
-                  : 'text-muted-foreground'
-            }`}
-          >
-            {isPositive && <IconArrowUp className="h-3 w-3" />}
-            {isNegative && <IconArrowDown className="h-3 w-3" />}
-            <span>
-              {isPositive && '+'}
-              {change}% from last period
-            </span>
-          </p>
-        )}
+        {description && <p className="text-xs text-muted-foreground mt-1">{description}</p>}
       </CardContent>
     </Card>
   );
@@ -80,39 +65,67 @@ const PERIOD_OPTIONS = [
   { value: '90' as PeriodOption, label: '90 days' },
 ];
 
+const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
+
 function AnalyticsPage() {
   const [period, setPeriod] = useState<PeriodOption>('30');
 
-  const { data: dashboard, isLoading } = useAdminStatisticsControllerGetDashboard({ period });
-  const { data: activityData, isLoading: isActivityLoading } = useAdminStatisticsControllerGetActivity({ period });
-  const { data: topUsersData, isLoading: isTopUsersLoading } = useAdminStatisticsControllerGetTopUsers();
-  const { data: recentOrdersData, isLoading: isRecentOrdersLoading } = useAdminStatisticsControllerGetRecentOrders();
+  const { data: userStats, isLoading: isUserStatsLoading } = useAdminStatisticsControllerGetUserStats({
+    period,
+  });
+  const { data: cardStats, isLoading: isCardStatsLoading } = useAdminStatisticsControllerGetCardStats({
+    period,
+  });
+  const { data: orderStats, isLoading: isOrderStatsLoading } = useAdminStatisticsControllerGetOrderStats({
+    period,
+  });
+  const { data: transactionStats, isLoading: isTransactionStatsLoading } =
+    useAdminStatisticsControllerGetTransactionStats({ period });
+  const { data: notificationStats, isLoading: isNotificationStatsLoading } =
+    useAdminStatisticsControllerGetNotificationStats({ period });
 
-  // Type assertion needed because backend doesn't have response DTO in swagger
-  const dashboardData = dashboard as any;
-  const activity = (activityData as any) || [];
-  const topUsers = (topUsersData as any) || [];
-  const recentOrders = (recentOrdersData as any) || [];
+  // Type assertions because backend doesn't have DTOs in swagger
+  const userStatsData = (userStats as any) || {};
+  const cardStatsData = (cardStats as any) || {};
+  const orderStatsData = (orderStats as any) || {};
+  const transactionStatsData = (transactionStats as any) || {};
+  const notificationStatsData = (notificationStats as any) || {};
 
-  const metrics = {
-    totalUsers: dashboardData?.users?.total || 0,
-    totalUsersChange: dashboardData?.users?.change || 0,
-    activeCards: dashboardData?.cards?.active || 0,
-    activeCardsChange: dashboardData?.cards?.change || 0,
-    pendingOrders: dashboardData?.orders?.pending || 0,
-    pendingOrdersChange: dashboardData?.orders?.change || 0,
-    totalTransactions: dashboardData?.transactions?.total || 0,
-    totalTransactionsChange: dashboardData?.transactions?.change || 0,
-  };
+  // Card status distribution for pie chart
+  const cardStatusData = cardStatsData.byStatus
+    ? Object.entries(cardStatsData.byStatus).map(([status, count]) => ({
+        name: status.charAt(0).toUpperCase() + status.slice(1),
+        value: count,
+      }))
+    : [];
 
-  const chartConfig = {
-    users: {
-      label: 'Users',
-      color: '#3b82f6', // blue-500
+  // Order status distribution
+  const orderStatusData = orderStatsData.byStatus
+    ? Object.entries(orderStatsData.byStatus).map(([status, count]) => ({
+        name: status.charAt(0).toUpperCase() + status.slice(1),
+        value: count,
+      }))
+    : [];
+
+  // Payment method distribution
+  const paymentMethodData = orderStatsData.byPaymentType
+    ? Object.entries(orderStatsData.byPaymentType).map(([type, count]) => ({
+        name: type,
+        count: count,
+      }))
+    : [];
+
+  const cardChartConfig = {
+    count: {
+      label: 'Cards',
+      color: '#3b82f6',
     },
-    transactions: {
-      label: 'Transactions',
-      color: '#10b981', // green-500
+  } satisfies ChartConfig;
+
+  const orderChartConfig = {
+    count: {
+      label: 'Orders',
+      color: '#10b981',
     },
   } satisfies ChartConfig;
 
@@ -121,9 +134,7 @@ function AnalyticsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Analytics & Insights</h1>
-          <p className="text-muted-foreground">
-            Platform performance metrics and user statistics
-          </p>
+          <p className="text-muted-foreground">Deep dive into platform performance and user behavior</p>
         </div>
         <div className="flex gap-2">
           {PERIOD_OPTIONS.map((option) => (
@@ -142,87 +153,319 @@ function AnalyticsPage() {
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <MetricCard
-          title="Total Users"
-          value={isLoading ? <Skeleton className="h-8 w-20" /> : metrics.totalUsers.toLocaleString()}
-          change={metrics.totalUsersChange}
-          icon={IconUsers}
-          iconColor="text-blue-600"
-        />
-        <MetricCard
-          title="Active Cards"
-          value={isLoading ? <Skeleton className="h-8 w-20" /> : metrics.activeCards.toLocaleString()}
-          change={metrics.activeCardsChange}
-          icon={IconCreditCard}
-          iconColor="text-green-600"
-        />
-        <MetricCard
-          title="Pending Orders"
-          value={isLoading ? <Skeleton className="h-8 w-20" /> : metrics.pendingOrders.toLocaleString()}
-          change={metrics.pendingOrdersChange}
-          icon={IconShoppingCart}
-          iconColor="text-orange-600"
-        />
-        <MetricCard
-          title="Total Transactions"
-          value={isLoading ? <Skeleton className="h-8 w-20" /> : metrics.totalTransactions.toLocaleString()}
-          change={metrics.totalTransactionsChange}
-          icon={IconTrendingUp}
-          iconColor="text-purple-600"
-        />
+      {/* User Engagement Metrics */}
+      <div>
+        <h2 className="text-xl font-semibold mb-4">User Engagement</h2>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <StatCard
+            title="New Users"
+            value={
+              isUserStatsLoading ? (
+                <Skeleton className="h-8 w-20" />
+              ) : (
+                userStatsData.newUsers?.toLocaleString() || 0
+              )
+            }
+            description="Users registered in period"
+            icon={IconUsers}
+            iconColor="text-blue-600"
+          />
+          <StatCard
+            title="Active Users"
+            value={
+              isUserStatsLoading ? (
+                <Skeleton className="h-8 w-20" />
+              ) : (
+                userStatsData.activeUsers?.toLocaleString() || 0
+              )
+            }
+            description="Users with activity in period"
+            icon={IconUsers}
+            iconColor="text-green-600"
+          />
+          <StatCard
+            title="Verified Email"
+            value={
+              isUserStatsLoading ? (
+                <Skeleton className="h-8 w-20" />
+              ) : (
+                `${userStatsData.verificationRate?.toFixed(1) || 0}%`
+              )
+            }
+            description="Email verification rate"
+            icon={IconPercentage}
+            iconColor="text-purple-600"
+          />
+          <StatCard
+            title="Premium Users"
+            value={
+              isUserStatsLoading ? (
+                <Skeleton className="h-8 w-20" />
+              ) : (
+                userStatsData.premiumUsers?.toLocaleString() || 0
+              )
+            }
+            description="Active premium subscriptions"
+            icon={IconTrendingUp}
+            iconColor="text-orange-600"
+          />
+        </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <Card className="lg:col-span-2">
+      {/* Card Analytics */}
+      <div>
+        <h2 className="text-xl font-semibold mb-4">Card Performance</h2>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-4">
+          <StatCard
+            title="Cards Issued"
+            value={
+              isCardStatsLoading ? (
+                <Skeleton className="h-8 w-20" />
+              ) : (
+                cardStatsData.totalIssued?.toLocaleString() || 0
+              )
+            }
+            description="Total cards created in period"
+            icon={IconCreditCard}
+            iconColor="text-blue-600"
+          />
+          <StatCard
+            title="Avg Cards/User"
+            value={
+              isCardStatsLoading ? (
+                <Skeleton className="h-8 w-20" />
+              ) : (
+                cardStatsData.averagePerUser?.toFixed(2) || '0.00'
+              )
+            }
+            description="Cards per active user"
+            icon={IconChartBar}
+            iconColor="text-green-600"
+          />
+          <StatCard
+            title="Card Activation"
+            value={
+              isCardStatsLoading ? (
+                <Skeleton className="h-8 w-20" />
+              ) : (
+                `${cardStatsData.activationRate?.toFixed(1) || 0}%`
+              )
+            }
+            description="Percentage of active cards"
+            icon={IconPercentage}
+            iconColor="text-purple-600"
+          />
+          <StatCard
+            title="Frozen Cards"
+            value={
+              isCardStatsLoading ? (
+                <Skeleton className="h-8 w-20" />
+              ) : (
+                cardStatsData.frozenCount?.toLocaleString() || 0
+              )
+            }
+            description="Currently frozen cards"
+            icon={IconCreditCard}
+            iconColor="text-orange-600"
+          />
+        </div>
+
+        <Card>
           <CardHeader>
-            <CardTitle>User Growth & Transaction Activity</CardTitle>
+            <CardTitle>Card Status Distribution</CardTitle>
+            <CardDescription>Breakdown of all cards by current status</CardDescription>
           </CardHeader>
           <CardContent>
-            {isActivityLoading ? (
-              <Skeleton className="h-[250px] w-full" />
-            ) : activity.length > 0 ? (
-              <ChartContainer config={chartConfig} className="h-[250px] w-full">
-                <AreaChart data={activity}>
-                  <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
-                  <XAxis
-                    dataKey="date"
-                    className="fill-muted-foreground"
-                    fontSize={12}
-                    tickLine={false}
-                    axisLine={false}
-                  />
-                  <ChartTooltip content={<ChartTooltipContent />} />
-                  <ChartLegend content={<ChartLegendContent />} />
-                  <defs>
-                    <linearGradient id="fillUsers" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.4} />
-                      <stop offset="95%" stopColor="#3b82f6" stopOpacity={0.05} />
-                    </linearGradient>
-                    <linearGradient id="fillTransactions" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#10b981" stopOpacity={0.4} />
-                      <stop offset="95%" stopColor="#10b981" stopOpacity={0.05} />
-                    </linearGradient>
-                  </defs>
-                  <Area
-                    type="monotone"
-                    dataKey="users"
-                    stroke="#3b82f6"
-                    fill="url(#fillUsers)"
-                    strokeWidth={2}
-                  />
-                  <Area
-                    type="monotone"
-                    dataKey="transactions"
-                    stroke="#10b981"
-                    fill="url(#fillTransactions)"
-                    strokeWidth={2}
-                  />
-                </AreaChart>
-              </ChartContainer>
+            {isCardStatsLoading ? (
+              <Skeleton className="h-[300px] w-full" />
+            ) : cardStatusData.length > 0 ? (
+              <ResponsiveContainer width="100%" height={300}>
+                <PieChart>
+                  <Pie
+                    data={cardStatusData}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                    outerRadius={100}
+                    fill="#8884d8"
+                    dataKey="value"
+                  >
+                    {cardStatusData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <ChartTooltip />
+                </PieChart>
+              </ResponsiveContainer>
             ) : (
-              <div className="flex h-[250px] items-center justify-center text-sm text-muted-foreground">
-                No activity data available
+              <div className="flex h-[300px] items-center justify-center text-sm text-muted-foreground">
+                No card data available
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Order & Payment Analytics */}
+      <div>
+        <h2 className="text-xl font-semibold mb-4">Order & Payment Insights</h2>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-4">
+          <StatCard
+            title="Completion Rate"
+            value={
+              isOrderStatsLoading ? (
+                <Skeleton className="h-8 w-20" />
+              ) : (
+                `${orderStatsData.completionRate?.toFixed(1) || 0}%`
+              )
+            }
+            description="Successfully completed orders"
+            icon={IconPercentage}
+            iconColor="text-green-600"
+          />
+          <StatCard
+            title="Avg Order Value"
+            value={
+              isOrderStatsLoading ? (
+                <Skeleton className="h-8 w-20" />
+              ) : (
+                `$${orderStatsData.averageValue?.toFixed(2) || '0.00'}`
+              )
+            }
+            description="Average order amount"
+            icon={IconShoppingCart}
+            iconColor="text-blue-600"
+          />
+          <StatCard
+            title="Avg Processing Time"
+            value={
+              isOrderStatsLoading ? (
+                <Skeleton className="h-8 w-20" />
+              ) : (
+                `${orderStatsData.avgProcessingTime || 0}min`
+              )
+            }
+            description="Time to complete order"
+            icon={IconClock}
+            iconColor="text-purple-600"
+          />
+          <StatCard
+            title="Failed Orders"
+            value={
+              isOrderStatsLoading ? <Skeleton className="h-8 w-20" /> : orderStatsData.failedCount?.toLocaleString() || 0
+            }
+            description="Orders that failed"
+            icon={IconShoppingCart}
+            iconColor="text-red-600"
+          />
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-2">
+          <Card>
+            <CardHeader>
+              <CardTitle>Order Status Breakdown</CardTitle>
+              <CardDescription>Distribution of orders by status</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {isOrderStatsLoading ? (
+                <Skeleton className="h-[300px] w-full" />
+              ) : orderStatusData.length > 0 ? (
+                <ResponsiveContainer width="100%" height={300}>
+                  <PieChart>
+                    <Pie
+                      data={orderStatusData}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                      label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                      outerRadius={100}
+                      fill="#8884d8"
+                      dataKey="value"
+                    >
+                      {orderStatusData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <ChartTooltip />
+                  </PieChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="flex h-[300px] items-center justify-center text-sm text-muted-foreground">
+                  No order data available
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Payment Methods</CardTitle>
+              <CardDescription>Orders by payment type</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {isOrderStatsLoading ? (
+                <Skeleton className="h-[300px] w-full" />
+              ) : paymentMethodData.length > 0 ? (
+                <ChartContainer config={orderChartConfig} className="h-[300px] w-full">
+                  <BarChart data={paymentMethodData}>
+                    <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
+                    <XAxis dataKey="name" className="fill-muted-foreground" fontSize={12} />
+                    <YAxis className="fill-muted-foreground" fontSize={12} />
+                    <ChartTooltip content={<ChartTooltipContent />} />
+                    <Bar dataKey="count" fill="#10b981" radius={[8, 8, 0, 0]} />
+                  </BarChart>
+                </ChartContainer>
+              ) : (
+                <div className="flex h-[300px] items-center justify-center text-sm text-muted-foreground">
+                  No payment data available
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+
+      {/* Transaction & Notification Stats */}
+      <div className="grid gap-4 md:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle>Transaction Insights</CardTitle>
+            <CardDescription>Transaction volume and patterns</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {isTransactionStatsLoading ? (
+              <div className="space-y-3">
+                {[...Array(4)].map((_, i) => (
+                  <Skeleton key={i} className="h-12 w-full" />
+                ))}
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">Total Volume</span>
+                  <span className="text-2xl font-bold">
+                    ${transactionStatsData.totalVolume?.toLocaleString() || 0}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">Average Transaction</span>
+                  <span className="text-xl font-semibold text-blue-600">
+                    ${transactionStatsData.averageAmount?.toFixed(2) || '0.00'}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">Success Rate</span>
+                  <span className="text-xl font-semibold text-green-600">
+                    {transactionStatsData.successRate?.toFixed(1) || 0}%
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">Failed Transactions</span>
+                  <span className="text-xl font-semibold text-red-600">
+                    {transactionStatsData.failedCount?.toLocaleString() || 0}
+                  </span>
+                </div>
               </div>
             )}
           </CardContent>
@@ -230,115 +473,47 @@ function AnalyticsPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Top Users</CardTitle>
+            <CardTitle>Notification Analytics</CardTitle>
+            <CardDescription>User engagement with notifications</CardDescription>
           </CardHeader>
           <CardContent>
-            {isTopUsersLoading ? (
+            {isNotificationStatsLoading ? (
               <div className="space-y-3">
-                {[...Array(5)].map((_, i) => (
-                  <Skeleton key={i} className="h-16 w-full" />
-                ))}
-              </div>
-            ) : topUsers.length > 0 ? (
-              <div className="space-y-3">
-                {topUsers.slice(0, 5).map((user: any, idx: number) => (
-                  <div
-                    key={user.id}
-                    className="flex items-center justify-between border-b pb-3 last:border-0"
-                  >
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm font-medium text-muted-foreground">
-                          #{idx + 1}
-                        </span>
-                        <span className="font-medium text-sm truncate max-w-[150px]">
-                          {user.nickname && user.nickname !== 'Anonymous' ? user.nickname : user.email}
-                        </span>
-                      </div>
-                      <p className="text-xs text-muted-foreground">
-                        {user.transactionCount} transactions
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-sm font-bold text-green-600">
-                        ${user.balance.toFixed(2)}
-                      </div>
-                    </div>
-                  </div>
+                {[...Array(4)].map((_, i) => (
+                  <Skeleton key={i} className="h-12 w-full" />
                 ))}
               </div>
             ) : (
-              <div className="flex h-32 items-center justify-center text-sm text-muted-foreground">
-                No users data available
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">Total Sent</span>
+                  <span className="text-2xl font-bold">
+                    {notificationStatsData.totalSent?.toLocaleString() || 0}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">Read Rate</span>
+                  <span className="text-xl font-semibold text-blue-600">
+                    {notificationStatsData.readRate?.toFixed(1) || 0}%
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">Click Rate</span>
+                  <span className="text-xl font-semibold text-green-600">
+                    {notificationStatsData.clickRate?.toFixed(1) || 0}%
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">Unread</span>
+                  <span className="text-xl font-semibold text-orange-600">
+                    {notificationStatsData.unreadCount?.toLocaleString() || 0}
+                  </span>
+                </div>
               </div>
             )}
           </CardContent>
         </Card>
       </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Recent Orders</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {isRecentOrdersLoading ? (
-            <div className="space-y-3">
-              {[...Array(5)].map((_, i) => (
-                <Skeleton key={i} className="h-16 w-full" />
-              ))}
-            </div>
-          ) : recentOrders.length > 0 ? (
-            <div className="space-y-3">
-              {recentOrders.map((order: any) => (
-                <div
-                  key={order.id}
-                  className="flex flex-col gap-2 border-b pb-3 last:border-0"
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => navigator.clipboard.writeText(order.reference)}
-                        className="font-mono text-xs font-medium hover:text-primary transition-colors"
-                        title="Click to copy reference"
-                      >
-                        {order.reference}
-                      </button>
-                      <span
-                        className={`rounded-full px-2 py-0.5 text-xs font-medium ${
-                          order.status === 'completed'
-                            ? 'bg-green-100 text-green-700'
-                            : order.status === 'confirmed'
-                              ? 'bg-blue-100 text-blue-700'
-                              : order.status === 'failed'
-                                ? 'bg-red-100 text-red-700'
-                                : 'bg-gray-100 text-gray-700'
-                        }`}
-                      >
-                        {order.status}
-                      </span>
-                    </div>
-                    <div className="text-right">
-                      <div className="font-bold">
-                        {order.amount} {order.currency}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-between text-xs text-muted-foreground">
-                    <span>{order.user.nickname && order.user.nickname !== 'Anonymous' ? order.user.nickname : order.user.email}</span>
-                    <span className="flex items-center gap-1">
-                      {order.paymentType} • {new Date(order.createdAt).toLocaleDateString()}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="flex h-32 items-center justify-center text-sm text-muted-foreground">
-              No orders data available
-            </div>
-          )}
-        </CardContent>
-      </Card>
     </div>
   );
 }
