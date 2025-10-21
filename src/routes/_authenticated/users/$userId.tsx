@@ -14,7 +14,6 @@ import {
   IconCrown,
   IconTrophy,
   IconUsers,
-  IconChartLine,
   IconCoin,
   IconListCheck,
   IconReceipt,
