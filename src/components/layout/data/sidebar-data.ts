@@ -20,9 +20,6 @@ import {
   IconPigMoney,
   IconLanguage,
   IconChartPie,
-  IconUserCircle,
-  IconMoon,
-  IconLogout,
 } from '@tabler/icons-react';
 import { type SidebarData } from '../types';
 

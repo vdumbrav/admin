@@ -147,16 +147,16 @@ function ProfilePage() {
             <div className="flex items-center justify-between text-sm">
               <span className="text-muted-foreground">Token Issued:</span>
               <span className="font-mono text-xs">
-                {user?.issuedAt
-                  ? new Date(user.issuedAt * 1000).toLocaleString()
+                {user?.profile?.iat
+                  ? new Date(user.profile.iat * 1000).toLocaleString()
                   : 'N/A'}
               </span>
             </div>
             <div className="flex items-center justify-between text-sm">
               <span className="text-muted-foreground">Token Expires:</span>
               <span className="font-mono text-xs">
-                {user?.expiresAt
-                  ? new Date(user.expiresAt * 1000).toLocaleString()
+                {user?.expires_at
+                  ? new Date(user.expires_at * 1000).toLocaleString()
                   : 'N/A'}
               </span>
             </div>

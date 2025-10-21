@@ -4,13 +4,13 @@ export interface Card {
   id: string;
   userId: number;
   cardNumber: string; // masked, e.g., "**** **** **** 1234"
-  cardholderName: string;
+  cardholderName?: string;
   balance: number;
   currency: string;
   status: CardStatus;
-  bin: string;
+  bin?: string;
   createdAt: string;
-  lastUsed: string | null;
+  lastUsed?: string | null;
 }
 
 export interface TopupSource {
