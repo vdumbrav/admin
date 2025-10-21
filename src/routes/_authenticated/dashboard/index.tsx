@@ -9,7 +9,7 @@ import {
 } from '@tabler/icons-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useStatisticsControllerGetDashboard } from '@/lib/api/generated/statistics/statistics';
+import { useAdminStatisticsControllerGetDashboard } from '@/lib/api/generated/admin-statistics/admin-statistics';
 
 export const Route = createFileRoute('/_authenticated/dashboard/')({
   component: DashboardPage,
@@ -65,7 +65,7 @@ function MetricCard({
 }
 
 function DashboardPage() {
-  const { data: dashboard, isLoading } = useStatisticsControllerGetDashboard();
+  const { data: dashboard, isLoading } = useAdminStatisticsControllerGetDashboard();
 
   const metrics = {
     totalUsers: dashboard?.users?.total || 0,

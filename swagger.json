@@ -6976,6 +6976,146 @@
           "Webacy"
         ]
       }
+    },
+    "/admin/statistics/dashboard": {
+      "get": {
+        "operationId": "AdminStatisticsController_getDashboard",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Dashboard statistics retrieved successfully"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get dashboard overview statistics",
+        "tags": [
+          "Admin - Statistics"
+        ]
+      }
+    },
+    "/admin/statistics/users": {
+      "get": {
+        "operationId": "AdminStatisticsController_getUserStats",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "User statistics retrieved successfully"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get user statistics",
+        "tags": [
+          "Admin - Statistics"
+        ]
+      }
+    },
+    "/admin/statistics/users/total": {
+      "get": {
+        "operationId": "AdminStatisticsController_getUsersTotal",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Total users count retrieved successfully"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get total users count",
+        "tags": [
+          "Admin - Statistics"
+        ]
+      }
+    },
+    "/admin/statistics/cards": {
+      "get": {
+        "operationId": "AdminStatisticsController_getCardStats",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Card statistics retrieved successfully"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get card statistics",
+        "tags": [
+          "Admin - Statistics"
+        ]
+      }
+    },
+    "/admin/statistics/orders": {
+      "get": {
+        "operationId": "AdminStatisticsController_getOrderStats",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Order statistics retrieved successfully"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get order statistics",
+        "tags": [
+          "Admin - Statistics"
+        ]
+      }
+    },
+    "/admin/statistics/transactions": {
+      "get": {
+        "operationId": "AdminStatisticsController_getTransactionStats",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Transaction statistics retrieved successfully"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get transaction statistics",
+        "tags": [
+          "Admin - Statistics"
+        ]
+      }
+    },
+    "/admin/statistics/notifications": {
+      "get": {
+        "operationId": "AdminStatisticsController_getNotificationStats",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Notification statistics retrieved successfully"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get notification statistics",
+        "tags": [
+          "Admin - Statistics"
+        ]
+      }
     }
   },
   "info": {
@@ -9730,7 +9870,7 @@
           },
           "cardsCost": {
             "type": "number",
-            "description": "Total cost of cards (count \u00d7 price)",
+            "description": "Total cost of cards (count × price)",
             "example": 6
           },
           "platformFee": {
