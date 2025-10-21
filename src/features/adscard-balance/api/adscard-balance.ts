@@ -8,6 +8,9 @@ import type {
   TrcCancelResponse,
   TrcTopupStatus,
   BalanceInfo,
+  CryptoTopupRequest,
+  CryptoTopupResponse,
+  CryptoTopupStatusResponse,
 } from '../types/api';
 
 const ADSCARD_API_BASE = '/adscard/balance';
@@ -94,4 +97,29 @@ export async function getBalanceInfo(
     pendingTopups: 0,
     availableForCards: response.balance || 0,
   };
+}
+
+/**
+ * Create a new crypto topup (USDT TRC20/ERC20)
+ */
+export async function createCryptoTopup(
+  request: CryptoTopupRequest,
+): Promise<CryptoTopupResponse> {
+  return authenticatedMutator<CryptoTopupResponse>({
+    url: '/adscard/balance/crypto_topup',
+    method: 'POST',
+    data: request,
+  });
+}
+
+/**
+ * Get crypto topup payment status
+ */
+export async function getCryptoTopupStatus(
+  paymentId: string,
+): Promise<CryptoTopupStatusResponse> {
+  return authenticatedMutator<CryptoTopupStatusResponse>({
+    url: `/adscard/balance/crypto_topup/${paymentId}`,
+    method: 'GET',
+  });
 }

@@ -4,8 +4,10 @@ import {
   getTrcTopups,
   cancelTrcTopup,
   getBalanceInfo,
+  createCryptoTopup,
+  getCryptoTopupStatus,
 } from '../api/adscard-balance';
-import type { TrcTopupStatus } from '../types/api';
+import type { TrcTopupStatus, CryptoTopupRequest } from '../types/api';
 
 // Query keys
 const trcTopupKeys = {
@@ -85,5 +87,31 @@ export function useBalanceInfo(authToken: string) {
     queryFn: () => getBalanceInfo(authToken),
     enabled: !!authToken,
     refetchInterval: 30000, // Refetch every 30 seconds
+  });
+}
+
+/**
+ * Hook to create a crypto topup (USDT TRC20/ERC20)
+ */
+export function useCreateCryptoTopup() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (request: CryptoTopupRequest) => createCryptoTopup(request),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: balanceKeys.info() });
+    },
+  });
+}
+
+/**
+ * Hook to get crypto topup status
+ */
+export function useCryptoTopupStatus(paymentId: string | null) {
+  return useQuery({
+    queryKey: ['crypto-topup-status', paymentId],
+    queryFn: () => getCryptoTopupStatus(paymentId!),
+    enabled: !!paymentId,
+    refetchInterval: 5000, // Poll every 5 seconds
   });
 }
