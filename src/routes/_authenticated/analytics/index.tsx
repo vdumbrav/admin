@@ -1,12 +1,16 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { IconUsers, IconCreditCard, IconTrendingUp, IconActivity } from '@tabler/icons-react';
+import { useStatisticsControllerGetUsersTotal } from '@/lib/api/generated/statistics/statistics';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export const Route = createFileRoute('/_authenticated/analytics/')({
   component: AnalyticsPage,
 });
 
 function AnalyticsPage() {
+  const { data: usersData, isLoading: isLoadingUsers } = useStatisticsControllerGetUsersTotal();
+
   return (
     <div className="flex flex-col gap-6 p-6">
       {/* Header */}
@@ -25,9 +29,13 @@ function AnalyticsPage() {
             <IconUsers className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">45,231</div>
+            {isLoadingUsers ? (
+              <Skeleton className="h-8 w-24" />
+            ) : (
+              <div className="text-2xl font-bold">{usersData?.total?.toLocaleString() || '0'}</div>
+            )}
             <p className="text-xs text-muted-foreground">
-              +20.1% from last month
+              Registered in system
             </p>
           </CardContent>
         </Card>
@@ -38,9 +46,9 @@ function AnalyticsPage() {
             <IconCreditCard className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">2,350</div>
+            <div className="text-2xl font-bold">-</div>
             <p className="text-xs text-muted-foreground">
-              +180.1% from last month
+              See Metabase for details
             </p>
           </CardContent>
         </Card>
@@ -51,9 +59,9 @@ function AnalyticsPage() {
             <IconTrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">$12,234</div>
+            <div className="text-2xl font-bold">-</div>
             <p className="text-xs text-muted-foreground">
-              +19% from last month
+              See Metabase for details
             </p>
           </CardContent>
         </Card>
@@ -64,9 +72,9 @@ function AnalyticsPage() {
             <IconActivity className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">+573</div>
+            <div className="text-2xl font-bold">-</div>
             <p className="text-xs text-muted-foreground">
-              +201 from last hour
+              See Metabase for details
             </p>
           </CardContent>
         </Card>
@@ -83,7 +91,7 @@ function AnalyticsPage() {
           </CardHeader>
           <CardContent>
             <div className="h-[300px] flex items-center justify-center border-2 border-dashed rounded-lg">
-              <p className="text-sm text-muted-foreground">Chart will be added here</p>
+              <p className="text-sm text-muted-foreground">View in Metabase dashboard</p>
             </div>
           </CardContent>
         </Card>
@@ -97,7 +105,7 @@ function AnalyticsPage() {
           </CardHeader>
           <CardContent>
             <div className="h-[300px] flex items-center justify-center border-2 border-dashed rounded-lg">
-              <p className="text-sm text-muted-foreground">Chart will be added here</p>
+              <p className="text-sm text-muted-foreground">View in Metabase dashboard</p>
             </div>
           </CardContent>
         </Card>
@@ -113,7 +121,7 @@ function AnalyticsPage() {
           </CardHeader>
           <CardContent>
             <div className="h-[200px] flex items-center justify-center border-2 border-dashed rounded-lg">
-              <p className="text-sm text-muted-foreground">List will be added here</p>
+              <p className="text-sm text-muted-foreground">View in Metabase dashboard</p>
             </div>
           </CardContent>
         </Card>
@@ -127,7 +135,7 @@ function AnalyticsPage() {
           </CardHeader>
           <CardContent>
             <div className="h-[200px] flex items-center justify-center border-2 border-dashed rounded-lg">
-              <p className="text-sm text-muted-foreground">Pie chart will be added here</p>
+              <p className="text-sm text-muted-foreground">View in Metabase dashboard</p>
             </div>
           </CardContent>
         </Card>
@@ -141,7 +149,7 @@ function AnalyticsPage() {
           </CardHeader>
           <CardContent>
             <div className="h-[200px] flex items-center justify-center border-2 border-dashed rounded-lg">
-              <p className="text-sm text-muted-foreground">Map will be added here</p>
+              <p className="text-sm text-muted-foreground">View in Metabase dashboard</p>
             </div>
           </CardContent>
         </Card>

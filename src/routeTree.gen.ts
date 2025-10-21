@@ -30,6 +30,7 @@ import { Route as AuthenticatedQuestsNewRouteImport } from './routes/_authentica
 import { Route as AuthenticatedQuestsIdRouteImport } from './routes/_authenticated/quests/$id'
 import { Route as AuthenticatedCardsCardIdRouteImport } from './routes/_authenticated/cards/$cardId'
 import { Route as AuthenticatedAnalyticsMetabaseRouteImport } from './routes/_authenticated/analytics/metabase'
+import { Route as AuthenticatedAnalyticsIndexOldRouteImport } from './routes/_authenticated/analytics/index.old'
 import { Route as AuthenticatedMarketsTreasuriesIndexRouteImport } from './routes/_authenticated/markets/treasuries/index'
 import { Route as AuthenticatedMarketsPlatformsIndexRouteImport } from './routes/_authenticated/markets/platforms/index'
 import { Route as AuthenticatedMarketsLanguagesIndexRouteImport } from './routes/_authenticated/markets/languages/index'
@@ -156,6 +157,12 @@ const AuthenticatedAnalyticsMetabaseRoute =
     path: '/analytics/metabase',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAnalyticsIndexOldRoute =
+  AuthenticatedAnalyticsIndexOldRouteImport.update({
+    id: '/analytics/index/old',
+    path: '/analytics/index/old',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedMarketsTreasuriesIndexRoute =
   AuthenticatedMarketsTreasuriesIndexRouteImport.update({
     id: '/markets/treasuries/',
@@ -241,6 +248,7 @@ export interface FileRoutesByFullPath {
   '/markets/languages': typeof AuthenticatedMarketsLanguagesIndexRoute
   '/markets/platforms': typeof AuthenticatedMarketsPlatformsIndexRoute
   '/markets/treasuries': typeof AuthenticatedMarketsTreasuriesIndexRoute
+  '/analytics/index/old': typeof AuthenticatedAnalyticsIndexOldRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -272,6 +280,7 @@ export interface FileRoutesByTo {
   '/markets/languages': typeof AuthenticatedMarketsLanguagesIndexRoute
   '/markets/platforms': typeof AuthenticatedMarketsPlatformsIndexRoute
   '/markets/treasuries': typeof AuthenticatedMarketsTreasuriesIndexRoute
+  '/analytics/index/old': typeof AuthenticatedAnalyticsIndexOldRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -305,6 +314,7 @@ export interface FileRoutesById {
   '/_authenticated/markets/languages/': typeof AuthenticatedMarketsLanguagesIndexRoute
   '/_authenticated/markets/platforms/': typeof AuthenticatedMarketsPlatformsIndexRoute
   '/_authenticated/markets/treasuries/': typeof AuthenticatedMarketsTreasuriesIndexRoute
+  '/_authenticated/analytics/index/old': typeof AuthenticatedAnalyticsIndexOldRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -338,6 +348,7 @@ export interface FileRouteTypes {
     | '/markets/languages'
     | '/markets/platforms'
     | '/markets/treasuries'
+    | '/analytics/index/old'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -369,6 +380,7 @@ export interface FileRouteTypes {
     | '/markets/languages'
     | '/markets/platforms'
     | '/markets/treasuries'
+    | '/analytics/index/old'
   id:
     | '__root__'
     | '/'
@@ -401,6 +413,7 @@ export interface FileRouteTypes {
     | '/_authenticated/markets/languages/'
     | '/_authenticated/markets/platforms/'
     | '/_authenticated/markets/treasuries/'
+    | '/_authenticated/analytics/index/old'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -559,6 +572,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAnalyticsMetabaseRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/analytics/index/old': {
+      id: '/_authenticated/analytics/index/old'
+      path: '/analytics/index/old'
+      fullPath: '/analytics/index/old'
+      preLoaderRoute: typeof AuthenticatedAnalyticsIndexOldRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/markets/treasuries/': {
       id: '/_authenticated/markets/treasuries/'
       path: '/markets/treasuries'
@@ -664,6 +684,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedMarketsLanguagesIndexRoute: typeof AuthenticatedMarketsLanguagesIndexRoute
   AuthenticatedMarketsPlatformsIndexRoute: typeof AuthenticatedMarketsPlatformsIndexRoute
   AuthenticatedMarketsTreasuriesIndexRoute: typeof AuthenticatedMarketsTreasuriesIndexRoute
+  AuthenticatedAnalyticsIndexOldRoute: typeof AuthenticatedAnalyticsIndexOldRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -696,6 +717,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedMarketsPlatformsIndexRoute,
   AuthenticatedMarketsTreasuriesIndexRoute:
     AuthenticatedMarketsTreasuriesIndexRoute,
+  AuthenticatedAnalyticsIndexOldRoute: AuthenticatedAnalyticsIndexOldRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
