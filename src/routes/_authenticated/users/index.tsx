@@ -36,7 +36,7 @@ function UsersPage() {
   const [cardStatus, setCardStatus] = useState<'all' | 'has_cards' | 'no_cards'>('all');
   const [filtersOpen, setFiltersOpen] = useState(false);
 
-  // Build filters object
+  // Build filters object with stable serialization
   const filters = useMemo(() => {
     const result: any = {};
 
@@ -45,7 +45,8 @@ function UsersPage() {
     }
 
     if (selectedRoles.length > 0) {
-      result.roles = selectedRoles;
+      // Sort roles for stable serialization
+      result.roles = [...selectedRoles].sort();
     }
 
     if (emailVerified !== 'all') {
