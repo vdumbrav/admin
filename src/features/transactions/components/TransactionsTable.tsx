@@ -88,7 +88,7 @@ export function TransactionsTable({
         <TableBody>
           {transactions.map((tx) => {
             const statusInfo = statusConfig[tx.status] || statusConfig.pending;
-            const isIncoming = tx.direction === 'incoming';
+            const isIncoming = String(tx.direction) === 'incoming';
 
             return (
               <TableRow key={tx.id}>

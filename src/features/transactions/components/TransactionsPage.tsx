@@ -79,7 +79,7 @@ export function TransactionsPage() {
               Total Transactions
             </div>
             <div className="text-2xl font-bold">
-              {data?.meta?.total || 0}
+              {data?.totalItems || 0}
             </div>
           </CardContent>
         </Card>
@@ -89,7 +89,7 @@ export function TransactionsPage() {
               Completed
             </div>
             <div className="text-2xl font-bold text-green-600">
-              {data?.items?.filter((tx) => tx.status === 'completed').length ||
+              {data?.items?.filter((tx) => String(tx.status) === 'completed').length ||
                 0}
             </div>
           </CardContent>
@@ -100,7 +100,7 @@ export function TransactionsPage() {
               Pending
             </div>
             <div className="text-2xl font-bold text-yellow-600">
-              {data?.items?.filter((tx) => tx.status === 'pending').length || 0}
+              {data?.items?.filter((tx) => String(tx.status) === 'pending').length || 0}
             </div>
           </CardContent>
         </Card>
@@ -110,7 +110,7 @@ export function TransactionsPage() {
               Failed
             </div>
             <div className="text-2xl font-bold text-red-600">
-              {data?.items?.filter((tx) => tx.status === 'failed').length || 0}
+              {data?.items?.filter((tx) => String(tx.status) === 'failed').length || 0}
             </div>
           </CardContent>
         </Card>
@@ -126,16 +126,17 @@ export function TransactionsPage() {
       />
 
       {/* Pagination */}
-      {data?.meta && (
+      {data && data.totalItems && data.totalItems > 0 && (
         <div className="flex items-center justify-between">
           <p className="text-sm text-muted-foreground">
-            Showing {data.items?.length || 0} of {data.meta.total} transactions
+            Showing {data.items?.length || 0} of {data.totalItems} transactions
+            {data.page && data.totalPages && ` (Page ${data.page} of ${data.totalPages})`}
           </p>
           <div className="flex gap-2">
             <Button
               variant="outline"
               size="sm"
-              disabled={!data.meta.hasPreviousPage}
+              disabled={!data.page || data.page <= 1}
               onClick={() =>
                 setFilters((f) => ({ ...f, page: (f.page || 1) - 1 }))
               }
@@ -145,7 +146,7 @@ export function TransactionsPage() {
             <Button
               variant="outline"
               size="sm"
-              disabled={!data.meta.hasNextPage}
+              disabled={!data.page || !data.totalPages || data.page >= data.totalPages}
               onClick={() =>
                 setFilters((f) => ({ ...f, page: (f.page || 1) + 1 }))
               }

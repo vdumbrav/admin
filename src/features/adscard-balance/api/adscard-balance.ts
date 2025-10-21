@@ -37,7 +37,7 @@ export async function getTrcTopups(
   authToken: string,
   filters?: {
     time?: string;
-    status?: string;
+    status?: TrcTopupStatus;
     id?: number;
   },
 ): Promise<TrcListResponse> {

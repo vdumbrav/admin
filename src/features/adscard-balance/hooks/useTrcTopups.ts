@@ -5,7 +5,7 @@ import {
   cancelTrcTopup,
   getBalanceInfo,
 } from '../api/adscard-balance';
-import type { TrcTopupData } from '../types/api';
+import type { TrcTopupStatus } from '../types/api';
 
 // Query keys
 const trcTopupKeys = {
@@ -29,7 +29,7 @@ export function useTrcTopups(
   authToken: string,
   filters?: {
     time?: string;
-    status?: string;
+    status?: TrcTopupStatus;
     id?: number;
   },
 ) {
