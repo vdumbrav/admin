@@ -97,11 +97,11 @@ function DashboardPage() {
   const chartConfig = {
     users: {
       label: 'Users',
-      color: 'hsl(var(--chart-1))',
+      color: '#3b82f6', // blue-500
     },
     transactions: {
       label: 'Transactions',
-      color: 'hsl(var(--chart-2))',
+      color: '#10b981', // green-500
     },
   } satisfies ChartConfig;
 
@@ -156,10 +156,10 @@ function DashboardPage() {
             ) : activity.length > 0 ? (
               <ChartContainer config={chartConfig} className="h-[250px] w-full">
                 <AreaChart data={activity}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                  <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
                   <XAxis
                     dataKey="date"
-                    stroke="hsl(var(--muted-foreground))"
+                    className="fill-muted-foreground"
                     fontSize={12}
                     tickLine={false}
                     axisLine={false}
@@ -167,25 +167,25 @@ function DashboardPage() {
                   <ChartTooltip content={<ChartTooltipContent />} />
                   <defs>
                     <linearGradient id="fillUsers" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="hsl(var(--chart-1))" stopOpacity={0.3} />
-                      <stop offset="95%" stopColor="hsl(var(--chart-1))" stopOpacity={0} />
+                      <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.4} />
+                      <stop offset="95%" stopColor="#3b82f6" stopOpacity={0.05} />
                     </linearGradient>
                     <linearGradient id="fillTransactions" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="hsl(var(--chart-2))" stopOpacity={0.3} />
-                      <stop offset="95%" stopColor="hsl(var(--chart-2))" stopOpacity={0} />
+                      <stop offset="5%" stopColor="#10b981" stopOpacity={0.4} />
+                      <stop offset="95%" stopColor="#10b981" stopOpacity={0.05} />
                     </linearGradient>
                   </defs>
                   <Area
                     type="monotone"
                     dataKey="users"
-                    stroke="hsl(var(--chart-1))"
+                    stroke="#3b82f6"
                     fill="url(#fillUsers)"
                     strokeWidth={2}
                   />
                   <Area
                     type="monotone"
                     dataKey="transactions"
-                    stroke="hsl(var(--chart-2))"
+                    stroke="#10b981"
                     fill="url(#fillTransactions)"
                     strokeWidth={2}
                   />
