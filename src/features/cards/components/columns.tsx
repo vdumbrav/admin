@@ -16,7 +16,9 @@ import {
   IconLock,
   IconSnowflake,
   IconCirclePlus,
+  IconArrowsExchange,
 } from '@tabler/icons-react';
+import { useNavigate } from '@tanstack/react-router';
 import type { Card } from '../types';
 
 const statusConfig = {
@@ -159,6 +161,7 @@ export const createColumns = ({
       const canFreeze = card.status === 'active';
       const canUnfreeze = card.status === 'frozen';
       const canBlock = card.status !== 'blocked';
+      const navigate = useNavigate();
 
       return (
         <div className="flex items-center gap-2">
@@ -180,6 +183,18 @@ export const createColumns = ({
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>Actions</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={() =>
+                  navigate({
+                    to: '/transactions',
+                    search: { cardId: card.id },
+                  })
+                }
+              >
+                <IconArrowsExchange className="mr-2 h-4 w-4" />
+                View Transactions
+              </DropdownMenuItem>
               <DropdownMenuSeparator />
               {canFreeze && (
                 <DropdownMenuItem onClick={() => onFreeze(card)}>

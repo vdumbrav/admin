@@ -1,9 +1,17 @@
 import { type ColumnDef } from '@tanstack/react-table';
-import { Link } from '@tanstack/react-router';
-import { IconMail, IconMailCheck, IconShield, IconUser } from '@tabler/icons-react';
+import { Link, useNavigate } from '@tanstack/react-router';
+import { IconMail, IconMailCheck, IconShield, IconUser, IconDotsVertical, IconArrowsExchange, IconEye } from '@tabler/icons-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { DataTableColumnHeader } from '@/components/table/data-table-column-header';
 import type { User } from '../types';
 
@@ -145,13 +153,39 @@ export const columns: ColumnDef<User>[] = [
     id: 'actions',
     cell: ({ row }) => {
       const user = row.original;
+      const navigate = useNavigate();
+
       return (
-        <div className="flex justify-end">
-          <Button asChild variant="ghost" size="sm">
+        <div className="flex justify-end gap-2">
+          <Button asChild variant="outline" size="sm">
             <Link to="/users/$userId" params={{ userId: user.id.toString() }}>
-              View Details
+              <IconEye className="mr-1 h-4 w-4" />
+              View
             </Link>
           </Button>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="sm">
+                <IconDotsVertical className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={() =>
+                  navigate({
+                    to: '/transactions',
+                    search: { userId: user.id },
+                  })
+                }
+              >
+                <IconArrowsExchange className="mr-2 h-4 w-4" />
+                View Transactions
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       );
     },
