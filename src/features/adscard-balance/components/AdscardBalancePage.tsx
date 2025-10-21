@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { BalanceCards } from './BalanceCards';
 import { CreateTopupDialog } from './CreateTopupDialog';
+import { CreateCryptoTopupDialog } from './CreateCryptoTopupDialog';
 import { TopupsTable } from './TopupsTable';
 import { useTrcTopups, useBalanceInfo } from '../hooks/useTrcTopups';
 
@@ -32,7 +33,10 @@ export function AdscardBalancePage() {
             Manage master wallet TRC topups and balance
           </p>
         </div>
-        <CreateTopupDialog authToken={MOCK_AUTH_TOKEN} />
+        <div className="flex gap-2">
+          <CreateCryptoTopupDialog />
+          <CreateTopupDialog authToken={MOCK_AUTH_TOKEN} />
+        </div>
       </div>
 
       {/* Balance Cards */}
