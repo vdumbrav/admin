@@ -264,7 +264,7 @@ function DashboardPage() {
                         <span className="text-sm font-medium text-muted-foreground">
                           #{idx + 1}
                         </span>
-                        <span className="font-medium">{user.nickname || user.email}</span>
+                        <span className="font-medium">{user.nickname && user.nickname !== 'Anonymous' ? user.nickname : user.email}</span>
                       </div>
                       <p className="text-xs text-muted-foreground">
                         {user.transactionCount} transactions
@@ -334,7 +334,7 @@ function DashboardPage() {
                       </div>
                     </div>
                     <div className="flex items-center justify-between text-xs text-muted-foreground">
-                      <span>{order.user.nickname || order.user.email}</span>
+                      <span>{order.user.nickname && order.user.nickname !== 'Anonymous' ? order.user.nickname : order.user.email}</span>
                       <span className="flex items-center gap-1">
                         {order.paymentType} • {new Date(order.createdAt).toLocaleDateString()}
                       </span>
