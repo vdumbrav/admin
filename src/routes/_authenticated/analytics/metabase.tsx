@@ -29,13 +29,14 @@ function MetabasePage() {
     // Generate new URL when theme changes or component mounts
     const metabaseTheme = effectiveTheme === 'dark' ? 'night' : 'light';
 
-    const url = generateMetabaseUrl({
+    generateMetabaseUrl({
       dashboardId: 2,
       theme: metabaseTheme,
       bordered: true,
       titled: true,
-    });
-    setIframeUrl(url);
+    })
+      .then((url) => setIframeUrl(url))
+      .catch((error) => console.error('Failed to generate Metabase URL:', error));
   }, [theme, refreshKey]);
 
   const handleRefresh = () => {

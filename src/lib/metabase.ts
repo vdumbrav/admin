@@ -6,10 +6,10 @@ export interface MetabaseEmbedOptions {
 }
 
 /**
- * Generate Metabase embed URL
- * Uses public dashboard URL with theme and display parameters
+ * Generate Metabase embed URL via backend API
+ * Backend signs the JWT token for secure embedding
  */
-export function generateMetabaseUrl(options: MetabaseEmbedOptions): string {
+export async function generateMetabaseUrl(options: MetabaseEmbedOptions): Promise<string> {
   const {
     dashboardId,
     theme = 'night',
@@ -17,13 +17,39 @@ export function generateMetabaseUrl(options: MetabaseEmbedOptions): string {
     titled = true,
   } = options;
 
-  const METABASE_SITE_URL = 'https://analytics.walme.io';
+  const API_URL = import.meta.env.VITE_API_URL || 'https://api2.moliedev.xyz';
 
-  // Construct URL with theme and display parameters as hash
-  const hashParams = [];
-  hashParams.push(`theme=${theme}`);
-  if (bordered) hashParams.push('bordered=true');
-  if (titled) hashParams.push('titled=true');
+  try {
+    // Get auth token from localStorage (set by OIDC provider)
+    const oidcStorage = localStorage.getItem(`oidc.user:${import.meta.env.VITE_OIDC_AUTHORITY}:${import.meta.env.VITE_OIDC_CLIENT_ID}`);
+    const token = oidcStorage ? JSON.parse(oidcStorage).access_token : null;
 
-  return `${METABASE_SITE_URL}/public/dashboard/${dashboardId}#${hashParams.join('&')}`;
+    if (!token) {
+      throw new Error('No authentication token found');
+    }
+
+    // Call backend API to get signed embed URL
+    const params = new URLSearchParams({
+      dashboardId: dashboardId.toString(),
+      theme,
+      bordered: bordered.toString(),
+      titled: titled.toString(),
+    });
+
+    const response = await fetch(`${API_URL}/metabase/embed-url?${params}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to get Metabase embed URL: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    return data.iframeUrl;
+  } catch (error) {
+    console.error('Error generating Metabase URL:', error);
+    throw error;
+  }
 }
