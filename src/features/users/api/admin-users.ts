@@ -125,19 +125,47 @@ export interface UserDetails {
   activityStats: ActivityStats;
 }
 
-export const useAdminUsers = (page: number = 1, limit: number = 50, search?: string) => {
+export interface UsersFilterParams {
+  search?: string;
+  roles?: string[];
+  emailVerified?: boolean;
+  premiumActive?: boolean;
+  hasCards?: boolean;
+}
+
+export const useAdminUsers = (
+  page: number = 1,
+  limit: number = 50,
+  filters?: UsersFilterParams
+) => {
   const auth = useAppAuth();
 
   return useQuery({
-    queryKey: ['admin', 'users', page, limit, search],
+    queryKey: ['admin', 'users', page, limit, filters],
     queryFn: async (): Promise<UserListResponse> => {
       const params = new URLSearchParams({
         page: page.toString(),
         limit: limit.toString(),
       });
 
-      if (search) {
-        params.append('search', search);
+      if (filters?.search) {
+        params.append('search', filters.search);
+      }
+
+      if (filters?.roles && filters.roles.length > 0) {
+        filters.roles.forEach(role => params.append('roles[]', role));
+      }
+
+      if (filters?.emailVerified !== undefined) {
+        params.append('emailVerified', filters.emailVerified.toString());
+      }
+
+      if (filters?.premiumActive !== undefined) {
+        params.append('premiumActive', filters.premiumActive.toString());
+      }
+
+      if (filters?.hasCards !== undefined) {
+        params.append('hasCards', filters.hasCards.toString());
       }
 
       const token = await auth.getAccessToken();
