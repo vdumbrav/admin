@@ -268,3 +268,102 @@ export const useBlockCard = () => {
     },
   });
 };
+
+// Mutation for adjusting user XP (add or remove)
+export const useAdjustUserXP = () => {
+  const auth = useAppAuth();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ userId, amount, reason }: { userId: number; amount: number; reason: string }) => {
+      const token = await auth.getAccessToken();
+
+      return orvalMutator({
+        url: `/admin/users/${userId}/xp`,
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        data: { amount, reason },
+      });
+    },
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'users', variables.userId.toString(), 'details'] });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
+    },
+  });
+};
+
+// Mutation for granting premium
+export const useGrantPremium = () => {
+  const auth = useAppAuth();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ userId, bundleId, duration }: { userId: number; bundleId: number; duration: number }) => {
+      const token = await auth.getAccessToken();
+
+      return orvalMutator({
+        url: `/admin/users/${userId}/premium/grant`,
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        data: { bundleId, duration },
+      });
+    },
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'users', variables.userId.toString(), 'details'] });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
+    },
+  });
+};
+
+// Mutation for revoking premium
+export const useRevokePremium = () => {
+  const auth = useAppAuth();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ userId }: { userId: number }) => {
+      const token = await auth.getAccessToken();
+
+      return orvalMutator({
+        url: `/admin/users/${userId}/premium/revoke`,
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+    },
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'users', variables.userId.toString(), 'details'] });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
+    },
+  });
+};
+
+// Mutation for deleting user (GDPR)
+export const useDeleteUser = () => {
+  const auth = useAppAuth();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ userId }: { userId: number }) => {
+      const token = await auth.getAccessToken();
+
+      return orvalMutator({
+        url: `/admin/users/${userId}`,
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
+    },
+  });
+};
