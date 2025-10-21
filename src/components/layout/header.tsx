@@ -1,9 +1,10 @@
 import React from 'react';
-import { IconMoon, IconSun } from '@tabler/icons-react';
+import { IconMoon, IconSun, IconUser } from '@tabler/icons-react';
 import { useTheme } from '@/context/theme-context';
 import { useAppAuth } from '@/auth/hooks';
 import { getUserDisplayData } from '@/utils/user';
 import { ChevronsUpDown, LogOut } from 'lucide-react';
+import { Link } from '@tanstack/react-router';
 import { cn } from '@/lib/utils';
 import { Separator } from '@/components/ui/separator';
 import { SidebarTrigger } from '@/components/ui/sidebar';
@@ -119,6 +120,12 @@ export const Header = ({ className, fixed, children, ...props }: HeaderProps) =>
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
+            <DropdownMenuItem asChild>
+              <Link to="/profile">
+                <IconUser className="mr-2 h-4 w-4" />
+                Profile
+              </Link>
+            </DropdownMenuItem>
             <DropdownMenuItem onClick={() => auth.signoutRedirect()}>
               <LogOut className="mr-2 h-4 w-4" />
               Log out

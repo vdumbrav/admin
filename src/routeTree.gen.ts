@@ -14,6 +14,7 @@ import { Route as AuthRouteRouteImport } from './routes/auth/route'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthCallbackRouteImport } from './routes/auth/callback'
+import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
 import { Route as AuthenticatedUsersIndexRouteImport } from './routes/_authenticated/users/index'
 import { Route as AuthenticatedTransactionsIndexRouteImport } from './routes/_authenticated/transactions/index'
 import { Route as AuthenticatedReferralsIndexRouteImport } from './routes/_authenticated/referrals/index'
@@ -64,6 +65,11 @@ const AuthCallbackRoute = AuthCallbackRouteImport.update({
   id: '/callback',
   path: '/callback',
   getParentRoute: () => AuthRouteRoute,
+} as any)
+const AuthenticatedProfileRoute = AuthenticatedProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedUsersIndexRoute = AuthenticatedUsersIndexRouteImport.update({
   id: '/users/',
@@ -222,6 +228,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRouteRouteWithChildren
   '/sign-in': typeof SignInRoute
+  '/profile': typeof AuthenticatedProfileRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/analytics/metabase': typeof AuthenticatedAnalyticsMetabaseRoute
   '/cards/$cardId': typeof AuthenticatedCardsCardIdRoute
@@ -254,6 +261,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRouteRouteWithChildren
   '/sign-in': typeof SignInRoute
+  '/profile': typeof AuthenticatedProfileRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/analytics/metabase': typeof AuthenticatedAnalyticsMetabaseRoute
   '/cards/$cardId': typeof AuthenticatedCardsCardIdRoute
@@ -288,6 +296,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRouteRouteWithChildren
   '/sign-in': typeof SignInRoute
+  '/_authenticated/profile': typeof AuthenticatedProfileRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/_authenticated/analytics/metabase': typeof AuthenticatedAnalyticsMetabaseRoute
   '/_authenticated/cards/$cardId': typeof AuthenticatedCardsCardIdRoute
@@ -322,6 +331,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/sign-in'
+    | '/profile'
     | '/auth/callback'
     | '/analytics/metabase'
     | '/cards/$cardId'
@@ -354,6 +364,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/sign-in'
+    | '/profile'
     | '/auth/callback'
     | '/analytics/metabase'
     | '/cards/$cardId'
@@ -387,6 +398,7 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/auth'
     | '/sign-in'
+    | '/_authenticated/profile'
     | '/auth/callback'
     | '/_authenticated/analytics/metabase'
     | '/_authenticated/cards/$cardId'
@@ -459,6 +471,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/auth/callback'
       preLoaderRoute: typeof AuthCallbackRouteImport
       parentRoute: typeof AuthRouteRoute
+    }
+    '/_authenticated/profile': {
+      id: '/_authenticated/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof AuthenticatedProfileRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/users/': {
       id: '/_authenticated/users/'
@@ -660,6 +679,7 @@ const AuthenticatedQuestsNewRouteWithChildren =
   )
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
   AuthenticatedAnalyticsMetabaseRoute: typeof AuthenticatedAnalyticsMetabaseRoute
   AuthenticatedCardsCardIdRoute: typeof AuthenticatedCardsCardIdRoute
   AuthenticatedQuestsIdRoute: typeof AuthenticatedQuestsIdRoute
@@ -688,6 +708,7 @@ interface AuthenticatedRouteRouteChildren {
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedProfileRoute: AuthenticatedProfileRoute,
   AuthenticatedAnalyticsMetabaseRoute: AuthenticatedAnalyticsMetabaseRoute,
   AuthenticatedCardsCardIdRoute: AuthenticatedCardsCardIdRoute,
   AuthenticatedQuestsIdRoute: AuthenticatedQuestsIdRoute,
