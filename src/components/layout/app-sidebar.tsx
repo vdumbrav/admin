@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/sidebar';
 import { NavGroup } from '@/components/layout/nav-group';
 import { TeamSwitcher } from '@/components/layout/team-switcher';
+import { AccountMenu } from '@/components/layout/account-menu';
 import { sidebarData } from './data/sidebar-data';
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
@@ -49,6 +50,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         {navGroups.map((props) => (
           <NavGroup key={props.title} {...props} />
         ))}
+        <AccountMenu />
       </SidebarContent>
       <SidebarFooter>
         <SidebarMenu>

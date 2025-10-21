@@ -21,6 +21,8 @@ import {
   IconLanguage,
   IconChartPie,
   IconUserCircle,
+  IconMoon,
+  IconLogout,
 } from '@tabler/icons-react';
 import { type SidebarData } from '../types';
 
@@ -188,17 +190,6 @@ export const sidebarData: SidebarData = {
           url: '/notifications',
           icon: IconBell,
           isActive: (pathname: string) => pathname.startsWith('/notifications'),
-        },
-      ],
-    },
-    {
-      title: 'Account',
-      items: [
-        {
-          title: 'Profile',
-          url: '/profile',
-          icon: IconUserCircle,
-          isActive: (pathname: string) => pathname === '/profile',
         },
       ],
     },

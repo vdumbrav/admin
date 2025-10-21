@@ -19,6 +19,7 @@ import { Route as AuthenticatedUsersIndexRouteImport } from './routes/_authentic
 import { Route as AuthenticatedTransactionsIndexRouteImport } from './routes/_authenticated/transactions/index'
 import { Route as AuthenticatedReferralsIndexRouteImport } from './routes/_authenticated/referrals/index'
 import { Route as AuthenticatedQuestsIndexRouteImport } from './routes/_authenticated/quests/index'
+import { Route as AuthenticatedProfileIndexRouteImport } from './routes/_authenticated/profile/index'
 import { Route as AuthenticatedPremiumIndexRouteImport } from './routes/_authenticated/premium/index'
 import { Route as AuthenticatedOrdersIndexRouteImport } from './routes/_authenticated/orders/index'
 import { Route as AuthenticatedNotificationsIndexRouteImport } from './routes/_authenticated/notifications/index'
@@ -93,6 +94,12 @@ const AuthenticatedQuestsIndexRoute =
     id: '/quests/',
     path: '/quests/',
     getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedProfileIndexRoute =
+  AuthenticatedProfileIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedProfileRoute,
   } as any)
 const AuthenticatedPremiumIndexRoute =
   AuthenticatedPremiumIndexRouteImport.update({
@@ -228,7 +235,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRouteRouteWithChildren
   '/sign-in': typeof SignInRoute
-  '/profile': typeof AuthenticatedProfileRoute
+  '/profile': typeof AuthenticatedProfileRouteWithChildren
   '/auth/callback': typeof AuthCallbackRoute
   '/analytics/metabase': typeof AuthenticatedAnalyticsMetabaseRoute
   '/cards/$cardId': typeof AuthenticatedCardsCardIdRoute
@@ -242,6 +249,7 @@ export interface FileRoutesByFullPath {
   '/notifications': typeof AuthenticatedNotificationsIndexRoute
   '/orders': typeof AuthenticatedOrdersIndexRoute
   '/premium': typeof AuthenticatedPremiumIndexRoute
+  '/profile/': typeof AuthenticatedProfileIndexRoute
   '/quests': typeof AuthenticatedQuestsIndexRoute
   '/referrals': typeof AuthenticatedReferralsIndexRoute
   '/transactions': typeof AuthenticatedTransactionsIndexRoute
@@ -261,7 +269,6 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRouteRouteWithChildren
   '/sign-in': typeof SignInRoute
-  '/profile': typeof AuthenticatedProfileRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/analytics/metabase': typeof AuthenticatedAnalyticsMetabaseRoute
   '/cards/$cardId': typeof AuthenticatedCardsCardIdRoute
@@ -275,6 +282,7 @@ export interface FileRoutesByTo {
   '/notifications': typeof AuthenticatedNotificationsIndexRoute
   '/orders': typeof AuthenticatedOrdersIndexRoute
   '/premium': typeof AuthenticatedPremiumIndexRoute
+  '/profile': typeof AuthenticatedProfileIndexRoute
   '/quests': typeof AuthenticatedQuestsIndexRoute
   '/referrals': typeof AuthenticatedReferralsIndexRoute
   '/transactions': typeof AuthenticatedTransactionsIndexRoute
@@ -296,7 +304,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRouteRouteWithChildren
   '/sign-in': typeof SignInRoute
-  '/_authenticated/profile': typeof AuthenticatedProfileRoute
+  '/_authenticated/profile': typeof AuthenticatedProfileRouteWithChildren
   '/auth/callback': typeof AuthCallbackRoute
   '/_authenticated/analytics/metabase': typeof AuthenticatedAnalyticsMetabaseRoute
   '/_authenticated/cards/$cardId': typeof AuthenticatedCardsCardIdRoute
@@ -310,6 +318,7 @@ export interface FileRoutesById {
   '/_authenticated/notifications/': typeof AuthenticatedNotificationsIndexRoute
   '/_authenticated/orders/': typeof AuthenticatedOrdersIndexRoute
   '/_authenticated/premium/': typeof AuthenticatedPremiumIndexRoute
+  '/_authenticated/profile/': typeof AuthenticatedProfileIndexRoute
   '/_authenticated/quests/': typeof AuthenticatedQuestsIndexRoute
   '/_authenticated/referrals/': typeof AuthenticatedReferralsIndexRoute
   '/_authenticated/transactions/': typeof AuthenticatedTransactionsIndexRoute
@@ -345,6 +354,7 @@ export interface FileRouteTypes {
     | '/notifications'
     | '/orders'
     | '/premium'
+    | '/profile/'
     | '/quests'
     | '/referrals'
     | '/transactions'
@@ -364,7 +374,6 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/sign-in'
-    | '/profile'
     | '/auth/callback'
     | '/analytics/metabase'
     | '/cards/$cardId'
@@ -378,6 +387,7 @@ export interface FileRouteTypes {
     | '/notifications'
     | '/orders'
     | '/premium'
+    | '/profile'
     | '/quests'
     | '/referrals'
     | '/transactions'
@@ -412,6 +422,7 @@ export interface FileRouteTypes {
     | '/_authenticated/notifications/'
     | '/_authenticated/orders/'
     | '/_authenticated/premium/'
+    | '/_authenticated/profile/'
     | '/_authenticated/quests/'
     | '/_authenticated/referrals/'
     | '/_authenticated/transactions/'
@@ -506,6 +517,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/quests'
       preLoaderRoute: typeof AuthenticatedQuestsIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/profile/': {
+      id: '/_authenticated/profile/'
+      path: '/'
+      fullPath: '/profile/'
+      preLoaderRoute: typeof AuthenticatedProfileIndexRouteImport
+      parentRoute: typeof AuthenticatedProfileRoute
     }
     '/_authenticated/premium/': {
       id: '/_authenticated/premium/'
@@ -664,6 +682,17 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AuthenticatedProfileRouteChildren {
+  AuthenticatedProfileIndexRoute: typeof AuthenticatedProfileIndexRoute
+}
+
+const AuthenticatedProfileRouteChildren: AuthenticatedProfileRouteChildren = {
+  AuthenticatedProfileIndexRoute: AuthenticatedProfileIndexRoute,
+}
+
+const AuthenticatedProfileRouteWithChildren =
+  AuthenticatedProfileRoute._addFileChildren(AuthenticatedProfileRouteChildren)
+
 interface AuthenticatedQuestsNewRouteChildren {
   AuthenticatedQuestsNewPresetRoute: typeof AuthenticatedQuestsNewPresetRoute
 }
@@ -679,7 +708,7 @@ const AuthenticatedQuestsNewRouteWithChildren =
   )
 
 interface AuthenticatedRouteRouteChildren {
-  AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
+  AuthenticatedProfileRoute: typeof AuthenticatedProfileRouteWithChildren
   AuthenticatedAnalyticsMetabaseRoute: typeof AuthenticatedAnalyticsMetabaseRoute
   AuthenticatedCardsCardIdRoute: typeof AuthenticatedCardsCardIdRoute
   AuthenticatedQuestsIdRoute: typeof AuthenticatedQuestsIdRoute
@@ -708,7 +737,7 @@ interface AuthenticatedRouteRouteChildren {
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
-  AuthenticatedProfileRoute: AuthenticatedProfileRoute,
+  AuthenticatedProfileRoute: AuthenticatedProfileRouteWithChildren,
   AuthenticatedAnalyticsMetabaseRoute: AuthenticatedAnalyticsMetabaseRoute,
   AuthenticatedCardsCardIdRoute: AuthenticatedCardsCardIdRoute,
   AuthenticatedQuestsIdRoute: AuthenticatedQuestsIdRoute,
