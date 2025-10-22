@@ -147,9 +147,9 @@ export const sidebarData: SidebarData = {
             },
             {
               title: 'Platforms',
-              url: '/markets/platforms',
+              url: '/platforms',
               icon: IconServer,
-              isActive: (pathname: string) => pathname.startsWith('/markets/platforms'),
+              isActive: (pathname: string) => pathname.startsWith('/platforms'),
             },
             {
               title: 'Chains',
