@@ -22,7 +22,7 @@ import {
 } from '@/components/ui/select';
 import { usePlatforms } from '@/features/markets/platforms/api/platforms';
 
-export const Route = createFileRoute('/_authenticated/markets/platforms/')({
+export const Route = createFileRoute('/_authenticated/platforms/')({
   component: MarketPlatformsPage,
 });
 

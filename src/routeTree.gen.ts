@@ -21,6 +21,7 @@ import { Route as AuthenticatedReferralsIndexRouteImport } from './routes/_authe
 import { Route as AuthenticatedQuestsIndexRouteImport } from './routes/_authenticated/quests/index'
 import { Route as AuthenticatedProfileIndexRouteImport } from './routes/_authenticated/profile/index'
 import { Route as AuthenticatedPremiumIndexRouteImport } from './routes/_authenticated/premium/index'
+import { Route as AuthenticatedPlatformsIndexRouteImport } from './routes/_authenticated/platforms/index'
 import { Route as AuthenticatedOrdersIndexRouteImport } from './routes/_authenticated/orders/index'
 import { Route as AuthenticatedNotificationsIndexRouteImport } from './routes/_authenticated/notifications/index'
 import { Route as AuthenticatedDashboardIndexRouteImport } from './routes/_authenticated/dashboard/index'
@@ -34,7 +35,6 @@ import { Route as AuthenticatedCardsCardIdRouteImport } from './routes/_authenti
 import { Route as AuthenticatedAnalyticsMetabaseRouteImport } from './routes/_authenticated/analytics/metabase'
 import { Route as AuthenticatedAnalyticsIndexOldRouteImport } from './routes/_authenticated/analytics/index.old'
 import { Route as AuthenticatedMarketsTreasuriesIndexRouteImport } from './routes/_authenticated/markets/treasuries/index'
-import { Route as AuthenticatedMarketsPlatformsIndexRouteImport } from './routes/_authenticated/markets/platforms/index'
 import { Route as AuthenticatedMarketsLanguagesIndexRouteImport } from './routes/_authenticated/markets/languages/index'
 import { Route as AuthenticatedMarketsFundsIndexRouteImport } from './routes/_authenticated/markets/funds/index'
 import { Route as AuthenticatedMarketsExchangesIndexRouteImport } from './routes/_authenticated/markets/exchanges/index'
@@ -105,6 +105,12 @@ const AuthenticatedPremiumIndexRoute =
   AuthenticatedPremiumIndexRouteImport.update({
     id: '/premium/',
     path: '/premium/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedPlatformsIndexRoute =
+  AuthenticatedPlatformsIndexRouteImport.update({
+    id: '/platforms/',
+    path: '/platforms/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedOrdersIndexRoute =
@@ -182,12 +188,6 @@ const AuthenticatedMarketsTreasuriesIndexRoute =
     path: '/markets/treasuries/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedMarketsPlatformsIndexRoute =
-  AuthenticatedMarketsPlatformsIndexRouteImport.update({
-    id: '/markets/platforms/',
-    path: '/markets/platforms/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
 const AuthenticatedMarketsLanguagesIndexRoute =
   AuthenticatedMarketsLanguagesIndexRouteImport.update({
     id: '/markets/languages/',
@@ -248,6 +248,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AuthenticatedDashboardIndexRoute
   '/notifications': typeof AuthenticatedNotificationsIndexRoute
   '/orders': typeof AuthenticatedOrdersIndexRoute
+  '/platforms': typeof AuthenticatedPlatformsIndexRoute
   '/premium': typeof AuthenticatedPremiumIndexRoute
   '/profile/': typeof AuthenticatedProfileIndexRoute
   '/quests': typeof AuthenticatedQuestsIndexRoute
@@ -261,7 +262,6 @@ export interface FileRoutesByFullPath {
   '/markets/exchanges': typeof AuthenticatedMarketsExchangesIndexRoute
   '/markets/funds': typeof AuthenticatedMarketsFundsIndexRoute
   '/markets/languages': typeof AuthenticatedMarketsLanguagesIndexRoute
-  '/markets/platforms': typeof AuthenticatedMarketsPlatformsIndexRoute
   '/markets/treasuries': typeof AuthenticatedMarketsTreasuriesIndexRoute
   '/analytics/index/old': typeof AuthenticatedAnalyticsIndexOldRoute
 }
@@ -281,6 +281,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AuthenticatedDashboardIndexRoute
   '/notifications': typeof AuthenticatedNotificationsIndexRoute
   '/orders': typeof AuthenticatedOrdersIndexRoute
+  '/platforms': typeof AuthenticatedPlatformsIndexRoute
   '/premium': typeof AuthenticatedPremiumIndexRoute
   '/profile': typeof AuthenticatedProfileIndexRoute
   '/quests': typeof AuthenticatedQuestsIndexRoute
@@ -294,7 +295,6 @@ export interface FileRoutesByTo {
   '/markets/exchanges': typeof AuthenticatedMarketsExchangesIndexRoute
   '/markets/funds': typeof AuthenticatedMarketsFundsIndexRoute
   '/markets/languages': typeof AuthenticatedMarketsLanguagesIndexRoute
-  '/markets/platforms': typeof AuthenticatedMarketsPlatformsIndexRoute
   '/markets/treasuries': typeof AuthenticatedMarketsTreasuriesIndexRoute
   '/analytics/index/old': typeof AuthenticatedAnalyticsIndexOldRoute
 }
@@ -317,6 +317,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard/': typeof AuthenticatedDashboardIndexRoute
   '/_authenticated/notifications/': typeof AuthenticatedNotificationsIndexRoute
   '/_authenticated/orders/': typeof AuthenticatedOrdersIndexRoute
+  '/_authenticated/platforms/': typeof AuthenticatedPlatformsIndexRoute
   '/_authenticated/premium/': typeof AuthenticatedPremiumIndexRoute
   '/_authenticated/profile/': typeof AuthenticatedProfileIndexRoute
   '/_authenticated/quests/': typeof AuthenticatedQuestsIndexRoute
@@ -330,7 +331,6 @@ export interface FileRoutesById {
   '/_authenticated/markets/exchanges/': typeof AuthenticatedMarketsExchangesIndexRoute
   '/_authenticated/markets/funds/': typeof AuthenticatedMarketsFundsIndexRoute
   '/_authenticated/markets/languages/': typeof AuthenticatedMarketsLanguagesIndexRoute
-  '/_authenticated/markets/platforms/': typeof AuthenticatedMarketsPlatformsIndexRoute
   '/_authenticated/markets/treasuries/': typeof AuthenticatedMarketsTreasuriesIndexRoute
   '/_authenticated/analytics/index/old': typeof AuthenticatedAnalyticsIndexOldRoute
 }
@@ -353,6 +353,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/notifications'
     | '/orders'
+    | '/platforms'
     | '/premium'
     | '/profile/'
     | '/quests'
@@ -366,7 +367,6 @@ export interface FileRouteTypes {
     | '/markets/exchanges'
     | '/markets/funds'
     | '/markets/languages'
-    | '/markets/platforms'
     | '/markets/treasuries'
     | '/analytics/index/old'
   fileRoutesByTo: FileRoutesByTo
@@ -386,6 +386,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/notifications'
     | '/orders'
+    | '/platforms'
     | '/premium'
     | '/profile'
     | '/quests'
@@ -399,7 +400,6 @@ export interface FileRouteTypes {
     | '/markets/exchanges'
     | '/markets/funds'
     | '/markets/languages'
-    | '/markets/platforms'
     | '/markets/treasuries'
     | '/analytics/index/old'
   id:
@@ -421,6 +421,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard/'
     | '/_authenticated/notifications/'
     | '/_authenticated/orders/'
+    | '/_authenticated/platforms/'
     | '/_authenticated/premium/'
     | '/_authenticated/profile/'
     | '/_authenticated/quests/'
@@ -434,7 +435,6 @@ export interface FileRouteTypes {
     | '/_authenticated/markets/exchanges/'
     | '/_authenticated/markets/funds/'
     | '/_authenticated/markets/languages/'
-    | '/_authenticated/markets/platforms/'
     | '/_authenticated/markets/treasuries/'
     | '/_authenticated/analytics/index/old'
   fileRoutesById: FileRoutesById
@@ -532,6 +532,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPremiumIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/platforms/': {
+      id: '/_authenticated/platforms/'
+      path: '/platforms'
+      fullPath: '/platforms'
+      preLoaderRoute: typeof AuthenticatedPlatformsIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/orders/': {
       id: '/_authenticated/orders/'
       path: '/orders'
@@ -621,13 +628,6 @@ declare module '@tanstack/react-router' {
       path: '/markets/treasuries'
       fullPath: '/markets/treasuries'
       preLoaderRoute: typeof AuthenticatedMarketsTreasuriesIndexRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/markets/platforms/': {
-      id: '/_authenticated/markets/platforms/'
-      path: '/markets/platforms'
-      fullPath: '/markets/platforms'
-      preLoaderRoute: typeof AuthenticatedMarketsPlatformsIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/markets/languages/': {
@@ -720,6 +720,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardIndexRoute: typeof AuthenticatedDashboardIndexRoute
   AuthenticatedNotificationsIndexRoute: typeof AuthenticatedNotificationsIndexRoute
   AuthenticatedOrdersIndexRoute: typeof AuthenticatedOrdersIndexRoute
+  AuthenticatedPlatformsIndexRoute: typeof AuthenticatedPlatformsIndexRoute
   AuthenticatedPremiumIndexRoute: typeof AuthenticatedPremiumIndexRoute
   AuthenticatedQuestsIndexRoute: typeof AuthenticatedQuestsIndexRoute
   AuthenticatedReferralsIndexRoute: typeof AuthenticatedReferralsIndexRoute
@@ -731,7 +732,6 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedMarketsExchangesIndexRoute: typeof AuthenticatedMarketsExchangesIndexRoute
   AuthenticatedMarketsFundsIndexRoute: typeof AuthenticatedMarketsFundsIndexRoute
   AuthenticatedMarketsLanguagesIndexRoute: typeof AuthenticatedMarketsLanguagesIndexRoute
-  AuthenticatedMarketsPlatformsIndexRoute: typeof AuthenticatedMarketsPlatformsIndexRoute
   AuthenticatedMarketsTreasuriesIndexRoute: typeof AuthenticatedMarketsTreasuriesIndexRoute
   AuthenticatedAnalyticsIndexOldRoute: typeof AuthenticatedAnalyticsIndexOldRoute
 }
@@ -749,6 +749,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardIndexRoute: AuthenticatedDashboardIndexRoute,
   AuthenticatedNotificationsIndexRoute: AuthenticatedNotificationsIndexRoute,
   AuthenticatedOrdersIndexRoute: AuthenticatedOrdersIndexRoute,
+  AuthenticatedPlatformsIndexRoute: AuthenticatedPlatformsIndexRoute,
   AuthenticatedPremiumIndexRoute: AuthenticatedPremiumIndexRoute,
   AuthenticatedQuestsIndexRoute: AuthenticatedQuestsIndexRoute,
   AuthenticatedReferralsIndexRoute: AuthenticatedReferralsIndexRoute,
@@ -763,8 +764,6 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedMarketsFundsIndexRoute: AuthenticatedMarketsFundsIndexRoute,
   AuthenticatedMarketsLanguagesIndexRoute:
     AuthenticatedMarketsLanguagesIndexRoute,
-  AuthenticatedMarketsPlatformsIndexRoute:
-    AuthenticatedMarketsPlatformsIndexRoute,
   AuthenticatedMarketsTreasuriesIndexRoute:
     AuthenticatedMarketsTreasuriesIndexRoute,
   AuthenticatedAnalyticsIndexOldRoute: AuthenticatedAnalyticsIndexOldRoute,
