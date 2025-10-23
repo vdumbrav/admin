@@ -77,7 +77,7 @@ import {
   useRevokePremium,
   useDeleteUser,
 } from '@/features/users/api/admin-users';
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 
 export const Route = createFileRoute('/_authenticated/users/$userId')({
   component: UserDetailsPage,
@@ -183,118 +183,102 @@ function UserDetailsPage() {
   const displayName = user.name || user.nickname || user.email || `User ${user.id}`;
   const initials = displayName.substring(0, 2).toUpperCase();
 
-  // Filter cards
-  const filteredCards = useMemo(() => {
-    if (cardStatusFilter === 'all') return user.cards;
-    return user.cards.filter(card => card.status === cardStatusFilter);
-  }, [user.cards, cardStatusFilter]);
+  // Filter cards - not memoized to avoid array reference issues causing re-renders
+  const filteredCards = cardStatusFilter === 'all'
+    ? user.cards
+    : user.cards.filter(card => card.status === cardStatusFilter);
 
-  // Filter transactions
-  const filteredTransactions = useMemo(() => {
-    let filtered = user.recentTransactions;
+  // Filter transactions - not memoized to avoid array reference issues
+  let filteredTransactions = user.recentTransactions;
 
-    if (txTypeFilter !== 'all') {
-      filtered = filtered.filter(tx => tx.type.toLowerCase() === txTypeFilter.toLowerCase());
-    }
+  if (txTypeFilter !== 'all') {
+    filteredTransactions = filteredTransactions.filter(tx => tx.type.toLowerCase() === txTypeFilter.toLowerCase());
+  }
 
-    if (txStatusFilter !== 'all') {
-      filtered = filtered.filter(tx => tx.status.toLowerCase() === txStatusFilter.toLowerCase());
-    }
+  if (txStatusFilter !== 'all') {
+    filteredTransactions = filteredTransactions.filter(tx => tx.status.toLowerCase() === txStatusFilter.toLowerCase());
+  }
 
-    if (txSearchQuery.trim()) {
-      const query = txSearchQuery.toLowerCase();
-      filtered = filtered.filter(tx =>
-        tx.type.toLowerCase().includes(query) ||
-        tx.merchant?.toLowerCase().includes(query) ||
-        tx.category?.toLowerCase().includes(query)
-      );
-    }
-
-    return filtered;
-  }, [user.recentTransactions, txTypeFilter, txStatusFilter, txSearchQuery]);
+  if (txSearchQuery.trim()) {
+    const query = txSearchQuery.toLowerCase();
+    filteredTransactions = filteredTransactions.filter(tx =>
+      tx.type.toLowerCase().includes(query) ||
+      tx.merchant?.toLowerCase().includes(query) ||
+      tx.category?.toLowerCase().includes(query)
+    );
+  }
 
   // Generate activity timeline from user data
-  const generateTimeline = () => {
-    const events = [];
+  // Computed on every render to avoid complex memoization dependencies
+  const events = [];
 
-    // User created
+  // User created
+  events.push({
+    type: 'user_created',
+    title: 'User Registered',
+    description: `Joined the platform`,
+    date: user.createdAt,
+    icon: IconUserPlus,
+    color: 'text-blue-600',
+    bgColor: 'bg-blue-500/10',
+  });
+
+  // Premium activation
+  if (user.premiumStatus.isActive && user.premiumStatus.activeFrom) {
     events.push({
-      type: 'user_created',
-      title: 'User Registered',
-      description: `Joined the platform`,
-      date: user.createdAt,
-      icon: IconUserPlus,
-      color: 'text-blue-600',
-      bgColor: 'bg-blue-500/10',
+      type: 'premium_activated',
+      title: 'Premium Activated',
+      description: `Subscribed to ${user.premiumStatus.bundle?.title || 'Premium'}`,
+      date: user.premiumStatus.activeFrom,
+      icon: IconCrown,
+      color: 'text-amber-600',
+      bgColor: 'bg-amber-500/10',
     });
+  }
 
-    // Premium activation
-    if (user.premiumStatus.isActive && user.premiumStatus.activeFrom) {
+  // Cards created
+  user.cards.slice(0, 3).forEach((card) => {
+    events.push({
+      type: 'card_created',
+      title: 'Card Issued',
+      description: `Created card ${card.cardMasked}`,
+      date: card.createdAt,
+      icon: IconCreditCard,
+      color: 'text-purple-600',
+      bgColor: 'bg-purple-500/10',
+    });
+  });
+
+  // Major quests completed
+  user.completedQuests.slice(0, 5).forEach((quest) => {
+    if (quest.completedAt) {
       events.push({
-        type: 'premium_activated',
-        title: 'Premium Activated',
-        description: `Subscribed to ${user.premiumStatus.bundle?.title || 'Premium'}`,
-        date: user.premiumStatus.activeFrom,
-        icon: IconCrown,
-        color: 'text-amber-600',
-        bgColor: 'bg-amber-500/10',
+        type: 'quest_completed',
+        title: 'Quest Completed',
+        description: quest.taskTitle,
+        date: quest.completedAt,
+        icon: IconListCheck,
+        color: 'text-green-600',
+        bgColor: 'bg-green-500/10',
       });
     }
+  });
 
-    // Cards created
-    user.cards.slice(0, 3).forEach((card) => {
-      events.push({
-        type: 'card_created',
-        title: 'Card Issued',
-        description: `Created card ${card.cardMasked}`,
-        date: card.createdAt,
-        icon: IconCreditCard,
-        color: 'text-purple-600',
-        bgColor: 'bg-purple-500/10',
-      });
+  // Last login
+  if (user.lastLogin) {
+    events.push({
+      type: 'last_login',
+      title: 'Last Login',
+      description: 'Most recent platform access',
+      date: user.lastLogin,
+      icon: IconActivity,
+      color: 'text-gray-600',
+      bgColor: 'bg-gray-500/10',
     });
+  }
 
-    // Major quests completed
-    user.completedQuests.slice(0, 5).forEach((quest) => {
-      if (quest.completedAt) {
-        events.push({
-          type: 'quest_completed',
-          title: 'Quest Completed',
-          description: quest.taskTitle,
-          date: quest.completedAt,
-          icon: IconListCheck,
-          color: 'text-green-600',
-          bgColor: 'bg-green-500/10',
-        });
-      }
-    });
-
-    // Last login
-    if (user.lastLogin) {
-      events.push({
-        type: 'last_login',
-        title: 'Last Login',
-        description: 'Most recent platform access',
-        date: user.lastLogin,
-        icon: IconActivity,
-        color: 'text-gray-600',
-        bgColor: 'bg-gray-500/10',
-      });
-    }
-
-    // Sort by date descending
-    return events.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).slice(0, 10);
-  };
-
-  const timeline = useMemo(() => generateTimeline(), [
-    user.createdAt,
-    user.premiumStatus.isActive,
-    user.premiumStatus.activeFrom,
-    user.premiumStatus.bundle?.title,
-    user.cards.length,
-    user.completedQuests.length,
-    user.lastLogin,
-  ]);
+  // Sort by date descending
+  const timeline = events.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).slice(0, 10);
 
   const handleRoleChange = (role: string) => {
     setSelectedRole(role);
@@ -419,25 +403,23 @@ function UserDetailsPage() {
   };
 
   // Calculate referral conversion and engagement metrics
-  const referralMetrics = useMemo(() => {
-    const totalReferrals = user.referralStats.totalReferrals;
-    const now = Date.now(); // Calculate once outside the filter
-    const activeReferrals = user.referralStats.referrals.filter(r => {
-      // Consider a referral active if they were created more than 7 days ago
-      const daysSinceJoined = Math.floor((now - new Date(r.createdAt).getTime()) / (1000 * 60 * 60 * 24));
-      return daysSinceJoined > 7;
-    }).length;
+  // Not memoized to avoid dependency issues with array references
+  const totalReferrals = user.referralStats.totalReferrals;
+  const activeReferrals = user.referralStats.referrals.filter(r => {
+    // Consider a referral active if they were created more than 7 days ago
+    const daysSinceJoined = Math.floor((Date.now() - new Date(r.createdAt).getTime()) / (1000 * 60 * 60 * 24));
+    return daysSinceJoined > 7;
+  }).length;
 
-    const conversionRate = totalReferrals > 0 ? (activeReferrals / totalReferrals) * 100 : 0;
-    const avgEarningsPerReferral = totalReferrals > 0 ? user.referralStats.totalEarnings / totalReferrals : 0;
+  const conversionRate = totalReferrals > 0 ? (activeReferrals / totalReferrals) * 100 : 0;
+  const avgEarningsPerReferral = totalReferrals > 0 ? user.referralStats.totalEarnings / totalReferrals : 0;
 
-    return {
-      totalReferrals,
-      activeReferrals,
-      conversionRate: conversionRate.toFixed(1),
-      avgEarningsPerReferral: Math.round(avgEarningsPerReferral),
-    };
-  }, [user.referralStats.totalReferrals, user.referralStats.referrals, user.referralStats.totalEarnings]);
+  const referralMetrics = {
+    totalReferrals,
+    activeReferrals,
+    conversionRate: conversionRate.toFixed(1),
+    avgEarningsPerReferral: Math.round(avgEarningsPerReferral),
+  };
 
   return (
     <div className="flex flex-col gap-6 p-6">
