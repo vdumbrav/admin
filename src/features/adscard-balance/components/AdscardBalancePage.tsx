@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { BalanceCards } from './BalanceCards';
-import { CreateTopupDialog } from './CreateTopupDialog';
 import { CreateCryptoTopupDialog } from './CreateCryptoTopupDialog';
 import { TopupsTable } from './TopupsTable';
 import { BalanceSettings } from './BalanceSettings';
@@ -38,7 +37,6 @@ export function AdscardBalancePage() {
         </div>
         <div className="flex gap-2">
           <CreateCryptoTopupDialog />
-          <CreateTopupDialog />
         </div>
       </div>
 
