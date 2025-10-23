@@ -6,6 +6,7 @@ import { CreateCryptoTopupDialog } from './CreateCryptoTopupDialog';
 import { TopupsTable } from './TopupsTable';
 import { BalanceSettings } from './BalanceSettings';
 import { useTrcTopups, useBalanceInfo } from '../hooks/useTrcTopups';
+import type { TrcTopupData } from '../types/api';
 
 export function AdscardBalancePage() {
   const [selectedTab, setSelectedTab] = useState('all');
@@ -16,8 +17,8 @@ export function AdscardBalancePage() {
   const pendingTopups = useTrcTopups({ status: 'pending' });
 
   // Convert to array if needed (backend returns object with numeric keys)
-  const allTopupsArray = Array.isArray(allTopups.data) ? allTopups.data : Object.values(allTopups.data || {});
-  const pendingTopupsArray = Array.isArray(pendingTopups.data) ? pendingTopups.data : Object.values(pendingTopups.data || {});
+  const allTopupsArray = (Array.isArray(allTopups.data) ? allTopups.data : Object.values(allTopups.data || {})) as TrcTopupData[];
+  const pendingTopupsArray = (Array.isArray(pendingTopups.data) ? pendingTopups.data : Object.values(pendingTopups.data || {})) as TrcTopupData[];
 
   // Determine which topups to show based on selected tab
   const displayTopups =

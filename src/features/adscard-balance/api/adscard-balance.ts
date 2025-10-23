@@ -1,9 +1,7 @@
 import { authenticatedMutator } from '@/lib/api/client/authenticatedMutator';
 import type {
-  TrcTopupRequest,
   TrcTopupResponse,
   TrcListResponse,
-  TrcCancelRequest,
   TrcCancelResponse,
   TrcTopupStatus,
   BalanceInfo,
