@@ -286,7 +286,15 @@ function UserDetailsPage() {
     return events.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).slice(0, 10);
   };
 
-  const timeline = generateTimeline();
+  const timeline = useMemo(() => generateTimeline(), [
+    user.createdAt,
+    user.premiumStatus.isActive,
+    user.premiumStatus.activeFrom,
+    user.premiumStatus.bundle?.title,
+    user.cards.length,
+    user.completedQuests.length,
+    user.lastLogin,
+  ]);
 
   const handleRoleChange = (role: string) => {
     setSelectedRole(role);
@@ -413,9 +421,10 @@ function UserDetailsPage() {
   // Calculate referral conversion and engagement metrics
   const referralMetrics = useMemo(() => {
     const totalReferrals = user.referralStats.totalReferrals;
+    const now = Date.now(); // Calculate once outside the filter
     const activeReferrals = user.referralStats.referrals.filter(r => {
       // Consider a referral active if they were created more than 7 days ago
-      const daysSinceJoined = Math.floor((Date.now() - new Date(r.createdAt).getTime()) / (1000 * 60 * 60 * 24));
+      const daysSinceJoined = Math.floor((now - new Date(r.createdAt).getTime()) / (1000 * 60 * 60 * 24));
       return daysSinceJoined > 7;
     }).length;
 
@@ -428,7 +437,7 @@ function UserDetailsPage() {
       conversionRate: conversionRate.toFixed(1),
       avgEarningsPerReferral: Math.round(avgEarningsPerReferral),
     };
-  }, [user.referralStats]);
+  }, [user.referralStats.totalReferrals, user.referralStats.referrals, user.referralStats.totalEarnings]);
 
   return (
     <div className="flex flex-col gap-6 p-6">
