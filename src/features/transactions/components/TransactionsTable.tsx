@@ -135,7 +135,7 @@ export function TransactionsTable({
                   {new Date(tx.createdAt).toLocaleString()}
                 </TableCell>
                 <TableCell>
-                  {tx.txHash ? (
+                  {tx.txHash && typeof tx.txHash === 'string' ? (
                     <a
                       href={`https://etherscan.io/tx/${tx.txHash}`}
                       target="_blank"
