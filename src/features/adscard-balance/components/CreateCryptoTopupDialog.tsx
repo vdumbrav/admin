@@ -34,9 +34,21 @@ export function CreateCryptoTopupDialog() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    const numAmount = parseFloat(amount);
+
+    // Confirmation dialog for financial operation (PCI DSS compliance)
+    const confirmed = window.confirm(
+      `Create a topup for $${numAmount.toFixed(2)} USDT on ${network}?\n\n` +
+      `This action will generate a payment request and cannot be undone once paid.`
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
     try {
       const response = await createMutation.mutateAsync({
-        amount: parseFloat(amount),
+        amount: numAmount,
         currency: 'USDT',
         network,
       });
