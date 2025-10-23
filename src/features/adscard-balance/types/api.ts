@@ -29,9 +29,7 @@ export interface TrcListRequest {
 }
 
 export interface TrcListResponse {
-  data: {
-    [key: number]: Omit<TrcTopupData, 'qr'>;
-  };
+  data: Omit<TrcTopupData, 'qr'>[];
   request_id: string;
 }
 

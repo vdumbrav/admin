@@ -28,7 +28,7 @@ const balanceKeys = {
  * Hook to fetch TRC topups list
  */
 export function useTrcTopups(
-  authToken: string,
+  authToken?: string,
   filters?: {
     time?: string;
     status?: TrcTopupStatus;
@@ -39,8 +39,8 @@ export function useTrcTopups(
     queryKey: trcTopupKeys.list(filters),
     queryFn: async () => {
       const response = await getTrcTopups(authToken, filters);
-      // Convert object to array
-      return Object.values(response.data);
+      // Data is already an array
+      return response.data;
     },
     enabled: !!authToken,
   });
@@ -49,11 +49,11 @@ export function useTrcTopups(
 /**
  * Hook to create a new TRC topup
  */
-export function useCreateTrcTopup(authToken: string) {
+export function useCreateTrcTopup(authToken?: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (amount: number) => createTrcTopup(amount, authToken),
+    mutationFn: (amount: number) => createTrcTopup(amount, authToken!),
     onSuccess: () => {
       // Invalidate topups list to refetch
       queryClient.invalidateQueries({ queryKey: trcTopupKeys.lists() });
@@ -65,11 +65,11 @@ export function useCreateTrcTopup(authToken: string) {
 /**
  * Hook to cancel a TRC topup
  */
-export function useCancelTrcTopup(authToken: string) {
+export function useCancelTrcTopup(authToken?: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (id: number) => cancelTrcTopup(id, authToken),
+    mutationFn: (id: number) => cancelTrcTopup(id, authToken!),
     onSuccess: () => {
       // Invalidate topups list to refetch
       queryClient.invalidateQueries({ queryKey: trcTopupKeys.lists() });
@@ -81,10 +81,10 @@ export function useCancelTrcTopup(authToken: string) {
 /**
  * Hook to fetch balance information
  */
-export function useBalanceInfo(authToken: string) {
+export function useBalanceInfo(authToken?: string) {
   return useQuery({
     queryKey: balanceKeys.info(),
-    queryFn: () => getBalanceInfo(authToken),
+    queryFn: () => getBalanceInfo(authToken!),
     enabled: !!authToken,
     refetchInterval: 30000, // Refetch every 30 seconds
   });

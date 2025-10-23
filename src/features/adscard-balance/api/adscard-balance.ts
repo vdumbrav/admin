@@ -2,7 +2,6 @@ import { authenticatedMutator } from '@/lib/api/client/authenticatedMutator';
 import type {
   TrcTopupRequest,
   TrcTopupResponse,
-  TrcListRequest,
   TrcListResponse,
   TrcCancelRequest,
   TrcCancelResponse,
@@ -36,24 +35,21 @@ export async function createTrcTopup(
 
 /**
  * Get list of TRC topups with optional filters
+ * TODO: Implement backend endpoint for this
  */
 export async function getTrcTopups(
-  authToken: string,
-  filters?: {
+  _authToken?: string,
+  _filters?: {
     time?: string;
     status?: TrcTopupStatus;
     id?: number;
   },
 ): Promise<TrcListResponse> {
-  const request: TrcListRequest = {
-    auth_token: authToken,
-    ...filters,
-  };
-
-  return authenticatedMutator<TrcListResponse>({
-    url: '/users/erc_topup',
-    method: 'POST',
-    data: request,
+  // Endpoint not yet implemented on backend
+  // Return empty list for now
+  return Promise.resolve({
+    data: [],
+    request_id: 'mock',
   });
 }
 
@@ -84,7 +80,7 @@ export async function getBalanceInfo(
 ): Promise<BalanceInfo> {
   // Call the correct balance endpoint
   const response = await authenticatedMutator<{ data: { usd: number; eur: number } }>({
-    url: '/users/balance',
+    url: '/adscard/users/balance',
     method: 'POST',
     data: { auth_token: authToken },
   });
