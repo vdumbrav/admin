@@ -51,7 +51,7 @@ export async function getTrcTopups(
   };
 
   return authenticatedMutator<TrcListResponse>({
-    url: `${ADSCARD_API_BASE}/trc_list`,
+    url: '/users/erc_topup',
     method: 'POST',
     data: request,
   });
@@ -82,20 +82,20 @@ export async function cancelTrcTopup(
 export async function getBalanceInfo(
   authToken: string,
 ): Promise<BalanceInfo> {
-  // This would call the actual balance endpoint
-  // For now, returning mock data structure
-  const response = await authenticatedMutator<{ balance: number }>({
-    url: '/adscard/balance/info',
+  // Call the correct balance endpoint
+  const response = await authenticatedMutator<{ data: { usd: number; eur: number } }>({
+    url: '/users/balance',
     method: 'POST',
     data: { auth_token: authToken },
   });
 
   // Calculate derived values
   // TODO: Get pending topups and calculate available balance
+  const balanceUsd = response.data?.usd || 0;
   return {
-    currentBalance: response.balance || 0,
+    currentBalance: balanceUsd,
     pendingTopups: 0,
-    availableForCards: response.balance || 0,
+    availableForCards: balanceUsd,
   };
 }
 
