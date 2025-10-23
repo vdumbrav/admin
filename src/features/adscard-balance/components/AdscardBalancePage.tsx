@@ -4,6 +4,7 @@ import { BalanceCards } from './BalanceCards';
 import { CreateTopupDialog } from './CreateTopupDialog';
 import { CreateCryptoTopupDialog } from './CreateCryptoTopupDialog';
 import { TopupsTable } from './TopupsTable';
+import { BalanceSettings } from './BalanceSettings';
 import { useTrcTopups, useBalanceInfo } from '../hooks/useTrcTopups';
 
 // TODO: Get actual auth token from your auth system
@@ -53,6 +54,7 @@ export function AdscardBalancePage() {
             <TabsTrigger value="pending">
               Pending ({pendingTopups.data?.length || 0})
             </TabsTrigger>
+            <TabsTrigger value="settings">Settings</TabsTrigger>
           </TabsList>
 
           <TabsContent value="all" className="mt-4">
@@ -69,6 +71,10 @@ export function AdscardBalancePage() {
               isLoading={isLoading}
               authToken={MOCK_AUTH_TOKEN}
             />
+          </TabsContent>
+
+          <TabsContent value="settings" className="mt-4">
+            <BalanceSettings authToken={MOCK_AUTH_TOKEN} />
           </TabsContent>
         </Tabs>
       </div>
