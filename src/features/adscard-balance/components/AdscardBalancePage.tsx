@@ -7,20 +7,21 @@ import { TopupsTable } from './TopupsTable';
 import { BalanceSettings } from './BalanceSettings';
 import { useTrcTopups, useBalanceInfo } from '../hooks/useTrcTopups';
 
-// TODO: Get actual auth token from your auth system
-const MOCK_AUTH_TOKEN = 'your-auth-token-here';
-
 export function AdscardBalancePage() {
   const [selectedTab, setSelectedTab] = useState('all');
 
-  // Fetch data
-  const balanceInfo = useBalanceInfo(MOCK_AUTH_TOKEN);
-  const allTopups = useTrcTopups(MOCK_AUTH_TOKEN);
-  const pendingTopups = useTrcTopups(MOCK_AUTH_TOKEN, { status: 'pending' });
+  // Fetch data (no auth token needed - backend uses config token)
+  const balanceInfo = useBalanceInfo();
+  const allTopups = useTrcTopups();
+  const pendingTopups = useTrcTopups({ status: 'pending' });
+
+  // Convert to array if needed (backend returns object with numeric keys)
+  const allTopupsArray = Array.isArray(allTopups.data) ? allTopups.data : Object.values(allTopups.data || {});
+  const pendingTopupsArray = Array.isArray(pendingTopups.data) ? pendingTopups.data : Object.values(pendingTopups.data || {});
 
   // Determine which topups to show based on selected tab
   const displayTopups =
-    selectedTab === 'pending' ? pendingTopups.data : allTopups.data;
+    selectedTab === 'pending' ? pendingTopupsArray : allTopupsArray;
   const isLoading =
     selectedTab === 'pending' ? pendingTopups.isLoading : allTopups.isLoading;
 
@@ -36,7 +37,7 @@ export function AdscardBalancePage() {
         </div>
         <div className="flex gap-2">
           <CreateCryptoTopupDialog />
-          <CreateTopupDialog authToken={MOCK_AUTH_TOKEN} />
+          <CreateTopupDialog />
         </div>
       </div>
 
@@ -52,7 +53,7 @@ export function AdscardBalancePage() {
           <TabsList>
             <TabsTrigger value="all">All Topups</TabsTrigger>
             <TabsTrigger value="pending">
-              Pending ({pendingTopups.data?.length || 0})
+              Pending ({pendingTopupsArray?.length || 0})
             </TabsTrigger>
             <TabsTrigger value="settings">Settings</TabsTrigger>
           </TabsList>
@@ -61,7 +62,6 @@ export function AdscardBalancePage() {
             <TopupsTable
               topups={displayTopups}
               isLoading={isLoading}
-              authToken={MOCK_AUTH_TOKEN}
             />
           </TabsContent>
 
@@ -69,12 +69,11 @@ export function AdscardBalancePage() {
             <TopupsTable
               topups={displayTopups}
               isLoading={isLoading}
-              authToken={MOCK_AUTH_TOKEN}
             />
           </TabsContent>
 
           <TabsContent value="settings" className="mt-4">
-            <BalanceSettings authToken={MOCK_AUTH_TOKEN} />
+            <BalanceSettings />
           </TabsContent>
         </Tabs>
       </div>

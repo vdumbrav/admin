@@ -28,7 +28,6 @@ const balanceKeys = {
  * Hook to fetch TRC topups list
  */
 export function useTrcTopups(
-  authToken?: string,
   filters?: {
     time?: string;
     status?: TrcTopupStatus;
@@ -38,22 +37,21 @@ export function useTrcTopups(
   return useQuery({
     queryKey: trcTopupKeys.list(filters),
     queryFn: async () => {
-      const response = await getTrcTopups(authToken, filters);
+      const response = await getTrcTopups(filters);
       // Data is already an array
       return response.data;
     },
-    enabled: !!authToken,
   });
 }
 
 /**
  * Hook to create a new TRC topup
  */
-export function useCreateTrcTopup(authToken?: string) {
+export function useCreateTrcTopup() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (amount: number) => createTrcTopup(amount, authToken!),
+    mutationFn: (amount: number) => createTrcTopup(amount),
     onSuccess: () => {
       // Invalidate topups list to refetch
       queryClient.invalidateQueries({ queryKey: trcTopupKeys.lists() });
@@ -65,11 +63,11 @@ export function useCreateTrcTopup(authToken?: string) {
 /**
  * Hook to cancel a TRC topup
  */
-export function useCancelTrcTopup(authToken?: string) {
+export function useCancelTrcTopup() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (id: number) => cancelTrcTopup(id, authToken!),
+    mutationFn: (id: number) => cancelTrcTopup(id),
     onSuccess: () => {
       // Invalidate topups list to refetch
       queryClient.invalidateQueries({ queryKey: trcTopupKeys.lists() });
@@ -81,11 +79,10 @@ export function useCancelTrcTopup(authToken?: string) {
 /**
  * Hook to fetch balance information
  */
-export function useBalanceInfo(authToken?: string) {
+export function useBalanceInfo() {
   return useQuery({
     queryKey: balanceKeys.info(),
-    queryFn: () => getBalanceInfo(authToken!),
-    enabled: !!authToken,
+    queryFn: () => getBalanceInfo(),
     refetchInterval: 30000, // Refetch every 30 seconds
   });
 }

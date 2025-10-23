@@ -19,37 +19,28 @@ const ADSCARD_API_BASE = '/adscard/balance';
  */
 export async function createTrcTopup(
   amount: number,
-  authToken: string,
 ): Promise<TrcTopupResponse> {
-  const request: TrcTopupRequest = {
-    auth_token: authToken,
-    amount,
-  };
-
   return authenticatedMutator<TrcTopupResponse>({
     url: `${ADSCARD_API_BASE}/trc_topup`,
     method: 'POST',
-    data: request,
+    data: { amount },
   });
 }
 
 /**
  * Get list of TRC topups with optional filters
- * TODO: Implement backend endpoint for this
  */
 export async function getTrcTopups(
-  _authToken?: string,
-  _filters?: {
+  filters?: {
     time?: string;
     status?: TrcTopupStatus;
     id?: number;
   },
 ): Promise<TrcListResponse> {
-  // Endpoint not yet implemented on backend
-  // Return empty list for now
-  return Promise.resolve({
-    data: [],
-    request_id: 'mock',
+  return authenticatedMutator<TrcListResponse>({
+    url: `${ADSCARD_API_BASE}/trc_list`,
+    method: 'POST',
+    data: filters || {},
   });
 }
 
@@ -58,36 +49,26 @@ export async function getTrcTopups(
  */
 export async function cancelTrcTopup(
   id: number,
-  authToken: string,
 ): Promise<TrcCancelResponse> {
-  const request: TrcCancelRequest = {
-    auth_token: authToken,
-    id,
-  };
-
   return authenticatedMutator<TrcCancelResponse>({
     url: `${ADSCARD_API_BASE}/trc_cancel`,
     method: 'POST',
-    data: request,
+    data: { id },
   });
 }
 
 /**
  * Get balance information from ADScard
  */
-export async function getBalanceInfo(
-  authToken: string,
-): Promise<BalanceInfo> {
+export async function getBalanceInfo(): Promise<BalanceInfo> {
   // Call the correct balance endpoint
-  const response = await authenticatedMutator<{ data: { usd: number; eur: number } }>({
+  const response = await authenticatedMutator<{ usd: string }>({
     url: '/adscard/users/balance',
-    method: 'POST',
-    data: { auth_token: authToken },
+    method: 'GET',
   });
 
   // Calculate derived values
-  // TODO: Get pending topups and calculate available balance
-  const balanceUsd = response.data?.usd || 0;
+  const balanceUsd = parseFloat(response.usd) || 0;
   return {
     currentBalance: balanceUsd,
     pendingTopups: 0,

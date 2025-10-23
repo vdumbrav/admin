@@ -17,7 +17,6 @@ import { toast } from 'sonner';
 interface TopupsTableProps {
   topups?: TrcTopupData[];
   isLoading?: boolean;
-  authToken: string;
 }
 
 const statusConfig: Record<
@@ -30,8 +29,8 @@ const statusConfig: Record<
   failed: { label: 'Failed', variant: 'destructive' },
 };
 
-export function TopupsTable({ topups, isLoading, authToken }: TopupsTableProps) {
-  const cancelTopup = useCancelTrcTopup(authToken);
+export function TopupsTable({ topups, isLoading }: TopupsTableProps) {
+  const cancelTopup = useCancelTrcTopup();
 
   const handleCancel = async (id: number) => {
     if (!confirm('Are you sure you want to cancel this topup?')) {

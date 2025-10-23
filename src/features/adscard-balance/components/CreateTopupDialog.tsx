@@ -16,17 +16,15 @@ import { useCreateTrcTopup } from '../hooks/useTrcTopups';
 import { toast } from 'sonner';
 
 interface CreateTopupDialogProps {
-  authToken: string;
   onSuccess?: (qr: string, wallet: string) => void;
 }
 
 export function CreateTopupDialog({
-  authToken,
   onSuccess,
 }: CreateTopupDialogProps) {
   const [open, setOpen] = useState(false);
   const [amount, setAmount] = useState('');
-  const createTopup = useCreateTrcTopup(authToken);
+  const createTopup = useCreateTrcTopup();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
