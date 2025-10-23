@@ -15,9 +15,9 @@ export function AdscardBalancePage() {
   const allTopups = useTrcTopups();
   const pendingTopups = useTrcTopups({ status: 'pending' });
 
-  // Convert to array if needed (backend returns object with numeric keys)
-  const allTopupsArray = (Array.isArray(allTopups.data) ? allTopups.data : Object.values(allTopups.data || {})) as TrcTopupData[];
-  const pendingTopupsArray = (Array.isArray(pendingTopups.data) ? pendingTopups.data : Object.values(pendingTopups.data || {})) as TrcTopupData[];
+  // Data is already an array from the hook
+  const allTopupsArray = allTopups.data || [];
+  const pendingTopupsArray = pendingTopups.data || [];
 
   // Determine which topups to show based on selected tab
   const displayTopups =

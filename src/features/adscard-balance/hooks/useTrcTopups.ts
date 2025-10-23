@@ -38,7 +38,8 @@ export function useTrcTopups(
     queryKey: trcTopupKeys.list(filters),
     queryFn: async () => {
       const response = await getTrcTopups(filters);
-      // Data is already an array
+      // TrcListResponse has { data: array, request_id: string }
+      // Extract the actual array from response.data
       return response.data;
     },
   });
