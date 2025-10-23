@@ -5,7 +5,6 @@ import { CreateCryptoTopupDialog } from './CreateCryptoTopupDialog';
 import { TopupsTable } from './TopupsTable';
 import { BalanceSettings } from './BalanceSettings';
 import { useTrcTopups, useBalanceInfo } from '../hooks/useTrcTopups';
-import type { TrcTopupData } from '../types/api';
 
 export function AdscardBalancePage() {
   const [selectedTab, setSelectedTab] = useState('all');
