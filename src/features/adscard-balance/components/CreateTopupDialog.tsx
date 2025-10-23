@@ -56,14 +56,14 @@ export function CreateTopupDialog({
       <DialogTrigger asChild>
         <Button>
           <IconPlus className="w-4 h-4 mr-2" />
-          Create Topup
+          Create TRC20 Topup
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Create TRC Topup</DialogTitle>
+          <DialogTitle>Create TRC20 Topup</DialogTitle>
           <DialogDescription>
-            Create a new TRC (USDT) topup for the master balance
+            Create a new TRC20 (USDT) topup for the master balance
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit}>

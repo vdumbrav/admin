@@ -1,48 +1,38 @@
-// TRC Topup Types
-export type TrcTopupStatus = 'pending' | 'success' | 'cancelled' | 'failed';
+// Crypto Topup Types (TRC20/ERC20)
+export type CryptoTopupStatus = 'pending' | 'success' | 'cancelled' | 'failed';
 
-export interface TrcTopupRequest {
-  auth_token: string;
-  amount: number;
-}
-
-export interface TrcTopupData {
+export interface CryptoTopupData {
   id: number;
-  status: TrcTopupStatus;
+  status: CryptoTopupStatus;
   amount: number;
   wallet: string;
   created_at: string;
   qr?: string;
 }
 
-export interface TrcTopupResponse {
-  data: TrcTopupData;
+export interface CryptoTopupApiResponse {
+  data: CryptoTopupData;
   request_id: string;
 }
 
-// TRC List Types
-export interface TrcListRequest {
-  auth_token: string;
-  time?: string;
-  status?: TrcTopupStatus;
-  id?: number;
-}
-
-export interface TrcListResponse {
-  data: Omit<TrcTopupData, 'qr'>[];
+// Crypto Topup List Types
+export interface CryptoTopupListResponse {
+  data: Omit<CryptoTopupData, 'qr'>[];
   request_id: string;
 }
 
-// TRC Cancel Types
-export interface TrcCancelRequest {
-  auth_token: string;
-  id: number;
-}
-
-export interface TrcCancelResponse {
-  data: TrcTopupData;
+// Crypto Topup Cancel Types
+export interface CryptoTopupCancelResponse {
+  data: CryptoTopupData;
   request_id: string;
 }
+
+// Legacy type aliases for backward compatibility
+export type TrcTopupStatus = CryptoTopupStatus;
+export type TrcTopupData = CryptoTopupData;
+export type TrcTopupResponse = CryptoTopupApiResponse;
+export type TrcListResponse = CryptoTopupListResponse;
+export type TrcCancelResponse = CryptoTopupCancelResponse;
 
 // Balance Info Types
 export interface BalanceInfo {
@@ -51,17 +41,17 @@ export interface BalanceInfo {
   availableForCards: number;
 }
 
-// NOWPayments Topup Types
+// NOWPayments Integration Types
 export type CryptoNetwork = 'TRC20' | 'ERC20';
 export type CryptoCurrency = 'USDT';
 
-export interface CryptoTopupRequest {
+export interface NOWPaymentsTopupRequest {
   amount: number; // USD amount
   currency: CryptoCurrency;
   network: CryptoNetwork;
 }
 
-export interface CryptoTopupResponse {
+export interface NOWPaymentsTopupResponse {
   paymentId: string;
   paymentUrl: string;
   payAddress: string;
@@ -76,7 +66,7 @@ export interface CryptoTopupResponse {
   updatedAt: string;
 }
 
-export interface CryptoTopupStatusResponse {
+export interface NOWPaymentsStatusResponse {
   paymentId: string;
   paymentStatus: string;
   payAddress: string;
@@ -90,3 +80,8 @@ export interface CryptoTopupStatusResponse {
   outcomeAmount: number;
   outcomeCurrency: string;
 }
+
+// Legacy type aliases
+export type CryptoTopupRequest = NOWPaymentsTopupRequest;
+export type CryptoTopupResponse = NOWPaymentsTopupResponse;
+export type CryptoTopupStatusResponse = NOWPaymentsStatusResponse;

@@ -33,7 +33,7 @@ export function AdscardBalancePage() {
         <div>
           <h1 className="text-3xl font-bold">ADScard Master Balance</h1>
           <p className="text-muted-foreground">
-            Manage master wallet TRC topups and balance
+            Manage master wallet TRC20/ERC20 topups and balance
           </p>
         </div>
         <div className="flex gap-2">
@@ -52,7 +52,7 @@ export function AdscardBalancePage() {
       <div>
         <Tabs value={selectedTab} onValueChange={setSelectedTab}>
           <TabsList>
-            <TabsTrigger value="all">All Topups</TabsTrigger>
+            <TabsTrigger value="all">All Crypto Topups</TabsTrigger>
             <TabsTrigger value="pending">
               Pending ({pendingTopupsArray?.length || 0})
             </TabsTrigger>
