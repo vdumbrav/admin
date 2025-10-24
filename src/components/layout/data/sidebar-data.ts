@@ -20,6 +20,7 @@ import {
   IconPigMoney,
   IconLanguage,
   IconChartPie,
+  IconShieldCheck,
 } from '@tabler/icons-react';
 import { type SidebarData } from '../types';
 
@@ -99,6 +100,17 @@ export const sidebarData: SidebarData = {
           icon: IconWallet,
           isActive: (pathname: string) =>
             pathname.startsWith('/adscard-balance'),
+        },
+      ],
+    },
+    {
+      title: 'Security',
+      items: [
+        {
+          title: 'Fraud Detection',
+          url: '/fraud' as any,
+          icon: IconShieldCheck,
+          isActive: (pathname: string) => pathname.startsWith('/fraud'),
         },
       ],
     },
