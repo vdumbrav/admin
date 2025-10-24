@@ -21,6 +21,7 @@ import {
   IconLanguage,
   IconChartPie,
   IconShieldCheck,
+  IconFileText,
 } from '@tabler/icons-react';
 import { type SidebarData } from '../types';
 
@@ -108,9 +109,15 @@ export const sidebarData: SidebarData = {
       items: [
         {
           title: 'Fraud Detection',
-          url: '/fraud' as any,
+          url: '/fraud',
           icon: IconShieldCheck,
           isActive: (pathname: string) => pathname.startsWith('/fraud'),
+        },
+        {
+          title: 'System Logs',
+          url: '/logs' as any,
+          icon: IconFileText,
+          isActive: (pathname: string) => pathname.startsWith('/logs'),
         },
       ],
     },
