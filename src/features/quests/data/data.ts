@@ -25,6 +25,7 @@ const GROUP_LABELS: Record<TaskResponseDtoGroup, string> = {
   [TaskResponseDtoGroup.daily]: 'Daily',
   [TaskResponseDtoGroup.referral]: 'Referral',
   [TaskResponseDtoGroup.partner]: 'Partner',
+  [TaskResponseDtoGroup.game]: 'Game Quests',
 };
 
 /**
