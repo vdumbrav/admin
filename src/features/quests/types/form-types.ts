@@ -25,7 +25,7 @@ export const QUEST_TYPES = [
   'dummy',
 ] as const;
 
-export const QUEST_GROUPS = ['all', 'social', 'daily', 'referral', 'partner'] as const;
+export const QUEST_GROUPS = ['all', 'social', 'daily', 'referral', 'partner', 'game'] as const;
 
 export const PROVIDERS = [
   'twitter',
@@ -35,6 +35,7 @@ export const PROVIDERS = [
   'walme',
   'monetag',
   'adsgram',
+  'adscard',
 ] as const;
 
 export const CHILD_TYPES = ['like', 'share', 'comment', 'join', 'connect'] as const;
