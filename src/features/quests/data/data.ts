@@ -43,6 +43,9 @@ const TYPE_LABELS: Record<WaitlistTasksResponseDtoTypeItem, string> = {
   [WaitlistTasksResponseDtoTypeItem.referral]: 'Referral',
   [WaitlistTasksResponseDtoTypeItem.external]: 'External',
   [WaitlistTasksResponseDtoTypeItem.dummy]: 'Dummy',
+  [WaitlistTasksResponseDtoTypeItem['flappy-bird-wlm']]: 'Flappy Bird',
+  [WaitlistTasksResponseDtoTypeItem['tap-card']]: 'Tap Card',
+  [WaitlistTasksResponseDtoTypeItem['snake-wlm']]: 'Snake Game',
 };
 
 /**
@@ -57,6 +60,7 @@ const PROVIDER_LABELS: Record<TaskResponseDtoProvider, string> = {
   [TaskResponseDtoProvider.walme]: 'Internal',
   [TaskResponseDtoProvider.monetag]: 'Monetag',
   [TaskResponseDtoProvider.adsgram]: 'AdsGram',
+  [TaskResponseDtoProvider.adscard]: 'ADScard',
 };
 
 // ============================================================================
