@@ -76,8 +76,10 @@ import {
   useGrantPremium,
   useRevokePremium,
   useDeleteUser,
+  useUpdateCameraQuestAccess,
 } from '@/features/users/api/admin-users';
 import { useState } from 'react';
+import { Switch } from '@/components/ui/switch';
 
 export const Route = createFileRoute('/_authenticated/users/$userId')({
   component: UserDetailsPage,
@@ -111,6 +113,7 @@ function UserDetailsPage() {
   const grantPremiumMutation = useGrantPremium();
   const revokePremiumMutation = useRevokePremium();
   const deleteUserMutation = useDeleteUser();
+  const updateCameraQuestAccessMutation = useUpdateCameraQuestAccess();
 
   const [activeTab, setActiveTab] = useState('overview');
   const [roleDialogOpen, setRoleDialogOpen] = useState(false);
@@ -295,6 +298,18 @@ function UserDetailsPage() {
       setRoleDialogOpen(false);
     } catch (error) {
       toast.error('Failed to update user role');
+    }
+  };
+
+  const handleCameraQuestAccessChange = async (canAccess: boolean) => {
+    try {
+      await updateCameraQuestAccessMutation.mutateAsync({
+        userId: user.id,
+        canAccess,
+      });
+      toast.success(`Camera Quest access ${canAccess ? 'enabled' : 'disabled'} successfully`);
+    } catch (error) {
+      toast.error('Failed to update Camera Quest access');
     }
   };
 
@@ -1170,6 +1185,16 @@ function UserDetailsPage() {
                           <SelectItem value="Administrator">Administrator</SelectItem>
                         </SelectContent>
                       </Select>
+                    </div>
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2">
+                        <IconActivity className="h-4 w-4 text-muted-foreground" />
+                        <Label className="text-sm">Camera Quest Access</Label>
+                      </div>
+                      <Switch
+                        checked={user.canAccessCameraQuest || false}
+                        onCheckedChange={handleCameraQuestAccessChange}
+                      />
                     </div>
                   </div>
                 </div>
