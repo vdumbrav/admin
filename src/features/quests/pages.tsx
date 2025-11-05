@@ -131,6 +131,9 @@ export const QuestEditPage = () => {
   // Check if this is Camera Quest
   const isCameraQuest = data?.type === 'camera-quest';
 
+  // Debug logging
+  console.log('Quest Edit Page:', { id, type: data?.type, isCameraQuest, data });
+
   return (
     <>
       <Main>
