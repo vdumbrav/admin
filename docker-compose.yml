@@ -9,7 +9,7 @@ services:
         VITE_API_URL: ${VITE_API_URL:-https://api2.moliedev.xyz}
         VITE_SWAGGER_URL: ${VITE_SWAGGER_URL:-https://api2.moliedev.xyz/docs-json}
         VITE_APP_BASE_URL: ${VITE_APP_BASE_URL:-https://admin2.moliedev.xyz}
-        VITE_KIBANA_URL: ${VITE_KIBANA_URL:-http://167.233.7.108:5601}
+        VITE_KIBANA_URL: ${VITE_KIBANA_URL:-https://kibana.moliedev.xyz}
         VITE_OIDC_AUTHORITY: ${VITE_OIDC_AUTHORITY:-https://auth2.moliedev.xyz/realms/walme}
         VITE_OIDC_CLIENT_ID: ${VITE_OIDC_CLIENT_ID:-waitlist-admin}
         VITE_OIDC_SCOPE: ${VITE_OIDC_SCOPE:-openid profile email roles offline_access}
