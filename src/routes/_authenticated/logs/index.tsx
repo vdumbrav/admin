@@ -1,3 +1,4 @@
+import { createFileRoute } from '@tanstack/react-router';
 import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -304,3 +305,7 @@ export function LogsPage() {
     </div>
   );
 }
+
+export const Route = createFileRoute('/_authenticated/logs/' as any)({
+  component: LogsPage,
+});
