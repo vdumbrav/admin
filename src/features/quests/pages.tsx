@@ -8,6 +8,7 @@ import { defaultQuestSearch } from './default-search';
 import { QuestForm } from './form';
 import { getPreset, getPresetSafe, type PresetId } from './presets';
 import type { QuestFormValues } from './types/form-types';
+import { CameraQuestTabs } from '../camera-quest/components';
 
 export const QuestCreatePage = () => {
   const hasPreset = useRouterState({
@@ -69,6 +70,9 @@ export const QuestEditPage = () => {
 
   // Get preset configuration from existing quest data
   const presetConfig = data?.preset ? (getPresetSafe(data.preset) ?? undefined) : undefined;
+
+  // Check if this is a camera quest
+  const isCameraQuest = data?.type === 'camera-quest';
 
   if (isLoading || !data) {
     return (
@@ -142,20 +146,42 @@ export const QuestEditPage = () => {
             Back to list
           </Button>
         </div>
-        <QuestForm
-          presetConfig={presetConfig}
-          initial={data ? apiToForm(data) : undefined}
-          onSubmit={async (v: QuestFormValues) => {
-            try {
-              await update.mutateAsync(v);
-              void nav({ to: '/quests', search: defaultQuestSearch });
-            } catch (e) {
-              // Error toast already shown by mutation hook
-              console.error('Quest update failed:', e);
-            }
-          }}
-          onCancel={() => void nav({ to: '/quests', search: defaultQuestSearch })}
-        />
+
+        {isCameraQuest ? (
+          <div className="space-y-6">
+            <QuestForm
+              presetConfig={presetConfig}
+              initial={data ? apiToForm(data) : undefined}
+              onSubmit={async (v: QuestFormValues) => {
+                try {
+                  await update.mutateAsync(v);
+                  void nav({ to: '/quests', search: defaultQuestSearch });
+                } catch (e) {
+                  // Error toast already shown by mutation hook
+                  console.error('Quest update failed:', e);
+                }
+              }}
+              onCancel={() => void nav({ to: '/quests', search: defaultQuestSearch })}
+            />
+
+            <CameraQuestTabs />
+          </div>
+        ) : (
+          <QuestForm
+            presetConfig={presetConfig}
+            initial={data ? apiToForm(data) : undefined}
+            onSubmit={async (v: QuestFormValues) => {
+              try {
+                await update.mutateAsync(v);
+                void nav({ to: '/quests', search: defaultQuestSearch });
+              } catch (e) {
+                // Error toast already shown by mutation hook
+                console.error('Quest update failed:', e);
+              }
+            }}
+            onCancel={() => void nav({ to: '/quests', search: defaultQuestSearch })}
+          />
+        )}
       </Main>
     </>
   );
