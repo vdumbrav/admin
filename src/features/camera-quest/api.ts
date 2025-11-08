@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { apiClient } from '@/lib/api/client';
+import { orvalMutator } from '@/lib/api/client/orvalMutator';
+import { useAppAuth } from '@/auth/hooks';
 import { toast } from 'sonner';
 import type {
   CameraQuestSettings,
@@ -19,26 +20,39 @@ const BASE_URL = '/admin/camera-quest';
 
 // Settings
 export const useSettings = () => {
+  const { token } = useAppAuth();
+
   return useQuery({
     queryKey: ['camera-quest', 'settings'],
     queryFn: async () => {
-      const response = await apiClient.get<{ success: boolean; settings: CameraQuestSettings }>(
-        `${BASE_URL}/settings`,
-      );
+      const response = await orvalMutator<{ success: boolean; settings: CameraQuestSettings }>({
+        url: `${BASE_URL}/settings`,
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       return response.data.settings;
     },
+    enabled: !!token,
   });
 };
 
 export const useUpdateSettings = () => {
   const queryClient = useQueryClient();
+  const { token } = useAppAuth();
 
   return useMutation({
     mutationFn: async (data: UpdateSettingsDto) => {
-      const response = await apiClient.put<{ success: boolean; settings: CameraQuestSettings }>(
-        `${BASE_URL}/settings`,
+      const response = await orvalMutator<{ success: boolean; settings: CameraQuestSettings }>({
+        url: `${BASE_URL}/settings`,
+        method: 'PUT',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
         data,
-      );
+      });
       return response.data.settings;
     },
     onSuccess: () => {
@@ -53,42 +67,77 @@ export const useUpdateSettings = () => {
 
 // Prize Cards
 export const usePrizeCards = (params: GetPrizeCardsParams) => {
+  const { token } = useAppAuth();
+
   return useQuery({
     queryKey: ['camera-quest', 'prize-cards', params],
     queryFn: async () => {
-      const response = await apiClient.get<{
+      const searchParams = new URLSearchParams();
+      if (params.status) searchParams.set('status', params.status);
+      if (params.search) searchParams.set('search', params.search);
+      if (params.limit) searchParams.set('limit', params.limit.toString());
+      if (params.offset) searchParams.set('offset', params.offset.toString());
+
+      const response = await orvalMutator<{
         success: boolean;
         cards: PrizeCard[];
         total: number;
-      }>(`${BASE_URL}/cards`, { params });
+      }>({
+        url: `${BASE_URL}/cards?${searchParams.toString()}`,
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       return response.data;
     },
+    enabled: !!token,
   });
 };
 
 export const useAvailableCards = (params: GetAvailableCardsParams) => {
+  const { token } = useAppAuth();
+
   return useQuery({
     queryKey: ['camera-quest', 'available-cards', params],
     queryFn: async () => {
-      const response = await apiClient.get<{
+      const searchParams = new URLSearchParams();
+      if (params.search) searchParams.set('search', params.search);
+      if (params.limit) searchParams.set('limit', params.limit.toString());
+      if (params.offset) searchParams.set('offset', params.offset.toString());
+
+      const response = await orvalMutator<{
         success: boolean;
         cards: any[];
         total: number;
-      }>(`${BASE_URL}/cards/available`, { params });
+      }>({
+        url: `${BASE_URL}/cards/available?${searchParams.toString()}`,
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       return response.data;
     },
+    enabled: !!token,
   });
 };
 
 export const useAddCardToPool = () => {
   const queryClient = useQueryClient();
+  const { token } = useAppAuth();
 
   return useMutation({
     mutationFn: async (data: AddCardDto) => {
-      const response = await apiClient.post<{ success: boolean; prizeCard: PrizeCard }>(
-        `${BASE_URL}/cards`,
+      const response = await orvalMutator<{ success: boolean; prizeCard: PrizeCard }>({
+        url: `${BASE_URL}/cards`,
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
         data,
-      );
+      });
       return response.data.prizeCard;
     },
     onSuccess: () => {
@@ -105,15 +154,24 @@ export const useAddCardToPool = () => {
 
 export const useBatchAddCardsToPool = () => {
   const queryClient = useQueryClient();
+  const { token } = useAppAuth();
 
   return useMutation({
     mutationFn: async (data: BatchAddCardsDto) => {
-      const response = await apiClient.post<{
+      const response = await orvalMutator<{
         success: boolean;
         added: number;
         failed: number;
         errors?: string[];
-      }>(`${BASE_URL}/cards/batch`, data);
+      }>({
+        url: `${BASE_URL}/cards/batch`,
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        data,
+      });
       return response.data;
     },
     onSuccess: (data) => {
@@ -135,12 +193,17 @@ export const useBatchAddCardsToPool = () => {
 
 export const useRemoveCardFromPool = () => {
   const queryClient = useQueryClient();
+  const { token } = useAppAuth();
 
   return useMutation({
     mutationFn: async (id: number) => {
-      const response = await apiClient.delete<{ success: boolean; message: string }>(
-        `${BASE_URL}/cards/${id}`,
-      );
+      const response = await orvalMutator<{ success: boolean; message: string }>({
+        url: `${BASE_URL}/cards/${id}`,
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       return response.data;
     },
     onSuccess: () => {
@@ -157,28 +220,49 @@ export const useRemoveCardFromPool = () => {
 
 // Sessions
 export const useSessions = (params: GetSessionsParams) => {
+  const { token } = useAppAuth();
+
   return useQuery({
     queryKey: ['camera-quest', 'sessions', params],
     queryFn: async () => {
-      const response = await apiClient.get<{
+      const searchParams = new URLSearchParams();
+      if (params.status) searchParams.set('status', params.status);
+      if (params.userId) searchParams.set('userId', params.userId.toString());
+      if (params.limit) searchParams.set('limit', params.limit.toString());
+      if (params.offset) searchParams.set('offset', params.offset.toString());
+
+      const response = await orvalMutator<{
         success: boolean;
         sessions: CameraQuestSession[];
         total: number;
-      }>(`${BASE_URL}/sessions`, { params });
+      }>({
+        url: `${BASE_URL}/sessions?${searchParams.toString()}`,
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       return response.data;
     },
+    enabled: !!token,
   });
 };
 
 export const useCancelSession = () => {
   const queryClient = useQueryClient();
+  const { token } = useAppAuth();
 
   return useMutation({
     mutationFn: async ({ id, data }: { id: number; data: CancelSessionDto }) => {
-      const response = await apiClient.post<{ success: boolean; message: string }>(
-        `${BASE_URL}/sessions/${id}/cancel`,
+      const response = await orvalMutator<{ success: boolean; message: string }>({
+        url: `${BASE_URL}/sessions/${id}/cancel`,
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
         data,
-      );
+      });
       return response.data;
     },
     onSuccess: () => {
@@ -194,14 +278,23 @@ export const useCancelSession = () => {
 
 // Statistics
 export const useStatistics = () => {
+  const { token } = useAppAuth();
+
   return useQuery({
     queryKey: ['camera-quest', 'statistics'],
     queryFn: async () => {
-      const response = await apiClient.get<{
+      const response = await orvalMutator<{
         success: boolean;
         statistics: CameraQuestStatistics;
-      }>(`${BASE_URL}/statistics`);
+      }>({
+        url: `${BASE_URL}/statistics`,
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       return response.data.statistics;
     },
+    enabled: !!token,
   });
 };
