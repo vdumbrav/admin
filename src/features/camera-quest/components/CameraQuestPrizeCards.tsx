@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Loader2, Plus, Trash2, Search } from 'lucide-react';
 import { usePrizeCards, useRemoveCardFromPool, useAvailableCards, useAddCardToPool } from '../api';
 import { EPrizeCardStatus } from '../types';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 
 export const CameraQuestPrizeCards = () => {
   const [status, setStatus] = useState<EPrizeCardStatus | undefined>();
@@ -148,7 +148,7 @@ export const CameraQuestPrizeCards = () => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {data?.cards?.map((card) => (
+                    {data?.cards?.map((card: any) => (
                       <TableRow key={card.id}>
                         <TableCell className="font-mono">{card.cardNumber || `Card #${card.adscardCardId}`}</TableCell>
                         <TableCell>{card.currency || 'USD'}</TableCell>

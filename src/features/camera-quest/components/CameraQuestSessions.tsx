@@ -71,7 +71,7 @@ export const CameraQuestSessions = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {data?.sessions?.map((session) => (
+                  {data?.sessions?.map((session: any) => (
                     <TableRow key={session.id}>
                       <TableCell>#{session.id}</TableCell>
                       <TableCell>
