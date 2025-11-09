@@ -45,7 +45,7 @@ export const CameraQuestPrizeCards = () => {
             </div>
             <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
               <DialogTrigger asChild>
-                <Button>
+                <Button variant="default">
                   <Plus className="mr-2 h-4 w-4" />
                   Add Cards
                 </Button>
@@ -90,6 +90,7 @@ export const CameraQuestPrizeCards = () => {
                               <TableCell>
                                 <Button
                                   size="sm"
+                                  variant="default"
                                   onClick={() => handleAdd(card.id)}
                                   disabled={addCard.isPending}
                                 >
