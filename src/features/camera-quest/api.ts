@@ -20,11 +20,12 @@ const BASE_URL = '/admin/camera-quest';
 
 // Settings
 export const useSettings = () => {
-  const { token } = useAppAuth();
+  const { getAccessToken } = useAppAuth();
 
   return useQuery({
     queryKey: ['camera-quest', 'settings'],
     queryFn: async () => {
+      const token = await getAccessToken();
       const response = await orvalMutator<{ success: boolean; settings: CameraQuestSettings }>({
         url: `${BASE_URL}/settings`,
         method: 'GET',
@@ -32,18 +33,19 @@ export const useSettings = () => {
           Authorization: `Bearer ${token}`,
         },
       });
-      return response.data.settings;
+      return response.settings;
     },
-    enabled: !!token,
+    enabled: true,
   });
 };
 
 export const useUpdateSettings = () => {
   const queryClient = useQueryClient();
-  const { token } = useAppAuth();
+  const { getAccessToken } = useAppAuth();
 
   return useMutation({
     mutationFn: async (data: UpdateSettingsDto) => {
+      const token = await getAccessToken();
       const response = await orvalMutator<{ success: boolean; settings: CameraQuestSettings }>({
         url: `${BASE_URL}/settings`,
         method: 'PUT',
@@ -53,7 +55,7 @@ export const useUpdateSettings = () => {
         },
         data,
       });
-      return response.data.settings;
+      return response.settings;
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['camera-quest', 'settings'] });
@@ -67,7 +69,7 @@ export const useUpdateSettings = () => {
 
 // Prize Cards
 export const usePrizeCards = (params: GetPrizeCardsParams) => {
-  const { token } = useAppAuth();
+  const { getAccessToken } = useAppAuth();
 
   return useQuery({
     queryKey: ['camera-quest', 'prize-cards', params],
@@ -78,6 +80,7 @@ export const usePrizeCards = (params: GetPrizeCardsParams) => {
       if (params.limit) searchParams.set('limit', params.limit.toString());
       if (params.offset) searchParams.set('offset', params.offset.toString());
 
+      const token = await getAccessToken();
       const response = await orvalMutator<{
         success: boolean;
         cards: PrizeCard[];
@@ -89,14 +92,14 @@ export const usePrizeCards = (params: GetPrizeCardsParams) => {
           Authorization: `Bearer ${token}`,
         },
       });
-      return response.data;
+      return response;
     },
-    enabled: !!token,
+    enabled: true,
   });
 };
 
 export const useAvailableCards = (params: GetAvailableCardsParams) => {
-  const { token } = useAppAuth();
+  const { getAccessToken } = useAppAuth();
 
   return useQuery({
     queryKey: ['camera-quest', 'available-cards', params],
@@ -106,6 +109,7 @@ export const useAvailableCards = (params: GetAvailableCardsParams) => {
       if (params.limit) searchParams.set('limit', params.limit.toString());
       if (params.offset) searchParams.set('offset', params.offset.toString());
 
+      const token = await getAccessToken();
       const response = await orvalMutator<{
         success: boolean;
         cards: any[];
@@ -117,18 +121,19 @@ export const useAvailableCards = (params: GetAvailableCardsParams) => {
           Authorization: `Bearer ${token}`,
         },
       });
-      return response.data;
+      return response;
     },
-    enabled: !!token,
+    enabled: true,
   });
 };
 
 export const useAddCardToPool = () => {
   const queryClient = useQueryClient();
-  const { token } = useAppAuth();
+  const { getAccessToken } = useAppAuth();
 
   return useMutation({
     mutationFn: async (data: AddCardDto) => {
+      const token = await getAccessToken();
       const response = await orvalMutator<{ success: boolean; prizeCard: PrizeCard }>({
         url: `${BASE_URL}/cards`,
         method: 'POST',
@@ -138,7 +143,7 @@ export const useAddCardToPool = () => {
         },
         data,
       });
-      return response.data.prizeCard;
+      return response.prizeCard;
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['camera-quest', 'prize-cards'] });
@@ -154,10 +159,11 @@ export const useAddCardToPool = () => {
 
 export const useBatchAddCardsToPool = () => {
   const queryClient = useQueryClient();
-  const { token } = useAppAuth();
+  const { getAccessToken } = useAppAuth();
 
   return useMutation({
     mutationFn: async (data: BatchAddCardsDto) => {
+      const token = await getAccessToken();
       const response = await orvalMutator<{
         success: boolean;
         added: number;
@@ -172,7 +178,7 @@ export const useBatchAddCardsToPool = () => {
         },
         data,
       });
-      return response.data;
+      return response;
     },
     onSuccess: (data) => {
       void queryClient.invalidateQueries({ queryKey: ['camera-quest', 'prize-cards'] });
@@ -193,10 +199,11 @@ export const useBatchAddCardsToPool = () => {
 
 export const useRemoveCardFromPool = () => {
   const queryClient = useQueryClient();
-  const { token } = useAppAuth();
+  const { getAccessToken } = useAppAuth();
 
   return useMutation({
     mutationFn: async (id: number) => {
+      const token = await getAccessToken();
       const response = await orvalMutator<{ success: boolean; message: string }>({
         url: `${BASE_URL}/cards/${id}`,
         method: 'DELETE',
@@ -204,7 +211,7 @@ export const useRemoveCardFromPool = () => {
           Authorization: `Bearer ${token}`,
         },
       });
-      return response.data;
+      return response;
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['camera-quest', 'prize-cards'] });
@@ -220,7 +227,7 @@ export const useRemoveCardFromPool = () => {
 
 // Sessions
 export const useSessions = (params: GetSessionsParams) => {
-  const { token } = useAppAuth();
+  const { getAccessToken } = useAppAuth();
 
   return useQuery({
     queryKey: ['camera-quest', 'sessions', params],
@@ -231,6 +238,7 @@ export const useSessions = (params: GetSessionsParams) => {
       if (params.limit) searchParams.set('limit', params.limit.toString());
       if (params.offset) searchParams.set('offset', params.offset.toString());
 
+      const token = await getAccessToken();
       const response = await orvalMutator<{
         success: boolean;
         sessions: CameraQuestSession[];
@@ -242,18 +250,19 @@ export const useSessions = (params: GetSessionsParams) => {
           Authorization: `Bearer ${token}`,
         },
       });
-      return response.data;
+      return response;
     },
-    enabled: !!token,
+    enabled: true,
   });
 };
 
 export const useCancelSession = () => {
   const queryClient = useQueryClient();
-  const { token } = useAppAuth();
+  const { getAccessToken } = useAppAuth();
 
   return useMutation({
     mutationFn: async ({ id, data }: { id: number; data: CancelSessionDto }) => {
+      const token = await getAccessToken();
       const response = await orvalMutator<{ success: boolean; message: string }>({
         url: `${BASE_URL}/sessions/${id}/cancel`,
         method: 'POST',
@@ -263,7 +272,7 @@ export const useCancelSession = () => {
         },
         data,
       });
-      return response.data;
+      return response;
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['camera-quest', 'sessions'] });
@@ -278,11 +287,12 @@ export const useCancelSession = () => {
 
 // Statistics
 export const useStatistics = () => {
-  const { token } = useAppAuth();
+  const { getAccessToken } = useAppAuth();
 
   return useQuery({
     queryKey: ['camera-quest', 'statistics'],
     queryFn: async () => {
+      const token = await getAccessToken();
       const response = await orvalMutator<{
         success: boolean;
         statistics: CameraQuestStatistics;
@@ -293,8 +303,8 @@ export const useStatistics = () => {
           Authorization: `Bearer ${token}`,
         },
       });
-      return response.data.statistics;
+      return response.statistics;
     },
-    enabled: !!token,
+    enabled: true,
   });
 };
