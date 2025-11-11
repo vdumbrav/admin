@@ -143,6 +143,7 @@ export const CameraQuestPrizeCards = () => {
                   <TableHeader>
                     <TableRow>
                       <TableHead>Card Number</TableHead>
+                      <TableHead>Name</TableHead>
                       <TableHead>Currency</TableHead>
                       <TableHead>Balance</TableHead>
                       <TableHead>Status</TableHead>
@@ -154,6 +155,7 @@ export const CameraQuestPrizeCards = () => {
                     {data?.cards?.map((card: any) => (
                       <TableRow key={card.id}>
                         <TableCell className="font-mono">{card.cardNumber || `Card #${card.adscardCardId}`}</TableCell>
+                        <TableCell className="text-muted-foreground">{card.comment || '—'}</TableCell>
                         <TableCell>{card.currency || 'USD'}</TableCell>
                         <TableCell>${card.balance?.toFixed(2) || '0.00'}</TableCell>
                         <TableCell>
