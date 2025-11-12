@@ -24,6 +24,8 @@ import { Route as AuthenticatedPremiumIndexRouteImport } from './routes/_authent
 import { Route as AuthenticatedPlatformsIndexRouteImport } from './routes/_authenticated/platforms/index'
 import { Route as AuthenticatedOrdersIndexRouteImport } from './routes/_authenticated/orders/index'
 import { Route as AuthenticatedNotificationsIndexRouteImport } from './routes/_authenticated/notifications/index'
+import { Route as AuthenticatedLogsIndexRouteImport } from './routes/_authenticated/logs/index'
+import { Route as AuthenticatedFraudIndexRouteImport } from './routes/_authenticated/fraud/index'
 import { Route as AuthenticatedDashboardIndexRouteImport } from './routes/_authenticated/dashboard/index'
 import { Route as AuthenticatedCardsIndexRouteImport } from './routes/_authenticated/cards/index'
 import { Route as AuthenticatedAnalyticsIndexRouteImport } from './routes/_authenticated/analytics/index'
@@ -125,6 +127,16 @@ const AuthenticatedNotificationsIndexRoute =
     path: '/notifications/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedLogsIndexRoute = AuthenticatedLogsIndexRouteImport.update({
+  id: '/logs/',
+  path: '/logs/',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedFraudIndexRoute = AuthenticatedFraudIndexRouteImport.update({
+  id: '/fraud/',
+  path: '/fraud/',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedDashboardIndexRoute =
   AuthenticatedDashboardIndexRouteImport.update({
     id: '/dashboard/',
@@ -246,6 +258,8 @@ export interface FileRoutesByFullPath {
   '/analytics': typeof AuthenticatedAnalyticsIndexRoute
   '/cards': typeof AuthenticatedCardsIndexRoute
   '/dashboard': typeof AuthenticatedDashboardIndexRoute
+  '/fraud': typeof AuthenticatedFraudIndexRoute
+  '/logs': typeof AuthenticatedLogsIndexRoute
   '/notifications': typeof AuthenticatedNotificationsIndexRoute
   '/orders': typeof AuthenticatedOrdersIndexRoute
   '/platforms': typeof AuthenticatedPlatformsIndexRoute
@@ -279,6 +293,8 @@ export interface FileRoutesByTo {
   '/analytics': typeof AuthenticatedAnalyticsIndexRoute
   '/cards': typeof AuthenticatedCardsIndexRoute
   '/dashboard': typeof AuthenticatedDashboardIndexRoute
+  '/fraud': typeof AuthenticatedFraudIndexRoute
+  '/logs': typeof AuthenticatedLogsIndexRoute
   '/notifications': typeof AuthenticatedNotificationsIndexRoute
   '/orders': typeof AuthenticatedOrdersIndexRoute
   '/platforms': typeof AuthenticatedPlatformsIndexRoute
@@ -315,6 +331,8 @@ export interface FileRoutesById {
   '/_authenticated/analytics/': typeof AuthenticatedAnalyticsIndexRoute
   '/_authenticated/cards/': typeof AuthenticatedCardsIndexRoute
   '/_authenticated/dashboard/': typeof AuthenticatedDashboardIndexRoute
+  '/_authenticated/fraud/': typeof AuthenticatedFraudIndexRoute
+  '/_authenticated/logs/': typeof AuthenticatedLogsIndexRoute
   '/_authenticated/notifications/': typeof AuthenticatedNotificationsIndexRoute
   '/_authenticated/orders/': typeof AuthenticatedOrdersIndexRoute
   '/_authenticated/platforms/': typeof AuthenticatedPlatformsIndexRoute
@@ -351,6 +369,8 @@ export interface FileRouteTypes {
     | '/analytics'
     | '/cards'
     | '/dashboard'
+    | '/fraud'
+    | '/logs'
     | '/notifications'
     | '/orders'
     | '/platforms'
@@ -384,6 +404,8 @@ export interface FileRouteTypes {
     | '/analytics'
     | '/cards'
     | '/dashboard'
+    | '/fraud'
+    | '/logs'
     | '/notifications'
     | '/orders'
     | '/platforms'
@@ -419,6 +441,8 @@ export interface FileRouteTypes {
     | '/_authenticated/analytics/'
     | '/_authenticated/cards/'
     | '/_authenticated/dashboard/'
+    | '/_authenticated/fraud/'
+    | '/_authenticated/logs/'
     | '/_authenticated/notifications/'
     | '/_authenticated/orders/'
     | '/_authenticated/platforms/'
@@ -551,6 +575,20 @@ declare module '@tanstack/react-router' {
       path: '/notifications'
       fullPath: '/notifications'
       preLoaderRoute: typeof AuthenticatedNotificationsIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/logs/': {
+      id: '/_authenticated/logs/'
+      path: '/logs'
+      fullPath: '/logs'
+      preLoaderRoute: typeof AuthenticatedLogsIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/fraud/': {
+      id: '/_authenticated/fraud/'
+      path: '/fraud'
+      fullPath: '/fraud'
+      preLoaderRoute: typeof AuthenticatedFraudIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/dashboard/': {
@@ -718,6 +756,8 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAnalyticsIndexRoute: typeof AuthenticatedAnalyticsIndexRoute
   AuthenticatedCardsIndexRoute: typeof AuthenticatedCardsIndexRoute
   AuthenticatedDashboardIndexRoute: typeof AuthenticatedDashboardIndexRoute
+  AuthenticatedFraudIndexRoute: typeof AuthenticatedFraudIndexRoute
+  AuthenticatedLogsIndexRoute: typeof AuthenticatedLogsIndexRoute
   AuthenticatedNotificationsIndexRoute: typeof AuthenticatedNotificationsIndexRoute
   AuthenticatedOrdersIndexRoute: typeof AuthenticatedOrdersIndexRoute
   AuthenticatedPlatformsIndexRoute: typeof AuthenticatedPlatformsIndexRoute
@@ -747,6 +787,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAnalyticsIndexRoute: AuthenticatedAnalyticsIndexRoute,
   AuthenticatedCardsIndexRoute: AuthenticatedCardsIndexRoute,
   AuthenticatedDashboardIndexRoute: AuthenticatedDashboardIndexRoute,
+  AuthenticatedFraudIndexRoute: AuthenticatedFraudIndexRoute,
+  AuthenticatedLogsIndexRoute: AuthenticatedLogsIndexRoute,
   AuthenticatedNotificationsIndexRoute: AuthenticatedNotificationsIndexRoute,
   AuthenticatedOrdersIndexRoute: AuthenticatedOrdersIndexRoute,
   AuthenticatedPlatformsIndexRoute: AuthenticatedPlatformsIndexRoute,
