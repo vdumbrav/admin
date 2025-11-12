@@ -24,6 +24,9 @@ export const CameraQuestSessions = () => {
   const getStatusBadge = (s: ECameraQuestSessionStatus) => {
     const variants: Record<ECameraQuestSessionStatus, 'default' | 'secondary' | 'destructive' | 'outline'> = {
       [ECameraQuestSessionStatus.Active]: 'default',
+      [ECameraQuestSessionStatus.Playing]: 'default',
+      [ECameraQuestSessionStatus.Won]: 'secondary',
+      [ECameraQuestSessionStatus.Lost]: 'destructive',
       [ECameraQuestSessionStatus.Completed]: 'secondary',
       [ECameraQuestSessionStatus.Cancelled]: 'destructive',
       [ECameraQuestSessionStatus.Expired]: 'outline',
@@ -46,6 +49,9 @@ export const CameraQuestSessions = () => {
             <SelectContent>
               <SelectItem value="all">All Status</SelectItem>
               <SelectItem value={ECameraQuestSessionStatus.Active}>Active</SelectItem>
+              <SelectItem value={ECameraQuestSessionStatus.Playing}>Playing</SelectItem>
+              <SelectItem value={ECameraQuestSessionStatus.Won}>Won</SelectItem>
+              <SelectItem value={ECameraQuestSessionStatus.Lost}>Lost</SelectItem>
               <SelectItem value={ECameraQuestSessionStatus.Completed}>Completed</SelectItem>
               <SelectItem value={ECameraQuestSessionStatus.Cancelled}>Cancelled</SelectItem>
               <SelectItem value={ECameraQuestSessionStatus.Expired}>Expired</SelectItem>
@@ -95,7 +101,8 @@ export const CameraQuestSessions = () => {
                         {new Date(session.startedAt).toLocaleString()}
                       </TableCell>
                       <TableCell>
-                        {session.status === ECameraQuestSessionStatus.Active && (
+                        {(session.status === ECameraQuestSessionStatus.Active ||
+                          session.status === ECameraQuestSessionStatus.Playing) && (
                           <Button
                             size="sm"
                             variant="destructive"

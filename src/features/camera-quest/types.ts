@@ -6,6 +6,9 @@ export enum EPrizeCardStatus {
 
 export enum ECameraQuestSessionStatus {
   Active = 'active',
+  Playing = 'playing',
+  Won = 'won',
+  Lost = 'lost',
   Completed = 'completed',
   Cancelled = 'cancelled',
   Expired = 'expired',
