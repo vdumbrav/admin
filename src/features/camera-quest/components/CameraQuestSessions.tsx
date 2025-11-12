@@ -63,8 +63,9 @@ export const CameraQuestSessions = () => {
                   <TableRow>
                     <TableHead>ID</TableHead>
                     <TableHead>User</TableHead>
+                    <TableHead>Email</TableHead>
                     <TableHead>Score</TableHead>
-                    <TableHead>Pipes Passed</TableHead>
+                    <TableHead>Pipes</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Started</TableHead>
                     <TableHead className="w-[100px]">Actions</TableHead>
@@ -78,18 +79,23 @@ export const CameraQuestSessions = () => {
                         {session.user ? (
                           <div>
                             <div className="font-medium">
-                              {session.user.firstName} {session.user.lastName}
+                              {session.user.firstName || session.user.name} {session.user.lastName || ''}
                             </div>
-                            <div className="text-xs text-muted-foreground">
-                              @{session.user.username}
-                            </div>
+                            {session.user.username && (
+                              <div className="text-xs text-muted-foreground">
+                                @{session.user.username}
+                              </div>
+                            )}
                           </div>
                         ) : (
                           <span className="text-muted-foreground">User #{session.userId}</span>
                         )}
                       </TableCell>
-                      <TableCell className="font-mono">{session.score}</TableCell>
-                      <TableCell className="font-mono">{session.passedPipes}</TableCell>
+                      <TableCell className="text-xs text-muted-foreground">
+                        {session.user?.email || '—'}
+                      </TableCell>
+                      <TableCell className="font-mono text-center">{session.score || 0}</TableCell>
+                      <TableCell className="font-mono text-center">{session.passedPipes || 0}</TableCell>
                       <TableCell>{getStatusBadge(session.status)}</TableCell>
                       <TableCell className="text-xs text-muted-foreground">
                         {new Date(session.startedAt).toLocaleString()}
