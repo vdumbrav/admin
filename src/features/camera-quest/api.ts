@@ -225,6 +225,34 @@ export const useRemoveCardFromPool = () => {
   });
 };
 
+export const useReturnCardToPool = () => {
+  const queryClient = useQueryClient();
+  const { getAccessToken } = useAppAuth();
+
+  return useMutation({
+    mutationFn: async (id: number) => {
+      const token = await getAccessToken();
+      const response = await orvalMutator<{ success: boolean; message: string }>({
+        url: `${BASE_URL}/cards/${id}/return`,
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      return response;
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['camera-quest', 'prize-cards'] });
+      void queryClient.invalidateQueries({ queryKey: ['camera-quest', 'available-cards'] });
+      void queryClient.invalidateQueries({ queryKey: ['camera-quest', 'statistics'] });
+      toast.success('Card returned to pool successfully');
+    },
+    onError: (error: any) => {
+      toast.error(error?.response?.data?.message || 'Failed to return card to pool');
+    },
+  });
+};
+
 // Sessions
 export const useSessions = (params: GetSessionsParams) => {
   const { getAccessToken } = useAppAuth();

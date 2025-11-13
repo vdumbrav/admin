@@ -5,8 +5,8 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Plus, Trash2, Search } from 'lucide-react';
-import { usePrizeCards, useRemoveCardFromPool, useAvailableCards, useAddCardToPool } from '../api';
+import { Loader2, Plus, Trash2, Search, RotateCcw } from 'lucide-react';
+import { usePrizeCards, useRemoveCardFromPool, useAvailableCards, useAddCardToPool, useReturnCardToPool } from '../api';
 import { EPrizeCardStatus } from '../types';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 
@@ -20,10 +20,18 @@ export const CameraQuestPrizeCards = () => {
   const { data: availableData, isLoading: availableLoading } = useAvailableCards({ search: availableSearch, limit: 50 });
   const removeCard = useRemoveCardFromPool();
   const addCard = useAddCardToPool();
+  const returnCard = useReturnCardToPool();
 
   const handleRemove = async (id: number) => {
     if (confirm('Remove this card from prize pool?')) {
       await removeCard.mutateAsync(id);
+      void refetch();
+    }
+  };
+
+  const handleReturn = async (id: number) => {
+    if (confirm('Return this card to pool? This will make it available for new sessions.')) {
+      await returnCard.mutateAsync(id);
       void refetch();
     }
   };
@@ -175,6 +183,17 @@ export const CameraQuestPrizeCards = () => {
                               disabled={removeCard.isPending}
                             >
                               <Trash2 className="h-4 w-4" />
+                            </Button>
+                          )}
+                          {(card.status === EPrizeCardStatus.Distributed || card.status === EPrizeCardStatus.Reserved) && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleReturn(card.id)}
+                              disabled={returnCard.isPending}
+                            >
+                              <RotateCcw className="h-4 w-4 mr-1" />
+                              Return to Pool
                             </Button>
                           )}
                         </TableCell>
