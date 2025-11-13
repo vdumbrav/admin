@@ -22,8 +22,12 @@ export const CameraQuestSessions = () => {
     }
   };
 
-  const handleGiveCard = async (userId: number) => {
-    if (confirm(`Give a card to User #${userId}?`)) {
+  const handleGiveCard = async (userId: number, userEmail?: string) => {
+    const message = userEmail
+      ? `Give a card to ${userEmail} (User #${userId})?`
+      : `Give a card to User #${userId}?`;
+
+    if (confirm(message)) {
       await giveCard.mutateAsync({ userId });
       void refetch();
     }
@@ -122,9 +126,9 @@ export const CameraQuestSessions = () => {
                               <Button
                                 size="sm"
                                 variant="default"
-                                onClick={() => handleGiveCard(session.userId)}
+                                onClick={() => handleGiveCard(session.user?.id || session.userId, session.user?.email)}
                                 disabled={giveCard.isPending}
-                                title="Give card to this user"
+                                title="Give card to player (who scanned QR)"
                               >
                                 <Gift className="h-4 w-4" />
                               </Button>
