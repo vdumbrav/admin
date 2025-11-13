@@ -253,6 +253,41 @@ export const useReturnCardToPool = () => {
   });
 };
 
+export const useManuallyGiveCard = () => {
+  const queryClient = useQueryClient();
+  const { getAccessToken } = useAppAuth();
+
+  return useMutation({
+    mutationFn: async (data: { userId: number; prizeCardId?: number }) => {
+      const token = await getAccessToken();
+      const response = await orvalMutator<{
+        success: boolean;
+        message: string;
+        userCard: any;
+        prizeCard: PrizeCard;
+      }>({
+        url: `${BASE_URL}/cards/manual-give`,
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        data,
+      });
+      return response;
+    },
+    onSuccess: (data) => {
+      void queryClient.invalidateQueries({ queryKey: ['camera-quest', 'prize-cards'] });
+      void queryClient.invalidateQueries({ queryKey: ['camera-quest', 'available-cards'] });
+      void queryClient.invalidateQueries({ queryKey: ['camera-quest', 'statistics'] });
+      toast.success(data.message || 'Card given to user successfully');
+    },
+    onError: (error: any) => {
+      toast.error(error?.response?.data?.message || 'Failed to give card to user');
+    },
+  });
+};
+
 // Sessions
 export const useSessions = (params: GetSessionsParams) => {
   const { getAccessToken } = useAppAuth();

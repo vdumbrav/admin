@@ -5,22 +5,27 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Plus, Trash2, Search, RotateCcw } from 'lucide-react';
-import { usePrizeCards, useRemoveCardFromPool, useAvailableCards, useAddCardToPool, useReturnCardToPool } from '../api';
+import { Loader2, Plus, Trash2, Search, RotateCcw, Gift } from 'lucide-react';
+import { usePrizeCards, useRemoveCardFromPool, useAvailableCards, useAddCardToPool, useReturnCardToPool, useManuallyGiveCard } from '../api';
 import { EPrizeCardStatus } from '../types';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
 
 export const CameraQuestPrizeCards = () => {
   const [status, setStatus] = useState<EPrizeCardStatus | undefined>();
   const [search, setSearch] = useState('');
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [availableSearch, setAvailableSearch] = useState('');
+  const [giveCardDialogOpen, setGiveCardDialogOpen] = useState(false);
+  const [selectedCardForGive, setSelectedCardForGive] = useState<number | null>(null);
+  const [userId, setUserId] = useState('');
 
   const { data, isLoading, refetch } = usePrizeCards({ status, search, limit: 100 });
   const { data: availableData, isLoading: availableLoading } = useAvailableCards({ search: availableSearch, limit: 50 });
   const removeCard = useRemoveCardFromPool();
   const addCard = useAddCardToPool();
   const returnCard = useReturnCardToPool();
+  const giveCard = useManuallyGiveCard();
 
   const handleRemove = async (id: number) => {
     if (confirm('Remove this card from prize pool?')) {
@@ -39,6 +44,31 @@ export const CameraQuestPrizeCards = () => {
   const handleAdd = async (cardId: number) => {
     await addCard.mutateAsync({ adscardCardId: cardId });
     setAddDialogOpen(false);
+    void refetch();
+  };
+
+  const openGiveCardDialog = (cardId: number) => {
+    setSelectedCardForGive(cardId);
+    setUserId('');
+    setGiveCardDialogOpen(true);
+  };
+
+  const handleGiveCard = async () => {
+    if (!userId || !selectedCardForGive) return;
+
+    const userIdNum = parseInt(userId, 10);
+    if (isNaN(userIdNum)) {
+      return; // Invalid user ID
+    }
+
+    await giveCard.mutateAsync({
+      userId: userIdNum,
+      prizeCardId: selectedCardForGive,
+    });
+
+    setGiveCardDialogOpen(false);
+    setSelectedCardForGive(null);
+    setUserId('');
     void refetch();
   };
 
@@ -178,27 +208,40 @@ export const CameraQuestPrizeCards = () => {
                           {new Date(card.createdAt).toLocaleDateString()}
                         </TableCell>
                         <TableCell>
-                          {card.status === EPrizeCardStatus.Available && (
-                            <Button
-                              size="sm"
-                              variant="destructive"
-                              onClick={() => handleRemove(card.id)}
-                              disabled={removeCard.isPending}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          )}
-                          {(card.status === EPrizeCardStatus.Distributed || card.status === EPrizeCardStatus.Reserved) && (
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => handleReturn(card.id)}
-                              disabled={returnCard.isPending}
-                            >
-                              <RotateCcw className="h-4 w-4 mr-1" />
-                              Return to Pool
-                            </Button>
-                          )}
+                          <div className="flex gap-2">
+                            {card.status === EPrizeCardStatus.Available && (
+                              <>
+                                <Button
+                                  size="sm"
+                                  variant="default"
+                                  onClick={() => openGiveCardDialog(card.id)}
+                                  disabled={giveCard.isPending}
+                                >
+                                  <Gift className="h-4 w-4 mr-1" />
+                                  Give to User
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="destructive"
+                                  onClick={() => handleRemove(card.id)}
+                                  disabled={removeCard.isPending}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </>
+                            )}
+                            {(card.status === EPrizeCardStatus.Distributed || card.status === EPrizeCardStatus.Reserved) && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleReturn(card.id)}
+                                disabled={returnCard.isPending}
+                              >
+                                <RotateCcw className="h-4 w-4 mr-1" />
+                                Return to Pool
+                              </Button>
+                            )}
+                          </div>
                         </TableCell>
                       </TableRow>
                       );
@@ -221,6 +264,50 @@ export const CameraQuestPrizeCards = () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* Give Card to User Dialog */}
+      <Dialog open={giveCardDialogOpen} onOpenChange={setGiveCardDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Give Card to User</DialogTitle>
+            <DialogDescription>
+              Enter the User ID to manually give this card to a user
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="userId">User ID</Label>
+              <Input
+                id="userId"
+                type="number"
+                placeholder="Enter user ID (e.g., 13)"
+                value={userId}
+                onChange={(e) => setUserId(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    void handleGiveCard();
+                  }
+                }}
+              />
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setGiveCardDialogOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={() => void handleGiveCard()}
+                disabled={!userId || giveCard.isPending}
+              >
+                {giveCard.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Give Card
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
