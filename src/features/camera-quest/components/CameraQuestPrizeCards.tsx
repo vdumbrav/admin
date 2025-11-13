@@ -160,7 +160,10 @@ export const CameraQuestPrizeCards = () => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {data?.cards?.map((card: any) => (
+                    {data?.cards?.map((card: any) => {
+                      // Debug: log card status
+                      console.log('Card:', card.cardNumber, 'Status:', card.status, 'Type:', typeof card.status);
+                      return (
                       <TableRow key={card.id}>
                         <TableCell className="font-mono">{card.cardNumber || `Card #${card.adscardCardId}`}</TableCell>
                         <TableCell className="text-muted-foreground">{card.comment || '—'}</TableCell>
@@ -198,7 +201,8 @@ export const CameraQuestPrizeCards = () => {
                           )}
                         </TableCell>
                       </TableRow>
-                    ))}
+                      );
+                    })}
                   </TableBody>
                 </Table>
                 {data?.total === 0 && (
