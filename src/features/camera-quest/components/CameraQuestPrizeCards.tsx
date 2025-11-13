@@ -189,84 +189,159 @@ export const CameraQuestPrizeCards = () => {
                 <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
               </div>
             ) : (
-              <div className="rounded-md border">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Card Number</TableHead>
-                      <TableHead>Name</TableHead>
-                      <TableHead>Currency</TableHead>
-                      <TableHead>Balance</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Added</TableHead>
-                      <TableHead className="w-[100px]">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {data?.cards?.map((card: any) => {
-                      // Debug: log card status
-                      console.log('Card:', card.cardNumber, 'Status:', card.status, 'Type:', typeof card.status);
-                      return (
-                      <TableRow key={card.id}>
-                        <TableCell className="font-mono">{card.cardNumber || `Card #${card.adscardCardId}`}</TableCell>
-                        <TableCell className="text-muted-foreground">{card.comment || '—'}</TableCell>
-                        <TableCell>{card.currency || 'USD'}</TableCell>
-                        <TableCell>${card.balance?.toFixed(2) || '0.00'}</TableCell>
-                        <TableCell>
+              <>
+                {/* Desktop Table View */}
+                <div className="hidden md:block rounded-md border">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Card Number</TableHead>
+                        <TableHead>Name</TableHead>
+                        <TableHead>Currency</TableHead>
+                        <TableHead>Balance</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Added</TableHead>
+                        <TableHead className="w-[100px]">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {data?.cards?.map((card: any) => (
+                        <TableRow key={card.id}>
+                          <TableCell className="font-mono">{card.cardNumber || `Card #${card.adscardCardId}`}</TableCell>
+                          <TableCell className="text-muted-foreground">{card.comment || '—'}</TableCell>
+                          <TableCell>{card.currency || 'USD'}</TableCell>
+                          <TableCell>${card.balance?.toFixed(2) || '0.00'}</TableCell>
+                          <TableCell>
+                            <Badge variant={card.status === EPrizeCardStatus.Available ? 'default' : card.status === EPrizeCardStatus.Reserved ? 'secondary' : 'outline'}>
+                              {card.status}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-xs text-muted-foreground">
+                            {new Date(card.createdAt).toLocaleDateString()}
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex gap-2">
+                              {card.status === EPrizeCardStatus.Available && (
+                                <>
+                                  <Button
+                                    size="sm"
+                                    variant="default"
+                                    onClick={() => openGiveCardDialog(card.id)}
+                                    disabled={giveCard.isPending}
+                                  >
+                                    <Gift className="h-4 w-4 mr-1" />
+                                    Give to User
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="destructive"
+                                    onClick={() => handleRemove(card.id)}
+                                    disabled={removeCard.isPending}
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                </>
+                              )}
+                              {(card.status === EPrizeCardStatus.Distributed || card.status === EPrizeCardStatus.Reserved) && (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => handleReturn(card.id)}
+                                  disabled={returnCard.isPending}
+                                >
+                                  <RotateCcw className="h-4 w-4 mr-1" />
+                                  Return to Pool
+                                </Button>
+                              )}
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                  {data?.total === 0 && (
+                    <div className="py-8 text-center text-sm text-muted-foreground">
+                      No prize cards found
+                    </div>
+                  )}
+                </div>
+
+                {/* Mobile Card View */}
+                <div className="md:hidden space-y-3">
+                  {data?.cards?.map((card: any) => (
+                    <Card key={card.id} className="p-4">
+                      <div className="space-y-3">
+                        <div className="flex items-start justify-between">
+                          <div className="space-y-1">
+                            <div className="font-mono text-sm font-medium">
+                              {card.cardNumber || `Card #${card.adscardCardId}`}
+                            </div>
+                            <div className="text-xs text-muted-foreground">
+                              {card.comment || '—'}
+                            </div>
+                          </div>
                           <Badge variant={card.status === EPrizeCardStatus.Available ? 'default' : card.status === EPrizeCardStatus.Reserved ? 'secondary' : 'outline'}>
                             {card.status}
                           </Badge>
-                        </TableCell>
-                        <TableCell className="text-xs text-muted-foreground">
-                          {new Date(card.createdAt).toLocaleDateString()}
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex gap-2">
-                            {card.status === EPrizeCardStatus.Available && (
-                              <>
-                                <Button
-                                  size="sm"
-                                  variant="default"
-                                  onClick={() => openGiveCardDialog(card.id)}
-                                  disabled={giveCard.isPending}
-                                >
-                                  <Gift className="h-4 w-4 mr-1" />
-                                  Give to User
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  variant="destructive"
-                                  onClick={() => handleRemove(card.id)}
-                                  disabled={removeCard.isPending}
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
-                              </>
-                            )}
-                            {(card.status === EPrizeCardStatus.Distributed || card.status === EPrizeCardStatus.Reserved) && (
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-2 text-sm">
+                          <div>
+                            <div className="text-xs text-muted-foreground">Balance</div>
+                            <div className="font-medium">${card.balance?.toFixed(2) || '0.00'} {card.currency || 'USD'}</div>
+                          </div>
+                          <div>
+                            <div className="text-xs text-muted-foreground">Added</div>
+                            <div className="font-medium">{new Date(card.createdAt).toLocaleDateString()}</div>
+                          </div>
+                        </div>
+
+                        <div className="flex gap-2 pt-2">
+                          {card.status === EPrizeCardStatus.Available && (
+                            <>
                               <Button
                                 size="sm"
-                                variant="outline"
-                                onClick={() => handleReturn(card.id)}
-                                disabled={returnCard.isPending}
+                                variant="default"
+                                className="flex-1"
+                                onClick={() => openGiveCardDialog(card.id)}
+                                disabled={giveCard.isPending}
                               >
-                                <RotateCcw className="h-4 w-4 mr-1" />
-                                Return to Pool
+                                <Gift className="h-4 w-4 mr-1" />
+                                Give
                               </Button>
-                            )}
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                      );
-                    })}
-                  </TableBody>
-                </Table>
-                {data?.total === 0 && (
-                  <div className="py-8 text-center text-sm text-muted-foreground">
-                    No prize cards found
-                  </div>
-                )}
-              </div>
+                              <Button
+                                size="sm"
+                                variant="destructive"
+                                onClick={() => handleRemove(card.id)}
+                                disabled={removeCard.isPending}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </>
+                          )}
+                          {(card.status === EPrizeCardStatus.Distributed || card.status === EPrizeCardStatus.Reserved) && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="w-full"
+                              onClick={() => handleReturn(card.id)}
+                              disabled={returnCard.isPending}
+                            >
+                              <RotateCcw className="h-4 w-4 mr-1" />
+                              Return to Pool
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    </Card>
+                  ))}
+                  {data?.total === 0 && (
+                    <div className="py-8 text-center text-sm text-muted-foreground">
+                      No prize cards found
+                    </div>
+                  )}
+                </div>
+              </>
             )}
 
             {data && data.total > 0 && (
