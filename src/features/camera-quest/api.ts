@@ -265,6 +265,7 @@ export const useManuallyGiveCard = () => {
         message: string;
         userCard: any;
         prizeCard: PrizeCard;
+        user: any;
       }>({
         url: `${BASE_URL}/cards/manual-give`,
         method: 'POST',
@@ -272,7 +273,7 @@ export const useManuallyGiveCard = () => {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
-        data,
+        data: { userIdOrEmail: data.userId, prizeCardId: data.prizeCardId },
       });
       return response;
     },
@@ -285,6 +286,41 @@ export const useManuallyGiveCard = () => {
     onError: (error: any) => {
       toast.error(error?.response?.data?.message || 'Failed to give card to user');
     },
+  });
+};
+
+// Search users
+export const useSearchUsers = (query: string) => {
+  const { getAccessToken } = useAppAuth();
+
+  return useQuery({
+    queryKey: ['camera-quest', 'search-users', query],
+    queryFn: async () => {
+      if (!query || query.length < 2) {
+        return { users: [], total: 0 };
+      }
+
+      const token = await getAccessToken();
+      const response = await orvalMutator<{
+        success: boolean;
+        users: Array<{
+          id: number;
+          email: string | null;
+          firstName: string | null;
+          lastName: string | null;
+          username: string | null;
+        }>;
+        total: number;
+      }>({
+        url: `${BASE_URL}/users/search?q=${encodeURIComponent(query)}&limit=20`,
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      return response;
+    },
+    enabled: query.length >= 2,
   });
 };
 

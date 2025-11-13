@@ -1,15 +1,18 @@
-import { useState } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Plus, Trash2, Search, RotateCcw, Gift } from 'lucide-react';
-import { usePrizeCards, useRemoveCardFromPool, useAvailableCards, useAddCardToPool, useReturnCardToPool, useManuallyGiveCard } from '../api';
+import { Loader2, Plus, Trash2, Search, RotateCcw, Gift, Check, ChevronsUpDown } from 'lucide-react';
+import { usePrizeCards, useRemoveCardFromPool, useAvailableCards, useAddCardToPool, useReturnCardToPool, useManuallyGiveCard, useSearchUsers } from '../api';
 import { EPrizeCardStatus } from '../types';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { cn } from '@/lib/utils';
 
 export const CameraQuestPrizeCards = () => {
   const [status, setStatus] = useState<EPrizeCardStatus | undefined>();
@@ -18,14 +21,27 @@ export const CameraQuestPrizeCards = () => {
   const [availableSearch, setAvailableSearch] = useState('');
   const [giveCardDialogOpen, setGiveCardDialogOpen] = useState(false);
   const [selectedCardForGive, setSelectedCardForGive] = useState<number | null>(null);
-  const [userId, setUserId] = useState('');
+  const [selectedUser, setSelectedUser] = useState<{ id: number; label: string } | null>(null);
+  const [userSearchQuery, setUserSearchQuery] = useState('');
+  const [comboboxOpen, setComboboxOpen] = useState(false);
 
   const { data, isLoading, refetch } = usePrizeCards({ status, search, limit: 100 });
   const { data: availableData, isLoading: availableLoading } = useAvailableCards({ search: availableSearch, limit: 50 });
+  const { data: usersData, isLoading: usersLoading } = useSearchUsers(userSearchQuery);
   const removeCard = useRemoveCardFromPool();
   const addCard = useAddCardToPool();
   const returnCard = useReturnCardToPool();
   const giveCard = useManuallyGiveCard();
+
+  const userOptions = useMemo(() => {
+    if (!usersData?.users) return [];
+    return usersData.users.map((u) => ({
+      id: u.id,
+      label: u.email || u.username || `User #${u.id}`,
+      firstName: u.firstName,
+      lastName: u.lastName,
+    }));
+  }, [usersData]);
 
   const handleRemove = async (id: number) => {
     if (confirm('Remove this card from prize pool?')) {
@@ -49,26 +65,23 @@ export const CameraQuestPrizeCards = () => {
 
   const openGiveCardDialog = (cardId: number) => {
     setSelectedCardForGive(cardId);
-    setUserId('');
+    setSelectedUser(null);
+    setUserSearchQuery('');
     setGiveCardDialogOpen(true);
   };
 
   const handleGiveCard = async () => {
-    if (!userId || !selectedCardForGive) return;
-
-    const userIdNum = parseInt(userId, 10);
-    if (isNaN(userIdNum)) {
-      return; // Invalid user ID
-    }
+    if (!selectedUser || !selectedCardForGive) return;
 
     await giveCard.mutateAsync({
-      userId: userIdNum,
+      userId: selectedUser.id,
       prizeCardId: selectedCardForGive,
     });
 
     setGiveCardDialogOpen(false);
     setSelectedCardForGive(null);
-    setUserId('');
+    setSelectedUser(null);
+    setUserSearchQuery('');
     void refetch();
   };
 
@@ -271,24 +284,78 @@ export const CameraQuestPrizeCards = () => {
           <DialogHeader>
             <DialogTitle>Give Card to User</DialogTitle>
             <DialogDescription>
-              Enter the User ID to manually give this card to a user
+              Search and select a user to manually give this card to
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="userId">User ID</Label>
-              <Input
-                id="userId"
-                type="number"
-                placeholder="Enter user ID (e.g., 13)"
-                value={userId}
-                onChange={(e) => setUserId(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    void handleGiveCard();
-                  }
-                }}
-              />
+              <Label>User</Label>
+              <Popover open={comboboxOpen} onOpenChange={setComboboxOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    role="combobox"
+                    aria-expanded={comboboxOpen}
+                    className="w-full justify-between"
+                  >
+                    {selectedUser ? selectedUser.label : "Search users..."}
+                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-full p-0">
+                  <Command>
+                    <CommandInput
+                      placeholder="Search by email, name, or ID..."
+                      value={userSearchQuery}
+                      onValueChange={setUserSearchQuery}
+                    />
+                    <CommandList>
+                      {usersLoading && (
+                        <div className="flex items-center justify-center py-4">
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        </div>
+                      )}
+                      {!usersLoading && userOptions.length === 0 && userSearchQuery.length >= 2 && (
+                        <CommandEmpty>No users found.</CommandEmpty>
+                      )}
+                      {!usersLoading && userSearchQuery.length < 2 && (
+                        <div className="py-6 text-center text-sm text-muted-foreground">
+                          Type at least 2 characters to search
+                        </div>
+                      )}
+                      {!usersLoading && userOptions.length > 0 && (
+                        <CommandGroup>
+                          {userOptions.map((user) => (
+                            <CommandItem
+                              key={user.id}
+                              value={user.label}
+                              onSelect={() => {
+                                setSelectedUser(user);
+                                setComboboxOpen(false);
+                              }}
+                            >
+                              <Check
+                                className={cn(
+                                  "mr-2 h-4 w-4",
+                                  selectedUser?.id === user.id ? "opacity-100" : "opacity-0"
+                                )}
+                              />
+                              <div>
+                                <div className="font-medium">{user.label}</div>
+                                {user.firstName && (
+                                  <div className="text-xs text-muted-foreground">
+                                    {user.firstName} {user.lastName || ''}
+                                  </div>
+                                )}
+                              </div>
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      )}
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
             </div>
             <div className="flex justify-end gap-2">
               <Button
@@ -299,7 +366,7 @@ export const CameraQuestPrizeCards = () => {
               </Button>
               <Button
                 onClick={() => void handleGiveCard()}
-                disabled={!userId || giveCard.isPending}
+                disabled={!selectedUser || giveCard.isPending}
               >
                 {giveCard.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Give Card
