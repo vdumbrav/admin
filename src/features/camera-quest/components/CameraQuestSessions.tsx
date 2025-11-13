@@ -4,19 +4,27 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Loader2, Ban } from 'lucide-react';
-import { useSessions, useCancelSession } from '../api';
+import { Loader2, Ban, Gift } from 'lucide-react';
+import { useSessions, useCancelSession, useManuallyGiveCard } from '../api';
 import { ECameraQuestSessionStatus } from '../types';
 
 export const CameraQuestSessions = () => {
   const [status, setStatus] = useState<ECameraQuestSessionStatus | undefined>();
   const { data, isLoading, refetch } = useSessions({ status, limit: 100 });
   const cancelSession = useCancelSession();
+  const giveCard = useManuallyGiveCard();
 
   const handleCancel = async (id: number) => {
     const reason = prompt('Reason for cancellation (optional):');
     if (reason !== null) {
       await cancelSession.mutateAsync({ id, data: { reason: reason || undefined } });
+      void refetch();
+    }
+  };
+
+  const handleGiveCard = async (userId: number) => {
+    if (confirm(`Give a card to User #${userId}?`)) {
+      await giveCard.mutateAsync({ userId });
       void refetch();
     }
   };
@@ -107,17 +115,31 @@ export const CameraQuestSessions = () => {
                         {new Date(session.startedAt).toLocaleString()}
                       </TableCell>
                       <TableCell>
-                        {(session.status === ECameraQuestSessionStatus.Active ||
-                          session.status === ECameraQuestSessionStatus.Playing) && (
-                          <Button
-                            size="sm"
-                            variant="destructive"
-                            onClick={() => handleCancel(session.id)}
-                            disabled={cancelSession.isPending}
-                          >
-                            <Ban className="h-4 w-4" />
-                          </Button>
-                        )}
+                        <div className="flex gap-2">
+                          {(session.status === ECameraQuestSessionStatus.Active ||
+                            session.status === ECameraQuestSessionStatus.Playing) && (
+                            <>
+                              <Button
+                                size="sm"
+                                variant="default"
+                                onClick={() => handleGiveCard(session.userId)}
+                                disabled={giveCard.isPending}
+                                title="Give card to this user"
+                              >
+                                <Gift className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="destructive"
+                                onClick={() => handleCancel(session.id)}
+                                disabled={cancelSession.isPending}
+                                title="Cancel session"
+                              >
+                                <Ban className="h-4 w-4" />
+                              </Button>
+                            </>
+                          )}
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}
