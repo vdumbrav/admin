@@ -1,6 +1,5 @@
 import React from 'react';
 import { useAuth } from 'react-oidc-context';
-import { toast } from 'sonner';
 import { logError } from '@/utils/log';
 import { hasAdminRoleFromUser, hasAllowedRoleFromUser, hasSupportRoleFromUser } from './roles';
 import type { AuthResult } from './types';
