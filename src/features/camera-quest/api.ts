@@ -225,6 +225,38 @@ export const useRemoveCardFromPool = () => {
   });
 };
 
+export const useRefreshBalances = () => {
+  const queryClient = useQueryClient();
+  const { getAccessToken } = useAppAuth();
+
+  return useMutation({
+    mutationFn: async (cardIds: number[]) => {
+      const token = await getAccessToken();
+      const response = await orvalMutator<{
+        success: boolean;
+        balances: Record<number, number>;
+        totalCards: number;
+      }>({
+        url: `${BASE_URL}/cards/refresh-balances`,
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        data: { cardIds },
+      });
+      return response;
+    },
+    onSuccess: (data) => {
+      void queryClient.invalidateQueries({ queryKey: ['camera-quest', 'prize-cards'] });
+      toast.success(`Refreshed balances for ${data.totalCards} cards`);
+    },
+    onError: (error: any) => {
+      toast.error(error?.response?.data?.message || 'Failed to refresh balances');
+    },
+  });
+};
+
 export const useReturnCardToPool = () => {
   const queryClient = useQueryClient();
   const { getAccessToken } = useAppAuth();

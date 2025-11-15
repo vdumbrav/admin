@@ -6,8 +6,8 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Plus, Trash2, Search, RotateCcw, Gift, Check, ChevronsUpDown } from 'lucide-react';
-import { usePrizeCards, useRemoveCardFromPool, useAvailableCards, useAddCardToPool, useReturnCardToPool, useManuallyGiveCard, useSearchUsers } from '../api';
+import { Loader2, Plus, Trash2, Search, RotateCcw, Gift, Check, ChevronsUpDown, RefreshCw } from 'lucide-react';
+import { usePrizeCards, useRemoveCardFromPool, useAvailableCards, useAddCardToPool, useReturnCardToPool, useManuallyGiveCard, useSearchUsers, useRefreshBalances } from '../api';
 import { EPrizeCardStatus } from '../types';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
@@ -33,6 +33,7 @@ export const CameraQuestPrizeCards = () => {
   const addCard = useAddCardToPool();
   const returnCard = useReturnCardToPool();
   const giveCard = useManuallyGiveCard();
+  const refreshBalances = useRefreshBalances();
 
   const userOptions = useMemo(() => {
     if (!usersData?.users) return [];
@@ -86,6 +87,20 @@ export const CameraQuestPrizeCards = () => {
     void refetch();
   };
 
+  const handleRefreshBalances = async () => {
+    if (!data?.cards || data.cards.length === 0) {
+      return;
+    }
+
+    // Get all adscard card IDs from current cards
+    const cardIds = data.cards
+      .map((c: any) => c.adscardCardId)
+      .filter((id: number) => id != null);
+
+    await refreshBalances.mutateAsync(cardIds);
+    void refetch();
+  };
+
   return (
     <div className="space-y-4">
       <Card>
@@ -95,13 +110,22 @@ export const CameraQuestPrizeCards = () => {
               <CardTitle>Prize Cards Pool</CardTitle>
               <CardDescription>Manage cards available as prizes for Camera Quest</CardDescription>
             </div>
-            <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
-              <DialogTrigger asChild>
-                <Button variant="default">
-                  <Plus className="mr-2 h-4 w-4" />
-                  Add Cards
-                </Button>
-              </DialogTrigger>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                onClick={handleRefreshBalances}
+                disabled={refreshBalances.isPending || !data?.cards || data.cards.length === 0}
+              >
+                <RefreshCw className={`mr-2 h-4 w-4 ${refreshBalances.isPending ? 'animate-spin' : ''}`} />
+                Refresh Balances
+              </Button>
+              <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button variant="default">
+                    <Plus className="mr-2 h-4 w-4" />
+                    Add Cards
+                  </Button>
+                </DialogTrigger>
               <DialogContent className="max-w-2xl">
                 <DialogHeader>
                   <DialogTitle>Add Cards to Prize Pool</DialogTitle>
