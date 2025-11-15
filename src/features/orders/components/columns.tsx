@@ -113,8 +113,30 @@ export const createColumns = ({
   {
     accessorKey: 'userId',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="User ID" />
+      <DataTableColumnHeader column={column} title="User" />
     ),
+    cell: ({ row }) => {
+      const order = row.original;
+      const userId = row.getValue('userId') as number;
+      const userEmail = order.userEmail || 'No email';
+      const userName = order.userName || `User ${userId}`;
+
+      return (
+        <div>
+          <a
+            href={`/users/${userId}`}
+            className="text-sm font-medium text-blue-600 hover:text-blue-800 hover:underline"
+            onClick={(e) => {
+              e.preventDefault();
+              window.location.href = `/users/${userId}`;
+            }}
+          >
+            {userName}
+          </a>
+          <p className="text-xs text-muted-foreground">{userEmail}</p>
+        </div>
+      );
+    },
   },
   {
     accessorKey: 'cardNumber',

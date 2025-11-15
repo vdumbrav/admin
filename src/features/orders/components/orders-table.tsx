@@ -28,6 +28,7 @@ import {
 import { DataTablePagination } from '@/components/table/data-table-pagination';
 import type { CardOrder } from '../types';
 import { createColumns } from './columns';
+import { useCancelOrder } from '../api/admin-orders';
 
 interface OrdersTableProps {
   orders: CardOrder[];
@@ -40,14 +41,24 @@ export function OrdersTable({ orders }: OrdersTableProps) {
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [globalFilter, setGlobalFilter] = useState('');
 
+  const cancelOrderMutation = useCancelOrder();
+
   const handleRetry = (order: CardOrder) => {
     console.log('Retry order:', order.id);
     // TODO: Implement retry API call
   };
 
-  const handleCancel = (order: CardOrder) => {
-    console.log('Cancel order:', order.id);
-    // TODO: Implement cancel API call
+  const handleCancel = async (order: CardOrder) => {
+    if (!window.confirm(`Are you sure you want to cancel order #${order.id}?`)) {
+      return;
+    }
+
+    try {
+      await cancelOrderMutation.mutateAsync(order.id);
+    } catch (error) {
+      // Error already handled by mutation's onError
+      console.error('Failed to cancel order:', error);
+    }
   };
 
   const columns = createColumns({

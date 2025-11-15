@@ -1,4 +1,8 @@
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAdminStatisticsControllerGetRecentOrders } from '@/lib/api/generated/admin-statistics/admin-statistics';
+import { orvalMutator } from '@/lib/api/client/orvalMutator';
+import { useAppAuth } from '@/auth/hooks';
+import { toast } from 'sonner';
 import type { CardOrder } from '../types';
 
 /**
@@ -45,4 +49,38 @@ export const useAdminOrders = () => {
     error,
     total: orders.length,
   };
+};
+
+/**
+ * Hook to cancel an order (admin only)
+ */
+export const useCancelOrder = () => {
+  const queryClient = useQueryClient();
+  const { getAccessToken } = useAppAuth();
+
+  return useMutation({
+    mutationFn: async (orderId: number) => {
+      const token = await getAccessToken();
+      const response = await orvalMutator<{
+        success: boolean;
+        message: string;
+        orderId: number;
+      }>({
+        url: `/admin/statistics/cancel-order/${orderId}`,
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      return response;
+    },
+    onSuccess: (data) => {
+      void queryClient.invalidateQueries({ queryKey: ['admin-statistics', 'recent-orders'] });
+      toast.success(data.message || 'Order cancelled successfully');
+    },
+    onError: (error: any) => {
+      const errorMessage = error?.response?.data?.message || 'Failed to cancel order';
+      toast.error(errorMessage);
+    },
+  });
 };

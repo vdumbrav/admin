@@ -11,6 +11,8 @@ export type OrderStatus =
 export interface CardOrder {
   id: number;
   userId: number;
+  userEmail?: string;
+  userName?: string;
   orderType: OrderType;
   status: OrderStatus;
   amount?: number;
