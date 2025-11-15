@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { Link } from '@tanstack/react-router';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -220,7 +221,13 @@ export const CameraQuestPrizeCards = () => {
                           <TableCell className="text-sm">
                             {card.distributedToUser ? (
                               <div>
-                                <div className="font-medium">{card.distributedToUser.email}</div>
+                                <Link
+                                  to="/users/$userId"
+                                  params={{ userId: card.distributedToUser.id.toString() }}
+                                  className="font-medium text-primary hover:underline"
+                                >
+                                  {card.distributedToUser.email}
+                                </Link>
                                 {(card.distributedToUser.firstName || card.distributedToUser.lastName) && (
                                   <div className="text-xs text-muted-foreground">
                                     {card.distributedToUser.firstName} {card.distributedToUser.lastName}
