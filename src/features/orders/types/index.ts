@@ -1,6 +1,8 @@
 export type OrderType = 'card_creation' | 'card_topup';
 export type OrderStatus =
+  | 'draft'
   | 'pending'
+  | 'confirmed'
   | 'processing'
   | 'completed'
   | 'failed'

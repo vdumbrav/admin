@@ -79,7 +79,9 @@ export function OrdersTable({ orders }: OrdersTableProps) {
 
   const statusFilter = (columnFilters.find((f) => f.id === 'status')
     ?.value as string[]) || [
+    'draft',
     'pending',
+    'confirmed',
     'processing',
     'completed',
     'failed',
@@ -110,15 +112,17 @@ export function OrdersTable({ orders }: OrdersTableProps) {
             <SelectValue placeholder="Filter by status" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="pending,processing,completed,failed,cancelled">
+            <SelectItem value="draft,pending,confirmed,processing,completed,failed,cancelled">
               All Statuses
             </SelectItem>
+            <SelectItem value="draft">Draft Only</SelectItem>
             <SelectItem value="pending">Pending Only</SelectItem>
+            <SelectItem value="confirmed">Confirmed Only</SelectItem>
             <SelectItem value="processing">Processing Only</SelectItem>
             <SelectItem value="completed">Completed Only</SelectItem>
             <SelectItem value="failed">Failed Only</SelectItem>
             <SelectItem value="cancelled">Cancelled Only</SelectItem>
-            <SelectItem value="pending,processing">Active Orders</SelectItem>
+            <SelectItem value="draft,pending,confirmed,processing">Active Orders</SelectItem>
           </SelectContent>
         </Select>
 

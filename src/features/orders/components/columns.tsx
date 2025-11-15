@@ -34,10 +34,20 @@ const orderTypeConfig = {
 };
 
 const statusConfig = {
+  draft: {
+    label: 'Draft',
+    variant: 'secondary' as const,
+    color: 'text-gray-500',
+  },
   pending: {
     label: 'Pending',
     variant: 'secondary' as const,
     color: 'text-gray-600',
+  },
+  confirmed: {
+    label: 'Confirmed',
+    variant: 'default' as const,
+    color: 'text-blue-500',
   },
   processing: {
     label: 'Processing',
@@ -165,7 +175,11 @@ export const createColumns = ({
     ),
     cell: ({ row }) => {
       const status = row.getValue('status') as CardOrder['status'];
-      const config = statusConfig[status];
+      const config = statusConfig[status] || {
+        label: status,
+        variant: 'secondary' as const,
+        color: 'text-gray-600',
+      };
 
       return <Badge variant={config.variant}>{config.label}</Badge>;
     },
