@@ -75,7 +75,7 @@ export const useCancelOrder = () => {
       return response;
     },
     onSuccess: (data) => {
-      void queryClient.invalidateQueries({ queryKey: ['admin-statistics', 'recent-orders'] });
+      void queryClient.invalidateQueries({ queryKey: ['admin', 'statistics', 'recent-orders'] });
       toast.success(data.message || 'Order cancelled successfully');
     },
     onError: (error: any) => {
