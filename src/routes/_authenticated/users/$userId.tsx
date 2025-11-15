@@ -79,9 +79,9 @@ import {
   useUpdateCameraQuestAccess,
 } from '@/features/users/api/admin-users';
 import { useAvailableCards, useManuallyGiveCard } from '@/features/camera-quest/api';
-import { EPrizeCardStatus } from '@/features/camera-quest/types';
 import { useState } from 'react';
 import { Switch } from '@/components/ui/switch';
+import { cn } from '@/lib/utils';
 
 export const Route = createFileRoute('/_authenticated/users/$userId')({
   component: UserDetailsPage,
@@ -106,7 +106,7 @@ function getTransactionIcon(type: string) {
 function UserDetailsPage() {
   const { userId } = Route.useParams();
   const navigate = useNavigate();
-  const { data: user, isLoading, error } = useAdminUserDetails(userId);
+  const { data: user, isLoading, error, refetch } = useAdminUserDetails(userId);
   const updateRoleMutation = useUpdateUserRole();
   const freezeCardMutation = useFreezeCard();
   const unfreezeCardMutation = useUnfreezeCard();
