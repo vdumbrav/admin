@@ -246,7 +246,7 @@ export const createColumns = ({
     cell: ({ row }) => {
       const order = row.original;
       const canRetry = order.status === 'failed';
-      const canCancel = order.status === 'pending' || order.status === 'processing';
+      const canCancel = order.status === 'draft' || order.status === 'confirmed';
 
       if (!canRetry && !canCancel) {
         return null;
