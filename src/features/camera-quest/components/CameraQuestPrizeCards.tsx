@@ -200,6 +200,7 @@ export const CameraQuestPrizeCards = () => {
                         <TableHead>Currency</TableHead>
                         <TableHead>Balance</TableHead>
                         <TableHead>Status</TableHead>
+                        <TableHead>Distributed To</TableHead>
                         <TableHead>Added</TableHead>
                         <TableHead className="w-[100px]">Actions</TableHead>
                       </TableRow>
@@ -215,6 +216,20 @@ export const CameraQuestPrizeCards = () => {
                             <Badge variant={card.status === EPrizeCardStatus.Available ? 'default' : card.status === EPrizeCardStatus.Reserved ? 'secondary' : 'outline'}>
                               {card.status}
                             </Badge>
+                          </TableCell>
+                          <TableCell className="text-sm">
+                            {card.distributedToUser ? (
+                              <div>
+                                <div className="font-medium">{card.distributedToUser.email}</div>
+                                {(card.distributedToUser.firstName || card.distributedToUser.lastName) && (
+                                  <div className="text-xs text-muted-foreground">
+                                    {card.distributedToUser.firstName} {card.distributedToUser.lastName}
+                                  </div>
+                                )}
+                              </div>
+                            ) : (
+                              <span className="text-muted-foreground">—</span>
+                            )}
                           </TableCell>
                           <TableCell className="text-xs text-muted-foreground">
                             {new Date(card.createdAt).toLocaleDateString()}
