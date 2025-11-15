@@ -184,6 +184,7 @@ export const CameraQuestPrizeCards = () => {
                 </div>
               </DialogContent>
             </Dialog>
+            </div>
           </div>
         </CardHeader>
         <CardContent>
