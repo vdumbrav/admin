@@ -78,6 +78,8 @@ import {
   useDeleteUser,
   useUpdateCameraQuestAccess,
 } from '@/features/users/api/admin-users';
+import { useAvailableCards, useManuallyGiveCard } from '@/features/camera-quest/api';
+import { EPrizeCardStatus } from '@/features/camera-quest/types';
 import { useState } from 'react';
 import { Switch } from '@/components/ui/switch';
 
@@ -154,6 +156,15 @@ function UserDetailsPage() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deleteConfirmStep, setDeleteConfirmStep] = useState(1);
   const [deleteConfirmText, setDeleteConfirmText] = useState('');
+
+  // Give prize card dialog state
+  const [giveCardDialogOpen, setGiveCardDialogOpen] = useState(false);
+  const [selectedCardId, setSelectedCardId] = useState<number | null>(null);
+  const [cardSearch, setCardSearch] = useState('');
+
+  // Camera Quest API hooks
+  const { data: availableCardsData } = useAvailableCards({ search: cardSearch, limit: 50 });
+  const giveCardMutation = useManuallyGiveCard();
 
   if (isLoading) {
     return (
@@ -415,6 +426,27 @@ function UserDetailsPage() {
     setDeleteDialogOpen(false);
     setDeleteConfirmStep(1);
     setDeleteConfirmText('');
+  };
+
+  const handleGivePrizeCard = async () => {
+    if (!selectedCardId) {
+      toast.error('Please select a card');
+      return;
+    }
+
+    try {
+      await giveCardMutation.mutateAsync({
+        prizeCardId: selectedCardId,
+        userId: user.id,
+      });
+      toast.success('Prize card given successfully');
+      setGiveCardDialogOpen(false);
+      setSelectedCardId(null);
+      setCardSearch('');
+      void refetch();
+    } catch (error) {
+      toast.error('Failed to give prize card');
+    }
   };
 
   // Calculate referral conversion and engagement metrics
@@ -1216,6 +1248,14 @@ function UserDetailsPage() {
                     <Button
                       variant="outline"
                       size="sm"
+                      onClick={() => setGiveCardDialogOpen(true)}
+                    >
+                      <IconCreditCard className="mr-2 h-4 w-4" />
+                      Give Prize Card
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
                       onClick={() => {
                         setPremiumAction('grant');
                         setPremiumDialogOpen(true);
@@ -1409,6 +1449,73 @@ function UserDetailsPage() {
               variant={premiumAction === 'revoke' ? 'destructive' : 'default'}
             >
               {(grantPremiumMutation.isPending || revokePremiumMutation.isPending) ? 'Processing...' : 'Confirm'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Give Prize Card Dialog */}
+      <Dialog open={giveCardDialogOpen} onOpenChange={setGiveCardDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Give Prize Card</DialogTitle>
+            <DialogDescription>
+              Select an available card from the prize pool to give to this user
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Search Cards</Label>
+              <Input
+                placeholder="Search by card number..."
+                value={cardSearch}
+                onChange={(e) => setCardSearch(e.target.value)}
+              />
+            </div>
+            <ScrollArea className="h-[300px] rounded-md border">
+              <div className="p-4 space-y-2">
+                {availableCardsData?.cards && availableCardsData.cards.length > 0 ? (
+                  availableCardsData.cards.map((card: any) => (
+                    <div
+                      key={card.id}
+                      className={cn(
+                        "flex items-center justify-between p-3 rounded-lg border cursor-pointer hover:bg-accent transition-colors",
+                        selectedCardId === card.id && "bg-accent border-primary"
+                      )}
+                      onClick={() => setSelectedCardId(card.id)}
+                    >
+                      <div className="flex flex-col gap-1">
+                        <p className="font-mono text-sm font-medium">{card.cardNumber}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {card.currency} • Balance: ${card.balance?.toFixed(2) || '0.00'}
+                        </p>
+                      </div>
+                      {selectedCardId === card.id && (
+                        <IconCreditCard className="h-5 w-5 text-primary" />
+                      )}
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-center py-8 text-sm text-muted-foreground">
+                    No available cards found
+                  </div>
+                )}
+              </div>
+            </ScrollArea>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => {
+              setGiveCardDialogOpen(false);
+              setSelectedCardId(null);
+              setCardSearch('');
+            }}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleGivePrizeCard}
+              disabled={!selectedCardId || giveCardMutation.isPending}
+            >
+              {giveCardMutation.isPending ? 'Giving Card...' : 'Give Card'}
             </Button>
           </DialogFooter>
         </DialogContent>
