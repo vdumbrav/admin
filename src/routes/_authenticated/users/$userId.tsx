@@ -78,8 +78,9 @@ import {
   useDeleteUser,
   useUpdateCameraQuestAccess,
 } from '@/features/users/api/admin-users';
-import { usePrizeCards, useManuallyGiveCard, useAvailableCards, useAddCardToPool } from '@/features/camera-quest/api';
+import { usePrizeCards, useManuallyGiveCard, useAvailableCards, useAddCardToPool, useReturnCardToPool } from '@/features/camera-quest/api';
 import { EPrizeCardStatus } from '@/features/camera-quest/types';
+import { IconGift, IconArrowBack, IconCheck } from '@tabler/icons-react';
 import { useState } from 'react';
 import { Switch } from '@/components/ui/switch';
 import { cn } from '@/lib/utils';
@@ -170,9 +171,26 @@ function UserDetailsPage() {
 
   // Camera Quest API hooks - use prize pool cards with 'available' status
   const { data: prizeCardsData, refetch: refetchPrizeCards } = usePrizeCards({ status: EPrizeCardStatus.Available, search: cardSearch, limit: 50 });
+  const { data: distributedCardsData, refetch: refetchDistributedCards } = usePrizeCards({ status: EPrizeCardStatus.Distributed, limit: 100 });
   const { data: availableForPoolData } = useAvailableCards({ search: addToPoolSearch, limit: 50 });
   const giveCardMutation = useManuallyGiveCard();
   const addToPoolMutation = useAddCardToPool();
+  const returnToPoolMutation = useReturnCardToPool();
+
+  // Check if a user card is a prize card (came from prize pool)
+  const isPrizeCard = (cardId: number | string) => {
+    if (!distributedCardsData?.cards) return false;
+    return distributedCardsData.cards.some((pc: any) =>
+      pc.adscardCardId === cardId || pc.distributedToUserId === user?.id
+    );
+  };
+
+  // Get prize card pool ID by adscard card id
+  const getPrizeCardPoolId = (adscardCardId: number | string) => {
+    if (!distributedCardsData?.cards) return null;
+    const prizeCard = distributedCardsData.cards.find((pc: any) => pc.adscardCardId === adscardCardId);
+    return prizeCard?.id || null;
+  };
 
   if (isLoading) {
     return (
@@ -472,6 +490,18 @@ function UserDetailsPage() {
       void refetchPrizeCards();
     } catch (error) {
       toast.error('Failed to add card to pool');
+    }
+  };
+
+  const handleReturnToPool = async (prizeCardPoolId: number, cardMasked: string) => {
+    try {
+      await returnToPoolMutation.mutateAsync(prizeCardPoolId);
+      toast.success(`Card ${cardMasked} returned to prize pool`);
+      void refetch();
+      void refetchDistributedCards();
+      void refetchPrizeCards();
+    } catch (error) {
+      toast.error('Failed to return card to pool');
     }
   };
 
@@ -808,57 +838,87 @@ function UserDetailsPage() {
             <CardContent>
               {filteredCards.length > 0 ? (
                 <div className="space-y-3">
-                  {filteredCards.map((card) => (
-                    <div key={card.id} className="flex flex-col gap-2 p-3 rounded-lg border">
-                      <div className="flex justify-between items-center">
-                        <div>
-                          <p className="font-mono text-sm font-medium">{card.cardMasked}</p>
-                          {card.cardName && <p className="text-xs text-muted-foreground">{card.cardName}</p>}
+                  {filteredCards.map((card) => {
+                    const prizeCardPoolId = getPrizeCardPoolId(card.adscardCardId);
+                    const isFromPrizePool = prizeCardPoolId !== null;
+
+                    return (
+                      <div key={card.id} className={cn(
+                        "flex flex-col gap-2 p-3 rounded-lg border",
+                        isFromPrizePool && "border-amber-500/50 bg-amber-50/30 dark:bg-amber-950/10"
+                      )}>
+                        <div className="flex justify-between items-center">
+                          <div className="flex items-center gap-2">
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <p className="font-mono text-sm font-medium">{card.cardMasked}</p>
+                                {isFromPrizePool && (
+                                  <Badge variant="outline" className="text-xs bg-amber-100 text-amber-700 border-amber-300">
+                                    <IconGift className="mr-1 h-3 w-3" />
+                                    Prize Card
+                                  </Badge>
+                                )}
+                              </div>
+                              {card.cardName && <p className="text-xs text-muted-foreground">{card.cardName}</p>}
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-sm font-bold">{card.balance} {card.currency}</p>
+                            <Badge variant={card.status === 'active' ? 'default' : card.status === 'frozen' ? 'secondary' : 'destructive'} className="text-xs capitalize">
+                              {card.status}
+                            </Badge>
+                          </div>
                         </div>
-                        <div className="text-right">
-                          <p className="text-sm font-bold">{card.balance} {card.currency}</p>
-                          <Badge variant={card.status === 'active' ? 'default' : card.status === 'frozen' ? 'secondary' : 'destructive'} className="text-xs capitalize">
-                            {card.status}
-                          </Badge>
+                        <div className="flex gap-2 flex-wrap">
+                          {card.status === 'active' && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleCardAction('freeze', card.id, card.cardMasked)}
+                              disabled={freezeCardMutation.isPending}
+                            >
+                              <IconSnowflake className="mr-1 h-3 w-3" />
+                              Freeze
+                            </Button>
+                          )}
+                          {card.status === 'frozen' && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleCardAction('unfreeze', card.id, card.cardMasked)}
+                              disabled={unfreezeCardMutation.isPending}
+                            >
+                              <IconLockOpen className="mr-1 h-3 w-3" />
+                              Unfreeze
+                            </Button>
+                          )}
+                          {card.status !== 'blocked' && (
+                            <Button
+                              size="sm"
+                              variant="destructive"
+                              onClick={() => handleCardAction('block', card.id, card.cardMasked)}
+                              disabled={blockCardMutation.isPending}
+                            >
+                              <IconLock className="mr-1 h-3 w-3" />
+                              Block
+                            </Button>
+                          )}
+                          {isFromPrizePool && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="text-amber-600 hover:text-amber-700 hover:bg-amber-50"
+                              onClick={() => handleReturnToPool(prizeCardPoolId, card.cardMasked)}
+                              disabled={returnToPoolMutation.isPending}
+                            >
+                              <IconArrowBack className="mr-1 h-3 w-3" />
+                              Return to Pool
+                            </Button>
+                          )}
                         </div>
                       </div>
-                      <div className="flex gap-2">
-                        {card.status === 'active' && (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleCardAction('freeze', card.id, card.cardMasked)}
-                            disabled={freezeCardMutation.isPending}
-                          >
-                            <IconSnowflake className="mr-1 h-3 w-3" />
-                            Freeze
-                          </Button>
-                        )}
-                        {card.status === 'frozen' && (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleCardAction('unfreeze', card.id, card.cardMasked)}
-                            disabled={unfreezeCardMutation.isPending}
-                          >
-                            <IconLockOpen className="mr-1 h-3 w-3" />
-                            Unfreeze
-                          </Button>
-                        )}
-                        {card.status !== 'blocked' && (
-                          <Button
-                            size="sm"
-                            variant="destructive"
-                            onClick={() => handleCardAction('block', card.id, card.cardMasked)}
-                            disabled={blockCardMutation.isPending}
-                          >
-                            <IconLock className="mr-1 h-3 w-3" />
-                            Block
-                          </Button>
-                        )}
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               ) : (
                 <p className="text-sm text-muted-foreground text-center py-8">
@@ -1482,85 +1542,134 @@ function UserDetailsPage() {
 
       {/* Give Prize Card Dialog */}
       <Dialog open={giveCardDialogOpen} onOpenChange={setGiveCardDialogOpen}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle>Give Prize Card</DialogTitle>
+            <DialogTitle className="flex items-center gap-2">
+              <IconGift className="h-5 w-5 text-amber-500" />
+              Give Prize Card
+            </DialogTitle>
             <DialogDescription>
-              Select an available card from the prize pool to give to this user
+              Select a card from the prize pool to give to <span className="font-medium">{user.email || user.username}</span>
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="flex items-center gap-2">
-              <div className="flex-1">
-                <Label>Search Cards in Pool</Label>
-                <Input
-                  placeholder="Search by card number..."
-                  value={cardSearch}
-                  onChange={(e) => setCardSearch(e.target.value)}
-                />
-              </div>
+
+          <div className="space-y-4">
+            {/* Search and Add */}
+            <div className="flex gap-2">
+              <Input
+                placeholder="Search cards..."
+                value={cardSearch}
+                onChange={(e) => setCardSearch(e.target.value)}
+                className="flex-1"
+              />
               <Button
                 variant="outline"
-                size="sm"
-                className="mt-5"
+                size="icon"
                 onClick={() => setAddToPoolDialogOpen(true)}
+                title="Add card to pool"
               >
-                <IconPlus className="mr-1 h-4 w-4" />
-                Add to Pool
+                <IconPlus className="h-4 w-4" />
               </Button>
             </div>
-            <ScrollArea className="h-[300px] rounded-md border">
-              <div className="p-4 space-y-2">
+
+            {/* Cards count */}
+            {prizeCardsData?.cards && prizeCardsData.cards.length > 0 && (
+              <p className="text-xs text-muted-foreground">
+                {prizeCardsData.cards.length} card{prizeCardsData.cards.length !== 1 ? 's' : ''} available in pool
+              </p>
+            )}
+
+            {/* Cards List */}
+            <ScrollArea className="h-[280px]">
+              <div className="space-y-2 pr-3">
                 {prizeCardsData?.cards && prizeCardsData.cards.length > 0 ? (
                   prizeCardsData.cards.map((card: any) => (
                     <div
                       key={card.id}
                       className={cn(
-                        "flex items-center justify-between p-3 rounded-lg border cursor-pointer hover:bg-accent transition-colors",
-                        selectedCardId === card.id && "bg-accent border-primary"
+                        "flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all",
+                        selectedCardId === card.id
+                          ? "bg-amber-50 border-amber-400 ring-1 ring-amber-400 dark:bg-amber-950/30"
+                          : "hover:bg-muted/50 hover:border-muted-foreground/30"
                       )}
                       onClick={() => setSelectedCardId(card.id)}
                     >
-                      <div className="flex flex-col gap-1">
-                        <p className="font-mono text-sm font-medium">{card.cardMasked || card.cardNumber}</p>
-                        <p className="text-xs text-muted-foreground">
-                          ID: {card.adscardCardId} • {card.currency} • Balance: ${card.balance?.toFixed(2) || '0.00'}
-                        </p>
+                      {/* Selection indicator */}
+                      <div className={cn(
+                        "w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0",
+                        selectedCardId === card.id
+                          ? "border-amber-500 bg-amber-500"
+                          : "border-muted-foreground/30"
+                      )}>
+                        {selectedCardId === card.id && (
+                          <IconCheck className="h-3 w-3 text-white" />
+                        )}
                       </div>
-                      {selectedCardId === card.id && (
-                        <IconCreditCard className="h-5 w-5 text-primary" />
-                      )}
+
+                      {/* Card info */}
+                      <div className="flex-1 min-w-0">
+                        <p className="font-mono text-sm font-semibold truncate">
+                          {card.cardMasked || card.cardNumber}
+                        </p>
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                          <span>ID: {card.adscardCardId}</span>
+                          <span>•</span>
+                          <span className="font-medium text-green-600">${card.balance?.toFixed(2) || '0.00'}</span>
+                        </div>
+                      </div>
+
+                      {/* Card icon */}
+                      <IconCreditCard className={cn(
+                        "h-5 w-5 flex-shrink-0",
+                        selectedCardId === card.id ? "text-amber-500" : "text-muted-foreground/50"
+                      )} />
                     </div>
                   ))
                 ) : (
-                  <div className="text-center py-8">
-                    <p className="text-sm text-muted-foreground mb-3">No available cards in prize pool</p>
+                  <div className="flex flex-col items-center justify-center py-12 text-center">
+                    <div className="rounded-full bg-muted p-3 mb-3">
+                      <IconCreditCard className="h-6 w-6 text-muted-foreground" />
+                    </div>
+                    <p className="text-sm font-medium mb-1">No cards in pool</p>
+                    <p className="text-xs text-muted-foreground mb-4">Add cards to the prize pool first</p>
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => setAddToPoolDialogOpen(true)}
                     >
                       <IconPlus className="mr-1 h-4 w-4" />
-                      Add Cards to Pool
+                      Add Cards
                     </Button>
                   </div>
                 )}
               </div>
             </ScrollArea>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => {
-              setGiveCardDialogOpen(false);
-              setSelectedCardId(null);
-              setCardSearch('');
-            }}>
+
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button
+              variant="ghost"
+              onClick={() => {
+                setGiveCardDialogOpen(false);
+                setSelectedCardId(null);
+                setCardSearch('');
+              }}
+            >
               Cancel
             </Button>
             <Button
               onClick={handleGivePrizeCard}
               disabled={!selectedCardId || giveCardMutation.isPending}
+              className="bg-amber-500 hover:bg-amber-600 text-white"
             >
-              {giveCardMutation.isPending ? 'Giving Card...' : 'Give Card'}
+              {giveCardMutation.isPending ? (
+                <>Giving...</>
+              ) : (
+                <>
+                  <IconGift className="mr-1 h-4 w-4" />
+                  Give Card
+                </>
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -1568,66 +1677,111 @@ function UserDetailsPage() {
 
       {/* Add Card to Pool Dialog */}
       <Dialog open={addToPoolDialogOpen} onOpenChange={setAddToPoolDialogOpen}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle>Add Card to Prize Pool</DialogTitle>
+            <DialogTitle className="flex items-center gap-2">
+              <IconPlus className="h-5 w-5 text-primary" />
+              Add Card to Prize Pool
+            </DialogTitle>
             <DialogDescription>
-              Select a card from ADScard to add to the prize pool
+              Select an ADScard card to add to the prize pool for distribution
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label>Search ADScard Cards</Label>
-              <Input
-                placeholder="Search by card number or ID..."
-                value={addToPoolSearch}
-                onChange={(e) => setAddToPoolSearch(e.target.value)}
-              />
-            </div>
-            <ScrollArea className="h-[300px] rounded-md border">
-              <div className="p-4 space-y-2">
+
+          <div className="space-y-4">
+            <Input
+              placeholder="Search cards..."
+              value={addToPoolSearch}
+              onChange={(e) => setAddToPoolSearch(e.target.value)}
+            />
+
+            {availableForPoolData?.cards && availableForPoolData.cards.length > 0 && (
+              <p className="text-xs text-muted-foreground">
+                {availableForPoolData.cards.length} card{availableForPoolData.cards.length !== 1 ? 's' : ''} available
+              </p>
+            )}
+
+            <ScrollArea className="h-[280px]">
+              <div className="space-y-2 pr-3">
                 {availableForPoolData?.cards && availableForPoolData.cards.length > 0 ? (
-                  availableForPoolData.cards.map((card: any) => (
-                    <div
-                      key={card.id || card.adscardCardId}
-                      className={cn(
-                        "flex items-center justify-between p-3 rounded-lg border cursor-pointer hover:bg-accent transition-colors",
-                        selectedCardToAdd === (card.adscardCardId || card.id) && "bg-accent border-primary"
-                      )}
-                      onClick={() => setSelectedCardToAdd(card.adscardCardId || card.id)}
-                    >
-                      <div className="flex flex-col gap-1">
-                        <p className="font-mono text-sm font-medium">{card.cardMasked || card.cardNumber}</p>
-                        <p className="text-xs text-muted-foreground">
-                          ADScard ID: {card.adscardCardId || card.id} • {card.currency} • Balance: ${card.balance?.toFixed(2) || '0.00'}
-                        </p>
+                  availableForPoolData.cards.map((card: any) => {
+                    const cardId = card.adscardCardId || card.id;
+                    return (
+                      <div
+                        key={cardId}
+                        className={cn(
+                          "flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all",
+                          selectedCardToAdd === cardId
+                            ? "bg-primary/5 border-primary ring-1 ring-primary"
+                            : "hover:bg-muted/50 hover:border-muted-foreground/30"
+                        )}
+                        onClick={() => setSelectedCardToAdd(cardId)}
+                      >
+                        <div className={cn(
+                          "w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0",
+                          selectedCardToAdd === cardId
+                            ? "border-primary bg-primary"
+                            : "border-muted-foreground/30"
+                        )}>
+                          {selectedCardToAdd === cardId && (
+                            <IconCheck className="h-3 w-3 text-white" />
+                          )}
+                        </div>
+
+                        <div className="flex-1 min-w-0">
+                          <p className="font-mono text-sm font-semibold truncate">
+                            {card.cardMasked || card.cardNumber}
+                          </p>
+                          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                            <span>ID: {cardId}</span>
+                            <span>•</span>
+                            <span className="font-medium text-green-600">${card.balance?.toFixed(2) || '0.00'}</span>
+                          </div>
+                        </div>
+
+                        <IconCreditCard className={cn(
+                          "h-5 w-5 flex-shrink-0",
+                          selectedCardToAdd === cardId ? "text-primary" : "text-muted-foreground/50"
+                        )} />
                       </div>
-                      {selectedCardToAdd === (card.adscardCardId || card.id) && (
-                        <IconCreditCard className="h-5 w-5 text-primary" />
-                      )}
-                    </div>
-                  ))
+                    );
+                  })
                 ) : (
-                  <div className="text-center py-8 text-sm text-muted-foreground">
-                    No available cards found in ADScard
+                  <div className="flex flex-col items-center justify-center py-12 text-center">
+                    <div className="rounded-full bg-muted p-3 mb-3">
+                      <IconCreditCard className="h-6 w-6 text-muted-foreground" />
+                    </div>
+                    <p className="text-sm font-medium mb-1">No cards available</p>
+                    <p className="text-xs text-muted-foreground">All cards are already in the pool or assigned</p>
                   </div>
                 )}
               </div>
             </ScrollArea>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => {
-              setAddToPoolDialogOpen(false);
-              setSelectedCardToAdd(null);
-              setAddToPoolSearch('');
-            }}>
+
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button
+              variant="ghost"
+              onClick={() => {
+                setAddToPoolDialogOpen(false);
+                setSelectedCardToAdd(null);
+                setAddToPoolSearch('');
+              }}
+            >
               Cancel
             </Button>
             <Button
               onClick={handleAddToPool}
               disabled={!selectedCardToAdd || addToPoolMutation.isPending}
             >
-              {addToPoolMutation.isPending ? 'Adding...' : 'Add to Pool'}
+              {addToPoolMutation.isPending ? (
+                <>Adding...</>
+              ) : (
+                <>
+                  <IconPlus className="mr-1 h-4 w-4" />
+                  Add to Pool
+                </>
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>
