@@ -177,8 +177,8 @@ function UserDetailsPage() {
   const addToPoolMutation = useAddCardToPool();
   const returnToPoolMutation = useReturnCardToPool();
 
-  // Get prize card pool ID by user card id (searches distributed cards for this user)
-  const getPrizeCardPoolId = (userCardId: number) => {
+  // Get prize card pool ID (searches distributed cards for this user)
+  const getPrizeCardPoolId = () => {
     if (!distributedCardsData?.cards || !user) return null;
     // Find prize card that was distributed to this user
     const prizeCard = distributedCardsData.cards.find((pc: any) =>
@@ -834,7 +834,7 @@ function UserDetailsPage() {
               {filteredCards.length > 0 ? (
                 <div className="space-y-3">
                   {filteredCards.map((card) => {
-                    const prizeCardPoolId = getPrizeCardPoolId(card.id);
+                    const prizeCardPoolId = getPrizeCardPoolId();
                     const isFromPrizePool = prizeCardPoolId !== null;
 
                     return (
