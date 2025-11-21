@@ -177,18 +177,13 @@ function UserDetailsPage() {
   const addToPoolMutation = useAddCardToPool();
   const returnToPoolMutation = useReturnCardToPool();
 
-  // Check if a user card is a prize card (came from prize pool)
-  const isPrizeCard = (cardId: number | string) => {
-    if (!distributedCardsData?.cards) return false;
-    return distributedCardsData.cards.some((pc: any) =>
-      pc.adscardCardId === cardId || pc.distributedToUserId === user?.id
+  // Get prize card pool ID by user card id (searches distributed cards for this user)
+  const getPrizeCardPoolId = (userCardId: number) => {
+    if (!distributedCardsData?.cards || !user) return null;
+    // Find prize card that was distributed to this user
+    const prizeCard = distributedCardsData.cards.find((pc: any) =>
+      pc.distributedToUserId === user.id
     );
-  };
-
-  // Get prize card pool ID by adscard card id
-  const getPrizeCardPoolId = (adscardCardId: number | string) => {
-    if (!distributedCardsData?.cards) return null;
-    const prizeCard = distributedCardsData.cards.find((pc: any) => pc.adscardCardId === adscardCardId);
     return prizeCard?.id || null;
   };
 
@@ -839,7 +834,7 @@ function UserDetailsPage() {
               {filteredCards.length > 0 ? (
                 <div className="space-y-3">
                   {filteredCards.map((card) => {
-                    const prizeCardPoolId = getPrizeCardPoolId(card.adscardCardId);
+                    const prizeCardPoolId = getPrizeCardPoolId(card.id);
                     const isFromPrizePool = prizeCardPoolId !== null;
 
                     return (
@@ -1549,7 +1544,7 @@ function UserDetailsPage() {
               Give Prize Card
             </DialogTitle>
             <DialogDescription>
-              Select a card from the prize pool to give to <span className="font-medium">{user.email || user.username}</span>
+              Select a card from the prize pool to give to <span className="font-medium">{user.email || user.nickname}</span>
             </DialogDescription>
           </DialogHeader>
 
