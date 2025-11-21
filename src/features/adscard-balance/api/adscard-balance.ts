@@ -6,8 +6,6 @@ import type {
   TrcTopupStatus,
   BalanceInfo,
   CryptoTopupRequest,
-  CryptoTopupResponse,
-  CryptoTopupStatusResponse,
 } from '../types/api';
 
 const ADSCARD_API_BASE = '/adscard/balance';
