@@ -12,7 +12,6 @@ import {
   IconPercentage,
   IconWallet,
   IconSettings,
-  IconCheck,
   IconLoader2,
   IconRefresh,
   IconAlertTriangle,
@@ -22,7 +21,6 @@ import {
   updateBalanceSettings,
   getBalanceStatus,
   triggerAutoTopup,
-  type BalanceSettingsData,
   type UpdateBalanceSettingsRequest,
 } from '../api/adscard-balance';
 
