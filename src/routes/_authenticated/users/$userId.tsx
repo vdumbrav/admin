@@ -79,6 +79,7 @@ import {
   useUpdateCameraQuestAccess,
 } from '@/features/users/api/admin-users';
 import { usePrizeCards, useManuallyGiveCard, useAvailableCards, useAddCardToPool } from '@/features/camera-quest/api';
+import { EPrizeCardStatus } from '@/features/camera-quest/types';
 import { useState } from 'react';
 import { Switch } from '@/components/ui/switch';
 import { cn } from '@/lib/utils';
@@ -168,7 +169,7 @@ function UserDetailsPage() {
   const [selectedCardToAdd, setSelectedCardToAdd] = useState<number | null>(null);
 
   // Camera Quest API hooks - use prize pool cards with 'available' status
-  const { data: prizeCardsData, refetch: refetchPrizeCards } = usePrizeCards({ status: 'available', search: cardSearch, limit: 50 });
+  const { data: prizeCardsData, refetch: refetchPrizeCards } = usePrizeCards({ status: EPrizeCardStatus.Available, search: cardSearch, limit: 50 });
   const { data: availableForPoolData } = useAvailableCards({ search: addToPoolSearch, limit: 50 });
   const giveCardMutation = useManuallyGiveCard();
   const addToPoolMutation = useAddCardToPool();
