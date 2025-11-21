@@ -76,25 +76,37 @@ export async function getBalanceInfo(): Promise<BalanceInfo> {
 
 /**
  * Create a new crypto topup (USDT TRC20/ERC20)
+ * Routes to the appropriate endpoint based on network
  */
 export async function createCryptoTopup(
   request: CryptoTopupRequest,
-): Promise<CryptoTopupResponse> {
-  return authenticatedMutator<CryptoTopupResponse>({
-    url: '/adscard/balance/crypto_topup',
+): Promise<TrcTopupResponse> {
+  // Route to the correct endpoint based on network
+  const endpoint = request.network === 'TRC20'
+    ? `${ADSCARD_API_BASE}/trc_topup`
+    : `${ADSCARD_API_BASE}/erc_topup`;
+
+  return authenticatedMutator<TrcTopupResponse>({
+    url: endpoint,
     method: 'POST',
-    data: request,
+    data: { amount: request.amount },
   });
 }
 
 /**
- * Get crypto topup payment status
+ * Get crypto topup list by ID (for status checking)
  */
 export async function getCryptoTopupStatus(
-  paymentId: string,
-): Promise<CryptoTopupStatusResponse> {
-  return authenticatedMutator<CryptoTopupStatusResponse>({
-    url: `/adscard/balance/crypto_topup/${paymentId}`,
-    method: 'GET',
+  topupId: string,
+  network: 'TRC20' | 'ERC20' = 'TRC20',
+): Promise<TrcListResponse> {
+  const endpoint = network === 'TRC20'
+    ? `${ADSCARD_API_BASE}/trc_list`
+    : `${ADSCARD_API_BASE}/erc_list`;
+
+  return authenticatedMutator<TrcListResponse>({
+    url: endpoint,
+    method: 'POST',
+    data: { id: parseInt(topupId, 10) },
   });
 }
