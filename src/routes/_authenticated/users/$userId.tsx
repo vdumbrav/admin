@@ -78,7 +78,7 @@ import {
   useDeleteUser,
   useUpdateCameraQuestAccess,
 } from '@/features/users/api/admin-users';
-import { useAvailableCards, useManuallyGiveCard } from '@/features/camera-quest/api';
+import { usePrizeCards, useManuallyGiveCard, useAvailableCards, useAddCardToPool } from '@/features/camera-quest/api';
 import { useState } from 'react';
 import { Switch } from '@/components/ui/switch';
 import { cn } from '@/lib/utils';
@@ -162,9 +162,16 @@ function UserDetailsPage() {
   const [selectedCardId, setSelectedCardId] = useState<number | null>(null);
   const [cardSearch, setCardSearch] = useState('');
 
-  // Camera Quest API hooks
-  const { data: availableCardsData } = useAvailableCards({ search: cardSearch, limit: 50 });
+  // Add to pool dialog state
+  const [addToPoolDialogOpen, setAddToPoolDialogOpen] = useState(false);
+  const [addToPoolSearch, setAddToPoolSearch] = useState('');
+  const [selectedCardToAdd, setSelectedCardToAdd] = useState<number | null>(null);
+
+  // Camera Quest API hooks - use prize pool cards with 'available' status
+  const { data: prizeCardsData, refetch: refetchPrizeCards } = usePrizeCards({ status: 'available', search: cardSearch, limit: 50 });
+  const { data: availableForPoolData } = useAvailableCards({ search: addToPoolSearch, limit: 50 });
   const giveCardMutation = useManuallyGiveCard();
+  const addToPoolMutation = useAddCardToPool();
 
   if (isLoading) {
     return (
@@ -444,8 +451,26 @@ function UserDetailsPage() {
       setSelectedCardId(null);
       setCardSearch('');
       void refetch();
+      void refetchPrizeCards();
     } catch (error) {
       toast.error('Failed to give prize card');
+    }
+  };
+
+  const handleAddToPool = async () => {
+    if (!selectedCardToAdd) {
+      toast.error('Please select a card to add');
+      return;
+    }
+
+    try {
+      await addToPoolMutation.mutateAsync({ adscardCardId: selectedCardToAdd });
+      toast.success('Card added to prize pool');
+      setSelectedCardToAdd(null);
+      setAddToPoolSearch('');
+      void refetchPrizeCards();
+    } catch (error) {
+      toast.error('Failed to add card to pool');
     }
   };
 
@@ -1464,18 +1489,29 @@ function UserDetailsPage() {
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label>Search Cards</Label>
-              <Input
-                placeholder="Search by card number..."
-                value={cardSearch}
-                onChange={(e) => setCardSearch(e.target.value)}
-              />
+            <div className="flex items-center gap-2">
+              <div className="flex-1">
+                <Label>Search Cards in Pool</Label>
+                <Input
+                  placeholder="Search by card number..."
+                  value={cardSearch}
+                  onChange={(e) => setCardSearch(e.target.value)}
+                />
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                className="mt-5"
+                onClick={() => setAddToPoolDialogOpen(true)}
+              >
+                <IconPlus className="mr-1 h-4 w-4" />
+                Add to Pool
+              </Button>
             </div>
             <ScrollArea className="h-[300px] rounded-md border">
               <div className="p-4 space-y-2">
-                {availableCardsData?.cards && availableCardsData.cards.length > 0 ? (
-                  availableCardsData.cards.map((card: any) => (
+                {prizeCardsData?.cards && prizeCardsData.cards.length > 0 ? (
+                  prizeCardsData.cards.map((card: any) => (
                     <div
                       key={card.id}
                       className={cn(
@@ -1485,9 +1521,9 @@ function UserDetailsPage() {
                       onClick={() => setSelectedCardId(card.id)}
                     >
                       <div className="flex flex-col gap-1">
-                        <p className="font-mono text-sm font-medium">{card.cardNumber}</p>
+                        <p className="font-mono text-sm font-medium">{card.cardMasked || card.cardNumber}</p>
                         <p className="text-xs text-muted-foreground">
-                          {card.currency} • Balance: ${card.balance?.toFixed(2) || '0.00'}
+                          ID: {card.adscardCardId} • {card.currency} • Balance: ${card.balance?.toFixed(2) || '0.00'}
                         </p>
                       </div>
                       {selectedCardId === card.id && (
@@ -1496,8 +1532,16 @@ function UserDetailsPage() {
                     </div>
                   ))
                 ) : (
-                  <div className="text-center py-8 text-sm text-muted-foreground">
-                    No available cards found
+                  <div className="text-center py-8">
+                    <p className="text-sm text-muted-foreground mb-3">No available cards in prize pool</p>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setAddToPoolDialogOpen(true)}
+                    >
+                      <IconPlus className="mr-1 h-4 w-4" />
+                      Add Cards to Pool
+                    </Button>
                   </div>
                 )}
               </div>
@@ -1516,6 +1560,73 @@ function UserDetailsPage() {
               disabled={!selectedCardId || giveCardMutation.isPending}
             >
               {giveCardMutation.isPending ? 'Giving Card...' : 'Give Card'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Card to Pool Dialog */}
+      <Dialog open={addToPoolDialogOpen} onOpenChange={setAddToPoolDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Add Card to Prize Pool</DialogTitle>
+            <DialogDescription>
+              Select a card from ADScard to add to the prize pool
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Search ADScard Cards</Label>
+              <Input
+                placeholder="Search by card number or ID..."
+                value={addToPoolSearch}
+                onChange={(e) => setAddToPoolSearch(e.target.value)}
+              />
+            </div>
+            <ScrollArea className="h-[300px] rounded-md border">
+              <div className="p-4 space-y-2">
+                {availableForPoolData?.cards && availableForPoolData.cards.length > 0 ? (
+                  availableForPoolData.cards.map((card: any) => (
+                    <div
+                      key={card.id || card.adscardCardId}
+                      className={cn(
+                        "flex items-center justify-between p-3 rounded-lg border cursor-pointer hover:bg-accent transition-colors",
+                        selectedCardToAdd === (card.adscardCardId || card.id) && "bg-accent border-primary"
+                      )}
+                      onClick={() => setSelectedCardToAdd(card.adscardCardId || card.id)}
+                    >
+                      <div className="flex flex-col gap-1">
+                        <p className="font-mono text-sm font-medium">{card.cardMasked || card.cardNumber}</p>
+                        <p className="text-xs text-muted-foreground">
+                          ADScard ID: {card.adscardCardId || card.id} • {card.currency} • Balance: ${card.balance?.toFixed(2) || '0.00'}
+                        </p>
+                      </div>
+                      {selectedCardToAdd === (card.adscardCardId || card.id) && (
+                        <IconCreditCard className="h-5 w-5 text-primary" />
+                      )}
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-center py-8 text-sm text-muted-foreground">
+                    No available cards found in ADScard
+                  </div>
+                )}
+              </div>
+            </ScrollArea>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => {
+              setAddToPoolDialogOpen(false);
+              setSelectedCardToAdd(null);
+              setAddToPoolSearch('');
+            }}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleAddToPool}
+              disabled={!selectedCardToAdd || addToPoolMutation.isPending}
+            >
+              {addToPoolMutation.isPending ? 'Adding...' : 'Add to Pool'}
             </Button>
           </DialogFooter>
         </DialogContent>
