@@ -110,3 +110,98 @@ export async function getCryptoTopupStatus(
     data: { id: parseInt(topupId, 10) },
   });
 }
+
+// =====================================================
+// Admin Balance Settings API
+// =====================================================
+
+export interface BalanceSettingsData {
+  id: number;
+  minTopupAmount: number;
+  maxTopupAmount: number;
+  autoTopupEnabled: boolean;
+  autoTopupThreshold: number;
+  autoTopupAmount: number;
+  adscardFeePercent: number;
+  ourFeePercent: number;
+  minCardTopup: number;
+  defaultDailyLimit: number;
+  defaultMonthlyLimit: number;
+  maxSingleTransaction: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface UpdateBalanceSettingsRequest {
+  minTopupAmount?: number;
+  maxTopupAmount?: number;
+  autoTopupEnabled?: boolean;
+  autoTopupThreshold?: number;
+  autoTopupAmount?: number;
+  ourFeePercent?: number;
+  minCardTopup?: number;
+  defaultDailyLimit?: number;
+  defaultMonthlyLimit?: number;
+  maxSingleTransaction?: number;
+}
+
+export interface BalanceStatusData {
+  currentBalance: number;
+  autoTopupEnabled: boolean;
+  autoTopupThreshold: number;
+  autoTopupAmount: number;
+  belowThreshold: boolean;
+}
+
+const ADMIN_SETTINGS_BASE = '/admin/balance-settings';
+
+/**
+ * Get balance settings
+ */
+export async function getBalanceSettings(): Promise<{ success: boolean; data: BalanceSettingsData }> {
+  return authenticatedMutator<{ success: boolean; data: BalanceSettingsData }>({
+    url: ADMIN_SETTINGS_BASE,
+    method: 'GET',
+  });
+}
+
+/**
+ * Update balance settings
+ */
+export async function updateBalanceSettings(
+  data: UpdateBalanceSettingsRequest,
+): Promise<{ success: boolean; message: string; data: BalanceSettingsData }> {
+  return authenticatedMutator<{ success: boolean; message: string; data: BalanceSettingsData }>({
+    url: ADMIN_SETTINGS_BASE,
+    method: 'PUT',
+    data,
+  });
+}
+
+/**
+ * Get current balance status with auto-topup info
+ */
+export async function getBalanceStatus(): Promise<{ success: boolean; data: BalanceStatusData }> {
+  return authenticatedMutator<{ success: boolean; data: BalanceStatusData }>({
+    url: `${ADMIN_SETTINGS_BASE}/balance`,
+    method: 'GET',
+  });
+}
+
+/**
+ * Manually trigger auto-topup check
+ */
+export async function triggerAutoTopup(): Promise<{
+  success: boolean;
+  data: {
+    triggered: boolean;
+    currentBalance: number;
+    threshold: number;
+    message: string;
+  };
+}> {
+  return authenticatedMutator({
+    url: `${ADMIN_SETTINGS_BASE}/trigger-auto-topup`,
+    method: 'POST',
+  });
+}
