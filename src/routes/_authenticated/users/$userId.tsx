@@ -177,12 +177,12 @@ function UserDetailsPage() {
   const addToPoolMutation = useAddCardToPool();
   const returnToPoolMutation = useReturnCardToPool();
 
-  // Get prize card pool ID (searches distributed cards for this user)
-  const getPrizeCardPoolId = () => {
+  // Get prize card pool ID by matching cardMasked
+  const getPrizeCardPoolId = (cardMasked: string) => {
     if (!distributedCardsData?.cards || !user) return null;
-    // Find prize card that was distributed to this user
+    // Find prize card that matches by cardMasked and was distributed to this user
     const prizeCard = distributedCardsData.cards.find((pc: any) =>
-      pc.distributedToUserId === user.id
+      pc.cardMasked === cardMasked || pc.cardMasked?.endsWith(cardMasked.slice(-4))
     );
     return prizeCard?.id || null;
   };
@@ -834,8 +834,9 @@ function UserDetailsPage() {
               {filteredCards.length > 0 ? (
                 <div className="space-y-3">
                   {filteredCards.map((card) => {
-                    const prizeCardPoolId = getPrizeCardPoolId();
+                    const prizeCardPoolId = getPrizeCardPoolId(card.cardMasked);
                     const isFromPrizePool = prizeCardPoolId !== null;
+                    const canReturnToPool = isFromPrizePool && card.status !== 'blocked';
 
                     return (
                       <div key={card.id} className={cn(
@@ -898,7 +899,7 @@ function UserDetailsPage() {
                               Block
                             </Button>
                           )}
-                          {isFromPrizePool && (
+                          {canReturnToPool && prizeCardPoolId && (
                             <Button
                               size="sm"
                               variant="outline"
