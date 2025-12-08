@@ -114,7 +114,6 @@ export interface UserDetails {
   updatedAt: string;
   matrixId?: string;
   cardEmail?: string;
-  canAccessCameraQuest?: boolean;
 
   // Additional comprehensive data
   premiumStatus: PremiumStatus;
@@ -395,32 +394,6 @@ export const useDeleteUser = () => {
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
-    },
-  });
-};
-
-// Mutation for updating Camera Quest access
-export const useUpdateCameraQuestAccess = () => {
-  const auth = useAppAuth();
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async ({ userId, canAccess }: { userId: number; canAccess: boolean }) => {
-      const token = await auth.getAccessToken();
-
-      return orvalMutator({
-        url: `/admin/users/${userId}/camera-quest-access`,
-        method: 'PUT',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        data: { canAccess },
-      });
-    },
-    onSuccess: (_data, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['admin', 'users', variables.userId.toString(), 'details'] });
       queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
     },
   });
