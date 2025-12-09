@@ -15,6 +15,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthCallbackRouteImport } from './routes/auth/callback'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
+import { Route as AuthenticatedWalmecardBalanceIndexRouteImport } from './routes/_authenticated/walmecard-balance/index'
 import { Route as AuthenticatedUsersIndexRouteImport } from './routes/_authenticated/users/index'
 import { Route as AuthenticatedTransactionsIndexRouteImport } from './routes/_authenticated/transactions/index'
 import { Route as AuthenticatedReferralsIndexRouteImport } from './routes/_authenticated/referrals/index'
@@ -29,7 +30,6 @@ import { Route as AuthenticatedFraudIndexRouteImport } from './routes/_authentic
 import { Route as AuthenticatedDashboardIndexRouteImport } from './routes/_authenticated/dashboard/index'
 import { Route as AuthenticatedCardsIndexRouteImport } from './routes/_authenticated/cards/index'
 import { Route as AuthenticatedAnalyticsIndexRouteImport } from './routes/_authenticated/analytics/index'
-import { Route as AuthenticatedAdscardBalanceIndexRouteImport } from './routes/_authenticated/adscard-balance/index'
 import { Route as AuthenticatedUsersUserIdRouteImport } from './routes/_authenticated/users/$userId'
 import { Route as AuthenticatedQuestsNewRouteImport } from './routes/_authenticated/quests/new'
 import { Route as AuthenticatedQuestsIdRouteImport } from './routes/_authenticated/quests/$id'
@@ -74,6 +74,12 @@ const AuthenticatedProfileRoute = AuthenticatedProfileRouteImport.update({
   path: '/profile',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedWalmecardBalanceIndexRoute =
+  AuthenticatedWalmecardBalanceIndexRouteImport.update({
+    id: '/walmecard-balance/',
+    path: '/walmecard-balance/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedUsersIndexRoute = AuthenticatedUsersIndexRouteImport.update({
   id: '/users/',
   path: '/users/',
@@ -152,12 +158,6 @@ const AuthenticatedAnalyticsIndexRoute =
   AuthenticatedAnalyticsIndexRouteImport.update({
     id: '/analytics/',
     path: '/analytics/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedAdscardBalanceIndexRoute =
-  AuthenticatedAdscardBalanceIndexRouteImport.update({
-    id: '/adscard-balance/',
-    path: '/adscard-balance/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedUsersUserIdRoute =
@@ -254,7 +254,6 @@ export interface FileRoutesByFullPath {
   '/quests/$id': typeof AuthenticatedQuestsIdRoute
   '/quests/new': typeof AuthenticatedQuestsNewRouteWithChildren
   '/users/$userId': typeof AuthenticatedUsersUserIdRoute
-  '/adscard-balance': typeof AuthenticatedAdscardBalanceIndexRoute
   '/analytics': typeof AuthenticatedAnalyticsIndexRoute
   '/cards': typeof AuthenticatedCardsIndexRoute
   '/dashboard': typeof AuthenticatedDashboardIndexRoute
@@ -269,6 +268,7 @@ export interface FileRoutesByFullPath {
   '/referrals': typeof AuthenticatedReferralsIndexRoute
   '/transactions': typeof AuthenticatedTransactionsIndexRoute
   '/users': typeof AuthenticatedUsersIndexRoute
+  '/walmecard-balance': typeof AuthenticatedWalmecardBalanceIndexRoute
   '/quests/new/$preset': typeof AuthenticatedQuestsNewPresetRoute
   '/markets/categories': typeof AuthenticatedMarketsCategoriesIndexRoute
   '/markets/chains': typeof AuthenticatedMarketsChainsIndexRoute
@@ -289,7 +289,6 @@ export interface FileRoutesByTo {
   '/quests/$id': typeof AuthenticatedQuestsIdRoute
   '/quests/new': typeof AuthenticatedQuestsNewRouteWithChildren
   '/users/$userId': typeof AuthenticatedUsersUserIdRoute
-  '/adscard-balance': typeof AuthenticatedAdscardBalanceIndexRoute
   '/analytics': typeof AuthenticatedAnalyticsIndexRoute
   '/cards': typeof AuthenticatedCardsIndexRoute
   '/dashboard': typeof AuthenticatedDashboardIndexRoute
@@ -304,6 +303,7 @@ export interface FileRoutesByTo {
   '/referrals': typeof AuthenticatedReferralsIndexRoute
   '/transactions': typeof AuthenticatedTransactionsIndexRoute
   '/users': typeof AuthenticatedUsersIndexRoute
+  '/walmecard-balance': typeof AuthenticatedWalmecardBalanceIndexRoute
   '/quests/new/$preset': typeof AuthenticatedQuestsNewPresetRoute
   '/markets/categories': typeof AuthenticatedMarketsCategoriesIndexRoute
   '/markets/chains': typeof AuthenticatedMarketsChainsIndexRoute
@@ -327,7 +327,6 @@ export interface FileRoutesById {
   '/_authenticated/quests/$id': typeof AuthenticatedQuestsIdRoute
   '/_authenticated/quests/new': typeof AuthenticatedQuestsNewRouteWithChildren
   '/_authenticated/users/$userId': typeof AuthenticatedUsersUserIdRoute
-  '/_authenticated/adscard-balance/': typeof AuthenticatedAdscardBalanceIndexRoute
   '/_authenticated/analytics/': typeof AuthenticatedAnalyticsIndexRoute
   '/_authenticated/cards/': typeof AuthenticatedCardsIndexRoute
   '/_authenticated/dashboard/': typeof AuthenticatedDashboardIndexRoute
@@ -342,6 +341,7 @@ export interface FileRoutesById {
   '/_authenticated/referrals/': typeof AuthenticatedReferralsIndexRoute
   '/_authenticated/transactions/': typeof AuthenticatedTransactionsIndexRoute
   '/_authenticated/users/': typeof AuthenticatedUsersIndexRoute
+  '/_authenticated/walmecard-balance/': typeof AuthenticatedWalmecardBalanceIndexRoute
   '/_authenticated/quests/new/$preset': typeof AuthenticatedQuestsNewPresetRoute
   '/_authenticated/markets/categories/': typeof AuthenticatedMarketsCategoriesIndexRoute
   '/_authenticated/markets/chains/': typeof AuthenticatedMarketsChainsIndexRoute
@@ -365,7 +365,6 @@ export interface FileRouteTypes {
     | '/quests/$id'
     | '/quests/new'
     | '/users/$userId'
-    | '/adscard-balance'
     | '/analytics'
     | '/cards'
     | '/dashboard'
@@ -380,6 +379,7 @@ export interface FileRouteTypes {
     | '/referrals'
     | '/transactions'
     | '/users'
+    | '/walmecard-balance'
     | '/quests/new/$preset'
     | '/markets/categories'
     | '/markets/chains'
@@ -400,7 +400,6 @@ export interface FileRouteTypes {
     | '/quests/$id'
     | '/quests/new'
     | '/users/$userId'
-    | '/adscard-balance'
     | '/analytics'
     | '/cards'
     | '/dashboard'
@@ -415,6 +414,7 @@ export interface FileRouteTypes {
     | '/referrals'
     | '/transactions'
     | '/users'
+    | '/walmecard-balance'
     | '/quests/new/$preset'
     | '/markets/categories'
     | '/markets/chains'
@@ -437,7 +437,6 @@ export interface FileRouteTypes {
     | '/_authenticated/quests/$id'
     | '/_authenticated/quests/new'
     | '/_authenticated/users/$userId'
-    | '/_authenticated/adscard-balance/'
     | '/_authenticated/analytics/'
     | '/_authenticated/cards/'
     | '/_authenticated/dashboard/'
@@ -452,6 +451,7 @@ export interface FileRouteTypes {
     | '/_authenticated/referrals/'
     | '/_authenticated/transactions/'
     | '/_authenticated/users/'
+    | '/_authenticated/walmecard-balance/'
     | '/_authenticated/quests/new/$preset'
     | '/_authenticated/markets/categories/'
     | '/_authenticated/markets/chains/'
@@ -512,6 +512,13 @@ declare module '@tanstack/react-router' {
       path: '/profile'
       fullPath: '/profile'
       preLoaderRoute: typeof AuthenticatedProfileRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/walmecard-balance/': {
+      id: '/_authenticated/walmecard-balance/'
+      path: '/walmecard-balance'
+      fullPath: '/walmecard-balance'
+      preLoaderRoute: typeof AuthenticatedWalmecardBalanceIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/users/': {
@@ -610,13 +617,6 @@ declare module '@tanstack/react-router' {
       path: '/analytics'
       fullPath: '/analytics'
       preLoaderRoute: typeof AuthenticatedAnalyticsIndexRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/adscard-balance/': {
-      id: '/_authenticated/adscard-balance/'
-      path: '/adscard-balance'
-      fullPath: '/adscard-balance'
-      preLoaderRoute: typeof AuthenticatedAdscardBalanceIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/users/$userId': {
@@ -752,7 +752,6 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedQuestsIdRoute: typeof AuthenticatedQuestsIdRoute
   AuthenticatedQuestsNewRoute: typeof AuthenticatedQuestsNewRouteWithChildren
   AuthenticatedUsersUserIdRoute: typeof AuthenticatedUsersUserIdRoute
-  AuthenticatedAdscardBalanceIndexRoute: typeof AuthenticatedAdscardBalanceIndexRoute
   AuthenticatedAnalyticsIndexRoute: typeof AuthenticatedAnalyticsIndexRoute
   AuthenticatedCardsIndexRoute: typeof AuthenticatedCardsIndexRoute
   AuthenticatedDashboardIndexRoute: typeof AuthenticatedDashboardIndexRoute
@@ -766,6 +765,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedReferralsIndexRoute: typeof AuthenticatedReferralsIndexRoute
   AuthenticatedTransactionsIndexRoute: typeof AuthenticatedTransactionsIndexRoute
   AuthenticatedUsersIndexRoute: typeof AuthenticatedUsersIndexRoute
+  AuthenticatedWalmecardBalanceIndexRoute: typeof AuthenticatedWalmecardBalanceIndexRoute
   AuthenticatedMarketsCategoriesIndexRoute: typeof AuthenticatedMarketsCategoriesIndexRoute
   AuthenticatedMarketsChainsIndexRoute: typeof AuthenticatedMarketsChainsIndexRoute
   AuthenticatedMarketsCoinsIndexRoute: typeof AuthenticatedMarketsCoinsIndexRoute
@@ -783,7 +783,6 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedQuestsIdRoute: AuthenticatedQuestsIdRoute,
   AuthenticatedQuestsNewRoute: AuthenticatedQuestsNewRouteWithChildren,
   AuthenticatedUsersUserIdRoute: AuthenticatedUsersUserIdRoute,
-  AuthenticatedAdscardBalanceIndexRoute: AuthenticatedAdscardBalanceIndexRoute,
   AuthenticatedAnalyticsIndexRoute: AuthenticatedAnalyticsIndexRoute,
   AuthenticatedCardsIndexRoute: AuthenticatedCardsIndexRoute,
   AuthenticatedDashboardIndexRoute: AuthenticatedDashboardIndexRoute,
@@ -797,6 +796,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedReferralsIndexRoute: AuthenticatedReferralsIndexRoute,
   AuthenticatedTransactionsIndexRoute: AuthenticatedTransactionsIndexRoute,
   AuthenticatedUsersIndexRoute: AuthenticatedUsersIndexRoute,
+  AuthenticatedWalmecardBalanceIndexRoute:
+    AuthenticatedWalmecardBalanceIndexRoute,
   AuthenticatedMarketsCategoriesIndexRoute:
     AuthenticatedMarketsCategoriesIndexRoute,
   AuthenticatedMarketsChainsIndexRoute: AuthenticatedMarketsChainsIndexRoute,

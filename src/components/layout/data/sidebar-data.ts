@@ -97,10 +97,10 @@ export const sidebarData: SidebarData = {
         },
         {
           title: 'Master Balance',
-          url: '/adscard-balance',
+          url: '/walmecard-balance',
           icon: IconWallet,
           isActive: (pathname: string) =>
-            pathname.startsWith('/adscard-balance'),
+            pathname.startsWith('/walmecard-balance'),
         },
       ],
     },
