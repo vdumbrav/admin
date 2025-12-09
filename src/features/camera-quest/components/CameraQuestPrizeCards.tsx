@@ -46,9 +46,14 @@ export const CameraQuestPrizeCards = () => {
   }, [usersData]);
 
   const handleRemove = async (id: number) => {
+    console.log('[DELETE-CARD] handleRemove called with id:', id);
     if (confirm('Remove this card from prize pool?')) {
+      console.log('[DELETE-CARD] User confirmed, calling removeCard.mutateAsync...');
       await removeCard.mutateAsync(id);
+      console.log('[DELETE-CARD] removeCard completed');
       void refetch();
+    } else {
+      console.log('[DELETE-CARD] User cancelled');
     }
   };
 
@@ -286,7 +291,10 @@ export const CameraQuestPrizeCards = () => {
                                   <Button
                                     size="sm"
                                     variant="destructive"
-                                    onClick={() => handleRemove(card.id)}
+                                    onClick={(e) => {
+                                      console.log('[DELETE-CARD] Trash button clicked! card.id:', card.id, 'event:', e);
+                                      handleRemove(card.id);
+                                    }}
                                     disabled={removeCard.isPending}
                                   >
                                     <Trash2 className="h-4 w-4" />
