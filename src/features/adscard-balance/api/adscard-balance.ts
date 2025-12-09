@@ -8,7 +8,7 @@ import type {
   CryptoTopupRequest,
 } from '../types/api';
 
-const ADSCARD_API_BASE = '/adscard/balance';
+const ADSCARD_API_BASE = '/walmecard/balance';
 
 /**
  * Create a new TRC topup request
@@ -58,13 +58,14 @@ export async function cancelTrcTopup(
  */
 export async function getBalanceInfo(): Promise<BalanceInfo> {
   // Call the correct balance endpoint
-  const response = await authenticatedMutator<{ usd: string }>({
-    url: '/adscard/users/balance',
+  // Response is wrapped: { data: { usd: string }, request_id: string }
+  const response = await authenticatedMutator<{ data: { usd: string }; request_id?: string }>({
+    url: '/walmecard/users/balance',
     method: 'GET',
   });
 
-  // Calculate derived values
-  const balanceUsd = parseFloat(response.usd) || 0;
+  // Calculate derived values - handle nested data response
+  const balanceUsd = parseFloat(response?.data?.usd || '0') || 0;
   return {
     currentBalance: balanceUsd,
     pendingTopups: 0,
