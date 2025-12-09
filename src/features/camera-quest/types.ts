@@ -34,8 +34,11 @@ export interface PrizeCard {
   updatedAt: string;
   // Card details
   cardNumber?: string;
+  cardMasked?: string;
   currency?: string;
   balance?: number;
+  comment?: string; // Card name from ADScard
+  email?: string; // Billing email from ADScard
 }
 
 export interface CameraQuestSession {
