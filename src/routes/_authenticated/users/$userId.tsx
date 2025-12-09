@@ -1716,7 +1716,7 @@ function UserDetailsPage() {
               Add Card to Prize Pool
             </DialogTitle>
             <DialogDescription>
-              Select an ADScard card to add to the prize pool for distribution
+              Select a WalmeCard to add to the prize pool for distribution
             </DialogDescription>
           </DialogHeader>
 
@@ -1764,10 +1764,19 @@ function UserDetailsPage() {
                           <p className="font-mono text-sm font-semibold truncate">
                             {card.cardMasked || card.cardNumber}
                           </p>
+                          {card.comment && (
+                            <p className="text-sm text-foreground truncate">{card.comment}</p>
+                          )}
                           <div className="flex items-center gap-2 text-xs text-muted-foreground">
                             <span>ID: {cardId}</span>
                             <span>•</span>
                             <span className="font-medium text-green-600">${card.balance?.toFixed(2) || '0.00'}</span>
+                            {card.email && (
+                              <>
+                                <span>•</span>
+                                <span className="truncate max-w-[120px]">{card.email}</span>
+                              </>
+                            )}
                           </div>
                         </div>
 
