@@ -78,7 +78,7 @@ import {
   useDeleteUser,
   useUpdateCameraQuestAccess,
 } from '@/features/users/api/admin-users';
-import { usePrizeCards, useManuallyGiveCard, useAvailableCards, useAddCardToPool, useReturnCardToPool } from '@/features/camera-quest/api';
+import { usePrizeCards, useManuallyGiveCard, useAvailableCards, useAddCardToPool, useReturnCardToPool, useRemoveCardFromPool } from '@/features/camera-quest/api';
 import { EPrizeCardStatus } from '@/features/camera-quest/types';
 import { IconGift, IconArrowBack, IconCheck } from '@tabler/icons-react';
 import { useState } from 'react';
@@ -176,6 +176,7 @@ function UserDetailsPage() {
   const giveCardMutation = useManuallyGiveCard();
   const addToPoolMutation = useAddCardToPool();
   const returnToPoolMutation = useReturnCardToPool();
+  const removeFromPoolMutation = useRemoveCardFromPool();
 
   // Get prize card pool ID by matching cardMasked
   const getPrizeCardPoolId = (cardMasked: string) => {
@@ -497,6 +498,20 @@ function UserDetailsPage() {
       void refetchPrizeCards();
     } catch (error) {
       toast.error('Failed to return card to pool');
+    }
+  };
+
+  const handleRemoveFromPool = async (prizeCardPoolId: number, cardMasked: string, e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent selecting the card when clicking remove
+    if (!confirm(`Remove card ${cardMasked} from prize pool?`)) {
+      return;
+    }
+    try {
+      await removeFromPoolMutation.mutateAsync(prizeCardPoolId);
+      toast.success(`Card ${cardMasked} removed from prize pool`);
+      void refetchPrizeCards();
+    } catch (error) {
+      toast.error('Failed to remove card from pool');
     }
   };
 
@@ -1607,12 +1622,33 @@ function UserDetailsPage() {
                         <p className="font-mono text-sm font-semibold truncate">
                           {card.cardMasked || card.cardNumber}
                         </p>
+                        {card.comment && (
+                          <p className="text-sm text-foreground truncate">{card.comment}</p>
+                        )}
                         <div className="flex items-center gap-2 text-xs text-muted-foreground">
                           <span>ID: {card.adscardCardId}</span>
                           <span>•</span>
                           <span className="font-medium text-green-600">${card.balance?.toFixed(2) || '0.00'}</span>
+                          {card.email && (
+                            <>
+                              <span>•</span>
+                              <span className="truncate max-w-[120px]">{card.email}</span>
+                            </>
+                          )}
                         </div>
                       </div>
+
+                      {/* Remove from pool button */}
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 flex-shrink-0 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                        onClick={(e) => handleRemoveFromPool(card.id, card.cardMasked || card.cardNumber, e)}
+                        disabled={removeFromPoolMutation.isPending}
+                        title="Remove from prize pool"
+                      >
+                        <IconTrash className="h-4 w-4" />
+                      </Button>
 
                       {/* Card icon */}
                       <IconCreditCard className={cn(
