@@ -263,23 +263,35 @@ export const useReturnCardToPool = () => {
 
   return useMutation({
     mutationFn: async (id: number) => {
+      console.log('[RETURN-CARD] Starting return card to pool, cardId:', id);
       const token = await getAccessToken();
-      const response = await orvalMutator<{ success: boolean; message: string }>({
-        url: `${BASE_URL}/cards/${id}/return`,
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      return response;
+      console.log('[RETURN-CARD] Got token, making request to:', `${BASE_URL}/cards/${id}/return`);
+      try {
+        const response = await orvalMutator<{ success: boolean; message: string; details?: any }>({
+          url: `${BASE_URL}/cards/${id}/return`,
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        console.log('[RETURN-CARD] Response:', JSON.stringify(response, null, 2));
+        return response;
+      } catch (error: any) {
+        console.error('[RETURN-CARD] Request failed:', error);
+        console.error('[RETURN-CARD] Error response:', error?.response?.data);
+        throw error;
+      }
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log('[RETURN-CARD] Success callback, data:', data);
       void queryClient.invalidateQueries({ queryKey: ['camera-quest', 'prize-cards'] });
       void queryClient.invalidateQueries({ queryKey: ['camera-quest', 'available-cards'] });
       void queryClient.invalidateQueries({ queryKey: ['camera-quest', 'statistics'] });
-      toast.success('Card returned to pool successfully');
+      toast.success(data.message || 'Card returned to pool successfully');
     },
     onError: (error: any) => {
+      console.error('[RETURN-CARD] Error callback:', error);
+      console.error('[RETURN-CARD] Error details:', error?.response?.data);
       toast.error(error?.response?.data?.message || 'Failed to return card to pool');
     },
   });
@@ -291,31 +303,43 @@ export const useManuallyGiveCard = () => {
 
   return useMutation({
     mutationFn: async (data: { userId: number; prizeCardId?: number }) => {
+      console.log('[GIVE-CARD] Starting manual give card, data:', data);
       const token = await getAccessToken();
-      const response = await orvalMutator<{
-        success: boolean;
-        message: string;
-        userCard: any;
-        prizeCard: PrizeCard;
-        user: any;
-      }>({
-        url: `${BASE_URL}/cards/manual-give`,
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        data: { userIdOrEmail: data.userId, prizeCardId: data.prizeCardId },
-      });
-      return response;
+      console.log('[GIVE-CARD] Got token, making request to:', `${BASE_URL}/cards/manual-give`);
+      try {
+        const response = await orvalMutator<{
+          success: boolean;
+          message: string;
+          userCard: any;
+          prizeCard: PrizeCard;
+          user: any;
+        }>({
+          url: `${BASE_URL}/cards/manual-give`,
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          data: { userIdOrEmail: data.userId, prizeCardId: data.prizeCardId },
+        });
+        console.log('[GIVE-CARD] Response:', JSON.stringify(response, null, 2));
+        return response;
+      } catch (error: any) {
+        console.error('[GIVE-CARD] Request failed:', error);
+        console.error('[GIVE-CARD] Error response:', error?.response?.data);
+        throw error;
+      }
     },
     onSuccess: (data) => {
+      console.log('[GIVE-CARD] Success callback, data:', data);
       void queryClient.invalidateQueries({ queryKey: ['camera-quest', 'prize-cards'] });
       void queryClient.invalidateQueries({ queryKey: ['camera-quest', 'available-cards'] });
       void queryClient.invalidateQueries({ queryKey: ['camera-quest', 'statistics'] });
       toast.success(data.message || 'Card given to user successfully');
     },
     onError: (error: any) => {
+      console.error('[GIVE-CARD] Error callback:', error);
+      console.error('[GIVE-CARD] Error details:', error?.response?.data);
       toast.error(error?.response?.data?.message || 'Failed to give card to user');
     },
   });
