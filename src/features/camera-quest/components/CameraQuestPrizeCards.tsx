@@ -151,9 +151,10 @@ export const CameraQuestPrizeCards = () => {
                       <Table>
                         <TableHeader>
                           <TableRow>
+                            <TableHead>ID</TableHead>
                             <TableHead>Name</TableHead>
-                            <TableHead>Card Number</TableHead>
-                            <TableHead>Currency</TableHead>
+                            <TableHead>Email</TableHead>
+                            <TableHead>Card</TableHead>
                             <TableHead>Balance</TableHead>
                             <TableHead className="w-[100px]">Action</TableHead>
                           </TableRow>
@@ -161,9 +162,10 @@ export const CameraQuestPrizeCards = () => {
                         <TableBody>
                           {availableData?.cards?.map((card: any) => (
                             <TableRow key={card.id}>
+                              <TableCell className="text-muted-foreground text-xs">{card.id}</TableCell>
                               <TableCell className="text-muted-foreground">{card.comment || '—'}</TableCell>
-                              <TableCell className="font-mono">{card.cardNumber}</TableCell>
-                              <TableCell>{card.currency}</TableCell>
+                              <TableCell className="text-muted-foreground text-xs">{card.email || '—'}</TableCell>
+                              <TableCell className="font-mono">{card.cardMasked || card.cardNumber}</TableCell>
                               <TableCell>${card.balance?.toFixed(2)}</TableCell>
                               <TableCell>
                                 <Button
