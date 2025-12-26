@@ -12,6 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { useAppAuth } from '@/auth/hooks';
 
 interface LogAnalysisResult {
   summary: string;
@@ -28,13 +29,14 @@ interface LogAnalysisResult {
 export function LogsPage() {
   const [analyzing, setAnalyzing] = useState(false);
   const [analysis, setAnalysis] = useState<LogAnalysisResult | null>(null);
-  const [language, setLanguage] = useState('ru'); // Default to Russian
+  const [language, setLanguage] = useState('ru');
   const [expandedSections, setExpandedSections] = useState({
     summary: true,
     patterns: true,
     anomalies: true,
     recommendations: true,
   });
+  const auth = useAppAuth();
 
   const kibanaUrl = import.meta.env.VITE_KIBANA_URL || 'https://kibana.moliedev.xyz';
   const apiUrl = import.meta.env.VITE_API_URL || 'https://api2.moliedev.xyz';
@@ -52,11 +54,13 @@ export function LogsPage() {
     setAnalyzing(true);
 
     try {
+      const token = await auth.getAccessToken();
       const endpoint = errorsOnly ? '/logs/analyze/errors' : '/logs/analyze';
       const response = await fetch(`${apiUrl}${endpoint}?lang=${language}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
         },
       });
 
