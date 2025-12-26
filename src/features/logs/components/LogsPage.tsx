@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Loader2, Brain, AlertTriangle, TrendingUp, Lightbulb } from 'lucide-react';
 import { toast } from 'sonner';
+import { useAppAuth } from '@/auth/hooks';
 
 interface LogAnalysisResult {
   summary: string;
@@ -20,6 +21,7 @@ interface LogAnalysisResult {
 export function LogsPage() {
   const [analyzing, setAnalyzing] = useState(false);
   const [analysis, setAnalysis] = useState<LogAnalysisResult | null>(null);
+  const auth = useAppAuth();
 
   const kibanaUrl = import.meta.env.VITE_KIBANA_URL || 'http://167.233.7.108:5601';
   const apiUrl = import.meta.env.VITE_API_URL || 'https://api2.moliedev.xyz';
@@ -35,11 +37,13 @@ export function LogsPage() {
     setAnalysis(null);
 
     try {
+      const token = await auth.getAccessToken();
       const endpoint = errorsOnly ? '/logs/analyze/errors' : '/logs/analyze';
-      const response = await fetch(`${apiUrl}${endpoint}`, {
+      const response = await fetch(`${apiUrl}${endpoint}?lang=ru`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
         },
       });
 
