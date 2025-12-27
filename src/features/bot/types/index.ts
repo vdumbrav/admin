@@ -20,6 +20,8 @@ export interface BotUser {
   userId: string;
   usage: number;
   date: string;
+  linkedUserId?: string | null;
+  messageCount?: number;
 }
 
 export interface BotUsersResponse {

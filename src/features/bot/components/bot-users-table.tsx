@@ -29,7 +29,7 @@ import {
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useBotUsers, useUserContext, useResetUserLimit, useClearUserContext } from '../api/admin-bot';
 import { toast } from 'sonner';
-import { Search, RotateCcw, Trash2, Users, MessageCircle } from 'lucide-react';
+import { Search, RotateCcw, Trash2, Users, MessageCircle, Link } from 'lucide-react';
 import type { BotUser } from '../types';
 
 function UserContextDialog({ userId }: { userId: string }) {
@@ -100,8 +100,14 @@ function UserRow({ user, onResetLimit }: { user: BotUser; onResetLimit: () => vo
 
   return (
     <TableRow>
-      <TableCell className="font-mono text-xs max-w-[200px] truncate">
-        {user.userId}
+      <TableCell className="font-mono text-xs max-w-[250px]">
+        <div className="truncate">{user.userId}</div>
+        {user.linkedUserId && (
+          <div className="flex items-center gap-1 mt-1 text-muted-foreground">
+            <Link className="h-3 w-3" />
+            <span className="truncate text-xs">{user.linkedUserId}</span>
+          </div>
+        )}
       </TableCell>
       <TableCell>
         <Badge className={platformColors[user.platform] || 'bg-gray-100'}>
@@ -113,14 +119,21 @@ function UserRow({ user, onResetLimit }: { user: BotUser; onResetLimit: () => vo
           {user.usage}
         </Badge>
       </TableCell>
-      <TableCell className="text-muted-foreground text-sm">
-        {user.date}
+      <TableCell className="text-center">
+        <Badge variant="outline">
+          {user.messageCount || 0}
+        </Badge>
       </TableCell>
       <TableCell>
         <div className="flex gap-1">
           <Dialog>
             <DialogTrigger asChild>
-              <Button variant="ghost" size="sm" title="View conversation">
+              <Button
+                variant="ghost"
+                size="sm"
+                title="View conversation"
+                disabled={!user.messageCount}
+              >
                 <MessageCircle className="h-4 w-4" />
               </Button>
             </DialogTrigger>
@@ -129,6 +142,7 @@ function UserRow({ user, onResetLimit }: { user: BotUser; onResetLimit: () => vo
                 <DialogTitle>Conversation History</DialogTitle>
                 <DialogDescription>
                   {user.platform}: {user.userId}
+                  {user.linkedUserId && ` → ${user.linkedUserId}`}
                 </DialogDescription>
               </DialogHeader>
               <UserContextDialog userId={user.userId} />
@@ -227,8 +241,8 @@ export function BotUsersTable() {
           <TableRow>
             <TableHead>User ID</TableHead>
             <TableHead>Platform</TableHead>
-            <TableHead className="text-center">Requests Today</TableHead>
-            <TableHead>Date</TableHead>
+            <TableHead className="text-center">Requests</TableHead>
+            <TableHead className="text-center">Messages</TableHead>
             <TableHead>Actions</TableHead>
           </TableRow>
         </TableHeader>
@@ -242,7 +256,7 @@ export function BotUsersTable() {
           ))}
           {filteredUsers.length === 0 && (
             <TableRow>
-              <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
+              <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
                 No active users today
               </TableCell>
             </TableRow>
