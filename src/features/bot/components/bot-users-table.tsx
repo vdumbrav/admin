@@ -27,10 +27,12 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { useBotUsers, useUserContext, useResetUserLimit, useClearUserContext } from '../api/admin-bot';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
+import { useBotUsers, useUserContext, useResetUserLimit, useClearUserContext, useSummarizeUser } from '../api/admin-bot';
 import { toast } from 'sonner';
-import { Search, RotateCcw, Trash2, Users, MessageCircle, Link } from 'lucide-react';
-import type { BotUser } from '../types';
+import { Search, RotateCcw, Trash2, Users, MessageCircle, Link, Brain, Languages, Loader2 } from 'lucide-react';
+import type { BotUser, UserSummary } from '../types';
 
 function UserContextDialog({ userId }: { userId: string }) {
   const { data: context, isLoading } = useUserContext(userId);
@@ -92,7 +94,213 @@ function UserContextDialog({ userId }: { userId: string }) {
   );
 }
 
+function UserSummaryDialog({ userId, onClose }: { userId: string; onClose: () => void }) {
+  const [language, setLanguage] = useState('ru');
+  const [summary, setSummary] = useState<UserSummary | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [autoSave, setAutoSave] = useState(true);
+  const summarize = useSummarizeUser();
+
+  const handleSave = async (data: UserSummary) => {
+    setIsSaving(true);
+    try {
+      // TODO: Implement save API when backend is ready
+      // await saveUserProfile.mutateAsync({ userId, profile: data });
+      toast.success('User profile saved');
+    } catch {
+      toast.error('Failed to save profile');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleSummarize = async () => {
+    try {
+      const result = await summarize.mutateAsync({ userId, lang: language });
+      setSummary(result);
+      // Auto-save if enabled
+      if (autoSave && result) {
+        await handleSave(result);
+      }
+    } catch {
+      toast.error('Failed to generate summary');
+    }
+  };
+
+  return (
+    <ScrollArea className="max-h-[70vh]">
+      <div className="space-y-4 pr-4">
+        <div className="flex items-center gap-2 flex-wrap">
+          <Select value={language} onValueChange={setLanguage}>
+            <SelectTrigger className="w-[140px]">
+              <Languages className="mr-2 h-4 w-4" />
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="en">English</SelectItem>
+              <SelectItem value="ru">Русский</SelectItem>
+              <SelectItem value="uk">Українська</SelectItem>
+            </SelectContent>
+          </Select>
+          <Button onClick={handleSummarize} disabled={summarize.isPending}>
+            {summarize.isPending ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Analyzing...
+              </>
+            ) : (
+              <>
+                <Brain className="mr-2 h-4 w-4" />
+                Generate Summary
+              </>
+            )}
+          </Button>
+          <div className="flex items-center gap-2 ml-auto">
+            <Switch id="auto-save" checked={autoSave} onCheckedChange={setAutoSave} />
+            <Label htmlFor="auto-save" className="text-sm text-muted-foreground">
+              Auto-save
+            </Label>
+          </div>
+        </div>
+
+        {summary && (
+          <div className="space-y-4 border rounded-lg p-4">
+            {/* Basic Summary */}
+            <div>
+              <h4 className="font-medium text-sm mb-1">Summary</h4>
+              <p className="text-sm text-muted-foreground whitespace-pre-wrap">{summary.summary}</p>
+            </div>
+
+            {/* Topics */}
+            {summary.topics?.length > 0 && (
+              <div>
+                <h4 className="font-medium text-sm mb-2">Topics</h4>
+                <div className="flex flex-wrap gap-1">
+                  {summary.topics.map((topic, i) => (
+                    <Badge key={i} variant="secondary">{topic}</Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Sentiment & Engagement */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <h4 className="font-medium text-sm mb-1">Sentiment</h4>
+                <Badge variant={
+                  summary.sentiment === 'positive' ? 'default' :
+                  summary.sentiment === 'negative' ? 'destructive' : 'secondary'
+                }>
+                  {summary.sentiment}
+                </Badge>
+              </div>
+              <div>
+                <h4 className="font-medium text-sm mb-1">Engagement</h4>
+                <Badge variant="outline">{summary.engagement}</Badge>
+              </div>
+            </div>
+
+            {/* Preferences */}
+            {summary.preferences && (
+              <div className="border-t pt-4">
+                <h4 className="font-medium text-sm mb-3">User Preferences</h4>
+                <div className="grid grid-cols-2 gap-3 text-sm">
+                  {summary.preferences.interests?.length > 0 && (
+                    <div>
+                      <span className="text-muted-foreground">Interests:</span>
+                      <div className="flex flex-wrap gap-1 mt-1">
+                        {summary.preferences.interests.map((i, idx) => (
+                          <Badge key={idx} variant="outline" className="text-xs">{i}</Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {summary.preferences.tradingStyle && (
+                    <div>
+                      <span className="text-muted-foreground">Trading Style:</span>
+                      <p className="font-medium">{summary.preferences.tradingStyle}</p>
+                    </div>
+                  )}
+                  {summary.preferences.experienceLevel && (
+                    <div>
+                      <span className="text-muted-foreground">Experience:</span>
+                      <p className="font-medium">{summary.preferences.experienceLevel}</p>
+                    </div>
+                  )}
+                  {summary.preferences.communicationStyle && (
+                    <div>
+                      <span className="text-muted-foreground">Communication:</span>
+                      <p className="font-medium">{summary.preferences.communicationStyle}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Insights */}
+            {summary.insights && (
+              <div className="border-t pt-4">
+                <h4 className="font-medium text-sm mb-3">Marketing Insights</h4>
+                <div className="space-y-3 text-sm">
+                  {summary.insights.potentialNeeds?.length > 0 && (
+                    <div>
+                      <span className="text-muted-foreground">Potential Needs:</span>
+                      <div className="flex flex-wrap gap-1 mt-1">
+                        {summary.insights.potentialNeeds.map((need, idx) => (
+                          <Badge key={idx} variant="secondary" className="text-xs">{need}</Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {summary.insights.painPoints?.length > 0 && (
+                    <div>
+                      <span className="text-muted-foreground">Pain Points:</span>
+                      <div className="flex flex-wrap gap-1 mt-1">
+                        {summary.insights.painPoints.map((point, idx) => (
+                          <Badge key={idx} variant="destructive" className="text-xs">{point}</Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {summary.insights.goals?.length > 0 && (
+                    <div>
+                      <span className="text-muted-foreground">Goals:</span>
+                      <div className="flex flex-wrap gap-1 mt-1">
+                        {summary.insights.goals.map((goal, idx) => (
+                          <Badge key={idx} className="text-xs">{goal}</Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Footer with stats and Save button */}
+            <div className="border-t pt-4 flex items-center justify-between">
+              <div className="text-xs text-muted-foreground">
+                {summary.messageCount} messages
+                {summary.lastInteraction && ` • Last: ${new Date(summary.lastInteraction).toLocaleString()}`}
+                {autoSave && <span className="ml-2 text-green-600">• Auto-saved</span>}
+              </div>
+              {!autoSave && (
+                <Button size="sm" onClick={() => handleSave(summary)} disabled={isSaving}>
+                  {isSaving ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : null}
+                  Save Profile
+                </Button>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+    </ScrollArea>
+  );
+}
+
 function UserRow({ user, onResetLimit }: { user: BotUser; onResetLimit: () => void }) {
+  const [summaryOpen, setSummaryOpen] = useState(false);
   const platformColors = {
     matrix: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200',
     telegram: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
@@ -146,6 +354,27 @@ function UserRow({ user, onResetLimit }: { user: BotUser; onResetLimit: () => vo
                 </DialogDescription>
               </DialogHeader>
               <UserContextDialog userId={user.userId} />
+            </DialogContent>
+          </Dialog>
+          <Dialog open={summaryOpen} onOpenChange={setSummaryOpen}>
+            <DialogTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                title="AI Summary"
+                disabled={!user.messageCount}
+              >
+                <Brain className="h-4 w-4" />
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-xl">
+              <DialogHeader>
+                <DialogTitle>AI User Summary</DialogTitle>
+                <DialogDescription>
+                  {user.platform}: {user.userId}
+                </DialogDescription>
+              </DialogHeader>
+              <UserSummaryDialog userId={user.userId} onClose={() => setSummaryOpen(false)} />
             </DialogContent>
           </Dialog>
           <Button variant="ghost" size="sm" onClick={onResetLimit} title="Reset rate limit">

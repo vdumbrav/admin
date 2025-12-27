@@ -80,14 +80,279 @@ import {
 } from '@/features/users/api/admin-users';
 import { usePrizeCards, useManuallyGiveCard, useAvailableCards, useAddCardToPool, useReturnCardToPool, useRemoveCardFromPool } from '@/features/camera-quest/api';
 import { EPrizeCardStatus } from '@/features/camera-quest/types';
-import { IconGift, IconArrowBack, IconCheck } from '@tabler/icons-react';
+import { IconGift, IconArrowBack, IconCheck, IconRobot, IconMessageCircle, IconBrain } from '@tabler/icons-react';
 import { useState } from 'react';
 import { Switch } from '@/components/ui/switch';
 import { cn } from '@/lib/utils';
+import { useChatLogs, useUserContext, useSummarizeUser } from '@/features/bot/api/admin-bot';
+import type { UserSummary } from '@/features/bot/types';
 
 export const Route = createFileRoute('/_authenticated/users/$userId')({
   component: UserDetailsPage,
 });
+
+// Bot Interactions Section Component
+function BotInteractionsSection({ userId, userEmail }: { userId: string; userEmail?: string }) {
+  const [language, setLanguage] = useState('ru');
+  const [summary, setSummary] = useState<UserSummary | null>(null);
+  const [autoSave, setAutoSave] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+
+  // Try different user ID formats for bot data
+  const telegramUserId = `telegram:${userId}`;
+  const matrixUserId = `@${userEmail?.split('@')[0] || userId}:matrix2.moliedev.xyz`;
+
+  const { data: chatLogs, isLoading: logsLoading } = useChatLogs(1, 100, telegramUserId);
+  const { data: userContext, isLoading: contextLoading } = useUserContext(telegramUserId);
+  const summarize = useSummarizeUser();
+
+  const messages = userContext?.messages || (Array.isArray(userContext) ? userContext : []);
+
+  const handleSave = async (data: UserSummary) => {
+    setIsSaving(true);
+    try {
+      // TODO: Implement save API when backend is ready
+      // await saveUserProfile.mutateAsync({ userId, profile: data });
+    } catch {
+      // Silent fail for now
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleSummarize = async () => {
+    try {
+      const result = await summarize.mutateAsync({ userId: telegramUserId, lang: language });
+      setSummary(result);
+      if (autoSave && result) {
+        await handleSave(result);
+      }
+    } catch {
+      // Silent fail
+    }
+  };
+
+  return (
+    <div className="grid gap-6 md:grid-cols-2">
+      {/* Chat History */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <IconMessageCircle className="h-5 w-5 text-blue-500" />
+            Bot Conversations
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {contextLoading ? (
+            <Skeleton className="h-48 w-full" />
+          ) : messages.length > 0 ? (
+            <ScrollArea className="h-[400px]">
+              <div className="space-y-3 pr-4">
+                {messages.map((msg: { role: string; content: string }, i: number) => (
+                  <div
+                    key={i}
+                    className={cn(
+                      "p-3 rounded-lg text-sm",
+                      msg.role === 'user'
+                        ? 'bg-blue-50 dark:bg-blue-950/30 ml-4'
+                        : 'bg-green-50 dark:bg-green-950/30 mr-4'
+                    )}
+                  >
+                    <p className="font-medium text-xs mb-1 text-muted-foreground">
+                      {msg.role === 'user' ? 'User' : 'Bot'}
+                    </p>
+                    <p className="whitespace-pre-wrap">{msg.content}</p>
+                  </div>
+                ))}
+              </div>
+            </ScrollArea>
+          ) : (
+            <div className="flex flex-col items-center justify-center py-12 text-center">
+              <div className="rounded-full bg-muted p-3 mb-3">
+                <IconRobot className="h-6 w-6 text-muted-foreground" />
+              </div>
+              <p className="text-sm font-medium mb-1">No bot conversations</p>
+              <p className="text-xs text-muted-foreground">
+                This user hasn't interacted with the bot yet
+              </p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* AI Summary & Profile */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <IconBrain className="h-5 w-5 text-purple-500" />
+            AI User Profile
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {/* Controls */}
+            <div className="flex items-center gap-2 flex-wrap">
+              <Select value={language} onValueChange={setLanguage}>
+                <SelectTrigger className="w-[120px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="en">English</SelectItem>
+                  <SelectItem value="ru">Русский</SelectItem>
+                  <SelectItem value="uk">Українська</SelectItem>
+                </SelectContent>
+              </Select>
+              <Button
+                onClick={handleSummarize}
+                disabled={summarize.isPending || messages.length === 0}
+                size="sm"
+              >
+                {summarize.isPending ? 'Analyzing...' : 'Generate Profile'}
+              </Button>
+              <div className="flex items-center gap-2 ml-auto">
+                <Switch id="auto-save-user" checked={autoSave} onCheckedChange={setAutoSave} />
+                <Label htmlFor="auto-save-user" className="text-xs text-muted-foreground">
+                  Auto-save
+                </Label>
+              </div>
+            </div>
+
+            {/* Summary Results */}
+            {summary ? (
+              <ScrollArea className="h-[350px]">
+                <div className="space-y-4 pr-4">
+                  {/* Basic Summary */}
+                  <div>
+                    <p className="text-xs font-medium text-muted-foreground mb-1">Summary</p>
+                    <p className="text-sm whitespace-pre-wrap">{summary.summary}</p>
+                  </div>
+
+                  {/* Topics */}
+                  {summary.topics?.length > 0 && (
+                    <div>
+                      <p className="text-xs font-medium text-muted-foreground mb-2">Topics</p>
+                      <div className="flex flex-wrap gap-1">
+                        {summary.topics.map((topic, i) => (
+                          <Badge key={i} variant="secondary" className="text-xs">{topic}</Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Sentiment & Engagement */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <p className="text-xs font-medium text-muted-foreground mb-1">Sentiment</p>
+                      <Badge variant={
+                        summary.sentiment === 'positive' ? 'default' :
+                        summary.sentiment === 'negative' ? 'destructive' : 'secondary'
+                      }>
+                        {summary.sentiment}
+                      </Badge>
+                    </div>
+                    <div>
+                      <p className="text-xs font-medium text-muted-foreground mb-1">Engagement</p>
+                      <Badge variant="outline">{summary.engagement}</Badge>
+                    </div>
+                  </div>
+
+                  {/* Preferences */}
+                  {summary.preferences && (
+                    <div className="border-t pt-3">
+                      <p className="text-xs font-medium text-muted-foreground mb-2">User Preferences</p>
+                      <div className="grid grid-cols-2 gap-2 text-xs">
+                        {summary.preferences.interests?.length > 0 && (
+                          <div className="col-span-2">
+                            <span className="text-muted-foreground">Interests:</span>
+                            <div className="flex flex-wrap gap-1 mt-1">
+                              {summary.preferences.interests.map((i, idx) => (
+                                <Badge key={idx} variant="outline" className="text-xs">{i}</Badge>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        {summary.preferences.tradingStyle && (
+                          <div>
+                            <span className="text-muted-foreground">Trading:</span>
+                            <p className="font-medium">{summary.preferences.tradingStyle}</p>
+                          </div>
+                        )}
+                        {summary.preferences.experienceLevel && (
+                          <div>
+                            <span className="text-muted-foreground">Experience:</span>
+                            <p className="font-medium">{summary.preferences.experienceLevel}</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Insights */}
+                  {summary.insights && (
+                    <div className="border-t pt-3">
+                      <p className="text-xs font-medium text-muted-foreground mb-2">Marketing Insights</p>
+                      <div className="space-y-2 text-xs">
+                        {summary.insights.potentialNeeds?.length > 0 && (
+                          <div>
+                            <span className="text-muted-foreground">Potential Needs:</span>
+                            <div className="flex flex-wrap gap-1 mt-1">
+                              {summary.insights.potentialNeeds.map((need, idx) => (
+                                <Badge key={idx} variant="secondary" className="text-xs">{need}</Badge>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        {summary.insights.painPoints?.length > 0 && (
+                          <div>
+                            <span className="text-muted-foreground">Pain Points:</span>
+                            <div className="flex flex-wrap gap-1 mt-1">
+                              {summary.insights.painPoints.map((point, idx) => (
+                                <Badge key={idx} variant="destructive" className="text-xs">{point}</Badge>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        {summary.insights.goals?.length > 0 && (
+                          <div>
+                            <span className="text-muted-foreground">Goals:</span>
+                            <div className="flex flex-wrap gap-1 mt-1">
+                              {summary.insights.goals.map((goal, idx) => (
+                                <Badge key={idx} className="text-xs">{goal}</Badge>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Footer */}
+                  <div className="border-t pt-3 text-xs text-muted-foreground">
+                    {summary.messageCount} messages analyzed
+                    {summary.lastInteraction && ` • Last: ${new Date(summary.lastInteraction).toLocaleString()}`}
+                    {autoSave && <span className="ml-2 text-green-600">• Auto-saved</span>}
+                  </div>
+                </div>
+              </ScrollArea>
+            ) : (
+              <div className="flex flex-col items-center justify-center py-12 text-center">
+                <div className="rounded-full bg-muted p-3 mb-3">
+                  <IconBrain className="h-6 w-6 text-muted-foreground" />
+                </div>
+                <p className="text-sm font-medium mb-1">No profile generated</p>
+                <p className="text-xs text-muted-foreground">
+                  {messages.length > 0
+                    ? 'Click "Generate Profile" to analyze user interactions'
+                    : 'User needs to chat with the bot first'}
+                </p>
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
 
 // Transaction type icons
 function getTransactionIcon(type: string) {
@@ -550,6 +815,7 @@ function UserDetailsPage() {
         <ScrollArea className="w-full whitespace-nowrap">
           <TabsList className="inline-flex w-full justify-start">
             <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="bot">Bot</TabsTrigger>
             <TabsTrigger value="cards">Cards</TabsTrigger>
             <TabsTrigger value="transactions">Transactions</TabsTrigger>
             <TabsTrigger value="quests">Quests</TabsTrigger>
@@ -813,6 +1079,11 @@ function UserDetailsPage() {
               </CardContent>
             </Card>
           </div>
+        </TabsContent>
+
+        {/* Bot Tab */}
+        <TabsContent value="bot" className="space-y-6">
+          <BotInteractionsSection userId={userId} userEmail={user.email} />
         </TabsContent>
 
         {/* Cards Tab */}

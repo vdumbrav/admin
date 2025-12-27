@@ -139,3 +139,28 @@ export interface TrainingExport {
     completion: string;
   }>;
 }
+
+// ==================== User Summary ====================
+export interface UserSummary {
+  userId: string;
+  summary: string;
+  topics: string[];
+  sentiment: string;
+  engagement: string;
+  messageCount: number;
+  lastInteraction?: string;
+  // Extended profile data for marketing/personalization
+  preferences?: {
+    interests: string[];           // crypto topics they're interested in (BTC, ETH, DeFi, NFT)
+    tradingStyle?: string;         // hodler, trader, investor, learner
+    experienceLevel?: string;      // beginner, intermediate, advanced
+    preferredLanguage?: string;
+    communicationStyle?: string;   // formal, casual, technical
+    activeHours?: string;          // morning, afternoon, evening, night
+  };
+  insights?: {
+    potentialNeeds: string[];      // what products/services might interest them
+    painPoints: string[];          // problems they mentioned
+    goals: string[];               // what they want to achieve
+  };
+}

@@ -11,6 +11,7 @@ import { AIConfigEditor } from '@/features/bot/components/ai-config-editor';
 import { ResponseTemplatesEditor } from '@/features/bot/components/response-templates-editor';
 import { ChatLogsViewer } from '@/features/bot/components/chat-logs-viewer';
 import { PromptGenerator } from '@/features/bot/components/prompt-generator';
+import { TopicsDashboard } from '@/features/bot/components/topics-dashboard';
 
 export const Route = createFileRoute('/_authenticated/bot/')({
   component: BotAdminPage,
@@ -29,8 +30,9 @@ function BotAdminPage() {
       <BotStatsOverview />
 
       <Tabs defaultValue="users" className="w-full">
-        <TabsList className="grid w-full grid-cols-9">
+        <TabsList className="grid w-full grid-cols-10">
           <TabsTrigger value="users">Users</TabsTrigger>
+          <TabsTrigger value="topics">Topics</TabsTrigger>
           <TabsTrigger value="limits">Limits</TabsTrigger>
           <TabsTrigger value="prompts">Prompts</TabsTrigger>
           <TabsTrigger value="generator">Generator</TabsTrigger>
@@ -51,6 +53,20 @@ function BotAdminPage() {
             </CardHeader>
             <CardContent>
               <BotUsersTable />
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="topics" className="mt-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Topics & Insights</CardTitle>
+              <CardDescription>
+                AI-powered analysis of user conversations and interests
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <TopicsDashboard />
             </CardContent>
           </Card>
         </TabsContent>

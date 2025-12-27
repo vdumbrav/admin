@@ -14,6 +14,7 @@ import type {
   AIConfig,
   ChatLogsResponse,
   TrainingExport,
+  UserSummary,
 } from '../types';
 
 // ==================== Stats ====================
@@ -593,6 +594,69 @@ export const useTestPrompt = () => {
         },
         data,
       });
+    },
+  });
+};
+
+// ==================== User Summary ====================
+
+export const useSummarizeUser = () => {
+  const auth = useAppAuth();
+
+  return useMutation({
+    mutationFn: async ({ userId, lang = 'ru' }: { userId: string; lang?: string }): Promise<UserSummary> => {
+      const token = await auth.getAccessToken();
+      return orvalMutator<UserSummary>({
+        url: `/admin/bot/summarize-user/${encodeURIComponent(userId)}?lang=${lang}`,
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+    },
+  });
+};
+
+// ==================== Topics Analytics ====================
+
+export interface TopicsAnalytics {
+  topTopics: Array<{ topic: string; count: number; trend: 'up' | 'down' | 'stable' }>;
+  sentimentBreakdown: { positive: number; neutral: number; negative: number };
+  userInterests: Array<{ interest: string; userCount: number }>;
+  recentQuestions: string[];
+  lastUpdated: string;
+}
+
+export const useTopicsAnalytics = () => {
+  const auth = useAppAuth();
+
+  return useQuery({
+    queryKey: ['admin', 'bot', 'topics-analytics'],
+    queryFn: async (): Promise<TopicsAnalytics> => {
+      const token = await auth.getAccessToken();
+      return orvalMutator<TopicsAnalytics>({
+        url: '/admin/bot/topics-analytics',
+        method: 'GET',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+    },
+    refetchInterval: 60000, // Refresh every minute
+  });
+};
+
+export const useGenerateTopicsAnalytics = () => {
+  const auth = useAppAuth();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ lang = 'ru' }: { lang?: string } = {}): Promise<TopicsAnalytics> => {
+      const token = await auth.getAccessToken();
+      return orvalMutator<TopicsAnalytics>({
+        url: `/admin/bot/topics-analytics/generate?lang=${lang}`,
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'bot', 'topics-analytics'] });
     },
   });
 };
