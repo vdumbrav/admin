@@ -20,6 +20,8 @@ export interface BotUser {
   messagesCount: number;
   lastActive: string;
   createdAt: string;
+  bridgedFrom?: string; // Original ID if user is bridged
+  linkedUsers?: string[]; // IDs of linked accounts
 }
 
 export interface BotLimits {

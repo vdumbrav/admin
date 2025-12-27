@@ -17,6 +17,18 @@ import { Download, Search, Eye, MessageCircle, Bot, User, Clock, Cpu, Database }
 import { formatDistanceToNow } from 'date-fns';
 import type { ChatLog } from '../types';
 
+// Safe date formatter that handles invalid dates
+function safeFormatTime(timestamp: string | number | undefined): string {
+  if (!timestamp) return 'Unknown';
+  try {
+    const date = new Date(timestamp);
+    if (isNaN(date.getTime())) return 'Invalid date';
+    return formatDistanceToNow(date, { addSuffix: true });
+  } catch {
+    return 'Invalid date';
+  }
+}
+
 function LogDetailDialog({ log }: { log: ChatLog }) {
   return (
     <div className="space-y-4">
@@ -29,7 +41,7 @@ function LogDetailDialog({ log }: { log: ChatLog }) {
         <div className="flex items-center gap-2">
           <Clock className="h-4 w-4 text-muted-foreground" />
           <span className="text-muted-foreground">Time:</span>
-          <span>{formatDistanceToNow(new Date(log.timestamp), { addSuffix: true })}</span>
+          <span>{safeFormatTime(log.timestamp)}</span>
         </div>
         <div className="flex items-center gap-2">
           <Cpu className="h-4 w-4 text-muted-foreground" />
@@ -84,7 +96,7 @@ function LogRow({ log }: { log: ChatLog }) {
           </div>
           <p className="text-sm truncate">{log.message}</p>
           <p className="text-xs text-muted-foreground mt-1">
-            {formatDistanceToNow(new Date(log.timestamp), { addSuffix: true })}
+            {safeFormatTime(log.timestamp)}
           </p>
         </div>
         <Dialog>
