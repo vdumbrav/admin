@@ -14,7 +14,7 @@ deploy_dev:
     name: development
     url: https://admin.moliedev.xyz/
   tags:
-    - walme dev runner
+    - waitlist
   script:
     - cd /opt/waitlist-admin
     - docker system prune -f
