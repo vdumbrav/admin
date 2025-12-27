@@ -37,6 +37,9 @@ import type { BotUser, UserSummary } from '../types';
 function UserContextDialog({ userId }: { userId: string }) {
   const { data: context, isLoading } = useUserContext(userId);
   const clearContext = useClearUserContext();
+  const summarize = useSummarizeUser();
+  const [quickSummary, setQuickSummary] = useState<string | null>(null);
+  const [summaryLang, setSummaryLang] = useState('ru');
 
   if (isLoading) {
     return <Skeleton className="h-48 w-full" />;
@@ -54,17 +57,49 @@ function UserContextDialog({ userId }: { userId: string }) {
     }
   };
 
+  const handleQuickSummary = async () => {
+    try {
+      const result = await summarize.mutateAsync({ userId, lang: summaryLang });
+      setQuickSummary(result.summary);
+    } catch {
+      toast.error('Failed to generate summary');
+    }
+  };
+
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-2 flex-wrap">
         <p className="text-sm text-muted-foreground">
           {messages.length} messages in history
         </p>
-        <Button variant="outline" size="sm" onClick={handleClear} disabled={clearContext.isPending}>
-          <Trash2 className="h-4 w-4 mr-2" />
-          Clear History
-        </Button>
+        <div className="flex items-center gap-2">
+          <Select value={summaryLang} onValueChange={setSummaryLang}>
+            <SelectTrigger className="w-[100px] h-8">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="en">EN</SelectItem>
+              <SelectItem value="ru">RU</SelectItem>
+              <SelectItem value="uk">UK</SelectItem>
+            </SelectContent>
+          </Select>
+          <Button variant="outline" size="sm" onClick={handleQuickSummary} disabled={summarize.isPending || messages.length === 0}>
+            {summarize.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Brain className="h-4 w-4 mr-1" />}
+            Summary
+          </Button>
+          <Button variant="outline" size="sm" onClick={handleClear} disabled={clearContext.isPending}>
+            <Trash2 className="h-4 w-4 mr-1" />
+            Clear
+          </Button>
+        </div>
       </div>
+
+      {quickSummary && (
+        <div className="p-3 bg-purple-50 dark:bg-purple-950/30 rounded-lg border border-purple-200 dark:border-purple-800">
+          <p className="text-sm font-medium text-purple-800 dark:text-purple-200 mb-1">AI Summary</p>
+          <p className="text-sm text-purple-700 dark:text-purple-300">{quickSummary}</p>
+        </div>
+      )}
 
       <ScrollArea className="h-[400px] rounded border p-4">
         <div className="space-y-3">
@@ -97,7 +132,7 @@ function UserContextDialog({ userId }: { userId: string }) {
 function UserSummaryDialog({ userId }: { userId: string; onClose?: () => void }) {
   const [language, setLanguage] = useState('ru');
   const [summary, setSummary] = useState<UserSummary | null>(null);
-  const [autoSave, setAutoSave] = useState(true);
+  const [autoSave, setAutoSave] = useState(false);
   const summarize = useSummarizeUser();
   const saveProfile = useSaveUserProfile();
 
@@ -386,8 +421,12 @@ export function BotUsersTable() {
   const [page, setPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
   const [platformFilter, setPlatformFilter] = useState<string>('all');
+  const [bulkLang, setBulkLang] = useState('ru');
+  const [bulkProgress, setBulkProgress] = useState<{ current: number; total: number; results: UserSummary[] } | null>(null);
   const { data, isLoading, refetch } = useBotUsers(page, 100);
   const resetLimit = useResetUserLimit();
+  const summarize = useSummarizeUser();
+  const saveProfile = useSaveUserProfile();
 
   // Filter users
   const filteredUsers = useMemo(() => {
@@ -414,6 +453,35 @@ export function BotUsersTable() {
     }
   };
 
+  const handleBulkSummary = async () => {
+    const usersWithMessages = filteredUsers.filter(u => (u.messageCount || 0) > 0);
+    if (usersWithMessages.length === 0) {
+      toast.error('No users with messages to summarize');
+      return;
+    }
+
+    if (!confirm(`Generate AI summary for ${usersWithMessages.length} users? This may take a while.`)) return;
+
+    setBulkProgress({ current: 0, total: usersWithMessages.length, results: [] });
+    const results: UserSummary[] = [];
+
+    for (let i = 0; i < usersWithMessages.length; i++) {
+      const user = usersWithMessages[i];
+      try {
+        const result = await summarize.mutateAsync({ userId: user.userId, lang: bulkLang });
+        results.push(result);
+        // Auto-save each result
+        await saveProfile.mutateAsync({ userId: user.userId, profile: result });
+        setBulkProgress(prev => prev ? { ...prev, current: i + 1, results: [...results] } : null);
+      } catch {
+        // Skip failed users
+        setBulkProgress(prev => prev ? { ...prev, current: i + 1 } : null);
+      }
+    }
+
+    toast.success(`Generated ${results.length} summaries`);
+  };
+
   if (isLoading) {
     return (
       <div className="space-y-3">
@@ -428,6 +496,44 @@ export function BotUsersTable() {
 
   return (
     <div className="space-y-4">
+      {/* Bulk Actions */}
+      <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
+        <Brain className="h-5 w-5 text-purple-500" />
+        <span className="text-sm font-medium">Bulk AI Summary</span>
+        <Select value={bulkLang} onValueChange={setBulkLang}>
+          <SelectTrigger className="w-[100px] h-8">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="en">English</SelectItem>
+            <SelectItem value="ru">Русский</SelectItem>
+            <SelectItem value="uk">Українська</SelectItem>
+          </SelectContent>
+        </Select>
+        <Button
+          size="sm"
+          onClick={handleBulkSummary}
+          disabled={bulkProgress !== null || filteredUsers.filter(u => (u.messageCount || 0) > 0).length === 0}
+        >
+          {bulkProgress ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              {bulkProgress.current}/{bulkProgress.total}
+            </>
+          ) : (
+            <>
+              <Brain className="mr-2 h-4 w-4" />
+              Summarize All ({filteredUsers.filter(u => (u.messageCount || 0) > 0).length})
+            </>
+          )}
+        </Button>
+        {bulkProgress && bulkProgress.current === bulkProgress.total && (
+          <Button size="sm" variant="outline" onClick={() => setBulkProgress(null)}>
+            Done ({bulkProgress.results.length} saved)
+          </Button>
+        )}
+      </div>
+
       {/* Filters */}
       <div className="flex gap-4 flex-wrap">
         <div className="flex-1 min-w-[200px] relative">

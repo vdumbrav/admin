@@ -92,27 +92,28 @@ export const Route = createFileRoute('/_authenticated/users/$userId')({
 });
 
 // Bot Interactions Section Component
-function BotInteractionsSection({ userId }: { userId: string }) {
+function BotInteractionsSection({ matrixId }: { matrixId?: string }) {
   const [language, setLanguage] = useState('ru');
   const [summary, setSummary] = useState<UserSummary | null>(null);
-  const [autoSave, setAutoSave] = useState(true);
+  const [autoSave, setAutoSave] = useState(false);
 
-  // Try different user ID formats for bot data
-  const telegramUserId = `telegram:${userId}`;
+  // Use matrix ID for bot data
+  const botUserId = matrixId || null;
 
-  const { data: userContext, isLoading: contextLoading } = useUserContext(telegramUserId);
+  const { data: userContext, isLoading: contextLoading } = useUserContext(botUserId || '');
   const summarize = useSummarizeUser();
 
   const messages = userContext?.messages || (Array.isArray(userContext) ? userContext : []);
 
   const handleSave = async (_profile: UserSummary) => {
     // TODO: Implement save API when backend is ready
-    // await saveUserProfile.mutateAsync({ userId, profile: _profile });
+    // await saveUserProfile.mutateAsync({ userId: botUserId, profile: _profile });
   };
 
   const handleSummarize = async () => {
+    if (!botUserId) return;
     try {
-      const result = await summarize.mutateAsync({ userId: telegramUserId, lang: language });
+      const result = await summarize.mutateAsync({ userId: botUserId, lang: language });
       setSummary(result);
       if (autoSave && result) {
         await handleSave(result);
@@ -122,6 +123,22 @@ function BotInteractionsSection({ userId }: { userId: string }) {
     }
   };
 
+  if (!botUserId) {
+    return (
+      <Card>
+        <CardContent className="py-12 text-center">
+          <div className="rounded-full bg-muted p-3 mb-3 inline-block">
+            <IconRobot className="h-6 w-6 text-muted-foreground" />
+          </div>
+          <p className="text-sm font-medium mb-1">No bot account linked</p>
+          <p className="text-xs text-muted-foreground">
+            This user doesn't have a Matrix or Telegram ID linked to their account
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <div className="grid gap-6 md:grid-cols-2">
       {/* Chat History */}
@@ -130,6 +147,9 @@ function BotInteractionsSection({ userId }: { userId: string }) {
           <CardTitle className="flex items-center gap-2">
             <IconMessageCircle className="h-5 w-5 text-blue-500" />
             Bot Conversations
+            <Badge variant="outline" className="ml-2 font-mono text-xs">
+              {botUserId}
+            </Badge>
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -1073,7 +1093,7 @@ function UserDetailsPage() {
 
         {/* Bot Tab */}
         <TabsContent value="bot" className="space-y-6">
-          <BotInteractionsSection userId={userId} />
+          <BotInteractionsSection matrixId={user.matrixId} />
         </TabsContent>
 
         {/* Cards Tab */}

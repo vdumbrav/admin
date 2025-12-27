@@ -11,44 +11,96 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { useChatLogs, useExportTrainingData } from '../api/admin-bot';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { useChatLogs, useExportTrainingData, useSummarizeUser } from '../api/admin-bot';
 import { toast } from 'sonner';
-import { Download, Search, Eye, MessageCircle, Bot, User } from 'lucide-react';
+import { Download, Search, Eye, MessageCircle, Bot, User, Brain, Loader2 } from 'lucide-react';
 import type { ChatLogEntry } from '../types';
 
 function ConversationDialog({ log }: { log: ChatLogEntry }) {
+  const [summaryLang, setSummaryLang] = useState('ru');
+  const [quickSummary, setQuickSummary] = useState<string | null>(null);
+  const summarize = useSummarizeUser();
+
+  const handleQuickSummary = async () => {
+    try {
+      const result = await summarize.mutateAsync({ userId: log.userId, lang: summaryLang });
+      setQuickSummary(result.summary);
+    } catch {
+      toast.error('Failed to generate summary');
+    }
+  };
+
   return (
-    <ScrollArea className="h-[500px] pr-4">
-      <div className="space-y-3">
-        {log.messages?.map((msg, i) => (
-          <div
-            key={i}
-            className={`p-3 rounded-lg ${
-              msg.role === 'user'
-                ? 'bg-blue-50 dark:bg-blue-950/30 ml-4'
-                : 'bg-green-50 dark:bg-green-950/30 mr-4'
-            }`}
-          >
-            <div className="flex items-center gap-2 mb-2">
-              {msg.role === 'user' ? (
-                <User className="h-4 w-4 text-blue-600" />
-              ) : (
-                <Bot className="h-4 w-4 text-green-600" />
-              )}
-              <span className="font-medium text-sm">
-                {msg.role === 'user' ? 'User' : 'Bot'}
-              </span>
-            </div>
-            <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
-          </div>
-        ))}
-        {(!log.messages || log.messages.length === 0) && (
-          <p className="text-center text-muted-foreground py-8">
-            No messages in this conversation
-          </p>
-        )}
+    <div className="space-y-4">
+      {/* Summary controls */}
+      <div className="flex items-center gap-2">
+        <Select value={summaryLang} onValueChange={setSummaryLang}>
+          <SelectTrigger className="w-[100px] h-8">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="en">EN</SelectItem>
+            <SelectItem value="ru">RU</SelectItem>
+            <SelectItem value="uk">UK</SelectItem>
+          </SelectContent>
+        </Select>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleQuickSummary}
+          disabled={summarize.isPending || !log.messages?.length}
+        >
+          {summarize.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Brain className="h-4 w-4 mr-1" />}
+          Summary
+        </Button>
       </div>
-    </ScrollArea>
+
+      {quickSummary && (
+        <div className="p-3 bg-purple-50 dark:bg-purple-950/30 rounded-lg border border-purple-200 dark:border-purple-800">
+          <p className="text-sm font-medium text-purple-800 dark:text-purple-200 mb-1">AI Summary</p>
+          <p className="text-sm text-purple-700 dark:text-purple-300">{quickSummary}</p>
+        </div>
+      )}
+
+      <ScrollArea className="h-[400px] pr-4">
+        <div className="space-y-3">
+          {log.messages?.map((msg, i) => (
+            <div
+              key={i}
+              className={`p-3 rounded-lg ${
+                msg.role === 'user'
+                  ? 'bg-blue-50 dark:bg-blue-950/30 ml-4'
+                  : 'bg-green-50 dark:bg-green-950/30 mr-4'
+              }`}
+            >
+              <div className="flex items-center gap-2 mb-2">
+                {msg.role === 'user' ? (
+                  <User className="h-4 w-4 text-blue-600" />
+                ) : (
+                  <Bot className="h-4 w-4 text-green-600" />
+                )}
+                <span className="font-medium text-sm">
+                  {msg.role === 'user' ? 'User' : 'Bot'}
+                </span>
+              </div>
+              <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
+            </div>
+          ))}
+          {(!log.messages || log.messages.length === 0) && (
+            <p className="text-center text-muted-foreground py-8">
+              No messages in this conversation
+            </p>
+          )}
+        </div>
+      </ScrollArea>
+    </div>
   );
 }
 
