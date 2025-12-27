@@ -1,15 +1,16 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useBotStats } from '../api/admin-bot';
-import { Users, MessageSquare, Activity, Globe, Send, Link2 } from 'lucide-react';
+import { Users, MessageSquare, Globe, Send, Link2 } from 'lucide-react';
+import type { BotStats } from '../types';
 
 export function BotStatsOverview() {
-  const { data: stats, isLoading } = useBotStats();
+  const { data, isLoading, error } = useBotStats();
 
   if (isLoading) {
     return (
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-6">
-        {[...Array(6)].map((_, i) => (
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+        {[...Array(5)].map((_, i) => (
           <Card key={i}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <Skeleton className="h-4 w-24" />
@@ -24,47 +25,60 @@ export function BotStatsOverview() {
     );
   }
 
+  if (error) {
+    return (
+      <Card className="border-destructive">
+        <CardHeader>
+          <CardTitle className="text-destructive">Error loading stats</CardTitle>
+          <CardDescription>Failed to fetch bot statistics from the backend</CardDescription>
+        </CardHeader>
+      </Card>
+    );
+  }
+
+  // Cast to correct type
+  const stats = data as BotStats | undefined;
+
   const statCards = [
     {
-      title: 'Total Users',
-      value: stats?.totalUsers ?? 0,
-      icon: Users,
-      color: 'text-blue-500',
-    },
-    {
-      title: 'Total Messages',
-      value: stats?.totalMessages ?? 0,
+      title: 'Requests Today',
+      value: stats?.today?.totalRequests ?? 0,
+      description: 'Total API requests',
       icon: MessageSquare,
       color: 'text-green-500',
     },
     {
-      title: 'Active Today',
-      value: stats?.activeToday ?? 0,
-      icon: Activity,
-      color: 'text-yellow-500',
+      title: 'Active Users',
+      value: stats?.today?.uniqueUsers ?? 0,
+      description: 'Unique users today',
+      icon: Users,
+      color: 'text-blue-500',
     },
     {
       title: 'Matrix Users',
-      value: stats?.matrixUsers ?? 0,
+      value: stats?.today?.matrixUsers ?? 0,
+      description: 'Active Matrix users',
       icon: Globe,
       color: 'text-purple-500',
     },
     {
       title: 'Telegram Users',
-      value: stats?.telegramUsers ?? 0,
+      value: stats?.today?.telegramUsers ?? 0,
+      description: 'Active Telegram users',
       icon: Send,
       color: 'text-cyan-500',
     },
     {
-      title: 'Bridged Users',
-      value: stats?.bridgedUsers ?? 0,
+      title: 'Room Mappings',
+      value: (stats?.mappings?.telegramChats ?? 0) + (stats?.mappings?.matrixRooms ?? 0),
+      description: `${stats?.mappings?.telegramChats ?? 0} TG / ${stats?.mappings?.matrixRooms ?? 0} Matrix`,
       icon: Link2,
       color: 'text-orange-500',
     },
   ];
 
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-6">
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
       {statCards.map((stat) => (
         <Card key={stat.title}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -73,6 +87,7 @@ export function BotStatsOverview() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stat.value.toLocaleString()}</div>
+            <p className="text-xs text-muted-foreground mt-1">{stat.description}</p>
           </CardContent>
         </Card>
       ))}

@@ -13,17 +13,13 @@ const tierLabels: Record<keyof BotLimits, string> = {
   level1: 'Level 1',
   level2: 'Level 2',
   level3: 'Level 3 (VIP)',
-  pro: 'Pro',
-  premium: 'Premium',
 };
 
 const tierDescriptions: Record<keyof BotLimits, string> = {
   free: 'Default tier for new users',
   level1: 'Basic paid subscription',
   level2: 'Standard paid subscription',
-  level3: 'VIP unlimited access',
-  pro: 'Pro tier for power users',
-  premium: 'Premium unlimited access',
+  level3: 'VIP unlimited access (-1 = unlimited)',
 };
 
 export function BotLimitsEditor() {
@@ -74,7 +70,7 @@ export function BotLimitsEditor() {
             <Input
               id={tier}
               type="number"
-              value={localLimits[tier]}
+              value={localLimits[tier] ?? ''}
               onChange={(e) => handleChange(tier, e.target.value)}
               placeholder="-1 for unlimited"
             />

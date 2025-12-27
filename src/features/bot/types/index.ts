@@ -1,121 +1,139 @@
-// Bot Admin Types
+// Bot Admin Types - Aligned with Backend Responses
 
+// ==================== Stats ====================
 export interface BotStats {
-  totalUsers: number;
-  totalMessages: number;
-  activeToday: number;
-  matrixUsers: number;
-  telegramUsers: number;
-  bridgedUsers: number;
+  today: {
+    totalRequests: number;
+    telegramUsers: number;
+    matrixUsers: number;
+    uniqueUsers: number;
+  };
+  mappings: {
+    telegramChats: number;
+    matrixRooms: number;
+  };
 }
 
+// ==================== Users ====================
 export interface BotUser {
-  id: string;
-  platform: 'matrix' | 'telegram' | 'bridged';
-  matrixId?: string;
-  telegramId?: string;
-  username?: string;
-  tier: string;
-  language: string;
-  messagesCount: number;
-  lastActive: string;
-  createdAt: string;
-  bridgedFrom?: string; // Original ID if user is bridged
-  linkedUsers?: string[]; // IDs of linked accounts
+  platform: 'matrix' | 'telegram';
+  userId: string;
+  usage: number;
+  date: string;
 }
 
+export interface BotUsersResponse {
+  users: BotUser[];
+  total: number;
+  page: number;
+  limit: number;
+  pages: number;
+}
+
+// ==================== Limits ====================
 export interface BotLimits {
   free: number;
   level1: number;
   level2: number;
-  level3: number;
-  pro: number;
-  premium: number;
+  level3: number | null;
 }
 
+// ==================== Mappings ====================
 export interface UserMapping {
-  matrixId: string;
-  telegramId: string;
-  username?: string;
-  displayName?: string;
-  createdAt: string;
+  telegramChatId: string;
+  matrixRoomId: string;
+  isGroup: boolean;
 }
 
+export interface MappingsResponse {
+  mappings: UserMapping[];
+  total: number;
+  page: number;
+  limit: number;
+  pages: number;
+}
+
+// ==================== User Context ====================
 export interface UserContext {
-  userId: string;
-  platform: string;
-  language: string;
-  tier: string;
-  messagesCount: number;
-  lastActive: string;
-  recentMessages: Array<{
+  messages?: Array<{
     role: 'user' | 'assistant';
     content: string;
-    timestamp: string;
   }>;
+  lastUpdated?: string;
 }
 
-export interface SystemPrompt {
-  key: string;
-  name: string;
-  prompt: string;
-  language?: string;
-  description?: string;
-  updatedAt?: string;
+// ==================== System Prompts ====================
+export interface PromptsResponse {
+  promptTypes: string[];
+  overrides: Record<string, { content: string; updatedAt: string }>;
+  hasOverrides: boolean;
 }
 
-export interface KnowledgeEntry {
-  key: string;
-  name: string;
-  content: string;
-  category?: string;
-  language?: string;
-  updatedAt?: string;
+// ==================== Knowledge Base ====================
+export interface KnowledgeResponse {
+  defaultTopics: string[];
+  customEntries: Record<string, { content: string; updatedAt: string }>;
+  totalEntries: number;
 }
 
+// ==================== Banned Words ====================
 export interface BannedConfig {
   words: string[];
   topics: string[];
   regex: string[];
+  updatedAt?: string;
 }
 
+// ==================== Custom Instructions ====================
 export interface CustomInstructions {
   global: string;
   perLanguage: Record<string, string>;
+  updatedAt?: string;
 }
 
+// ==================== AI Config ====================
 export interface AIConfig {
   defaultModel: string;
   models: Record<string, string>;
   fallbackModel: string;
   maxTokens: number;
   temperature: number;
+  updatedAt?: string;
 }
 
+// ==================== Response Templates ====================
 export interface ResponseTemplate {
   trigger: string;
   response: string;
   language?: string;
   exact?: boolean;
+  updatedAt?: string;
 }
 
-export interface ChatLog {
-  id: string;
+// ==================== Chat Logs ====================
+export interface ChatLogEntry {
   userId: string;
-  platform: string;
-  message: string;
-  response: string;
-  model: string;
-  cached: boolean;
-  timestamp: string;
+  messages: Array<{
+    role: 'user' | 'assistant';
+    content: string;
+  }>;
+  lastUpdated?: string;
 }
 
+export interface ChatLogsResponse {
+  logs: ChatLogEntry[];
+  total: number;
+  page: number;
+  limit: number;
+  pages: number;
+}
+
+// ==================== Training Export ====================
 export interface TrainingExport {
-  prompts: Record<string, SystemPrompt>;
-  knowledge: Record<string, KnowledgeEntry>;
-  templates: Record<string, ResponseTemplate>;
-  instructions: CustomInstructions;
-  banned: BannedConfig;
-  aiConfig: AIConfig;
-  exportedAt: string;
+  format: string;
+  count: number;
+  data: Array<{
+    prompt: string;
+    completion: string;
+  }>;
 }

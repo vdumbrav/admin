@@ -13,92 +13,88 @@ import {
 } from '@/components/ui/dialog';
 import { useChatLogs, useExportTrainingData } from '../api/admin-bot';
 import { toast } from 'sonner';
-import { Download, Search, Eye, MessageCircle, Bot, User, Clock, Cpu, Database } from 'lucide-react';
-import { formatDistanceToNow } from 'date-fns';
-import type { ChatLog } from '../types';
+import { Download, Search, Eye, MessageCircle, Bot, User } from 'lucide-react';
+import type { ChatLogEntry } from '../types';
 
-// Safe date formatter that handles invalid dates
-function safeFormatTime(timestamp: string | number | undefined): string {
-  if (!timestamp) return 'Unknown';
-  try {
-    const date = new Date(timestamp);
-    if (isNaN(date.getTime())) return 'Invalid date';
-    return formatDistanceToNow(date, { addSuffix: true });
-  } catch {
-    return 'Invalid date';
-  }
-}
-
-function LogDetailDialog({ log }: { log: ChatLog }) {
+function ConversationDialog({ log }: { log: ChatLogEntry }) {
   return (
-    <div className="space-y-4">
-      <div className="grid grid-cols-2 gap-4 text-sm">
-        <div className="flex items-center gap-2">
-          <User className="h-4 w-4 text-muted-foreground" />
-          <span className="text-muted-foreground">User:</span>
-          <span className="font-mono">{log.userId}</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <Clock className="h-4 w-4 text-muted-foreground" />
-          <span className="text-muted-foreground">Time:</span>
-          <span>{safeFormatTime(log.timestamp)}</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <Cpu className="h-4 w-4 text-muted-foreground" />
-          <span className="text-muted-foreground">Model:</span>
-          <Badge variant="outline">{log.model}</Badge>
-        </div>
-        <div className="flex items-center gap-2">
-          <Database className="h-4 w-4 text-muted-foreground" />
-          <span className="text-muted-foreground">Cached:</span>
-          <Badge variant={log.cached ? 'default' : 'secondary'}>
-            {log.cached ? 'Yes' : 'No'}
-          </Badge>
-        </div>
-      </div>
-
+    <ScrollArea className="h-[500px] pr-4">
       <div className="space-y-3">
-        <div className="p-4 bg-blue-50 dark:bg-blue-950/20 rounded-lg">
-          <div className="flex items-center gap-2 mb-2">
-            <User className="h-4 w-4 text-blue-600" />
-            <span className="font-medium text-blue-600">User Message</span>
+        {log.messages?.map((msg, i) => (
+          <div
+            key={i}
+            className={`p-3 rounded-lg ${
+              msg.role === 'user'
+                ? 'bg-blue-50 dark:bg-blue-950/30 ml-4'
+                : 'bg-green-50 dark:bg-green-950/30 mr-4'
+            }`}
+          >
+            <div className="flex items-center gap-2 mb-2">
+              {msg.role === 'user' ? (
+                <User className="h-4 w-4 text-blue-600" />
+              ) : (
+                <Bot className="h-4 w-4 text-green-600" />
+              )}
+              <span className="font-medium text-sm">
+                {msg.role === 'user' ? 'User' : 'Bot'}
+              </span>
+            </div>
+            <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
           </div>
-          <p className="text-sm whitespace-pre-wrap">{log.message}</p>
-        </div>
-
-        <div className="p-4 bg-green-50 dark:bg-green-950/20 rounded-lg">
-          <div className="flex items-center gap-2 mb-2">
-            <Bot className="h-4 w-4 text-green-600" />
-            <span className="font-medium text-green-600">Bot Response</span>
-          </div>
-          <p className="text-sm whitespace-pre-wrap">{log.response}</p>
-        </div>
+        ))}
+        {(!log.messages || log.messages.length === 0) && (
+          <p className="text-center text-muted-foreground py-8">
+            No messages in this conversation
+          </p>
+        )}
       </div>
-    </div>
+    </ScrollArea>
   );
 }
 
-function LogRow({ log }: { log: ChatLog }) {
+function LogCard({ log }: { log: ChatLogEntry }) {
+  const messageCount = log.messages?.length || 0;
+  const lastUserMessage = log.messages?.filter(m => m.role === 'user').slice(-1)[0];
+  const lastBotMessage = log.messages?.filter(m => m.role === 'assistant').slice(-1)[0];
+
+  // Determine platform from userId format
+  const platform = log.userId.startsWith('@') ? 'matrix' :
+                   log.userId.startsWith('telegram:') ? 'telegram' : 'unknown';
+
   return (
     <div className="p-4 border rounded-lg hover:border-primary/50 transition-colors">
       <div className="flex items-start justify-between">
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-1">
+          <div className="flex items-center gap-2 mb-2">
             <MessageCircle className="h-4 w-4 text-muted-foreground" />
-            <span className="font-mono text-sm text-muted-foreground">
-              {log.userId.substring(0, 20)}...
+            <span className="font-mono text-sm truncate max-w-[300px]">
+              {log.userId}
             </span>
-            <Badge variant="outline" className="text-xs">{log.platform}</Badge>
-            <Badge variant="secondary" className="text-xs">{log.model}</Badge>
-            {log.cached && (
-              <Badge variant="default" className="text-xs">Cached</Badge>
-            )}
+            <Badge variant="outline" className="capitalize">
+              {platform}
+            </Badge>
+            <Badge variant="secondary">
+              {messageCount} messages
+            </Badge>
           </div>
-          <p className="text-sm truncate">{log.message}</p>
-          <p className="text-xs text-muted-foreground mt-1">
-            {safeFormatTime(log.timestamp)}
-          </p>
+
+          {lastUserMessage && (
+            <div className="mb-2">
+              <p className="text-xs text-muted-foreground mb-1">Last user message:</p>
+              <p className="text-sm truncate">{lastUserMessage.content}</p>
+            </div>
+          )}
+
+          {lastBotMessage && (
+            <div>
+              <p className="text-xs text-muted-foreground mb-1">Last bot response:</p>
+              <p className="text-sm truncate text-muted-foreground">
+                {lastBotMessage.content.substring(0, 100)}...
+              </p>
+            </div>
+          )}
         </div>
+
         <Dialog>
           <DialogTrigger asChild>
             <Button variant="ghost" size="sm">
@@ -107,11 +103,12 @@ function LogRow({ log }: { log: ChatLog }) {
           </DialogTrigger>
           <DialogContent className="max-w-2xl max-h-[80vh]">
             <DialogHeader>
-              <DialogTitle>Conversation Details</DialogTitle>
+              <DialogTitle className="flex items-center gap-2">
+                <MessageCircle className="h-5 w-5" />
+                Conversation: {log.userId}
+              </DialogTitle>
             </DialogHeader>
-            <ScrollArea className="max-h-[60vh]">
-              <LogDetailDialog log={log} />
-            </ScrollArea>
+            <ConversationDialog log={log} />
           </DialogContent>
         </Dialog>
       </div>
@@ -137,19 +134,19 @@ export function ChatLogsViewer() {
 
   const logs = data?.logs || [];
   const total = data?.total || 0;
-  const totalPages = Math.ceil(total / 20);
+  const totalPages = data?.pages || 1;
 
   const handleExport = async () => {
     try {
       const result = await exportData.mutateAsync();
-      const blob = new Blob([JSON.stringify(result, null, 2)], { type: 'application/json' });
+      const blob = new Blob([JSON.stringify(result.data, null, 2)], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `bot-training-export-${new Date().toISOString().split('T')[0]}.json`;
+      a.download = `bot-training-export-${new Date().toISOString().split('T')[0]}.jsonl`;
       a.click();
       URL.revokeObjectURL(url);
-      toast.success('Training data exported');
+      toast.success(`Exported ${result.count} training examples`);
     } catch (error) {
       toast.error('Failed to export data');
     }
@@ -176,9 +173,13 @@ export function ChatLogsViewer() {
         </Button>
       </div>
 
+      <div className="text-sm text-muted-foreground">
+        {total} conversations found
+      </div>
+
       <div className="space-y-3">
         {logs.map((log) => (
-          <LogRow key={log.id} log={log} />
+          <LogCard key={log.userId} log={log} />
         ))}
         {logs.length === 0 && (
           <p className="text-center text-muted-foreground py-8">
@@ -190,7 +191,7 @@ export function ChatLogsViewer() {
       {totalPages > 1 && (
         <div className="flex items-center justify-between">
           <p className="text-sm text-muted-foreground">
-            Page {page} of {totalPages} ({total} logs)
+            Page {page} of {totalPages} ({total} conversations)
           </p>
           <div className="flex gap-2">
             <Button

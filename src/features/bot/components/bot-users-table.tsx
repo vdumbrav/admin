@@ -26,120 +26,118 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { useBotUsers, useUserContext } from '../api/admin-bot';
-import { formatDistanceToNow } from 'date-fns';
-import { Eye, Search, Link2, Users } from 'lucide-react';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { useBotUsers, useUserContext, useResetUserLimit, useClearUserContext } from '../api/admin-bot';
+import { toast } from 'sonner';
+import { Search, RotateCcw, Trash2, Users, MessageCircle } from 'lucide-react';
 import type { BotUser } from '../types';
-
-// Safe date formatter
-function safeFormatTime(date: string | undefined): string {
-  if (!date) return '-';
-  try {
-    const parsed = new Date(date);
-    if (isNaN(parsed.getTime())) return '-';
-    return formatDistanceToNow(parsed, { addSuffix: true });
-  } catch {
-    return '-';
-  }
-}
 
 function UserContextDialog({ userId }: { userId: string }) {
   const { data: context, isLoading } = useUserContext(userId);
+  const clearContext = useClearUserContext();
 
   if (isLoading) {
     return <Skeleton className="h-48 w-full" />;
   }
 
+  const messages = context?.messages || (Array.isArray(context) ? context : []);
+
+  const handleClear = async () => {
+    if (!confirm('Clear conversation history for this user?')) return;
+    try {
+      await clearContext.mutateAsync(userId);
+      toast.success('Context cleared');
+    } catch {
+      toast.error('Failed to clear context');
+    }
+  };
+
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <p className="text-sm text-muted-foreground">Platform</p>
-          <p className="font-medium">{context?.platform}</p>
-        </div>
-        <div>
-          <p className="text-sm text-muted-foreground">Language</p>
-          <p className="font-medium">{context?.language}</p>
-        </div>
-        <div>
-          <p className="text-sm text-muted-foreground">Tier</p>
-          <p className="font-medium">{context?.tier}</p>
-        </div>
-        <div>
-          <p className="text-sm text-muted-foreground">Messages</p>
-          <p className="font-medium">{context?.messagesCount}</p>
-        </div>
+      <div className="flex items-center justify-between">
+        <p className="text-sm text-muted-foreground">
+          {messages.length} messages in history
+        </p>
+        <Button variant="outline" size="sm" onClick={handleClear} disabled={clearContext.isPending}>
+          <Trash2 className="h-4 w-4 mr-2" />
+          Clear History
+        </Button>
       </div>
 
-      <div>
-        <p className="text-sm text-muted-foreground mb-2">Recent Messages</p>
-        <div className="space-y-2 max-h-64 overflow-y-auto">
-          {context?.recentMessages?.map((msg, i) => (
+      <ScrollArea className="h-[400px] rounded border p-4">
+        <div className="space-y-3">
+          {messages.map((msg: { role: string; content: string }, i: number) => (
             <div
               key={i}
-              className={`p-2 rounded text-sm ${
-                msg.role === 'user' ? 'bg-blue-50' : 'bg-gray-50'
+              className={`p-3 rounded-lg text-sm ${
+                msg.role === 'user'
+                  ? 'bg-blue-50 dark:bg-blue-950/30 ml-4'
+                  : 'bg-green-50 dark:bg-green-950/30 mr-4'
               }`}
             >
-              <span className="font-medium">{msg.role === 'user' ? 'User' : 'Bot'}:</span>{' '}
-              {msg.content.substring(0, 200)}
-              {msg.content.length > 200 && '...'}
+              <p className="font-medium text-xs mb-1 text-muted-foreground">
+                {msg.role === 'user' ? 'User' : 'Bot'}
+              </p>
+              <p className="whitespace-pre-wrap">{msg.content}</p>
             </div>
           ))}
+          {messages.length === 0 && (
+            <p className="text-center text-muted-foreground py-8">
+              No conversation history
+            </p>
+          )}
         </div>
-      </div>
+      </ScrollArea>
     </div>
   );
 }
 
-function UserRow({ user }: { user: BotUser }) {
-  const platformBadgeVariant = {
-    matrix: 'default',
-    telegram: 'secondary',
-    bridged: 'outline',
-  } as const;
-
-  const tierColors = {
-    free: 'bg-gray-100 text-gray-800',
-    level1: 'bg-blue-100 text-blue-800',
-    level2: 'bg-purple-100 text-purple-800',
-    level3: 'bg-yellow-100 text-yellow-800',
+function UserRow({ user, onResetLimit }: { user: BotUser; onResetLimit: () => void }) {
+  const platformColors = {
+    matrix: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200',
+    telegram: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
   };
 
   return (
     <TableRow>
-      <TableCell className="font-mono text-xs">
-        {user.matrixId || user.telegramId || user.id}
+      <TableCell className="font-mono text-xs max-w-[200px] truncate">
+        {user.userId}
       </TableCell>
       <TableCell>
-        <Badge variant={platformBadgeVariant[user.platform]}>{user.platform}</Badge>
+        <Badge className={platformColors[user.platform] || 'bg-gray-100'}>
+          {user.platform}
+        </Badge>
       </TableCell>
-      <TableCell>{user.username || '-'}</TableCell>
-      <TableCell>
-        <span className={`px-2 py-1 rounded text-xs ${tierColors[user.tier as keyof typeof tierColors] || tierColors.free}`}>
-          {user.tier}
-        </span>
+      <TableCell className="text-center">
+        <Badge variant={user.usage > 50 ? 'destructive' : user.usage > 20 ? 'secondary' : 'outline'}>
+          {user.usage}
+        </Badge>
       </TableCell>
-      <TableCell>{user.language}</TableCell>
-      <TableCell>{user.messagesCount}</TableCell>
-      <TableCell>{safeFormatTime(user.lastActive)}</TableCell>
+      <TableCell className="text-muted-foreground text-sm">
+        {user.date}
+      </TableCell>
       <TableCell>
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button variant="ghost" size="sm">
-              <Eye className="h-4 w-4" />
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-2xl">
-            <DialogHeader>
-              <DialogTitle>User Context</DialogTitle>
-              <DialogDescription>
-                View user details and recent conversation history
-              </DialogDescription>
-            </DialogHeader>
-            <UserContextDialog userId={user.id} />
-          </DialogContent>
-        </Dialog>
+        <div className="flex gap-1">
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button variant="ghost" size="sm" title="View conversation">
+                <MessageCircle className="h-4 w-4" />
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-2xl">
+              <DialogHeader>
+                <DialogTitle>Conversation History</DialogTitle>
+                <DialogDescription>
+                  {user.platform}: {user.userId}
+                </DialogDescription>
+              </DialogHeader>
+              <UserContextDialog userId={user.userId} />
+            </DialogContent>
+          </Dialog>
+          <Button variant="ghost" size="sm" onClick={onResetLimit} title="Reset rate limit">
+            <RotateCcw className="h-4 w-4" />
+          </Button>
+        </div>
       </TableCell>
     </TableRow>
   );
@@ -149,45 +147,33 @@ export function BotUsersTable() {
   const [page, setPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
   const [platformFilter, setPlatformFilter] = useState<string>('all');
-  const [showLinked, setShowLinked] = useState(false);
-  const { data, isLoading } = useBotUsers(page, 100);
+  const { data, isLoading, refetch } = useBotUsers(page, 100);
+  const resetLimit = useResetUserLimit();
 
-  // Filter and group users
-  const { filteredUsers, linkedGroups } = useMemo(() => {
-    const users = data?.users || [];
+  // Filter users
+  const filteredUsers = useMemo(() => {
+    if (!data?.users) return [];
 
-    // Filter by search and platform
-    let filtered = users.filter(user => {
+    return data.users.filter(user => {
       const matchesSearch = !searchQuery ||
-        user.username?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        user.matrixId?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        user.telegramId?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        user.id.toLowerCase().includes(searchQuery.toLowerCase());
+        user.userId.toLowerCase().includes(searchQuery.toLowerCase());
 
       const matchesPlatform = platformFilter === 'all' || user.platform === platformFilter;
 
       return matchesSearch && matchesPlatform;
     });
+  }, [data?.users, searchQuery, platformFilter]);
 
-    // Group linked users (by bridgedFrom or similar username patterns)
-    const groups: Record<string, BotUser[]> = {};
-
-    if (showLinked) {
-      filtered.forEach(user => {
-        // Group by bridgedFrom if available, or by username
-        const groupKey = user.bridgedFrom || user.username || user.id;
-        if (!groups[groupKey]) {
-          groups[groupKey] = [];
-        }
-        groups[groupKey].push(user);
-      });
+  const handleResetLimit = async (user: BotUser) => {
+    if (!confirm(`Reset rate limit for ${user.userId}?`)) return;
+    try {
+      await resetLimit.mutateAsync({ platform: user.platform, userId: user.userId });
+      toast.success('Rate limit reset');
+      refetch();
+    } catch {
+      toast.error('Failed to reset limit');
     }
-
-    return {
-      filteredUsers: filtered,
-      linkedGroups: Object.entries(groups).filter(([_, users]) => users.length > 1)
-    };
-  }, [data?.users, searchQuery, platformFilter, showLinked]);
+  };
 
   if (isLoading) {
     return (
@@ -199,8 +185,7 @@ export function BotUsersTable() {
     );
   }
 
-  const total = data?.total || 0;
-  const totalPages = Math.ceil(total / 100);
+  const totalPages = data?.pages || 1;
 
   return (
     <div className="space-y-4">
@@ -209,7 +194,7 @@ export function BotUsersTable() {
         <div className="flex-1 min-w-[200px] relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Search by username, ID..."
+            placeholder="Search by user ID..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-10"
@@ -224,87 +209,52 @@ export function BotUsersTable() {
             <SelectItem value="all">All Platforms</SelectItem>
             <SelectItem value="matrix">Matrix</SelectItem>
             <SelectItem value="telegram">Telegram</SelectItem>
-            <SelectItem value="bridged">Bridged</SelectItem>
           </SelectContent>
         </Select>
-
-        <Button
-          variant={showLinked ? 'default' : 'outline'}
-          onClick={() => setShowLinked(!showLinked)}
-          className="gap-2"
-        >
-          <Link2 className="h-4 w-4" />
-          {showLinked ? 'Show All' : 'Group Linked'}
-        </Button>
       </div>
 
       {/* Stats */}
       <div className="flex gap-4 text-sm text-muted-foreground">
         <div className="flex items-center gap-1">
           <Users className="h-4 w-4" />
-          <span>{filteredUsers.length} users</span>
+          <span>{filteredUsers.length} active users today</span>
         </div>
-        {showLinked && linkedGroups.length > 0 && (
-          <div className="flex items-center gap-1">
-            <Link2 className="h-4 w-4" />
-            <span>{linkedGroups.length} linked groups</span>
-          </div>
-        )}
       </div>
 
-      {/* Linked Groups Section */}
-      {showLinked && linkedGroups.length > 0 && (
-        <div className="space-y-2 p-4 bg-muted/50 rounded-lg">
-          <h4 className="font-medium flex items-center gap-2">
-            <Link2 className="h-4 w-4" />
-            Linked Users
-          </h4>
-          {linkedGroups.map(([groupKey, users]) => (
-            <div key={groupKey} className="p-3 bg-background rounded border">
-              <p className="text-sm font-medium mb-2">{groupKey}</p>
-              <div className="flex gap-2 flex-wrap">
-                {users.map(user => (
-                  <Badge key={user.id} variant="outline">
-                    {user.platform}: {user.username || user.id.slice(0, 15)}...
-                  </Badge>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-
+      {/* Table */}
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>ID</TableHead>
+            <TableHead>User ID</TableHead>
             <TableHead>Platform</TableHead>
-            <TableHead>Username</TableHead>
-            <TableHead>Tier</TableHead>
-            <TableHead>Language</TableHead>
-            <TableHead>Messages</TableHead>
-            <TableHead>Last Active</TableHead>
-            <TableHead></TableHead>
+            <TableHead className="text-center">Requests Today</TableHead>
+            <TableHead>Date</TableHead>
+            <TableHead>Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {filteredUsers.map((user) => (
-            <UserRow key={user.id} user={user} />
+            <UserRow
+              key={`${user.platform}-${user.userId}`}
+              user={user}
+              onResetLimit={() => handleResetLimit(user)}
+            />
           ))}
           {filteredUsers.length === 0 && (
             <TableRow>
-              <TableCell colSpan={8} className="text-center text-muted-foreground">
-                No users found
+              <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
+                No active users today
               </TableCell>
             </TableRow>
           )}
         </TableBody>
       </Table>
 
+      {/* Pagination */}
       {totalPages > 1 && (
         <div className="flex items-center justify-between mt-4">
           <p className="text-sm text-muted-foreground">
-            Page {page} of {totalPages} ({total} users)
+            Page {page} of {totalPages} ({data?.total || 0} users)
           </p>
           <div className="flex gap-2">
             <Button

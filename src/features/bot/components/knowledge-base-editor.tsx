@@ -4,7 +4,6 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Badge } from '@/components/ui/badge';
 import {
   Dialog,
   DialogContent,
@@ -13,114 +12,134 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { useKnowledgeBase, useUpdateKnowledgeEntry, useDeleteKnowledgeEntry } from '../api/admin-bot';
 import { toast } from 'sonner';
-import { Plus, Trash2, Edit, Save, Book } from 'lucide-react';
-import type { KnowledgeEntry } from '../types';
+import { Plus, Trash2, Edit, Save, Book, CheckCircle2, Circle } from 'lucide-react';
+import type { KnowledgeResponse } from '../types';
 
-const categories = [
-  'general',
-  'cryptocurrency',
-  'walme',
-  'commands',
-  'faq',
-  'legal',
+// Default knowledge topics with descriptions
+const DEFAULT_TOPICS = [
+  { key: 'bitcoin', name: 'Bitcoin', description: 'Information about Bitcoin (BTC)' },
+  { key: 'ethereum', name: 'Ethereum', description: 'Information about Ethereum (ETH)' },
+  { key: 'defiBasics', name: 'DeFi Basics', description: 'Decentralized finance fundamentals' },
+  { key: 'staking', name: 'Staking', description: 'Staking concepts and strategies' },
+  { key: 'layer2', name: 'Layer 2', description: 'L2 scaling solutions' },
+  { key: 'slangDictionary', name: 'Crypto Slang', description: 'Common crypto terminology' },
 ];
 
-function KnowledgeEntryCard({ entry, onEdit, onDelete }: {
-  entry: KnowledgeEntry;
+interface EntryCardProps {
+  topic: string;
+  name: string;
+  description?: string;
+  content?: string;
+  isConfigured: boolean;
+  updatedAt?: string;
   onEdit: () => void;
-  onDelete: () => void;
-}) {
+  onDelete?: () => void;
+}
+
+function EntryCard({ topic, name, description, content, isConfigured, updatedAt, onEdit, onDelete }: EntryCardProps) {
   return (
-    <div className="p-4 border rounded-lg hover:border-primary/50 transition-colors">
-      <div className="flex items-start justify-between">
-        <div className="flex-1">
+    <Card
+      className={`cursor-pointer transition-colors hover:border-primary/50 ${isConfigured ? 'border-green-500/50' : ''}`}
+      onClick={onEdit}
+    >
+      <CardHeader className="pb-2">
+        <div className="flex items-start justify-between">
           <div className="flex items-center gap-2">
-            <Book className="h-4 w-4 text-muted-foreground" />
-            <h4 className="font-medium">{entry.name}</h4>
+            {isConfigured ? (
+              <CheckCircle2 className="h-5 w-5 text-green-500" />
+            ) : (
+              <Circle className="h-5 w-5 text-muted-foreground" />
+            )}
+            <CardTitle className="text-base">{name}</CardTitle>
           </div>
-          <p className="text-xs text-muted-foreground mt-1">Key: {entry.key}</p>
-          {entry.category && (
-            <Badge variant="outline" className="mt-2">{entry.category}</Badge>
-          )}
+          <div className="flex gap-1">
+            <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); onEdit(); }}>
+              <Edit className="h-4 w-4" />
+            </Button>
+            {onDelete && (
+              <Button variant="ghost" size="sm" className="text-destructive" onClick={(e) => { e.stopPropagation(); onDelete(); }}>
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
         </div>
-        <div className="flex gap-1">
-          <Button variant="ghost" size="sm" onClick={onEdit}>
-            <Edit className="h-4 w-4" />
-          </Button>
-          <Button variant="ghost" size="sm" onClick={onDelete} className="text-destructive">
-            <Trash2 className="h-4 w-4" />
-          </Button>
-        </div>
-      </div>
-      <p className="text-sm text-muted-foreground mt-3 line-clamp-3">
-        {entry.content}
-      </p>
-    </div>
+        <CardDescription className="text-xs">
+          {description || `Key: ${topic}`}
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        {content ? (
+          <p className="text-sm text-muted-foreground line-clamp-3">{content}</p>
+        ) : (
+          <p className="text-sm text-muted-foreground italic">Not configured - using default</p>
+        )}
+        {updatedAt && (
+          <p className="text-xs text-muted-foreground mt-2">
+            Updated: {new Date(updatedAt).toLocaleDateString()}
+          </p>
+        )}
+      </CardContent>
+    </Card>
   );
 }
 
 export function KnowledgeBaseEditor() {
-  const { data: knowledge, isLoading, refetch } = useKnowledgeBase();
+  const { data, isLoading, refetch } = useKnowledgeBase();
   const updateEntry = useUpdateKnowledgeEntry();
   const deleteEntry = useDeleteKnowledgeEntry();
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingEntry, setEditingEntry] = useState<KnowledgeEntry | null>(null);
+  const [editingTopic, setEditingTopic] = useState<string | null>(null);
   const [form, setForm] = useState({
     key: '',
-    name: '',
     content: '',
-    category: 'general',
   });
+
+  // Cast data to correct type
+  const knowledge = data as KnowledgeResponse | undefined;
 
   if (isLoading) {
     return (
-      <div className="grid gap-4 md:grid-cols-2">
-        {[...Array(4)].map((_, i) => (
-          <Skeleton key={i} className="h-32" />
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {[...Array(6)].map((_, i) => (
+          <Skeleton key={i} className="h-40" />
         ))}
       </div>
     );
   }
 
-  const entries = Object.entries(knowledge || {}).map(([entryKey, entry]) => ({
-    ...entry,
-    key: entryKey,
-  }));
+  const handleOpenDialog = (topic: string, existingContent?: string) => {
+    setEditingTopic(topic);
+    setForm({
+      key: topic,
+      content: existingContent || '',
+    });
+    setIsDialogOpen(true);
+  };
 
-  const handleOpenDialog = (entry?: KnowledgeEntry) => {
-    if (entry) {
-      setEditingEntry(entry);
-      setForm({
-        key: entry.key,
-        name: entry.name,
-        content: entry.content,
-        category: entry.category || 'general',
-      });
-    } else {
-      setEditingEntry(null);
-      setForm({ key: '', name: '', content: '', category: 'general' });
-    }
+  const handleOpenNewDialog = () => {
+    setEditingTopic(null);
+    setForm({ key: '', content: '' });
     setIsDialogOpen(true);
   };
 
   const handleSave = async () => {
-    if (!form.key || !form.name || !form.content) {
+    if (!form.key || !form.content) {
       toast.error('Please fill all required fields');
       return;
     }
 
     try {
-      await updateEntry.mutateAsync(form);
-      toast.success(editingEntry ? 'Entry updated' : 'Entry added');
+      await updateEntry.mutateAsync({ key: form.key, content: form.content });
+      toast.success('Knowledge entry saved');
       setIsDialogOpen(false);
       refetch();
     } catch (error) {
@@ -129,7 +148,7 @@ export function KnowledgeBaseEditor() {
   };
 
   const handleDelete = async (key: string) => {
-    if (!confirm('Are you sure you want to delete this entry?')) return;
+    if (!confirm('Delete this custom knowledge entry?')) return;
 
     try {
       await deleteEntry.mutateAsync(key);
@@ -140,67 +159,96 @@ export function KnowledgeBaseEditor() {
     }
   };
 
+  // Get topic info
+  const getTopicInfo = (key: string) => {
+    const defaultInfo = DEFAULT_TOPICS.find(t => t.key === key);
+    return defaultInfo || { key, name: key, description: `Custom topic: ${key}` };
+  };
+
+  // Combine default and custom topics
+  const allTopics = [
+    ...DEFAULT_TOPICS.map(t => ({
+      ...t,
+      content: knowledge?.customEntries?.[t.key]?.content,
+      updatedAt: knowledge?.customEntries?.[t.key]?.updatedAt,
+      isConfigured: !!knowledge?.customEntries?.[t.key],
+      isDefault: true,
+    })),
+    // Add custom topics that aren't in defaults
+    ...Object.entries(knowledge?.customEntries || {})
+      .filter(([key]) => !DEFAULT_TOPICS.some(t => t.key === key))
+      .map(([key, entry]) => ({
+        key,
+        name: key,
+        description: `Custom topic`,
+        content: entry.content,
+        updatedAt: entry.updatedAt,
+        isConfigured: true,
+        isDefault: false,
+      })),
+  ];
+
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
+      {/* Header */}
       <div className="flex justify-between items-center">
-        <p className="text-sm text-muted-foreground">
-          {entries.length} knowledge entries
-        </p>
+        <div>
+          <p className="text-sm text-muted-foreground">
+            {knowledge?.totalEntries || 0} knowledge entries
+          </p>
+          <p className="text-xs text-muted-foreground">
+            Configure knowledge that the AI uses to answer questions
+          </p>
+        </div>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
-            <Button onClick={() => handleOpenDialog()}>
+            <Button onClick={handleOpenNewDialog}>
               <Plus className="h-4 w-4 mr-2" />
-              Add Entry
+              Add Custom Topic
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-2xl">
             <DialogHeader>
-              <DialogTitle>
-                {editingEntry ? 'Edit Knowledge Entry' : 'Add Knowledge Entry'}
+              <DialogTitle className="flex items-center gap-2">
+                <Book className="h-5 w-5" />
+                {editingTopic ? `Edit: ${getTopicInfo(editingTopic).name}` : 'Add Custom Topic'}
               </DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              {!editingTopic && (
                 <div>
-                  <Label>Key (unique identifier)</Label>
+                  <Label>Topic Key (unique identifier)</Label>
                   <Input
                     value={form.key}
-                    onChange={(e) => setForm(f => ({ ...f, key: e.target.value }))}
-                    placeholder="e.g., walme_intro"
-                    disabled={!!editingEntry}
+                    onChange={(e) => setForm(f => ({ ...f, key: e.target.value.toLowerCase().replace(/\s+/g, '_') }))}
+                    placeholder="e.g., solana, nft_basics"
                   />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Use lowercase letters and underscores
+                  </p>
                 </div>
-                <div>
-                  <Label>Category</Label>
-                  <Select value={form.category} onValueChange={(v) => setForm(f => ({ ...f, category: v }))}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {categories.map((cat) => (
-                        <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              <div>
-                <Label>Name</Label>
-                <Input
-                  value={form.name}
-                  onChange={(e) => setForm(f => ({ ...f, name: e.target.value }))}
-                  placeholder="e.g., Walme Introduction"
-                />
-              </div>
+              )}
 
               <div>
                 <Label>Content</Label>
                 <Textarea
                   value={form.content}
                   onChange={(e) => setForm(f => ({ ...f, content: e.target.value }))}
-                  placeholder="Knowledge content that the AI will use..."
-                  className="min-h-[200px]"
+                  placeholder={`Enter knowledge content about ${editingTopic || 'this topic'}...
+
+Example:
+Solana (SOL) - high-performance blockchain.
+
+Facts:
+- Transaction speed: 65,000 TPS
+- Low fees: ~$0.00025 per transaction
+- Proof of History consensus
+
+Use cases:
+- DeFi (Raydium, Marinade)
+- NFTs (Magic Eden)
+- Gaming`}
+                  className="min-h-[300px] font-mono text-sm"
                 />
               </div>
 
@@ -218,21 +266,52 @@ export function KnowledgeBaseEditor() {
         </Dialog>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
-        {entries.map((entry) => (
-          <KnowledgeEntryCard
-            key={entry.key}
-            entry={entry}
-            onEdit={() => handleOpenDialog(entry)}
-            onDelete={() => handleDelete(entry.key)}
-          />
-        ))}
-        {entries.length === 0 && (
-          <p className="col-span-2 text-center text-muted-foreground py-8">
-            No knowledge entries yet. Add your first entry.
-          </p>
-        )}
+      {/* Default Topics Section */}
+      <div>
+        <h3 className="text-sm font-medium mb-3 flex items-center gap-2">
+          <Book className="h-4 w-4" />
+          Core Knowledge Topics
+        </h3>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {allTopics.filter(t => t.isDefault).map((topic) => (
+            <EntryCard
+              key={topic.key}
+              topic={topic.key}
+              name={topic.name}
+              description={topic.description}
+              content={topic.content}
+              isConfigured={topic.isConfigured}
+              updatedAt={topic.updatedAt}
+              onEdit={() => handleOpenDialog(topic.key, topic.content)}
+            />
+          ))}
+        </div>
       </div>
+
+      {/* Custom Topics Section */}
+      {allTopics.some(t => !t.isDefault) && (
+        <div>
+          <h3 className="text-sm font-medium mb-3 flex items-center gap-2">
+            <Plus className="h-4 w-4" />
+            Custom Topics
+          </h3>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {allTopics.filter(t => !t.isDefault).map((topic) => (
+              <EntryCard
+                key={topic.key}
+                topic={topic.key}
+                name={topic.name}
+                description={topic.description}
+                content={topic.content}
+                isConfigured={topic.isConfigured}
+                updatedAt={topic.updatedAt}
+                onEdit={() => handleOpenDialog(topic.key, topic.content)}
+                onDelete={() => handleDelete(topic.key)}
+              />
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
