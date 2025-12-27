@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Select,
   SelectContent,
@@ -11,14 +12,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { useTopicsAnalytics, useGenerateTopicsAnalytics } from '../api/admin-bot';
-import { TrendingUp, TrendingDown, Minus, Brain, RefreshCw, Loader2, MessageSquareQuote, Users, Languages } from 'lucide-react';
+import { useTopicsAnalytics, useGenerateTopicsAnalytics, useGeneratePrompt, useUpdateSystemPrompt } from '../api/admin-bot';
+import { TrendingUp, TrendingDown, Minus, Brain, RefreshCw, Loader2, MessageSquareQuote, Users, Languages, Lightbulb, Sparkles, Save, Copy, Check } from 'lucide-react';
 import { toast } from 'sonner';
 
 export function TopicsDashboard() {
   const [language, setLanguage] = useState('ru');
+  const [generatedPrompt, setGeneratedPrompt] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
   const { data, isLoading, error } = useTopicsAnalytics();
   const generateAnalytics = useGenerateTopicsAnalytics();
+  const generatePrompt = useGeneratePrompt();
+  const savePrompt = useUpdateSystemPrompt();
 
   const handleGenerate = async () => {
     try {
@@ -27,6 +32,58 @@ export function TopicsDashboard() {
     } catch {
       toast.error('Failed to generate analytics');
     }
+  };
+
+  const handleGenerateRecommendedPrompt = async () => {
+    if (!data) return;
+
+    // Build context from analytics
+    const context = `
+User Analytics Summary:
+- Top Topics: ${data.topTopics?.map(t => t.topic).join(', ') || 'N/A'}
+- User Interests: ${data.userInterests?.map(i => i.interest).join(', ') || 'N/A'}
+- Sentiment: ${data.sentimentBreakdown?.positive || 0}% positive, ${data.sentimentBreakdown?.negative || 0}% negative
+- Common Questions: ${data.recentQuestions?.slice(0, 5).join('; ') || 'N/A'}
+
+Goals:
+1. Improve user sentiment (reduce negative responses)
+2. Increase engagement and conversation quality
+3. Better address user pain points and questions
+4. Guide users toward premium features naturally
+    `.trim();
+
+    try {
+      const result = await generatePrompt.mutateAsync({
+        idea: 'Create a system prompt for a crypto assistant bot that improves user sentiment, addresses pain points, and naturally promotes premium features',
+        context,
+        type: 'system',
+      });
+      setGeneratedPrompt(result.prompt);
+      toast.success('Prompt generated');
+    } catch {
+      toast.error('Failed to generate prompt');
+    }
+  };
+
+  const handleSavePrompt = async () => {
+    if (!generatedPrompt) return;
+    try {
+      await savePrompt.mutateAsync({
+        key: 'default',
+        prompt: generatedPrompt,
+      });
+      toast.success('Prompt saved as default system prompt');
+    } catch {
+      toast.error('Failed to save prompt');
+    }
+  };
+
+  const handleCopyPrompt = () => {
+    if (!generatedPrompt) return;
+    navigator.clipboard.writeText(generatedPrompt);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+    toast.success('Copied to clipboard');
   };
 
   if (isLoading) {
@@ -262,6 +319,82 @@ export function TopicsDashboard() {
           </CardContent>
         </Card>
       )}
+
+      {/* AI Recommendations */}
+      <Card className="border-purple-200 dark:border-purple-800 bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-950/20 dark:to-blue-950/20">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Lightbulb className="h-5 w-5 text-yellow-500" />
+            AI Recommendations
+          </CardTitle>
+          <CardDescription>
+            Generate optimized prompts based on user analytics to improve sentiment, engagement, and conversions
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {/* Recommendations summary */}
+          <div className="grid md:grid-cols-3 gap-4 text-sm">
+            <div className="p-3 bg-white dark:bg-gray-900 rounded-lg">
+              <p className="font-medium text-green-600 mb-1">📈 Improve Sentiment</p>
+              <p className="text-muted-foreground">Address negative sentiment by providing clearer, more helpful responses on common pain points.</p>
+            </div>
+            <div className="p-3 bg-white dark:bg-gray-900 rounded-lg">
+              <p className="font-medium text-blue-600 mb-1">💬 Boost Engagement</p>
+              <p className="text-muted-foreground">Focus on top topics users care about: {data.topTopics?.slice(0, 3).map(t => t.topic).join(', ') || 'crypto prices, trading'}</p>
+            </div>
+            <div className="p-3 bg-white dark:bg-gray-900 rounded-lg">
+              <p className="font-medium text-purple-600 mb-1">💎 Increase LTV</p>
+              <p className="text-muted-foreground">Naturally guide users to premium features when discussing their interests.</p>
+            </div>
+          </div>
+
+          {/* Generate prompt button */}
+          <div className="flex items-center gap-2">
+            <Button onClick={handleGenerateRecommendedPrompt} disabled={generatePrompt.isPending}>
+              {generatePrompt.isPending ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <Sparkles className="mr-2 h-4 w-4" />
+                  Generate Recommended Prompt
+                </>
+              )}
+            </Button>
+          </div>
+
+          {/* Generated prompt display */}
+          {generatedPrompt && (
+            <div className="space-y-3">
+              <Textarea
+                value={generatedPrompt}
+                onChange={(e) => setGeneratedPrompt(e.target.value)}
+                className="min-h-[200px] font-mono text-sm"
+              />
+              <div className="flex items-center gap-2">
+                <Button onClick={handleSavePrompt} disabled={savePrompt.isPending}>
+                  {savePrompt.isPending ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <Save className="mr-2 h-4 w-4" />
+                  )}
+                  Save as Default Prompt
+                </Button>
+                <Button variant="outline" onClick={handleCopyPrompt}>
+                  {copied ? (
+                    <Check className="mr-2 h-4 w-4 text-green-500" />
+                  ) : (
+                    <Copy className="mr-2 h-4 w-4" />
+                  )}
+                  {copied ? 'Copied!' : 'Copy'}
+                </Button>
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }
