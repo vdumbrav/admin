@@ -84,7 +84,7 @@ import { IconGift, IconArrowBack, IconCheck, IconRobot, IconMessageCircle, IconB
 import { useState } from 'react';
 import { Switch } from '@/components/ui/switch';
 import { cn } from '@/lib/utils';
-import { useChatLogs, useUserContext, useSummarizeUser } from '@/features/bot/api/admin-bot';
+import { useUserContext, useSummarizeUser } from '@/features/bot/api/admin-bot';
 import type { UserSummary } from '@/features/bot/types';
 
 export const Route = createFileRoute('/_authenticated/users/$userId')({
@@ -92,32 +92,22 @@ export const Route = createFileRoute('/_authenticated/users/$userId')({
 });
 
 // Bot Interactions Section Component
-function BotInteractionsSection({ userId, userEmail }: { userId: string; userEmail?: string }) {
+function BotInteractionsSection({ userId }: { userId: string }) {
   const [language, setLanguage] = useState('ru');
   const [summary, setSummary] = useState<UserSummary | null>(null);
   const [autoSave, setAutoSave] = useState(true);
-  const [isSaving, setIsSaving] = useState(false);
 
   // Try different user ID formats for bot data
   const telegramUserId = `telegram:${userId}`;
-  const matrixUserId = `@${userEmail?.split('@')[0] || userId}:matrix2.moliedev.xyz`;
 
-  const { data: chatLogs, isLoading: logsLoading } = useChatLogs(1, 100, telegramUserId);
   const { data: userContext, isLoading: contextLoading } = useUserContext(telegramUserId);
   const summarize = useSummarizeUser();
 
   const messages = userContext?.messages || (Array.isArray(userContext) ? userContext : []);
 
-  const handleSave = async (data: UserSummary) => {
-    setIsSaving(true);
-    try {
-      // TODO: Implement save API when backend is ready
-      // await saveUserProfile.mutateAsync({ userId, profile: data });
-    } catch {
-      // Silent fail for now
-    } finally {
-      setIsSaving(false);
-    }
+  const handleSave = async (_profile: UserSummary) => {
+    // TODO: Implement save API when backend is ready
+    // await saveUserProfile.mutateAsync({ userId, profile: _profile });
   };
 
   const handleSummarize = async () => {
@@ -1083,7 +1073,7 @@ function UserDetailsPage() {
 
         {/* Bot Tab */}
         <TabsContent value="bot" className="space-y-6">
-          <BotInteractionsSection userId={userId} userEmail={user.email} />
+          <BotInteractionsSection userId={userId} />
         </TabsContent>
 
         {/* Cards Tab */}

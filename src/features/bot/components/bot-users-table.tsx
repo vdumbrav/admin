@@ -94,7 +94,7 @@ function UserContextDialog({ userId }: { userId: string }) {
   );
 }
 
-function UserSummaryDialog({ userId, onClose }: { userId: string; onClose: () => void }) {
+function UserSummaryDialog({ userId }: { userId: string; onClose?: () => void }) {
   const [language, setLanguage] = useState('ru');
   const [summary, setSummary] = useState<UserSummary | null>(null);
   const [autoSave, setAutoSave] = useState(true);
