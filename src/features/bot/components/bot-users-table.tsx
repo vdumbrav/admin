@@ -29,7 +29,7 @@ import {
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { useBotUsers, useUserContext, useResetUserLimit, useClearUserContext, useSummarizeUser } from '../api/admin-bot';
+import { useBotUsers, useUserContext, useResetUserLimit, useClearUserContext, useSummarizeUser, useSaveUserProfile } from '../api/admin-bot';
 import { toast } from 'sonner';
 import { Search, RotateCcw, Trash2, Users, MessageCircle, Link, Brain, Languages, Loader2 } from 'lucide-react';
 import type { BotUser, UserSummary } from '../types';
@@ -97,20 +97,16 @@ function UserContextDialog({ userId }: { userId: string }) {
 function UserSummaryDialog({ userId, onClose }: { userId: string; onClose: () => void }) {
   const [language, setLanguage] = useState('ru');
   const [summary, setSummary] = useState<UserSummary | null>(null);
-  const [isSaving, setIsSaving] = useState(false);
   const [autoSave, setAutoSave] = useState(true);
   const summarize = useSummarizeUser();
+  const saveProfile = useSaveUserProfile();
 
   const handleSave = async (data: UserSummary) => {
-    setIsSaving(true);
     try {
-      // TODO: Implement save API when backend is ready
-      // await saveUserProfile.mutateAsync({ userId, profile: data });
+      await saveProfile.mutateAsync({ userId, profile: data });
       toast.success('User profile saved');
     } catch {
       toast.error('Failed to save profile');
-    } finally {
-      setIsSaving(false);
     }
   };
 
@@ -284,8 +280,8 @@ function UserSummaryDialog({ userId, onClose }: { userId: string; onClose: () =>
                 {autoSave && <span className="ml-2 text-green-600">• Auto-saved</span>}
               </div>
               {!autoSave && (
-                <Button size="sm" onClick={() => handleSave(summary)} disabled={isSaving}>
-                  {isSaving ? (
+                <Button size="sm" onClick={() => handleSave(summary)} disabled={saveProfile.isPending}>
+                  {saveProfile.isPending ? (
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   ) : null}
                   Save Profile

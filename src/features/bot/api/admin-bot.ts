@@ -660,3 +660,44 @@ export const useGenerateTopicsAnalytics = () => {
     },
   });
 };
+
+// ==================== User Profiles ====================
+
+export const useSaveUserProfile = () => {
+  const auth = useAppAuth();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ userId, profile }: { userId: string; profile: UserSummary }) => {
+      const token = await auth.getAccessToken();
+      return orvalMutator({
+        url: `/admin/bot/save-user-profile/${encodeURIComponent(userId)}`,
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        data: profile,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'bot', 'user-profiles'] });
+    },
+  });
+};
+
+export const useUserProfiles = (page = 1, limit = 50) => {
+  const auth = useAppAuth();
+
+  return useQuery({
+    queryKey: ['admin', 'bot', 'user-profiles', page, limit],
+    queryFn: async () => {
+      const token = await auth.getAccessToken();
+      return orvalMutator({
+        url: `/admin/bot/user-profiles?page=${page}&limit=${limit}`,
+        method: 'GET',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+    },
+  });
+};
