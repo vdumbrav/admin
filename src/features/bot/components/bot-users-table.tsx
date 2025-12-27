@@ -278,7 +278,7 @@ function UserSummaryDialog({ userId }: { userId: string; onClose?: () => void })
                       <span className="text-muted-foreground">Potential Needs:</span>
                       <div className="flex flex-wrap gap-1 mt-1">
                         {summary.insights.potentialNeeds.map((need, idx) => (
-                          <Badge key={idx} variant="secondary" className="text-xs">{need}</Badge>
+                          <Badge key={idx} variant="secondary" className="text-xs whitespace-normal h-auto py-1">{need}</Badge>
                         ))}
                       </div>
                     </div>
@@ -288,7 +288,7 @@ function UserSummaryDialog({ userId }: { userId: string; onClose?: () => void })
                       <span className="text-muted-foreground">Pain Points:</span>
                       <div className="flex flex-wrap gap-1 mt-1">
                         {summary.insights.painPoints.map((point, idx) => (
-                          <Badge key={idx} variant="destructive" className="text-xs">{point}</Badge>
+                          <Badge key={idx} variant="destructive" className="text-xs whitespace-normal h-auto py-1">{point}</Badge>
                         ))}
                       </div>
                     </div>
@@ -298,7 +298,7 @@ function UserSummaryDialog({ userId }: { userId: string; onClose?: () => void })
                       <span className="text-muted-foreground">Goals:</span>
                       <div className="flex flex-wrap gap-1 mt-1">
                         {summary.insights.goals.map((goal, idx) => (
-                          <Badge key={idx} className="text-xs">{goal}</Badge>
+                          <Badge key={idx} className="text-xs whitespace-normal h-auto py-1">{goal}</Badge>
                         ))}
                       </div>
                     </div>
@@ -426,7 +426,6 @@ export function BotUsersTable() {
   const { data, isLoading, refetch } = useBotUsers(page, 100);
   const resetLimit = useResetUserLimit();
   const summarize = useSummarizeUser();
-  const saveProfile = useSaveUserProfile();
 
   // Filter users
   const filteredUsers = useMemo(() => {
@@ -470,8 +469,6 @@ export function BotUsersTable() {
       try {
         const result = await summarize.mutateAsync({ userId: user.userId, lang: bulkLang });
         results.push(result);
-        // Auto-save each result
-        await saveProfile.mutateAsync({ userId: user.userId, profile: result });
         setBulkProgress(prev => prev ? { ...prev, current: i + 1, results: [...results] } : null);
       } catch {
         // Skip failed users
@@ -481,6 +478,51 @@ export function BotUsersTable() {
 
     toast.success(`Generated ${results.length} summaries`);
   };
+
+  // Aggregate bulk results for overview
+  const bulkOverview = useMemo(() => {
+    if (!bulkProgress?.results?.length) return null;
+
+    const results = bulkProgress.results;
+    const allTopics: Record<string, number> = {};
+    const allInterests: Record<string, number> = {};
+    const allPainPoints: Record<string, number> = {};
+    const allGoals: Record<string, number> = {};
+    let positiveCount = 0, neutralCount = 0, negativeCount = 0;
+    let highEngagement = 0, mediumEngagement = 0, lowEngagement = 0;
+
+    results.forEach(r => {
+      // Count topics
+      r.topics?.forEach(t => { allTopics[t] = (allTopics[t] || 0) + 1; });
+      // Count interests
+      r.preferences?.interests?.forEach(i => { allInterests[i] = (allInterests[i] || 0) + 1; });
+      // Count pain points
+      r.insights?.painPoints?.forEach(p => { allPainPoints[p] = (allPainPoints[p] || 0) + 1; });
+      // Count goals
+      r.insights?.goals?.forEach(g => { allGoals[g] = (allGoals[g] || 0) + 1; });
+      // Sentiment
+      if (r.sentiment === 'positive') positiveCount++;
+      else if (r.sentiment === 'negative') negativeCount++;
+      else neutralCount++;
+      // Engagement
+      if (r.engagement === 'high') highEngagement++;
+      else if (r.engagement === 'low') lowEngagement++;
+      else mediumEngagement++;
+    });
+
+    const sortByCount = (obj: Record<string, number>) =>
+      Object.entries(obj).sort((a, b) => b[1] - a[1]).slice(0, 10);
+
+    return {
+      totalUsers: results.length,
+      topTopics: sortByCount(allTopics),
+      topInterests: sortByCount(allInterests),
+      topPainPoints: sortByCount(allPainPoints),
+      topGoals: sortByCount(allGoals),
+      sentiment: { positive: positiveCount, neutral: neutralCount, negative: negativeCount },
+      engagement: { high: highEngagement, medium: mediumEngagement, low: lowEngagement },
+    };
+  }, [bulkProgress?.results]);
 
   if (isLoading) {
     return (
@@ -497,40 +539,117 @@ export function BotUsersTable() {
   return (
     <div className="space-y-4">
       {/* Bulk Actions */}
-      <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
-        <Brain className="h-5 w-5 text-purple-500" />
-        <span className="text-sm font-medium">Bulk AI Summary</span>
-        <Select value={bulkLang} onValueChange={setBulkLang}>
-          <SelectTrigger className="w-[100px] h-8">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="en">English</SelectItem>
-            <SelectItem value="ru">Русский</SelectItem>
-            <SelectItem value="uk">Українська</SelectItem>
-          </SelectContent>
-        </Select>
-        <Button
-          size="sm"
-          onClick={handleBulkSummary}
-          disabled={bulkProgress !== null || filteredUsers.filter(u => (u.messageCount || 0) > 0).length === 0}
-        >
-          {bulkProgress ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              {bulkProgress.current}/{bulkProgress.total}
-            </>
-          ) : (
-            <>
-              <Brain className="mr-2 h-4 w-4" />
-              Summarize All ({filteredUsers.filter(u => (u.messageCount || 0) > 0).length})
-            </>
-          )}
-        </Button>
-        {bulkProgress && bulkProgress.current === bulkProgress.total && (
-          <Button size="sm" variant="outline" onClick={() => setBulkProgress(null)}>
-            Done ({bulkProgress.results.length} saved)
+      <div className="space-y-4">
+        <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
+          <Brain className="h-5 w-5 text-purple-500" />
+          <span className="text-sm font-medium">Bulk AI Summary</span>
+          <Select value={bulkLang} onValueChange={setBulkLang}>
+            <SelectTrigger className="w-[100px] h-8">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="en">English</SelectItem>
+              <SelectItem value="ru">Русский</SelectItem>
+              <SelectItem value="uk">Українська</SelectItem>
+            </SelectContent>
+          </Select>
+          <Button
+            size="sm"
+            onClick={handleBulkSummary}
+            disabled={(bulkProgress !== null && bulkProgress.current < bulkProgress.total) || filteredUsers.filter(u => (u.messageCount || 0) > 0).length === 0}
+          >
+            {bulkProgress && bulkProgress.current < bulkProgress.total ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                {bulkProgress.current}/{bulkProgress.total}
+              </>
+            ) : (
+              <>
+                <Brain className="mr-2 h-4 w-4" />
+                Summarize All ({filteredUsers.filter(u => (u.messageCount || 0) > 0).length})
+              </>
+            )}
           </Button>
+          {bulkProgress && bulkProgress.current === bulkProgress.total && (
+            <Button size="sm" variant="outline" onClick={() => setBulkProgress(null)}>
+              Clear Results
+            </Button>
+          )}
+        </div>
+
+        {/* Bulk Overview Results */}
+        {bulkOverview && (
+          <div className="p-4 border rounded-lg bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-950/30 dark:to-blue-950/30 space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="font-semibold text-lg flex items-center gap-2">
+                <Brain className="h-5 w-5 text-purple-500" />
+                Users Overview ({bulkOverview.totalUsers} analyzed)
+              </h3>
+              <div className="flex gap-4 text-sm">
+                <span className="text-green-600">😊 {bulkOverview.sentiment.positive} positive</span>
+                <span className="text-gray-600">😐 {bulkOverview.sentiment.neutral} neutral</span>
+                <span className="text-red-600">😞 {bulkOverview.sentiment.negative} negative</span>
+              </div>
+            </div>
+
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {/* Top Topics */}
+              <div>
+                <p className="text-sm font-medium text-muted-foreground mb-2">Top Topics</p>
+                <div className="flex flex-wrap gap-1">
+                  {bulkOverview.topTopics.map(([topic, count]) => (
+                    <Badge key={topic} variant="secondary" className="text-xs">
+                      {topic} ({count})
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+
+              {/* Top Interests */}
+              <div>
+                <p className="text-sm font-medium text-muted-foreground mb-2">Top Interests</p>
+                <div className="flex flex-wrap gap-1">
+                  {bulkOverview.topInterests.map(([interest, count]) => (
+                    <Badge key={interest} variant="outline" className="text-xs">
+                      {interest} ({count})
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+
+              {/* Pain Points */}
+              <div>
+                <p className="text-sm font-medium text-muted-foreground mb-2">Common Pain Points</p>
+                <div className="flex flex-wrap gap-1">
+                  {bulkOverview.topPainPoints.map(([point, count]) => (
+                    <Badge key={point} variant="destructive" className="text-xs whitespace-normal h-auto py-1">
+                      {point} ({count})
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+
+              {/* Goals */}
+              <div>
+                <p className="text-sm font-medium text-muted-foreground mb-2">Common Goals</p>
+                <div className="flex flex-wrap gap-1">
+                  {bulkOverview.topGoals.map(([goal, count]) => (
+                    <Badge key={goal} className="text-xs whitespace-normal h-auto py-1">
+                      {goal} ({count})
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Engagement breakdown */}
+            <div className="pt-2 border-t text-sm text-muted-foreground">
+              Engagement:
+              <span className="text-green-600 ml-2">🔥 {bulkOverview.engagement.high} high</span>
+              <span className="text-yellow-600 ml-2">⚡ {bulkOverview.engagement.medium} medium</span>
+              <span className="text-gray-600 ml-2">💤 {bulkOverview.engagement.low} low</span>
+            </div>
+          </div>
         )}
       </div>
 
