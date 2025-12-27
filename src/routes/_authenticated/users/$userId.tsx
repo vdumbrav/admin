@@ -84,7 +84,7 @@ import { IconGift, IconArrowBack, IconCheck, IconRobot, IconMessageCircle, IconB
 import { useState } from 'react';
 import { Switch } from '@/components/ui/switch';
 import { cn } from '@/lib/utils';
-import { useUserContext, useSummarizeUser } from '@/features/bot/api/admin-bot';
+import { useUserContext, useSummarizeUser, useUserProfile, useSaveUserProfile } from '@/features/bot/api/admin-bot';
 import type { UserSummary } from '@/features/bot/types';
 
 export const Route = createFileRoute('/_authenticated/users/$userId')({
@@ -94,32 +94,46 @@ export const Route = createFileRoute('/_authenticated/users/$userId')({
 // Bot Interactions Section Component
 function BotInteractionsSection({ matrixId }: { matrixId?: string }) {
   const [language, setLanguage] = useState('ru');
-  const [summary, setSummary] = useState<UserSummary | null>(null);
+  const [newSummary, setNewSummary] = useState<UserSummary | null>(null);
   const [autoSave, setAutoSave] = useState(false);
+  const [showSaveDialog, setShowSaveDialog] = useState(false);
 
   // Use matrix ID for bot data
   const botUserId = matrixId || null;
 
   const { data: userContext, isLoading: contextLoading } = useUserContext(botUserId || '');
+  const { data: savedProfile, isLoading: profileLoading } = useUserProfile(botUserId || '');
   const summarize = useSummarizeUser();
+  const saveProfile = useSaveUserProfile();
 
   const messages = userContext?.messages || (Array.isArray(userContext) ? userContext : []);
 
-  const handleSave = async (_profile: UserSummary) => {
-    // TODO: Implement save API when backend is ready
-    // await saveUserProfile.mutateAsync({ userId: botUserId, profile: _profile });
+  // Show saved profile or newly generated one
+  const displayProfile = newSummary || savedProfile;
+
+  const handleSave = async (profile: UserSummary) => {
+    if (!botUserId) return;
+    try {
+      await saveProfile.mutateAsync({ userId: botUserId, profile });
+      toast.success('Profile saved');
+      setShowSaveDialog(false);
+    } catch {
+      toast.error('Failed to save profile');
+    }
   };
 
   const handleSummarize = async () => {
     if (!botUserId) return;
     try {
       const result = await summarize.mutateAsync({ userId: botUserId, lang: language });
-      setSummary(result);
+      setNewSummary(result);
       if (autoSave && result) {
         await handleSave(result);
+      } else if (result) {
+        setShowSaveDialog(true);
       }
     } catch {
-      // Silent fail
+      toast.error('Failed to generate summary');
     }
   };
 
@@ -196,6 +210,9 @@ function BotInteractionsSection({ matrixId }: { matrixId?: string }) {
           <CardTitle className="flex items-center gap-2">
             <IconBrain className="h-5 w-5 text-purple-500" />
             AI User Profile
+            {savedProfile && !newSummary && (
+              <Badge variant="outline" className="ml-2 text-xs">saved</Badge>
+            )}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -217,7 +234,7 @@ function BotInteractionsSection({ matrixId }: { matrixId?: string }) {
                 disabled={summarize.isPending || messages.length === 0}
                 size="sm"
               >
-                {summarize.isPending ? 'Analyzing...' : 'Generate Profile'}
+                {summarize.isPending ? 'Analyzing...' : savedProfile ? 'Regenerate' : 'Generate Profile'}
               </Button>
               <div className="flex items-center gap-2 ml-auto">
                 <Switch id="auto-save-user" checked={autoSave} onCheckedChange={setAutoSave} />
@@ -227,22 +244,37 @@ function BotInteractionsSection({ matrixId }: { matrixId?: string }) {
               </div>
             </div>
 
+            {/* Loading state */}
+            {profileLoading && (
+              <div className="p-3 bg-muted rounded-lg animate-pulse">
+                <div className="h-4 bg-muted-foreground/20 rounded w-1/4 mb-2" />
+                <div className="h-3 bg-muted-foreground/20 rounded w-3/4" />
+              </div>
+            )}
+
             {/* Summary Results */}
-            {summary ? (
+            {displayProfile ? (
               <ScrollArea className="h-[350px]">
                 <div className="space-y-4 pr-4">
+                  {/* Saved indicator */}
+                  {savedProfile && !newSummary && savedProfile.savedAt && (
+                    <div className="text-xs text-muted-foreground">
+                      Saved: {new Date(savedProfile.savedAt as string).toLocaleString()}
+                    </div>
+                  )}
+
                   {/* Basic Summary */}
                   <div>
                     <p className="text-xs font-medium text-muted-foreground mb-1">Summary</p>
-                    <p className="text-sm whitespace-pre-wrap">{summary.summary}</p>
+                    <p className="text-sm whitespace-pre-wrap">{displayProfile.summary}</p>
                   </div>
 
                   {/* Topics */}
-                  {summary.topics?.length > 0 && (
+                  {displayProfile.topics?.length > 0 && (
                     <div>
                       <p className="text-xs font-medium text-muted-foreground mb-2">Topics</p>
                       <div className="flex flex-wrap gap-1">
-                        {summary.topics.map((topic, i) => (
+                        {displayProfile.topics.map((topic, i) => (
                           <Badge key={i} variant="secondary" className="text-xs">{topic}</Badge>
                         ))}
                       </div>
@@ -254,43 +286,43 @@ function BotInteractionsSection({ matrixId }: { matrixId?: string }) {
                     <div>
                       <p className="text-xs font-medium text-muted-foreground mb-1">Sentiment</p>
                       <Badge variant={
-                        summary.sentiment === 'positive' ? 'default' :
-                        summary.sentiment === 'negative' ? 'destructive' : 'secondary'
+                        displayProfile.sentiment === 'positive' ? 'default' :
+                        displayProfile.sentiment === 'negative' ? 'destructive' : 'secondary'
                       }>
-                        {summary.sentiment}
+                        {displayProfile.sentiment}
                       </Badge>
                     </div>
                     <div>
                       <p className="text-xs font-medium text-muted-foreground mb-1">Engagement</p>
-                      <Badge variant="outline">{summary.engagement}</Badge>
+                      <Badge variant="outline">{displayProfile.engagement}</Badge>
                     </div>
                   </div>
 
                   {/* Preferences */}
-                  {summary.preferences && (
+                  {displayProfile.preferences && (
                     <div className="border-t pt-3">
                       <p className="text-xs font-medium text-muted-foreground mb-2">User Preferences</p>
                       <div className="grid grid-cols-2 gap-2 text-xs">
-                        {summary.preferences.interests?.length > 0 && (
+                        {displayProfile.preferences.interests?.length > 0 && (
                           <div className="col-span-2">
                             <span className="text-muted-foreground">Interests:</span>
                             <div className="flex flex-wrap gap-1 mt-1">
-                              {summary.preferences.interests.map((i, idx) => (
+                              {displayProfile.preferences.interests.map((i, idx) => (
                                 <Badge key={idx} variant="outline" className="text-xs">{i}</Badge>
                               ))}
                             </div>
                           </div>
                         )}
-                        {summary.preferences.tradingStyle && (
+                        {displayProfile.preferences.tradingStyle && (
                           <div>
                             <span className="text-muted-foreground">Trading:</span>
-                            <p className="font-medium">{summary.preferences.tradingStyle}</p>
+                            <p className="font-medium">{displayProfile.preferences.tradingStyle}</p>
                           </div>
                         )}
-                        {summary.preferences.experienceLevel && (
+                        {displayProfile.preferences.experienceLevel && (
                           <div>
                             <span className="text-muted-foreground">Experience:</span>
-                            <p className="font-medium">{summary.preferences.experienceLevel}</p>
+                            <p className="font-medium">{displayProfile.preferences.experienceLevel}</p>
                           </div>
                         )}
                       </div>
@@ -298,36 +330,36 @@ function BotInteractionsSection({ matrixId }: { matrixId?: string }) {
                   )}
 
                   {/* Insights */}
-                  {summary.insights && (
+                  {displayProfile.insights && (
                     <div className="border-t pt-3">
                       <p className="text-xs font-medium text-muted-foreground mb-2">Marketing Insights</p>
                       <div className="space-y-2 text-xs">
-                        {summary.insights.potentialNeeds?.length > 0 && (
+                        {displayProfile.insights.potentialNeeds?.length > 0 && (
                           <div>
                             <span className="text-muted-foreground">Potential Needs:</span>
                             <div className="flex flex-wrap gap-1 mt-1">
-                              {summary.insights.potentialNeeds.map((need, idx) => (
+                              {displayProfile.insights.potentialNeeds.map((need, idx) => (
                                 <Badge key={idx} variant="secondary" className="text-xs">{need}</Badge>
                               ))}
                             </div>
                           </div>
                         )}
-                        {summary.insights.painPoints?.length > 0 && (
+                        {displayProfile.insights.painPoints?.length > 0 && (
                           <div>
                             <span className="text-muted-foreground">Pain Points:</span>
                             <div className="flex flex-wrap gap-1 mt-1">
-                              {summary.insights.painPoints.map((point, idx) => (
-                                <Badge key={idx} variant="destructive" className="text-xs">{point}</Badge>
+                              {displayProfile.insights.painPoints.map((point, idx) => (
+                                <Badge key={idx} variant="destructive" className="text-xs whitespace-normal h-auto py-1">{point}</Badge>
                               ))}
                             </div>
                           </div>
                         )}
-                        {summary.insights.goals?.length > 0 && (
+                        {displayProfile.insights.goals?.length > 0 && (
                           <div>
                             <span className="text-muted-foreground">Goals:</span>
                             <div className="flex flex-wrap gap-1 mt-1">
-                              {summary.insights.goals.map((goal, idx) => (
-                                <Badge key={idx} className="text-xs">{goal}</Badge>
+                              {displayProfile.insights.goals.map((goal, idx) => (
+                                <Badge key={idx} className="text-xs whitespace-normal h-auto py-1">{goal}</Badge>
                               ))}
                             </div>
                           </div>
@@ -338,9 +370,8 @@ function BotInteractionsSection({ matrixId }: { matrixId?: string }) {
 
                   {/* Footer */}
                   <div className="border-t pt-3 text-xs text-muted-foreground">
-                    {summary.messageCount} messages analyzed
-                    {summary.lastInteraction && ` • Last: ${new Date(summary.lastInteraction).toLocaleString()}`}
-                    {autoSave && <span className="ml-2 text-green-600">• Auto-saved</span>}
+                    {displayProfile.messageCount} messages analyzed
+                    {displayProfile.lastInteraction && ` • Last: ${new Date(displayProfile.lastInteraction).toLocaleString()}`}
                   </div>
                 </div>
               </ScrollArea>
@@ -360,6 +391,25 @@ function BotInteractionsSection({ matrixId }: { matrixId?: string }) {
           </div>
         </CardContent>
       </Card>
+
+      {/* Save confirmation dialog */}
+      <AlertDialog open={showSaveDialog} onOpenChange={setShowSaveDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Save Profile?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Do you want to save this AI-generated profile?
+              {savedProfile && ' This will replace the existing saved profile.'}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setShowSaveDialog(false)}>Don't Save</AlertDialogCancel>
+            <AlertDialogAction onClick={() => newSummary && handleSave(newSummary)} disabled={saveProfile.isPending}>
+              {saveProfile.isPending ? 'Saving...' : 'Save Profile'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

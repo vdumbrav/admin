@@ -149,6 +149,7 @@ export interface UserSummary {
   engagement: string;
   messageCount: number;
   lastInteraction?: string;
+  savedAt?: string;  // When profile was saved to Redis
   // Extended profile data for marketing/personalization
   preferences?: {
     interests: string[];           // crypto topics they're interested in (BTC, ETH, DeFi, NFT)

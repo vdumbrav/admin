@@ -18,24 +18,53 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { useChatLogs, useExportTrainingData, useSummarizeUser } from '../api/admin-bot';
+import { useChatLogs, useExportTrainingData, useSummarizeUser, useUserProfile, useSaveUserProfile } from '../api/admin-bot';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import type { UserSummary } from '../types';
 import { toast } from 'sonner';
 import { Download, Search, Eye, MessageCircle, Bot, User, Brain, Loader2 } from 'lucide-react';
 import type { ChatLogEntry } from '../types';
 
 function ConversationDialog({ log }: { log: ChatLogEntry }) {
   const [summaryLang, setSummaryLang] = useState('ru');
-  const [quickSummary, setQuickSummary] = useState<string | null>(null);
+  const [newSummary, setNewSummary] = useState<UserSummary | null>(null);
+  const [showSaveDialog, setShowSaveDialog] = useState(false);
+  const { data: savedProfile, isLoading: profileLoading } = useUserProfile(log.userId);
   const summarize = useSummarizeUser();
+  const saveProfile = useSaveUserProfile();
 
   const handleQuickSummary = async () => {
     try {
       const result = await summarize.mutateAsync({ userId: log.userId, lang: summaryLang });
-      setQuickSummary(result.summary);
+      setNewSummary(result);
+      setShowSaveDialog(true);
     } catch {
       toast.error('Failed to generate summary');
     }
   };
+
+  const handleSaveProfile = async () => {
+    if (!newSummary) return;
+    try {
+      await saveProfile.mutateAsync({ userId: log.userId, profile: newSummary });
+      toast.success('Profile saved');
+      setShowSaveDialog(false);
+    } catch {
+      toast.error('Failed to save profile');
+    }
+  };
+
+  // Show saved profile or newly generated one
+  const displayProfile = newSummary || savedProfile;
 
   return (
     <div className="space-y-4">
@@ -58,16 +87,61 @@ function ConversationDialog({ log }: { log: ChatLogEntry }) {
           disabled={summarize.isPending || !log.messages?.length}
         >
           {summarize.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Brain className="h-4 w-4 mr-1" />}
-          Summary
+          {savedProfile ? 'Regenerate' : 'Generate'} Summary
         </Button>
       </div>
 
-      {quickSummary && (
-        <div className="p-3 bg-purple-50 dark:bg-purple-950/30 rounded-lg border border-purple-200 dark:border-purple-800">
-          <p className="text-sm font-medium text-purple-800 dark:text-purple-200 mb-1">AI Summary</p>
-          <p className="text-sm text-purple-700 dark:text-purple-300">{quickSummary}</p>
+      {profileLoading && (
+        <div className="p-3 bg-muted rounded-lg animate-pulse">
+          <div className="h-4 bg-muted-foreground/20 rounded w-1/4 mb-2" />
+          <div className="h-3 bg-muted-foreground/20 rounded w-3/4" />
         </div>
       )}
+
+      {displayProfile && (
+        <div className="p-3 bg-purple-50 dark:bg-purple-950/30 rounded-lg border border-purple-200 dark:border-purple-800">
+          <div className="flex items-center justify-between mb-1">
+            <p className="text-sm font-medium text-purple-800 dark:text-purple-200">
+              AI Summary {savedProfile && !newSummary && <span className="text-xs text-muted-foreground">(saved)</span>}
+            </p>
+            {savedProfile?.savedAt && !newSummary && (
+              <span className="text-xs text-muted-foreground">
+                {new Date(savedProfile.savedAt as string).toLocaleDateString()}
+              </span>
+            )}
+          </div>
+          <p className="text-sm text-purple-700 dark:text-purple-300">{displayProfile.summary}</p>
+          {displayProfile.insights?.painPoints && displayProfile.insights.painPoints.length > 0 && (
+            <div className="mt-2">
+              <p className="text-xs text-muted-foreground mb-1">Pain Points:</p>
+              <div className="flex flex-wrap gap-1">
+                {displayProfile.insights.painPoints.map((p, i) => (
+                  <Badge key={i} variant="outline" className="text-xs whitespace-normal h-auto py-1">{p}</Badge>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Save confirmation dialog */}
+      <AlertDialog open={showSaveDialog} onOpenChange={setShowSaveDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Save Profile?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Do you want to save this AI-generated profile for user {log.userId}?
+              {savedProfile && ' This will replace the existing saved profile.'}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setShowSaveDialog(false)}>Don't Save</AlertDialogCancel>
+            <AlertDialogAction onClick={handleSaveProfile} disabled={saveProfile.isPending}>
+              {saveProfile.isPending ? 'Saving...' : 'Save Profile'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <ScrollArea className="h-[400px] pr-4">
         <div className="space-y-3">

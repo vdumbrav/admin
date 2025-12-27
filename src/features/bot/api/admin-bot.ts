@@ -680,9 +680,27 @@ export const useSaveUserProfile = () => {
         data: profile,
       });
     },
-    onSuccess: () => {
+    onSuccess: (_, { userId }) => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'bot', 'user-profiles'] });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'bot', 'user-profile', userId] });
     },
+  });
+};
+
+export const useUserProfile = (userId: string) => {
+  const auth = useAppAuth();
+
+  return useQuery({
+    queryKey: ['admin', 'bot', 'user-profile', userId],
+    queryFn: async (): Promise<UserSummary | null> => {
+      const token = await auth.getAccessToken();
+      return orvalMutator({
+        url: `/admin/bot/user-profile/${encodeURIComponent(userId)}`,
+        method: 'GET',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+    },
+    enabled: !!userId,
   });
 };
 
