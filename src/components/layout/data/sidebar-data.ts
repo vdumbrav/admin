@@ -22,6 +22,7 @@ import {
   IconChartPie,
   IconShieldCheck,
   IconFileText,
+  IconRobot,
 } from '@tabler/icons-react';
 import { type SidebarData } from '../types';
 
@@ -206,6 +207,17 @@ export const sidebarData: SidebarData = {
           url: '/notifications',
           icon: IconBell,
           isActive: (pathname: string) => pathname.startsWith('/notifications'),
+        },
+      ],
+    },
+    {
+      title: 'AI Bot',
+      items: [
+        {
+          title: 'Walme Bot',
+          url: '/bot',
+          icon: IconRobot,
+          isActive: (pathname: string) => pathname.startsWith('/bot'),
         },
       ],
     },
