@@ -115,7 +115,7 @@ export const useUserContext = (userId: string) => {
     queryFn: async (): Promise<UserContext> => {
       const token = await auth.getAccessToken();
       return orvalMutator<UserContext>({
-        url: `/admin/bot/users/${encodeURIComponent(userId)}/context`,
+        url: `/admin/bot/context/${encodeURIComponent(userId)}`,
         method: 'GET',
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -134,7 +134,7 @@ export const useSystemPrompts = () => {
     queryFn: async (): Promise<Record<string, SystemPrompt>> => {
       const token = await auth.getAccessToken();
       return orvalMutator({
-        url: '/admin/bot/training/prompts',
+        url: '/admin/bot/prompts',
         method: 'GET',
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -150,7 +150,7 @@ export const useUpdateSystemPrompt = () => {
     mutationFn: async ({ key, prompt, language }: { key: string; prompt: string; language?: string }) => {
       const token = await auth.getAccessToken();
       return orvalMutator({
-        url: '/admin/bot/training/prompts',
+        url: '/admin/bot/prompts',
         method: 'PUT',
         headers: {
           Authorization: `Bearer ${token}`,
@@ -175,7 +175,7 @@ export const useKnowledgeBase = () => {
     queryFn: async (): Promise<Record<string, KnowledgeEntry>> => {
       const token = await auth.getAccessToken();
       return orvalMutator({
-        url: '/admin/bot/training/knowledge',
+        url: '/admin/bot/knowledge',
         method: 'GET',
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -191,7 +191,7 @@ export const useUpdateKnowledgeEntry = () => {
     mutationFn: async ({ key, name, content, category }: { key: string; name: string; content: string; category?: string }) => {
       const token = await auth.getAccessToken();
       return orvalMutator({
-        url: '/admin/bot/training/knowledge',
+        url: '/admin/bot/knowledge',
         method: 'PUT',
         headers: {
           Authorization: `Bearer ${token}`,
@@ -214,7 +214,7 @@ export const useDeleteKnowledgeEntry = () => {
     mutationFn: async (key: string) => {
       const token = await auth.getAccessToken();
       return orvalMutator({
-        url: `/admin/bot/training/knowledge/${encodeURIComponent(key)}`,
+        url: `/admin/bot/knowledge/${encodeURIComponent(key)}`,
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -235,7 +235,7 @@ export const useBannedConfig = () => {
     queryFn: async (): Promise<BannedConfig> => {
       const token = await auth.getAccessToken();
       return orvalMutator<BannedConfig>({
-        url: '/admin/bot/training/banned',
+        url: '/admin/bot/banned',
         method: 'GET',
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -251,7 +251,7 @@ export const useUpdateBannedConfig = () => {
     mutationFn: async (config: Partial<BannedConfig>) => {
       const token = await auth.getAccessToken();
       return orvalMutator({
-        url: '/admin/bot/training/banned',
+        url: '/admin/bot/banned',
         method: 'PUT',
         headers: {
           Authorization: `Bearer ${token}`,
@@ -276,7 +276,7 @@ export const useCustomInstructions = () => {
     queryFn: async (): Promise<CustomInstructions> => {
       const token = await auth.getAccessToken();
       return orvalMutator<CustomInstructions>({
-        url: '/admin/bot/training/instructions',
+        url: '/admin/bot/instructions',
         method: 'GET',
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -292,7 +292,7 @@ export const useUpdateCustomInstructions = () => {
     mutationFn: async (instructions: Partial<CustomInstructions>) => {
       const token = await auth.getAccessToken();
       return orvalMutator({
-        url: '/admin/bot/training/instructions',
+        url: '/admin/bot/instructions',
         method: 'PUT',
         headers: {
           Authorization: `Bearer ${token}`,
@@ -317,7 +317,7 @@ export const useAIConfig = () => {
     queryFn: async (): Promise<AIConfig> => {
       const token = await auth.getAccessToken();
       return orvalMutator<AIConfig>({
-        url: '/admin/bot/training/ai-config',
+        url: '/admin/bot/ai-config',
         method: 'GET',
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -333,7 +333,7 @@ export const useUpdateAIConfig = () => {
     mutationFn: async (config: Partial<AIConfig>) => {
       const token = await auth.getAccessToken();
       return orvalMutator({
-        url: '/admin/bot/training/ai-config',
+        url: '/admin/bot/ai-config',
         method: 'PUT',
         headers: {
           Authorization: `Bearer ${token}`,
@@ -358,7 +358,7 @@ export const useResponseTemplates = () => {
     queryFn: async (): Promise<Record<string, ResponseTemplate>> => {
       const token = await auth.getAccessToken();
       return orvalMutator({
-        url: '/admin/bot/training/templates',
+        url: '/admin/bot/templates',
         method: 'GET',
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -374,7 +374,7 @@ export const useUpdateResponseTemplate = () => {
     mutationFn: async ({ trigger, response, language, exact }: ResponseTemplate) => {
       const token = await auth.getAccessToken();
       return orvalMutator({
-        url: '/admin/bot/training/templates',
+        url: '/admin/bot/templates',
         method: 'PUT',
         headers: {
           Authorization: `Bearer ${token}`,
@@ -397,7 +397,7 @@ export const useDeleteResponseTemplate = () => {
     mutationFn: async (trigger: string) => {
       const token = await auth.getAccessToken();
       return orvalMutator({
-        url: `/admin/bot/training/templates/${encodeURIComponent(trigger)}`,
+        url: `/admin/bot/templates/${encodeURIComponent(trigger)}`,
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -424,7 +424,7 @@ export const useChatLogs = (page = 1, limit = 50, userId?: string) => {
 
       const token = await auth.getAccessToken();
       return orvalMutator({
-        url: `/admin/bot/training/logs?${params.toString()}`,
+        url: `/admin/bot/logs?${params.toString()}`,
         method: 'GET',
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -441,7 +441,7 @@ export const useExportTrainingData = () => {
     mutationFn: async (): Promise<TrainingExport> => {
       const token = await auth.getAccessToken();
       return orvalMutator<TrainingExport>({
-        url: '/admin/bot/training/export',
+        url: '/admin/bot/export',
         method: 'GET',
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -457,7 +457,7 @@ export const useImportTrainingData = () => {
     mutationFn: async (data: Partial<TrainingExport>) => {
       const token = await auth.getAccessToken();
       return orvalMutator({
-        url: '/admin/bot/training/import',
+        url: '/admin/bot/import',
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`,
