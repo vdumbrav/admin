@@ -91,15 +91,46 @@ export const Route = createFileRoute('/_authenticated/users/$userId')({
   component: UserDetailsPage,
 });
 
+// Auth identity type
+interface AuthIdentity {
+  provider: string;
+  authId: string;
+  authName?: string;
+}
+
 // Bot Interactions Section Component
-function BotInteractionsSection({ matrixId }: { matrixId?: string }) {
+function BotInteractionsSection({ matrixId, telegramId, authIdentities }: {
+  matrixId?: string;
+  telegramId?: string;
+  authIdentities?: AuthIdentity[];
+}) {
   const [language, setLanguage] = useState('ru');
   const [newSummary, setNewSummary] = useState<UserSummary | null>(null);
   const [autoSave, setAutoSave] = useState(false);
   const [showSaveDialog, setShowSaveDialog] = useState(false);
+  const [selectedIdentity, setSelectedIdentity] = useState<string>('');
 
-  // Use matrix ID for bot data
-  const botUserId = matrixId || null;
+  // Get all bot-related identities
+  const botIdentities = (authIdentities || []).filter(
+    i => i.provider === 'matrix' || i.provider === 'telegram'
+  );
+
+  // Also add from direct props if not in authIdentities
+  if (matrixId && !botIdentities.find(i => i.authId === matrixId)) {
+    botIdentities.unshift({ provider: 'matrix', authId: matrixId });
+  }
+  if (telegramId && !botIdentities.find(i => i.authId === telegramId)) {
+    botIdentities.unshift({ provider: 'telegram', authId: telegramId });
+  }
+
+  // Select first identity by default
+  const currentIdentity = selectedIdentity || botIdentities[0]?.authId || '';
+  const currentProvider = botIdentities.find(i => i.authId === currentIdentity)?.provider || 'matrix';
+
+  // Format user ID for API based on provider
+  const botUserId = currentIdentity
+    ? (currentProvider === 'telegram' ? `telegram:${currentIdentity}` : currentIdentity)
+    : null;
 
   const { data: userContext, isLoading: contextLoading } = useUserContext(botUserId || '');
   const { data: savedProfile, isLoading: profileLoading } = useUserProfile(botUserId || '');
@@ -137,7 +168,7 @@ function BotInteractionsSection({ matrixId }: { matrixId?: string }) {
     }
   };
 
-  if (!botUserId) {
+  if (botIdentities.length === 0) {
     return (
       <Card>
         <CardContent className="py-12 text-center">
@@ -161,10 +192,27 @@ function BotInteractionsSection({ matrixId }: { matrixId?: string }) {
           <CardTitle className="flex items-center gap-2">
             <IconMessageCircle className="h-5 w-5 text-blue-500" />
             Bot Conversations
-            <Badge variant="outline" className="ml-2 font-mono text-xs">
-              {botUserId}
-            </Badge>
           </CardTitle>
+          {/* Identity selector */}
+          {botIdentities.length > 1 && (
+            <div className="flex flex-wrap gap-2 mt-2">
+              {botIdentities.map((identity) => (
+                <Badge
+                  key={identity.authId}
+                  variant={currentIdentity === identity.authId ? 'default' : 'outline'}
+                  className="cursor-pointer font-mono text-xs"
+                  onClick={() => setSelectedIdentity(identity.authId)}
+                >
+                  {identity.provider === 'telegram' ? '📱' : '💬'} {identity.authName || identity.authId}
+                </Badge>
+              ))}
+            </div>
+          )}
+          {botIdentities.length === 1 && (
+            <Badge variant="outline" className="font-mono text-xs w-fit">
+              {currentProvider === 'telegram' ? '📱' : '💬'} {currentIdentity}
+            </Badge>
+          )}
         </CardHeader>
         <CardContent>
           {contextLoading ? (
@@ -1143,7 +1191,11 @@ function UserDetailsPage() {
 
         {/* Bot Tab */}
         <TabsContent value="bot" className="space-y-6">
-          <BotInteractionsSection matrixId={user.matrixId} />
+          <BotInteractionsSection
+                    matrixId={user.matrixId}
+                    telegramId={user.telegramId}
+                    authIdentities={user.authIdentities}
+                  />
         </TabsContent>
 
         {/* Cards Tab */}
