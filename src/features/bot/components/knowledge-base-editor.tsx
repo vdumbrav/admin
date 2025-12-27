@@ -91,9 +91,9 @@ export function KnowledgeBaseEditor() {
     );
   }
 
-  const entries = Object.entries(knowledge || {}).map(([key, entry]) => ({
-    key,
+  const entries = Object.entries(knowledge || {}).map(([entryKey, entry]) => ({
     ...entry,
+    key: entryKey,
   }));
 
   const handleOpenDialog = (entry?: KnowledgeEntry) => {

@@ -29,6 +29,7 @@ import { Route as AuthenticatedLogsIndexRouteImport } from './routes/_authentica
 import { Route as AuthenticatedFraudIndexRouteImport } from './routes/_authenticated/fraud/index'
 import { Route as AuthenticatedDashboardIndexRouteImport } from './routes/_authenticated/dashboard/index'
 import { Route as AuthenticatedCardsIndexRouteImport } from './routes/_authenticated/cards/index'
+import { Route as AuthenticatedBotIndexRouteImport } from './routes/_authenticated/bot/index'
 import { Route as AuthenticatedAnalyticsIndexRouteImport } from './routes/_authenticated/analytics/index'
 import { Route as AuthenticatedUsersUserIdRouteImport } from './routes/_authenticated/users/$userId'
 import { Route as AuthenticatedQuestsNewRouteImport } from './routes/_authenticated/quests/new'
@@ -154,6 +155,11 @@ const AuthenticatedCardsIndexRoute = AuthenticatedCardsIndexRouteImport.update({
   path: '/cards/',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedBotIndexRoute = AuthenticatedBotIndexRouteImport.update({
+  id: '/bot/',
+  path: '/bot/',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedAnalyticsIndexRoute =
   AuthenticatedAnalyticsIndexRouteImport.update({
     id: '/analytics/',
@@ -255,6 +261,7 @@ export interface FileRoutesByFullPath {
   '/quests/new': typeof AuthenticatedQuestsNewRouteWithChildren
   '/users/$userId': typeof AuthenticatedUsersUserIdRoute
   '/analytics': typeof AuthenticatedAnalyticsIndexRoute
+  '/bot': typeof AuthenticatedBotIndexRoute
   '/cards': typeof AuthenticatedCardsIndexRoute
   '/dashboard': typeof AuthenticatedDashboardIndexRoute
   '/fraud': typeof AuthenticatedFraudIndexRoute
@@ -290,6 +297,7 @@ export interface FileRoutesByTo {
   '/quests/new': typeof AuthenticatedQuestsNewRouteWithChildren
   '/users/$userId': typeof AuthenticatedUsersUserIdRoute
   '/analytics': typeof AuthenticatedAnalyticsIndexRoute
+  '/bot': typeof AuthenticatedBotIndexRoute
   '/cards': typeof AuthenticatedCardsIndexRoute
   '/dashboard': typeof AuthenticatedDashboardIndexRoute
   '/fraud': typeof AuthenticatedFraudIndexRoute
@@ -328,6 +336,7 @@ export interface FileRoutesById {
   '/_authenticated/quests/new': typeof AuthenticatedQuestsNewRouteWithChildren
   '/_authenticated/users/$userId': typeof AuthenticatedUsersUserIdRoute
   '/_authenticated/analytics/': typeof AuthenticatedAnalyticsIndexRoute
+  '/_authenticated/bot/': typeof AuthenticatedBotIndexRoute
   '/_authenticated/cards/': typeof AuthenticatedCardsIndexRoute
   '/_authenticated/dashboard/': typeof AuthenticatedDashboardIndexRoute
   '/_authenticated/fraud/': typeof AuthenticatedFraudIndexRoute
@@ -366,6 +375,7 @@ export interface FileRouteTypes {
     | '/quests/new'
     | '/users/$userId'
     | '/analytics'
+    | '/bot'
     | '/cards'
     | '/dashboard'
     | '/fraud'
@@ -401,6 +411,7 @@ export interface FileRouteTypes {
     | '/quests/new'
     | '/users/$userId'
     | '/analytics'
+    | '/bot'
     | '/cards'
     | '/dashboard'
     | '/fraud'
@@ -438,6 +449,7 @@ export interface FileRouteTypes {
     | '/_authenticated/quests/new'
     | '/_authenticated/users/$userId'
     | '/_authenticated/analytics/'
+    | '/_authenticated/bot/'
     | '/_authenticated/cards/'
     | '/_authenticated/dashboard/'
     | '/_authenticated/fraud/'
@@ -612,6 +624,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCardsIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/bot/': {
+      id: '/_authenticated/bot/'
+      path: '/bot'
+      fullPath: '/bot'
+      preLoaderRoute: typeof AuthenticatedBotIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/analytics/': {
       id: '/_authenticated/analytics/'
       path: '/analytics'
@@ -753,6 +772,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedQuestsNewRoute: typeof AuthenticatedQuestsNewRouteWithChildren
   AuthenticatedUsersUserIdRoute: typeof AuthenticatedUsersUserIdRoute
   AuthenticatedAnalyticsIndexRoute: typeof AuthenticatedAnalyticsIndexRoute
+  AuthenticatedBotIndexRoute: typeof AuthenticatedBotIndexRoute
   AuthenticatedCardsIndexRoute: typeof AuthenticatedCardsIndexRoute
   AuthenticatedDashboardIndexRoute: typeof AuthenticatedDashboardIndexRoute
   AuthenticatedFraudIndexRoute: typeof AuthenticatedFraudIndexRoute
@@ -784,6 +804,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedQuestsNewRoute: AuthenticatedQuestsNewRouteWithChildren,
   AuthenticatedUsersUserIdRoute: AuthenticatedUsersUserIdRoute,
   AuthenticatedAnalyticsIndexRoute: AuthenticatedAnalyticsIndexRoute,
+  AuthenticatedBotIndexRoute: AuthenticatedBotIndexRoute,
   AuthenticatedCardsIndexRoute: AuthenticatedCardsIndexRoute,
   AuthenticatedDashboardIndexRoute: AuthenticatedDashboardIndexRoute,
   AuthenticatedFraudIndexRoute: AuthenticatedFraudIndexRoute,

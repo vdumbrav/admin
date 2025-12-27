@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useBannedConfig, useUpdateBannedConfig } from '../api/admin-bot';
 import { toast } from 'sonner';
-import { Plus, X, Save, Shield, AlertTriangle } from 'lucide-react';
+import { Plus, X, Shield, AlertTriangle } from 'lucide-react';
 import type { BannedConfig } from '../types';
 
 function TagInput({

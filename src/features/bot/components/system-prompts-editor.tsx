@@ -19,7 +19,7 @@ import {
 } from '@/components/ui/accordion';
 import { useSystemPrompts, useUpdateSystemPrompt } from '../api/admin-bot';
 import { toast } from 'sonner';
-import { Save, Plus } from 'lucide-react';
+import { Save } from 'lucide-react';
 
 const languages = [
   { value: 'en', label: 'English' },

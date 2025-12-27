@@ -64,9 +64,9 @@ export function ResponseTemplatesEditor() {
     );
   }
 
-  const templateList = Object.entries(templates || {}).map(([trigger, template]) => ({
-    trigger,
+  const templateList = Object.entries(templates || {}).map(([triggerKey, template]) => ({
     ...template,
+    trigger: triggerKey,
   }));
 
   const handleOpenDialog = (template?: ResponseTemplate & { trigger: string }) => {
