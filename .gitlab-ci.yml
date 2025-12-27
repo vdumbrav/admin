@@ -1,0 +1,38 @@
+stages:
+  - deploy
+
+variables:
+  LANG: 'C.UTF-8'
+  LC_ALL: 'C.UTF-8'
+
+# --------------------
+# DEPLOY DEV
+# --------------------
+deploy_dev:
+  stage: deploy
+  environment:
+    name: development
+    url: https://admin.moliedev.xyz/
+  tags:
+    - walme dev runner
+  script:
+    - cd /opt/waitlist-admin
+    - docker system prune -f
+    - git fetch gitlab dev
+    - git checkout dev 2>/dev/null || git checkout -b dev gitlab/dev
+    - git reset --hard gitlab/dev
+    - |
+      COMPOSE_HTTP_TIMEOUT=200 docker-compose build \
+        --build-arg VITE_API_URL=${VITE_API_URL} \
+        --build-arg VITE_SWAGGER_URL=${VITE_SWAGGER_URL} \
+        --build-arg VITE_APP_BASE_URL=${VITE_APP_BASE_URL} \
+        --build-arg VITE_KIBANA_URL=${VITE_KIBANA_URL} \
+        --build-arg VITE_OIDC_AUTHORITY=${VITE_OIDC_AUTHORITY} \
+        --build-arg VITE_OIDC_CLIENT_ID=${VITE_OIDC_CLIENT_ID} \
+        --build-arg VITE_OIDC_SCOPE=${VITE_OIDC_SCOPE}
+    - docker rm -f waitlist-admin 2>/dev/null || true
+    - COMPOSE_HTTP_TIMEOUT=200 docker-compose up -d --build
+    - docker-compose ps
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "dev"'
+      when: on_success
