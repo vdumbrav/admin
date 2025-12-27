@@ -531,3 +531,68 @@ export const useExportTrainingData = () => {
     },
   });
 };
+
+// ==================== Prompt Generator ====================
+
+export interface GeneratePromptRequest {
+  idea: string;
+  context?: string;
+  type?: 'system' | 'user' | 'assistant';
+}
+
+export interface GeneratePromptResponse {
+  success: boolean;
+  prompt: string;
+  type: string;
+  idea: string;
+}
+
+export interface TestPromptRequest {
+  prompt: string;
+  testMessage?: string;
+}
+
+export interface TestPromptResponse {
+  success: boolean;
+  testMessage: string;
+  result: string;
+  tokensUsed: number;
+}
+
+export const useGeneratePrompt = () => {
+  const auth = useAppAuth();
+
+  return useMutation({
+    mutationFn: async (data: GeneratePromptRequest): Promise<GeneratePromptResponse> => {
+      const token = await auth.getAccessToken();
+      return orvalMutator<GeneratePromptResponse>({
+        url: '/admin/bot/generate-prompt',
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        data,
+      });
+    },
+  });
+};
+
+export const useTestPrompt = () => {
+  const auth = useAppAuth();
+
+  return useMutation({
+    mutationFn: async (data: TestPromptRequest): Promise<TestPromptResponse> => {
+      const token = await auth.getAccessToken();
+      return orvalMutator<TestPromptResponse>({
+        url: '/admin/bot/test-prompt',
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        data,
+      });
+    },
+  });
+};

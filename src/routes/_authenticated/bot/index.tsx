@@ -10,6 +10,7 @@ import { BannedContentEditor } from '@/features/bot/components/banned-content-ed
 import { AIConfigEditor } from '@/features/bot/components/ai-config-editor';
 import { ResponseTemplatesEditor } from '@/features/bot/components/response-templates-editor';
 import { ChatLogsViewer } from '@/features/bot/components/chat-logs-viewer';
+import { PromptGenerator } from '@/features/bot/components/prompt-generator';
 
 export const Route = createFileRoute('/_authenticated/bot/')({
   component: BotAdminPage,
@@ -28,10 +29,11 @@ function BotAdminPage() {
       <BotStatsOverview />
 
       <Tabs defaultValue="users" className="w-full">
-        <TabsList className="grid w-full grid-cols-8">
+        <TabsList className="grid w-full grid-cols-9">
           <TabsTrigger value="users">Users</TabsTrigger>
           <TabsTrigger value="limits">Limits</TabsTrigger>
           <TabsTrigger value="prompts">Prompts</TabsTrigger>
+          <TabsTrigger value="generator">Generator</TabsTrigger>
           <TabsTrigger value="knowledge">Knowledge</TabsTrigger>
           <TabsTrigger value="banned">Banned</TabsTrigger>
           <TabsTrigger value="ai">AI Config</TabsTrigger>
@@ -77,6 +79,20 @@ function BotAdminPage() {
             </CardHeader>
             <CardContent>
               <SystemPromptsEditor />
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="generator" className="mt-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Prompt Generator</CardTitle>
+              <CardDescription>
+                Generate professional prompts from ideas using AI
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <PromptGenerator />
             </CardContent>
           </Card>
         </TabsContent>

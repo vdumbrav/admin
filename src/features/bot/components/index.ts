@@ -7,3 +7,4 @@ export { BannedContentEditor } from './banned-content-editor';
 export { AIConfigEditor } from './ai-config-editor';
 export { ResponseTemplatesEditor } from './response-templates-editor';
 export { ChatLogsViewer } from './chat-logs-viewer';
+export { PromptGenerator } from './prompt-generator';
