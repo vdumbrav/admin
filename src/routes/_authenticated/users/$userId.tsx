@@ -39,6 +39,7 @@ import {
   IconArrowUp,
   IconArrowDown,
   IconRefresh,
+  IconWallet,
 } from '@tabler/icons-react';
 import {
   Select,
@@ -86,6 +87,7 @@ import { Switch } from '@/components/ui/switch';
 import { cn } from '@/lib/utils';
 import { useUserContext, useSummarizeUser, useUserProfile, useSaveUserProfile } from '@/features/bot/api/admin-bot';
 import type { UserSummary } from '@/features/bot/types';
+import { UserAnalyticsModal } from '@/features/users/components/user-analytics-modal';
 
 export const Route = createFileRoute('/_authenticated/users/$userId')({
   component: UserDetailsPage,
@@ -495,6 +497,7 @@ function UserDetailsPage() {
   const [activeTab, setActiveTab] = useState('overview');
   const [roleDialogOpen, setRoleDialogOpen] = useState(false);
   const [selectedRole, setSelectedRole] = useState<string>('');
+  const [analyticsModalOpen, setAnalyticsModalOpen] = useState(false);
 
   // Card filter state
   const [cardStatusFilter, setCardStatusFilter] = useState<string>('all');
@@ -923,6 +926,10 @@ function UserDetailsPage() {
         <ScrollArea className="w-full whitespace-nowrap">
           <TabsList className="inline-flex w-full justify-start">
             <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="analytics" className="gap-1">
+              <IconBrain className="h-4 w-4" />
+              Analytics
+            </TabsTrigger>
             <TabsTrigger value="bot">Bot</TabsTrigger>
             <TabsTrigger value="cards">Cards</TabsTrigger>
             <TabsTrigger value="transactions">Transactions</TabsTrigger>
@@ -1207,6 +1214,60 @@ function UserDetailsPage() {
               </CardContent>
             </Card>
           </div>
+        </TabsContent>
+
+        {/* Analytics Tab */}
+        <TabsContent value="analytics" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="flex items-center gap-2">
+                    <IconBrain className="h-5 w-5 text-purple-500" />
+                    User Analytics & Fraud Detection
+                  </CardTitle>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Comprehensive risk analysis, fraud detection, and blockchain checks
+                  </p>
+                </div>
+                <Button onClick={() => setAnalyticsModalOpen(true)}>
+                  <IconBrain className="h-4 w-4 mr-2" />
+                  Open Analytics
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="p-4 rounded-lg bg-muted/50">
+                  <div className="flex items-center gap-2 mb-2">
+                    <IconShield className="h-5 w-5 text-blue-500" />
+                    <span className="font-medium">Risk Assessment</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Multi-factor risk scoring with AI analysis
+                  </p>
+                </div>
+                <div className="p-4 rounded-lg bg-muted/50">
+                  <div className="flex items-center gap-2 mb-2">
+                    <IconUsers className="h-5 w-5 text-orange-500" />
+                    <span className="font-medium">Fraud Detection</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Multi-account, referral fraud, card abuse
+                  </p>
+                </div>
+                <div className="p-4 rounded-lg bg-muted/50">
+                  <div className="flex items-center gap-2 mb-2">
+                    <IconWallet className="h-5 w-5 text-green-500" />
+                    <span className="font-medium">Blockchain Analysis</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    HashDit, Chainalysis wallet risk checks
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
 
         {/* Bot Tab */}
@@ -2266,6 +2327,14 @@ function UserDetailsPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* User Analytics Modal */}
+      <UserAnalyticsModal
+        userId={user.id}
+        userEmail={user.email || undefined}
+        open={analyticsModalOpen}
+        onOpenChange={setAnalyticsModalOpen}
+      />
     </div>
   );
 }

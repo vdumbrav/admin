@@ -15,7 +15,15 @@ export interface User {
   updatedAt: string | null;
   matrixId: string | null;
   cardEmail: string | null;
+  // Analytics fields
+  admin_tags?: string[];
+  risk_score?: number;
+  fraud_flags?: string[];
+  admin_notes?: string;
+  last_analytics_at?: string;
 }
+
+export * from './analytics';
 
 export interface UserWithStats extends User {
   cardsCount: number;
