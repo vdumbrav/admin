@@ -289,22 +289,23 @@ export function LogsPage() {
         </div>
       )}
 
-      <Card className="flex-1">
-        <CardHeader>
-          <CardTitle>Kibana Dashboard</CardTitle>
-          <CardDescription>
-            Elasticsearch logs visualization and search
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="flex flex-col items-center justify-center py-12 gap-4">
-          <p className="text-muted-foreground text-center">
-            View detailed logs in Kibana (opens in new tab)
-          </p>
-          <Button asChild size="lg">
+      <Card className="flex-1 min-h-[600px]">
+        <CardHeader className="flex flex-row items-center justify-between">
+          <div>
+            <CardTitle>Kibana</CardTitle>
+          </div>
+          <Button asChild variant="outline" size="sm">
             <a href={discoverUrl} target="_blank" rel="noopener noreferrer">
-              Open Kibana Dashboard
+              Open in new tab
             </a>
           </Button>
+        </CardHeader>
+        <CardContent className="p-0 h-[calc(100%-80px)]">
+          <iframe
+            src={kibanaUrl}
+            className="w-full h-full min-h-[500px] border-0"
+            title="Kibana Dashboard"
+          />
         </CardContent>
       </Card>
     </div>
