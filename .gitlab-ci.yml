@@ -18,6 +18,7 @@ deploy_dev:
   script:
     - cd /opt/waitlist-admin
     - docker system prune -f
+    - git remote set-url gitlab https://gitlab-ci-token:${CI_JOB_TOKEN}@git.moliedev.xyz/main/waitlist-admin.git || git remote add gitlab https://gitlab-ci-token:${CI_JOB_TOKEN}@git.moliedev.xyz/main/waitlist-admin.git
     - git fetch gitlab dev
     - git checkout dev 2>/dev/null || git checkout -b dev gitlab/dev
     - git reset --hard gitlab/dev
