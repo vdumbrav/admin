@@ -4,7 +4,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Progress } from '@/components/ui/progress';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
   Select,
@@ -34,7 +33,7 @@ import {
 } from '@/features/security/api/user-analytics';
 import { Link } from '@tanstack/react-router';
 
-export const Route = createFileRoute('/_authenticated/security/')({
+export const Route = createFileRoute('/_authenticated/security/' as any)({
   component: SecurityCenterPage,
 });
 
@@ -269,7 +268,7 @@ function SecurityCenterPage() {
                           </Badge>
                         </div>
                         <Button variant="outline" size="sm" asChild>
-                          <Link to={`/users/${user.id}`}>
+                          <Link to={`/users/${user.id}` as any}>
                             <IconExternalLink className="h-4 w-4" />
                           </Link>
                         </Button>
@@ -332,7 +331,7 @@ function SecurityCenterPage() {
                           {user.riskScore}
                         </Badge>
                         <Button variant="outline" size="sm" asChild>
-                          <Link to={`/users/${user.userId}`}>
+                          <Link to={`/users/${user.userId}` as any}>
                             <IconExternalLink className="h-4 w-4" />
                           </Link>
                         </Button>

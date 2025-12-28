@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { orvalMutator } from '@/api/orval-mutator';
+import { orvalMutator } from '@/lib/api/client/orvalMutator';
 
 // Types
 export interface SuspiciousUser {
