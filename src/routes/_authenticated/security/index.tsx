@@ -206,10 +206,10 @@ function SecurityCenterPage() {
                     <SelectValue placeholder="Min Risk Score" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="30">Risk >= 30</SelectItem>
-                    <SelectItem value="50">Risk >= 50</SelectItem>
-                    <SelectItem value="70">Risk >= 70</SelectItem>
-                    <SelectItem value="90">Risk >= 90</SelectItem>
+                    <SelectItem value="30">Risk 30+</SelectItem>
+                    <SelectItem value="50">Risk 50+</SelectItem>
+                    <SelectItem value="70">Risk 70+</SelectItem>
+                    <SelectItem value="90">Risk 90+</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
