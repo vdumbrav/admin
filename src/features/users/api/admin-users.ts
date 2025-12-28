@@ -115,6 +115,7 @@ export interface UserDetails {
   matrixId?: string;
   cardEmail?: string;
   canAccessCameraQuest?: boolean;
+  authIdentities?: { provider: string; authId: string; authName?: string }[];
 
   // Additional comprehensive data
   premiumStatus: PremiumStatus;
