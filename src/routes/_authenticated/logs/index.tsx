@@ -296,14 +296,15 @@ export function LogsPage() {
             Elasticsearch logs visualization and search
           </CardDescription>
         </CardHeader>
-        <CardContent className="p-0">
-          <iframe
-            src={discoverUrl}
-            style={{ height: 'calc(100vh - 280px)' }}
-            className="w-full border-0"
-            title="Kibana Logs"
-            sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
-          />
+        <CardContent className="flex flex-col items-center justify-center py-12 gap-4">
+          <p className="text-muted-foreground text-center">
+            View detailed logs in Kibana (opens in new tab)
+          </p>
+          <Button asChild size="lg">
+            <a href={discoverUrl} target="_blank" rel="noopener noreferrer">
+              Open Kibana Dashboard
+            </a>
+          </Button>
         </CardContent>
       </Card>
     </div>

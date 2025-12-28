@@ -29,6 +29,17 @@ import { type SidebarData } from '../types';
 export const sidebarData: SidebarData = {
   navGroups: [
     {
+      title: 'Security Center',
+      items: [
+        {
+          title: 'Overview',
+          url: '/security',
+          icon: IconShieldCheck,
+          isActive: (pathname: string) => pathname === '/security',
+        },
+      ],
+    },
+    {
       title: 'Overview',
       items: [
         {
