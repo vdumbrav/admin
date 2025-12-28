@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Dialog,
   DialogContent,
@@ -31,9 +32,9 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { useBotUsers, useUserContext, useResetUserLimit, useClearUserContext, useSummarizeUser, useSaveUserProfile } from '../api/admin-bot';
 import { toast } from 'sonner';
-import { Search, RotateCcw, Trash2, Users, MessageCircle, Link, Brain, Languages, Loader2, ExternalLink } from 'lucide-react';
+import { Search, RotateCcw, Trash2, Users, MessageCircle, Brain, Languages, Loader2, ExternalLink, CheckSquare } from 'lucide-react';
 import { Link as RouterLink } from '@tanstack/react-router';
-import type { BotUser, UserSummary } from '../types';
+import type { BotUser, BotUserIdentity, UserSummary } from '../types';
 
 function UserContextDialog({ userId }: { userId: string }) {
   const { data: context, isLoading } = useUserContext(userId);
@@ -331,65 +332,120 @@ function UserSummaryDialog({ userId }: { userId: string; onClose?: () => void })
   );
 }
 
-function UserRow({ user, onResetLimit }: { user: BotUser; onResetLimit: () => void }) {
-  const [summaryOpen, setSummaryOpen] = useState(false);
+function IdentityBadges({ identities }: { identities: BotUserIdentity[] }) {
   const platformColors = {
     matrix: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200',
     telegram: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
   };
 
   return (
-    <TableRow>
-      <TableCell className="font-mono text-xs max-w-[250px]">
-        <div className="flex items-center gap-2">
-          <span className="truncate">{user.userId}</span>
+    <div className="space-y-1">
+      {identities.map((identity, idx) => (
+        <div key={idx} className="flex items-center gap-2">
+          <Badge className={`${platformColors[identity.platform]} text-xs`}>
+            {identity.platform === 'matrix' ? 'M' : 'TG'}
+          </Badge>
+          <span className="font-mono text-xs truncate max-w-[180px]" title={identity.chatUserId}>
+            {identity.chatUserId}
+          </span>
+          <span className="text-xs text-muted-foreground">
+            ({identity.messageCount} msg)
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function UserRow({
+  user,
+  onResetLimit,
+  isSelected,
+  onSelect
+}: {
+  user: BotUser;
+  onResetLimit: () => void;
+  isSelected: boolean;
+  onSelect: (checked: boolean) => void;
+}) {
+  const [summaryOpen, setSummaryOpen] = useState(false);
+  const [selectedIdentity, setSelectedIdentity] = useState(0);
+
+  const hasMultipleIdentities = user.identities?.length > 1;
+  const currentIdentity = user.identities?.[selectedIdentity] || user.identities?.[0];
+  const chatUserId = currentIdentity?.chatUserId || user.userId;
+
+  return (
+    <TableRow className={isSelected ? 'bg-primary/5' : undefined}>
+      <TableCell className="w-[40px]">
+        <Checkbox
+          checked={isSelected}
+          onCheckedChange={onSelect}
+          disabled={(user.totalMessages || user.messageCount || 0) === 0}
+        />
+      </TableCell>
+      <TableCell className="max-w-[300px]">
+        <div className="space-y-1">
+          {/* Walme User Link */}
           {user.walmeUser && (
-            <RouterLink
-              to="/users/$userId"
-              params={{ userId: String(user.walmeUser.id) }}
-              className="text-primary hover:underline flex items-center gap-1"
-              title={`View profile: ${user.walmeUser.nickname || `User #${user.walmeUser.id}`}`}
-            >
-              <ExternalLink className="h-3 w-3" />
-            </RouterLink>
+            <div className="flex items-center gap-2">
+              <RouterLink
+                to="/users/$userId"
+                params={{ userId: String(user.walmeUser.id) }}
+                className="text-primary hover:underline font-medium flex items-center gap-1"
+              >
+                {user.walmeUser.nickname ? `@${user.walmeUser.nickname}` : `User #${user.walmeUser.id}`}
+                <ExternalLink className="h-3 w-3" />
+              </RouterLink>
+            </div>
+          )}
+
+          {/* Identities */}
+          {user.identities && user.identities.length > 0 ? (
+            <IdentityBadges identities={user.identities} />
+          ) : (
+            <span className="font-mono text-xs">{user.userId}</span>
           )}
         </div>
-        {user.linkedUserId && (
-          <div className="flex items-center gap-1 mt-1 text-muted-foreground">
-            <Link className="h-3 w-3" />
-            <span className="truncate text-xs">{user.linkedUserId}</span>
-          </div>
-        )}
-        {user.walmeUser?.nickname && (
-          <div className="text-muted-foreground text-xs mt-0.5">
-            @{user.walmeUser.nickname}
-          </div>
-        )}
-      </TableCell>
-      <TableCell>
-        <Badge className={platformColors[user.platform] || 'bg-gray-100'}>
-          {user.platform}
-        </Badge>
       </TableCell>
       <TableCell className="text-center">
-        <Badge variant={user.usage > 50 ? 'destructive' : user.usage > 20 ? 'secondary' : 'outline'}>
-          {user.usage}
+        <Badge variant={(user.totalUsage || user.usage) > 50 ? 'destructive' : (user.totalUsage || user.usage) > 20 ? 'secondary' : 'outline'}>
+          {user.totalUsage || user.usage || 0}
         </Badge>
       </TableCell>
       <TableCell className="text-center">
         <Badge variant="outline">
-          {user.messageCount || 0}
+          {user.totalMessages || user.messageCount || 0}
         </Badge>
       </TableCell>
       <TableCell>
         <div className="flex gap-1">
+          {/* Identity selector for conversations */}
+          {hasMultipleIdentities && (
+            <Select
+              value={String(selectedIdentity)}
+              onValueChange={(v) => setSelectedIdentity(Number(v))}
+            >
+              <SelectTrigger className="w-[80px] h-8">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {user.identities.map((id, idx) => (
+                  <SelectItem key={idx} value={String(idx)}>
+                    {id.platform === 'matrix' ? 'Matrix' : 'Telegram'}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+
           <Dialog>
             <DialogTrigger asChild>
               <Button
                 variant="ghost"
                 size="sm"
                 title="View conversation"
-                disabled={!user.messageCount}
+                disabled={(user.totalMessages || user.messageCount || 0) === 0}
               >
                 <MessageCircle className="h-4 w-4" />
               </Button>
@@ -398,20 +454,20 @@ function UserRow({ user, onResetLimit }: { user: BotUser; onResetLimit: () => vo
               <DialogHeader>
                 <DialogTitle>Conversation History</DialogTitle>
                 <DialogDescription>
-                  {user.platform}: {user.userId}
-                  {user.linkedUserId && ` → ${user.linkedUserId}`}
+                  {currentIdentity?.platform || user.platform}: {chatUserId}
                 </DialogDescription>
               </DialogHeader>
-              <UserContextDialog userId={user.userId} />
+              <UserContextDialog userId={chatUserId} />
             </DialogContent>
           </Dialog>
+
           <Dialog open={summaryOpen} onOpenChange={setSummaryOpen}>
             <DialogTrigger asChild>
               <Button
                 variant="ghost"
                 size="sm"
                 title="AI Summary"
-                disabled={!user.messageCount}
+                disabled={(user.totalMessages || user.messageCount || 0) === 0}
               >
                 <Brain className="h-4 w-4" />
               </Button>
@@ -420,12 +476,13 @@ function UserRow({ user, onResetLimit }: { user: BotUser; onResetLimit: () => vo
               <DialogHeader>
                 <DialogTitle>AI User Summary</DialogTitle>
                 <DialogDescription>
-                  {user.platform}: {user.userId}
+                  {user.walmeUser?.nickname ? `@${user.walmeUser.nickname}` : chatUserId}
                 </DialogDescription>
               </DialogHeader>
-              <UserSummaryDialog userId={user.userId} onClose={() => setSummaryOpen(false)} />
+              <UserSummaryDialog userId={chatUserId} onClose={() => setSummaryOpen(false)} />
             </DialogContent>
           </Dialog>
+
           <Button variant="ghost" size="sm" onClick={onResetLimit} title="Reset rate limit">
             <RotateCcw className="h-4 w-4" />
           </Button>
@@ -437,32 +494,80 @@ function UserRow({ user, onResetLimit }: { user: BotUser; onResetLimit: () => vo
 
 export function BotUsersTable() {
   const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(25);
   const [searchQuery, setSearchQuery] = useState('');
   const [platformFilter, setPlatformFilter] = useState<string>('all');
   const [bulkLang, setBulkLang] = useState('ru');
   const [bulkProgress, setBulkProgress] = useState<{ current: number; total: number; results: UserSummary[] } | null>(null);
-  const { data, isLoading, refetch } = useBotUsers(page, 100);
+  const [selectedUserIds, setSelectedUserIds] = useState<Set<string>>(new Set());
+  const { data, isLoading, refetch } = useBotUsers(page, limit);
   const resetLimit = useResetUserLimit();
   const summarize = useSummarizeUser();
+  const saveProfile = useSaveUserProfile();
 
   // Filter users
   const filteredUsers = useMemo(() => {
     if (!data?.users) return [];
 
     return data.users.filter(user => {
+      // Search in userId and all identities
+      const searchLower = searchQuery.toLowerCase();
       const matchesSearch = !searchQuery ||
-        user.userId.toLowerCase().includes(searchQuery.toLowerCase());
+        user.userId.toLowerCase().includes(searchLower) ||
+        user.walmeUser?.nickname?.toLowerCase().includes(searchLower) ||
+        user.identities?.some(id => id.chatUserId.toLowerCase().includes(searchLower));
 
-      const matchesPlatform = platformFilter === 'all' || user.platform === platformFilter;
+      // Filter by platform - check identities
+      const matchesPlatform = platformFilter === 'all' ||
+        user.platform === platformFilter ||
+        user.identities?.some(id => id.platform === platformFilter);
 
       return matchesSearch && matchesPlatform;
     });
   }, [data?.users, searchQuery, platformFilter]);
 
+  // Users with messages (for selection)
+  const usersWithMessages = useMemo(() =>
+    filteredUsers.filter(u => (u.totalMessages || u.messageCount || 0) > 0),
+    [filteredUsers]
+  );
+
+  // Get unique key for user (walmeUser.id or first identity)
+  const getUserKey = (user: BotUser) => {
+    if (user.walmeUser?.id) return `walme:${user.walmeUser.id}`;
+    return user.identities?.[0]?.chatUserId || user.userId;
+  };
+
+  // Selection handlers
+  const toggleUserSelection = (user: BotUser, checked: boolean) => {
+    const key = getUserKey(user);
+    setSelectedUserIds(prev => {
+      const next = new Set(prev);
+      if (checked) next.add(key);
+      else next.delete(key);
+      return next;
+    });
+  };
+
+  const toggleSelectAll = (checked: boolean) => {
+    if (checked) {
+      const allKeys = usersWithMessages.map(getUserKey);
+      setSelectedUserIds(new Set(allKeys));
+    } else {
+      setSelectedUserIds(new Set());
+    }
+  };
+
+  const isAllSelected = usersWithMessages.length > 0 &&
+    usersWithMessages.every(u => selectedUserIds.has(getUserKey(u)));
+
   const handleResetLimit = async (user: BotUser) => {
-    if (!confirm(`Reset rate limit for ${user.userId}?`)) return;
+    const identity = user.identities?.[0];
+    const platform = identity?.platform || user.platform;
+    const userId = identity?.chatUserId || user.userId;
+    if (!confirm(`Reset rate limit for ${userId}?`)) return;
     try {
-      await resetLimit.mutateAsync({ platform: user.platform, userId: user.userId });
+      await resetLimit.mutateAsync({ platform, userId });
       toast.success('Rate limit reset');
       refetch();
     } catch {
@@ -470,23 +575,33 @@ export function BotUsersTable() {
     }
   };
 
+  // Get selected users for summary
+  const selectedUsers = useMemo(() =>
+    filteredUsers.filter(u => selectedUserIds.has(getUserKey(u))),
+    [filteredUsers, selectedUserIds]
+  );
+
   const handleBulkSummary = async () => {
-    const usersWithMessages = filteredUsers.filter(u => (u.messageCount || 0) > 0);
-    if (usersWithMessages.length === 0) {
+    const usersToProcess = selectedUsers.length > 0 ? selectedUsers : usersWithMessages;
+    if (usersToProcess.length === 0) {
       toast.error('No users with messages to summarize');
       return;
     }
 
-    if (!confirm(`Generate AI summary for ${usersWithMessages.length} users? This may take a while.`)) return;
+    const action = selectedUsers.length > 0 ? 'selected' : 'all';
+    if (!confirm(`Generate AI summary for ${usersToProcess.length} ${action} users? This may take a while.`)) return;
 
-    setBulkProgress({ current: 0, total: usersWithMessages.length, results: [] });
+    setBulkProgress({ current: 0, total: usersToProcess.length, results: [] });
     const results: UserSummary[] = [];
 
-    for (let i = 0; i < usersWithMessages.length; i++) {
-      const user = usersWithMessages[i];
+    for (let i = 0; i < usersToProcess.length; i++) {
+      const user = usersToProcess[i];
+      const chatUserId = user.identities?.[0]?.chatUserId || user.userId;
       try {
-        const result = await summarize.mutateAsync({ userId: user.userId, lang: bulkLang });
+        const result = await summarize.mutateAsync({ userId: chatUserId, lang: bulkLang });
         results.push(result);
+        // Auto-save profile
+        await saveProfile.mutateAsync({ userId: chatUserId, profile: result });
         setBulkProgress(prev => prev ? { ...prev, current: i + 1, results: [...results] } : null);
       } catch {
         // Skip failed users
@@ -494,7 +609,8 @@ export function BotUsersTable() {
       }
     }
 
-    toast.success(`Generated ${results.length} summaries`);
+    toast.success(`Generated and saved ${results.length} summaries`);
+    setSelectedUserIds(new Set()); // Clear selection after bulk action
   };
 
   // Aggregate bulk results for overview
@@ -558,9 +674,9 @@ export function BotUsersTable() {
     <div className="space-y-4">
       {/* Bulk Actions */}
       <div className="space-y-4">
-        <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
+        <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg flex-wrap">
           <Brain className="h-5 w-5 text-purple-500" />
-          <span className="text-sm font-medium">Bulk AI Summary</span>
+          <span className="text-sm font-medium">AI Summary</span>
           <Select value={bulkLang} onValueChange={setBulkLang}>
             <SelectTrigger className="w-[100px] h-8">
               <SelectValue />
@@ -574,20 +690,30 @@ export function BotUsersTable() {
           <Button
             size="sm"
             onClick={handleBulkSummary}
-            disabled={(bulkProgress !== null && bulkProgress.current < bulkProgress.total) || filteredUsers.filter(u => (u.messageCount || 0) > 0).length === 0}
+            disabled={(bulkProgress !== null && bulkProgress.current < bulkProgress.total) || usersWithMessages.length === 0}
           >
             {bulkProgress && bulkProgress.current < bulkProgress.total ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 {bulkProgress.current}/{bulkProgress.total}
               </>
+            ) : selectedUsers.length > 0 ? (
+              <>
+                <CheckSquare className="mr-2 h-4 w-4" />
+                Summarize Selected ({selectedUsers.length})
+              </>
             ) : (
               <>
                 <Brain className="mr-2 h-4 w-4" />
-                Summarize All ({filteredUsers.filter(u => (u.messageCount || 0) > 0).length})
+                Summarize All ({usersWithMessages.length})
               </>
             )}
           </Button>
+          {selectedUsers.length > 0 && (
+            <Button size="sm" variant="outline" onClick={() => setSelectedUserIds(new Set())}>
+              Clear Selection
+            </Button>
+          )}
           {bulkProgress && bulkProgress.current === bulkProgress.total && (
             <Button size="sm" variant="outline" onClick={() => setBulkProgress(null)}>
               Clear Results
@@ -696,19 +822,35 @@ export function BotUsersTable() {
       </div>
 
       {/* Stats */}
-      <div className="flex gap-4 text-sm text-muted-foreground">
+      <div className="flex gap-4 text-sm text-muted-foreground flex-wrap">
         <div className="flex items-center gap-1">
           <Users className="h-4 w-4" />
-          <span>{filteredUsers.length} active users today</span>
+          <span>{data?.total || 0} users total</span>
         </div>
+        <div className="flex items-center gap-1">
+          <MessageCircle className="h-4 w-4" />
+          <span>{usersWithMessages.length} with messages</span>
+        </div>
+        {selectedUsers.length > 0 && (
+          <div className="flex items-center gap-1 text-primary">
+            <CheckSquare className="h-4 w-4" />
+            <span>{selectedUsers.length} selected</span>
+          </div>
+        )}
       </div>
 
       {/* Table */}
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>User ID</TableHead>
-            <TableHead>Platform</TableHead>
+            <TableHead className="w-[40px]">
+              <Checkbox
+                checked={isAllSelected}
+                onCheckedChange={toggleSelectAll}
+                disabled={usersWithMessages.length === 0}
+              />
+            </TableHead>
+            <TableHead>User / Identities</TableHead>
             <TableHead className="text-center">Requests</TableHead>
             <TableHead className="text-center">Messages</TableHead>
             <TableHead>Actions</TableHead>
@@ -717,15 +859,17 @@ export function BotUsersTable() {
         <TableBody>
           {filteredUsers.map((user) => (
             <UserRow
-              key={`${user.platform}-${user.userId}`}
+              key={getUserKey(user)}
               user={user}
               onResetLimit={() => handleResetLimit(user)}
+              isSelected={selectedUserIds.has(getUserKey(user))}
+              onSelect={(checked) => toggleUserSelection(user, checked)}
             />
           ))}
           {filteredUsers.length === 0 && (
             <TableRow>
-              <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
-                No active users today
+              <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
+                No users found
               </TableCell>
             </TableRow>
           )}
@@ -733,31 +877,58 @@ export function BotUsersTable() {
       </Table>
 
       {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="flex items-center justify-between mt-4">
+      <div className="flex items-center justify-between mt-4 flex-wrap gap-4">
+        <div className="flex items-center gap-4">
           <p className="text-sm text-muted-foreground">
             Page {page} of {totalPages} ({data?.total || 0} users)
           </p>
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setPage(p => Math.max(1, p - 1))}
-              disabled={page === 1}
-            >
-              Previous
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-              disabled={page === totalPages}
-            >
-              Next
-            </Button>
-          </div>
+          <Select value={String(limit)} onValueChange={(v) => { setLimit(Number(v)); setPage(1); }}>
+            <SelectTrigger className="w-[100px] h-8">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="10">10 / page</SelectItem>
+              <SelectItem value="25">25 / page</SelectItem>
+              <SelectItem value="50">50 / page</SelectItem>
+              <SelectItem value="100">100 / page</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
-      )}
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setPage(1)}
+            disabled={page === 1}
+          >
+            First
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setPage(p => Math.max(1, p - 1))}
+            disabled={page === 1}
+          >
+            Previous
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+            disabled={page === totalPages}
+          >
+            Next
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setPage(totalPages)}
+            disabled={page === totalPages}
+          >
+            Last
+          </Button>
+        </div>
+      </div>
     </div>
   );
 }

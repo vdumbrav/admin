@@ -15,17 +15,29 @@ export interface BotStats {
 }
 
 // ==================== Users ====================
-export interface BotUser {
+export interface BotUserIdentity {
   platform: 'matrix' | 'telegram';
+  chatUserId: string;
+  usage: number;
+  messageCount: number;
+}
+
+export interface BotUser {
+  // New grouped fields
+  identities: BotUserIdentity[];
+  totalUsage: number;
+  totalMessages: number;
+  walmeUser?: {
+    id: number;
+    nickname?: string;
+  } | null;
+  // Legacy fields for backward compatibility
+  platform: 'matrix' | 'telegram' | 'multiple';
   userId: string;
   usage: number;
   date: string;
   linkedUserId?: string | null;
   messageCount?: number;
-  walmeUser?: {
-    id: number;
-    nickname?: string;
-  } | null;
 }
 
 export interface BotUsersResponse {
