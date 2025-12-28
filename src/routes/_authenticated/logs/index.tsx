@@ -39,7 +39,7 @@ export function LogsPage() {
   const auth = useAppAuth();
 
   const kibanaUrl = import.meta.env.VITE_KIBANA_URL || 'https://admin.moliedev.xyz/kibana';
-  const apiUrl = import.meta.env.VITE_API_URL || 'https://api2.moliedev.xyz';
+  const apiUrl = import.meta.env.VITE_API_URL || 'https://api.moliedev.xyz';
 
   const dataViewId = 'fd93d6b1-88b0-49de-ac7e-43bf04cf7095';
   const discoverUrl = `${kibanaUrl}/app/discover#/?_g=(filters:!(),refreshInterval:(pause:!t,value:60000),time:(from:now-7d,to:now))&_a=(columns:!(level,message,context,timestamp),filters:!(),index:'${dataViewId}',interval:auto,query:(language:kuery,query:''),sort:!(!(timestamp,desc)))`;
