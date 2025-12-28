@@ -30,8 +30,18 @@ import {
   useSuspiciousUsers,
   useSuspiciousCards,
   useAnalyzeAllUsers,
+  useCheckHashDit,
+  useCheckChainalysis,
+  useCheckTron,
+  useCheckIP,
+  useCheckEmail,
+  useCheckSpam,
+  useCheckAbuse,
+  useUsersByTags,
 } from '@/features/security/api/user-analytics';
 import { Link } from '@tanstack/react-router';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 export const Route = createFileRoute('/_authenticated/security/' as any)({
   component: SecurityCenterPage,
@@ -40,6 +50,19 @@ export const Route = createFileRoute('/_authenticated/security/' as any)({
 function SecurityCenterPage() {
   const [minRiskScore, setMinRiskScore] = useState(50);
   const [analysisLang, setAnalysisLang] = useState('ru');
+
+  // External checks state
+  const [addressToCheck, setAddressToCheck] = useState('');
+  const [chainToCheck, setChainToCheck] = useState('tron');
+  const [ipToCheck, setIpToCheck] = useState('');
+  const [emailToCheck, setEmailToCheck] = useState('');
+  const [tagsToSearch, setTagsToSearch] = useState('');
+
+  // Active check triggers
+  const [activeAddressCheck, setActiveAddressCheck] = useState<string | null>(null);
+  const [activeIpCheck, setActiveIpCheck] = useState<string | null>(null);
+  const [activeEmailCheck, setActiveEmailCheck] = useState<string | null>(null);
+  const [activeTagsSearch, setActiveTagsSearch] = useState<string[]>([]);
 
   const { data: fraudStats, isLoading: fraudLoading, refetch: refetchFraud } = useFraudStats();
   const { data: suspiciousData, isLoading: suspiciousLoading, refetch: refetchSuspicious } = useSuspiciousUsers({
@@ -53,6 +76,40 @@ function SecurityCenterPage() {
   });
 
   const analyzeAllMutation = useAnalyzeAllUsers();
+
+  // External check queries
+  const hashditCheck = useCheckHashDit(activeAddressCheck || '', chainToCheck);
+  const chainalysisCheck = useCheckChainalysis(activeAddressCheck || '');
+  const tronCheck = useCheckTron(activeAddressCheck || '');
+  const ipCheck = useCheckIP(activeIpCheck || '');
+  const emailCheck = useCheckEmail(activeEmailCheck || '');
+  const spamCheck = useCheckSpam({ email: activeEmailCheck || undefined, ip: activeIpCheck || undefined });
+  const abuseCheck = useCheckAbuse(activeIpCheck || '');
+  const tagSearchResult = useUsersByTags({ tags: activeTagsSearch, matchAll: false });
+
+  const handleAddressCheck = () => {
+    if (addressToCheck) {
+      setActiveAddressCheck(addressToCheck);
+    }
+  };
+
+  const handleIpCheck = () => {
+    if (ipToCheck) {
+      setActiveIpCheck(ipToCheck);
+    }
+  };
+
+  const handleEmailCheck = () => {
+    if (emailToCheck) {
+      setActiveEmailCheck(emailToCheck);
+    }
+  };
+
+  const handleTagsSearch = () => {
+    if (tagsToSearch) {
+      setActiveTagsSearch(tagsToSearch.split(',').map(t => t.trim()).filter(Boolean));
+    }
+  };
 
   const handleRefresh = () => {
     refetchFraud();
@@ -418,78 +475,752 @@ function SecurityCenterPage() {
 
         {/* Tools Tab */}
         <TabsContent value="tools" className="mt-6">
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="space-y-6">
+            {/* Address Check Section */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <IconShieldCheck className="h-5 w-5" />
-                  Fraud Detection
+                  Address Check
                 </CardTitle>
-                <CardDescription>AI-powered fraud monitoring and incidents</CardDescription>
+                <CardDescription>
+                  Check wallet addresses against HashDit, Chainalysis, and TRON risk databases
+                </CardDescription>
               </CardHeader>
-              <CardContent>
-                <Button asChild className="w-full">
-                  <Link to="/fraud">
-                    <IconExternalLink className="mr-2 h-4 w-4" />
-                    Open Fraud Detection
-                  </Link>
-                </Button>
+              <CardContent className="space-y-4">
+                <div className="grid gap-4 md:grid-cols-3">
+                  <div className="space-y-2 md:col-span-2">
+                    <Label htmlFor="address-input">Wallet Address</Label>
+                    <Input
+                      id="address-input"
+                      placeholder="Enter wallet address (0x... or T...)"
+                      value={addressToCheck}
+                      onChange={(e) => setAddressToCheck(e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="chain-select">Chain</Label>
+                    <Select value={chainToCheck} onValueChange={setChainToCheck}>
+                      <SelectTrigger id="chain-select">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="tron">TRON</SelectItem>
+                        <SelectItem value="eth">Ethereum</SelectItem>
+                        <SelectItem value="bsc">BSC</SelectItem>
+                        <SelectItem value="polygon">Polygon</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div className="flex gap-2 flex-wrap">
+                  <Button
+                    onClick={handleAddressCheck}
+                    disabled={!addressToCheck || hashditCheck.isFetching}
+                  >
+                    {hashditCheck.isFetching ? (
+                      <IconLoader className="mr-2 h-4 w-4 animate-spin" />
+                    ) : null}
+                    HashDit Check
+                  </Button>
+                  <Button
+                    onClick={handleAddressCheck}
+                    disabled={!addressToCheck || chainalysisCheck.isFetching}
+                    variant="secondary"
+                  >
+                    {chainalysisCheck.isFetching ? (
+                      <IconLoader className="mr-2 h-4 w-4 animate-spin" />
+                    ) : null}
+                    Chainalysis Check
+                  </Button>
+                  <Button
+                    onClick={handleAddressCheck}
+                    disabled={!addressToCheck || tronCheck.isFetching}
+                    variant="outline"
+                  >
+                    {tronCheck.isFetching ? (
+                      <IconLoader className="mr-2 h-4 w-4 animate-spin" />
+                    ) : null}
+                    TRON Full Check
+                  </Button>
+                </div>
+
+                {/* Address Check Results */}
+                {activeAddressCheck && (
+                  <div className="grid gap-4 md:grid-cols-3 mt-4">
+                    {/* HashDit Result */}
+                    <Card className="border-2">
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-sm font-medium">HashDit</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        {hashditCheck.isFetching ? (
+                          <div className="flex items-center justify-center py-4">
+                            <IconLoader className="h-6 w-6 animate-spin text-muted-foreground" />
+                          </div>
+                        ) : hashditCheck.isError ? (
+                          <div className="text-sm text-red-500">
+                            Error: {(hashditCheck.error as Error)?.message || 'Failed to check'}
+                          </div>
+                        ) : hashditCheck.data ? (
+                          <div className="space-y-2 text-sm">
+                            <div className="flex justify-between">
+                              <span className="text-muted-foreground">Risk Score:</span>
+                              <Badge
+                                variant={
+                                  (hashditCheck.data as any).riskScore >= 70
+                                    ? 'destructive'
+                                    : (hashditCheck.data as any).riskScore >= 40
+                                    ? 'secondary'
+                                    : 'outline'
+                                }
+                              >
+                                {(hashditCheck.data as any).riskScore ?? 'N/A'}
+                              </Badge>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-muted-foreground">Risk Level:</span>
+                              <span>{(hashditCheck.data as any).riskLevel || 'Unknown'}</span>
+                            </div>
+                            {(hashditCheck.data as any).labels?.length > 0 && (
+                              <div className="pt-2">
+                                <span className="text-muted-foreground text-xs">Labels:</span>
+                                <div className="flex flex-wrap gap-1 mt-1">
+                                  {(hashditCheck.data as any).labels.map((label: string, idx: number) => (
+                                    <Badge key={idx} variant="outline" className="text-xs">
+                                      {label}
+                                    </Badge>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        ) : (
+                          <div className="text-sm text-muted-foreground">No data</div>
+                        )}
+                      </CardContent>
+                    </Card>
+
+                    {/* Chainalysis Result */}
+                    <Card className="border-2">
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-sm font-medium">Chainalysis</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        {chainalysisCheck.isFetching ? (
+                          <div className="flex items-center justify-center py-4">
+                            <IconLoader className="h-6 w-6 animate-spin text-muted-foreground" />
+                          </div>
+                        ) : chainalysisCheck.isError ? (
+                          <div className="text-sm text-red-500">
+                            Error: {(chainalysisCheck.error as Error)?.message || 'Failed to check'}
+                          </div>
+                        ) : chainalysisCheck.data ? (
+                          <div className="space-y-2 text-sm">
+                            <div className="flex justify-between">
+                              <span className="text-muted-foreground">Sanctioned:</span>
+                              <Badge
+                                variant={(chainalysisCheck.data as any).isSanctioned ? 'destructive' : 'outline'}
+                              >
+                                {(chainalysisCheck.data as any).isSanctioned ? 'YES' : 'NO'}
+                              </Badge>
+                            </div>
+                            {(chainalysisCheck.data as any).category && (
+                              <div className="flex justify-between">
+                                <span className="text-muted-foreground">Category:</span>
+                                <span>{(chainalysisCheck.data as any).category}</span>
+                              </div>
+                            )}
+                            {(chainalysisCheck.data as any).cluster && (
+                              <div className="flex justify-between">
+                                <span className="text-muted-foreground">Cluster:</span>
+                                <span className="text-xs truncate max-w-[120px]">
+                                  {(chainalysisCheck.data as any).cluster}
+                                </span>
+                              </div>
+                            )}
+                            {(chainalysisCheck.data as any).exposures?.length > 0 && (
+                              <div className="pt-2">
+                                <span className="text-muted-foreground text-xs">Exposures:</span>
+                                <div className="flex flex-wrap gap-1 mt-1">
+                                  {(chainalysisCheck.data as any).exposures.slice(0, 3).map((exp: any, idx: number) => (
+                                    <Badge key={idx} variant="destructive" className="text-xs">
+                                      {exp.category || exp}
+                                    </Badge>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        ) : (
+                          <div className="text-sm text-muted-foreground">No data</div>
+                        )}
+                      </CardContent>
+                    </Card>
+
+                    {/* TRON Full Check Result */}
+                    <Card className="border-2">
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-sm font-medium">TRON Full</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        {tronCheck.isFetching ? (
+                          <div className="flex items-center justify-center py-4">
+                            <IconLoader className="h-6 w-6 animate-spin text-muted-foreground" />
+                          </div>
+                        ) : tronCheck.isError ? (
+                          <div className="text-sm text-red-500">
+                            Error: {(tronCheck.error as Error)?.message || 'Failed to check'}
+                          </div>
+                        ) : tronCheck.data ? (
+                          <div className="space-y-2 text-sm">
+                            <div className="flex justify-between">
+                              <span className="text-muted-foreground">Combined Risk:</span>
+                              <Badge
+                                variant={
+                                  (tronCheck.data as any).riskScore >= 70
+                                    ? 'destructive'
+                                    : (tronCheck.data as any).riskScore >= 40
+                                    ? 'secondary'
+                                    : 'outline'
+                                }
+                              >
+                                {(tronCheck.data as any).riskScore ?? 'N/A'}
+                              </Badge>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-muted-foreground">Sanctioned:</span>
+                              <Badge
+                                variant={(tronCheck.data as any).isSanctioned ? 'destructive' : 'outline'}
+                              >
+                                {(tronCheck.data as any).isSanctioned ? 'YES' : 'NO'}
+                              </Badge>
+                            </div>
+                            {(tronCheck.data as any).flags?.length > 0 && (
+                              <div className="pt-2">
+                                <span className="text-muted-foreground text-xs">Flags:</span>
+                                <div className="flex flex-wrap gap-1 mt-1">
+                                  {(tronCheck.data as any).flags.map((flag: string, idx: number) => (
+                                    <Badge key={idx} variant="destructive" className="text-xs">
+                                      {flag}
+                                    </Badge>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        ) : (
+                          <div className="text-sm text-muted-foreground">No data</div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
               </CardContent>
             </Card>
 
+            {/* IP Check Section */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <IconBrain className="h-5 w-5" />
-                  System Logs
+                  <IconUserSearch className="h-5 w-5" />
+                  IP Check
                 </CardTitle>
-                <CardDescription>AI analysis of application logs</CardDescription>
+                <CardDescription>
+                  Check IP addresses for geolocation, proxy/VPN detection, and abuse reports
+                </CardDescription>
               </CardHeader>
-              <CardContent>
-                <Button asChild className="w-full">
-                  <Link to="/logs">
-                    <IconExternalLink className="mr-2 h-4 w-4" />
-                    Open System Logs
-                  </Link>
-                </Button>
+              <CardContent className="space-y-4">
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="ip-input">IP Address</Label>
+                    <Input
+                      id="ip-input"
+                      placeholder="Enter IP address (e.g., 8.8.8.8)"
+                      value={ipToCheck}
+                      onChange={(e) => setIpToCheck(e.target.value)}
+                    />
+                  </div>
+                  <div className="flex items-end gap-2">
+                    <Button
+                      onClick={handleIpCheck}
+                      disabled={!ipToCheck || ipCheck.isFetching}
+                    >
+                      {ipCheck.isFetching ? (
+                        <IconLoader className="mr-2 h-4 w-4 animate-spin" />
+                      ) : null}
+                      IP-API Check
+                    </Button>
+                    <Button
+                      onClick={handleIpCheck}
+                      disabled={!ipToCheck || abuseCheck.isFetching}
+                      variant="secondary"
+                    >
+                      {abuseCheck.isFetching ? (
+                        <IconLoader className="mr-2 h-4 w-4 animate-spin" />
+                      ) : null}
+                      AbuseIPDB Check
+                    </Button>
+                  </div>
+                </div>
+
+                {/* IP Check Results */}
+                {activeIpCheck && (
+                  <div className="grid gap-4 md:grid-cols-2 mt-4">
+                    {/* IP-API Result */}
+                    <Card className="border-2">
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-sm font-medium">IP-API (Geolocation)</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        {ipCheck.isFetching ? (
+                          <div className="flex items-center justify-center py-4">
+                            <IconLoader className="h-6 w-6 animate-spin text-muted-foreground" />
+                          </div>
+                        ) : ipCheck.isError ? (
+                          <div className="text-sm text-red-500">
+                            Error: {(ipCheck.error as Error)?.message || 'Failed to check'}
+                          </div>
+                        ) : ipCheck.data ? (
+                          <div className="space-y-2 text-sm">
+                            <div className="flex justify-between">
+                              <span className="text-muted-foreground">Country:</span>
+                              <span>{(ipCheck.data as any).country || 'Unknown'}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-muted-foreground">City:</span>
+                              <span>{(ipCheck.data as any).city || 'Unknown'}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-muted-foreground">ISP:</span>
+                              <span className="text-xs truncate max-w-[150px]">
+                                {(ipCheck.data as any).isp || 'Unknown'}
+                              </span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-muted-foreground">Proxy:</span>
+                              <Badge
+                                variant={(ipCheck.data as any).proxy ? 'destructive' : 'outline'}
+                              >
+                                {(ipCheck.data as any).proxy ? 'YES' : 'NO'}
+                              </Badge>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-muted-foreground">Hosting:</span>
+                              <Badge
+                                variant={(ipCheck.data as any).hosting ? 'secondary' : 'outline'}
+                              >
+                                {(ipCheck.data as any).hosting ? 'YES' : 'NO'}
+                              </Badge>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-muted-foreground">Mobile:</span>
+                              <span>{(ipCheck.data as any).mobile ? 'Yes' : 'No'}</span>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="text-sm text-muted-foreground">No data</div>
+                        )}
+                      </CardContent>
+                    </Card>
+
+                    {/* AbuseIPDB Result */}
+                    <Card className="border-2">
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-sm font-medium">AbuseIPDB</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        {abuseCheck.isFetching ? (
+                          <div className="flex items-center justify-center py-4">
+                            <IconLoader className="h-6 w-6 animate-spin text-muted-foreground" />
+                          </div>
+                        ) : abuseCheck.isError ? (
+                          <div className="text-sm text-red-500">
+                            Error: {(abuseCheck.error as Error)?.message || 'Failed to check'}
+                          </div>
+                        ) : abuseCheck.data ? (
+                          <div className="space-y-2 text-sm">
+                            <div className="flex justify-between">
+                              <span className="text-muted-foreground">Abuse Score:</span>
+                              <Badge
+                                variant={
+                                  (abuseCheck.data as any).abuseConfidenceScore >= 50
+                                    ? 'destructive'
+                                    : (abuseCheck.data as any).abuseConfidenceScore >= 20
+                                    ? 'secondary'
+                                    : 'outline'
+                                }
+                              >
+                                {(abuseCheck.data as any).abuseConfidenceScore ?? 0}%
+                              </Badge>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-muted-foreground">Total Reports:</span>
+                              <span>{(abuseCheck.data as any).totalReports ?? 0}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-muted-foreground">Distinct Users:</span>
+                              <span>{(abuseCheck.data as any).numDistinctUsers ?? 0}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-muted-foreground">Whitelisted:</span>
+                              <Badge
+                                variant={(abuseCheck.data as any).isWhitelisted ? 'outline' : 'secondary'}
+                              >
+                                {(abuseCheck.data as any).isWhitelisted ? 'YES' : 'NO'}
+                              </Badge>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-muted-foreground">Last Report:</span>
+                              <span className="text-xs">
+                                {(abuseCheck.data as any).lastReportedAt
+                                  ? new Date((abuseCheck.data as any).lastReportedAt).toLocaleDateString()
+                                  : 'Never'}
+                              </span>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="text-sm text-muted-foreground">No data</div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
               </CardContent>
             </Card>
 
+            {/* Email Check Section */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <IconAlertTriangle className="h-5 w-5" />
+                  Email Check
+                </CardTitle>
+                <CardDescription>
+                  Check email addresses for disposable domains and spam databases
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="email-input">Email Address</Label>
+                    <Input
+                      id="email-input"
+                      type="email"
+                      placeholder="Enter email address"
+                      value={emailToCheck}
+                      onChange={(e) => setEmailToCheck(e.target.value)}
+                    />
+                  </div>
+                  <div className="flex items-end gap-2">
+                    <Button
+                      onClick={handleEmailCheck}
+                      disabled={!emailToCheck || emailCheck.isFetching || spamCheck.isFetching}
+                    >
+                      {(emailCheck.isFetching || spamCheck.isFetching) ? (
+                        <IconLoader className="mr-2 h-4 w-4 animate-spin" />
+                      ) : null}
+                      Check Email
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Email Check Results */}
+                {activeEmailCheck && (
+                  <div className="grid gap-4 md:grid-cols-2 mt-4">
+                    {/* Disposable Email Result */}
+                    <Card className="border-2">
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-sm font-medium">Disposable Check</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        {emailCheck.isFetching ? (
+                          <div className="flex items-center justify-center py-4">
+                            <IconLoader className="h-6 w-6 animate-spin text-muted-foreground" />
+                          </div>
+                        ) : emailCheck.isError ? (
+                          <div className="text-sm text-red-500">
+                            Error: {(emailCheck.error as Error)?.message || 'Failed to check'}
+                          </div>
+                        ) : emailCheck.data ? (
+                          <div className="space-y-2 text-sm">
+                            <div className="flex justify-between">
+                              <span className="text-muted-foreground">Disposable:</span>
+                              <Badge
+                                variant={(emailCheck.data as any).isDisposable ? 'destructive' : 'outline'}
+                              >
+                                {(emailCheck.data as any).isDisposable ? 'YES' : 'NO'}
+                              </Badge>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-muted-foreground">Domain:</span>
+                              <span>{(emailCheck.data as any).domain || 'Unknown'}</span>
+                            </div>
+                            {(emailCheck.data as any).provider && (
+                              <div className="flex justify-between">
+                                <span className="text-muted-foreground">Provider:</span>
+                                <span>{(emailCheck.data as any).provider}</span>
+                              </div>
+                            )}
+                          </div>
+                        ) : (
+                          <div className="text-sm text-muted-foreground">No data</div>
+                        )}
+                      </CardContent>
+                    </Card>
+
+                    {/* StopForumSpam Result */}
+                    <Card className="border-2">
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-sm font-medium">StopForumSpam</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        {spamCheck.isFetching ? (
+                          <div className="flex items-center justify-center py-4">
+                            <IconLoader className="h-6 w-6 animate-spin text-muted-foreground" />
+                          </div>
+                        ) : spamCheck.isError ? (
+                          <div className="text-sm text-red-500">
+                            Error: {(spamCheck.error as Error)?.message || 'Failed to check'}
+                          </div>
+                        ) : spamCheck.data ? (
+                          <div className="space-y-2 text-sm">
+                            <div className="flex justify-between">
+                              <span className="text-muted-foreground">Found in Spam DB:</span>
+                              <Badge
+                                variant={(spamCheck.data as any).email?.appears ? 'destructive' : 'outline'}
+                              >
+                                {(spamCheck.data as any).email?.appears ? 'YES' : 'NO'}
+                              </Badge>
+                            </div>
+                            {(spamCheck.data as any).email?.confidence !== undefined && (
+                              <div className="flex justify-between">
+                                <span className="text-muted-foreground">Confidence:</span>
+                                <Badge
+                                  variant={
+                                    (spamCheck.data as any).email.confidence >= 70
+                                      ? 'destructive'
+                                      : (spamCheck.data as any).email.confidence >= 30
+                                      ? 'secondary'
+                                      : 'outline'
+                                  }
+                                >
+                                  {(spamCheck.data as any).email.confidence}%
+                                </Badge>
+                              </div>
+                            )}
+                            {(spamCheck.data as any).email?.frequency !== undefined && (
+                              <div className="flex justify-between">
+                                <span className="text-muted-foreground">Frequency:</span>
+                                <span>{(spamCheck.data as any).email.frequency}</span>
+                              </div>
+                            )}
+                            {(spamCheck.data as any).email?.lastseen && (
+                              <div className="flex justify-between">
+                                <span className="text-muted-foreground">Last Seen:</span>
+                                <span className="text-xs">
+                                  {new Date((spamCheck.data as any).email.lastseen).toLocaleDateString()}
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                        ) : (
+                          <div className="text-sm text-muted-foreground">No data</div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Tags Search Section */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <IconUsers className="h-5 w-5" />
-                  All Users
+                  Tags Search
                 </CardTitle>
-                <CardDescription>User management and individual analytics</CardDescription>
+                <CardDescription>
+                  Find users by admin tags (e.g., risk:high, whale, suspicious)
+                </CardDescription>
               </CardHeader>
-              <CardContent>
-                <Button asChild className="w-full">
-                  <Link to="/users">
-                    <IconExternalLink className="mr-2 h-4 w-4" />
-                    Open Users
-                  </Link>
-                </Button>
+              <CardContent className="space-y-4">
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="tags-input">Tags (comma separated)</Label>
+                    <Input
+                      id="tags-input"
+                      placeholder="risk:high, whale, churn:high"
+                      value={tagsToSearch}
+                      onChange={(e) => setTagsToSearch(e.target.value)}
+                    />
+                  </div>
+                  <div className="flex items-end gap-2">
+                    <Button
+                      onClick={handleTagsSearch}
+                      disabled={!tagsToSearch || tagSearchResult.isFetching}
+                    >
+                      {tagSearchResult.isFetching ? (
+                        <IconLoader className="mr-2 h-4 w-4 animate-spin" />
+                      ) : null}
+                      Search Users
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Tags Search Results */}
+                {activeTagsSearch.length > 0 && (
+                  <div className="mt-4">
+                    <Card className="border-2">
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-sm font-medium flex items-center justify-between">
+                          <span>Search Results</span>
+                          {tagSearchResult.data && (
+                            <Badge variant="secondary">
+                              {(tagSearchResult.data as any).users?.length ?? 0} users
+                            </Badge>
+                          )}
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        {tagSearchResult.isFetching ? (
+                          <div className="flex items-center justify-center py-4">
+                            <IconLoader className="h-6 w-6 animate-spin text-muted-foreground" />
+                          </div>
+                        ) : tagSearchResult.isError ? (
+                          <div className="text-sm text-red-500">
+                            Error: {(tagSearchResult.error as Error)?.message || 'Failed to search'}
+                          </div>
+                        ) : tagSearchResult.data && (tagSearchResult.data as any).users?.length > 0 ? (
+                          <div className="space-y-2 max-h-[300px] overflow-y-auto">
+                            {(tagSearchResult.data as any).users.slice(0, 20).map((user: any) => (
+                              <div
+                                key={user.id}
+                                className="flex items-center justify-between p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
+                              >
+                                <div className="flex-1">
+                                  <p className="font-medium text-sm">
+                                    {user.nickname || user.email || `User #${user.id}`}
+                                  </p>
+                                  <div className="flex flex-wrap gap-1 mt-1">
+                                    {user.admin_tags?.slice(0, 5).map((tag: string, idx: number) => (
+                                      <Badge key={idx} variant="outline" className="text-xs">
+                                        {tag}
+                                      </Badge>
+                                    ))}
+                                  </div>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  {user.risk_score !== undefined && (
+                                    <Badge
+                                      variant={
+                                        user.risk_score >= 70
+                                          ? 'destructive'
+                                          : user.risk_score >= 40
+                                          ? 'secondary'
+                                          : 'outline'
+                                      }
+                                    >
+                                      {user.risk_score}
+                                    </Badge>
+                                  )}
+                                  <Button variant="outline" size="sm" asChild>
+                                    <Link to={`/users/${user.id}` as any}>
+                                      <IconExternalLink className="h-4 w-4" />
+                                    </Link>
+                                  </Button>
+                                </div>
+                              </div>
+                            ))}
+                            {(tagSearchResult.data as any).users.length > 20 && (
+                              <p className="text-sm text-muted-foreground text-center py-2">
+                                Showing 20 of {(tagSearchResult.data as any).users.length} results
+                              </p>
+                            )}
+                          </div>
+                        ) : (
+                          <div className="text-sm text-muted-foreground text-center py-4">
+                            No users found with specified tags
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
               </CardContent>
             </Card>
 
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <IconCreditCard className="h-5 w-5" />
-                  Cards
-                </CardTitle>
-                <CardDescription>Card management and transactions</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Button asChild className="w-full">
-                  <Link to="/cards">
-                    <IconExternalLink className="mr-2 h-4 w-4" />
-                    Open Cards
-                  </Link>
-                </Button>
-              </CardContent>
-            </Card>
+            {/* Quick Links */}
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm flex items-center gap-2">
+                    <IconShieldCheck className="h-4 w-4" />
+                    Fraud Detection
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <Button asChild className="w-full" size="sm">
+                    <Link to="/fraud">
+                      <IconExternalLink className="mr-2 h-4 w-4" />
+                      Open
+                    </Link>
+                  </Button>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm flex items-center gap-2">
+                    <IconBrain className="h-4 w-4" />
+                    System Logs
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <Button asChild className="w-full" size="sm">
+                    <Link to="/logs">
+                      <IconExternalLink className="mr-2 h-4 w-4" />
+                      Open
+                    </Link>
+                  </Button>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm flex items-center gap-2">
+                    <IconUsers className="h-4 w-4" />
+                    All Users
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <Button asChild className="w-full" size="sm">
+                    <Link to="/users">
+                      <IconExternalLink className="mr-2 h-4 w-4" />
+                      Open
+                    </Link>
+                  </Button>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm flex items-center gap-2">
+                    <IconCreditCard className="h-4 w-4" />
+                    Cards
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <Button asChild className="w-full" size="sm">
+                    <Link to="/cards">
+                      <IconExternalLink className="mr-2 h-4 w-4" />
+                      Open
+                    </Link>
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
           </div>
         </TabsContent>
       </Tabs>
