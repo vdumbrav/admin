@@ -1011,7 +1011,7 @@ function UserDetailsPage() {
                     <>
                       <Separator />
                       <div className="space-y-2">
-                        <p className="text-sm font-medium">Connected Accounts</p>
+                        <p className="text-sm font-medium">Connected Profiles</p>
                         <div className="flex flex-wrap gap-2">
                           {user.authIdentities.map((identity, idx) => (
                             <Badge
