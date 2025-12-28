@@ -11,6 +11,7 @@ import { toast } from 'sonner';
 import {
   IconAlertTriangle,
   IconShield,
+  IconShieldCheck,
   IconUsers,
   IconWallet,
   IconRefresh,
@@ -30,10 +31,14 @@ import {
   IconTarget,
   IconDeviceDesktop,
   IconClock,
+  IconSearch,
+  IconExternalLink,
 } from '@tabler/icons-react';
 import {
   useUserAnalytics,
   useRefreshUserAnalytics,
+  useCheckHashDit,
+  useCheckChainalysis,
 } from '@/features/security/api/user-analytics';
 import { cn } from '@/lib/utils';
 import { format, formatDistanceToNow, isValid, parseISO } from 'date-fns';
@@ -96,6 +101,83 @@ const formatRelativeDate = (dateString: string | undefined | null): string => {
   }
 };
 
+// Wallet check result component
+function WalletCheckResult({ address, chain, enabled }: { address: string; chain: string; enabled: boolean }) {
+  const hashDitQuery = useCheckHashDit(address, chain === 'solana' ? 'solana' : chain === 'evm' ? 'eth' : chain);
+  const chainalysisQuery = useCheckChainalysis(address);
+
+  const isLoading = enabled && (hashDitQuery.isLoading || chainalysisQuery.isLoading);
+  const hashDitData = hashDitQuery.data as any;
+  const chainalysisData = chainalysisQuery.data as any;
+
+  if (!enabled) {
+    return (
+      <div className="p-3 rounded-lg bg-muted/30 border text-center text-sm text-muted-foreground">
+        Click "Check" to analyze this wallet
+      </div>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <div className="p-3 rounded-lg bg-muted/30 border flex items-center justify-center gap-2">
+        <IconLoader2 className="h-4 w-4 animate-spin" />
+        <span className="text-sm">Checking wallet...</span>
+      </div>
+    );
+  }
+
+  const hasRisk = hashDitData?.isRisky || chainalysisData?.isRisky ||
+                  (hashDitData?.riskScore && hashDitData.riskScore > 50) ||
+                  (chainalysisData?.risk && chainalysisData.risk !== 'low');
+
+  return (
+    <div className={cn(
+      "p-3 rounded-lg border space-y-2",
+      hasRisk ? "bg-red-500/10 border-red-500/30" : "bg-green-500/10 border-green-500/30"
+    )}>
+      <div className="flex items-center gap-2">
+        {hasRisk ? (
+          <IconAlertTriangle className="h-4 w-4 text-red-500" />
+        ) : (
+          <IconShieldCheck className="h-4 w-4 text-green-500" />
+        )}
+        <span className={cn("text-sm font-medium", hasRisk ? "text-red-600" : "text-green-600")}>
+          {hasRisk ? "Risk Detected" : "No Risk Detected"}
+        </span>
+      </div>
+
+      {hashDitData && (
+        <div className="text-xs space-y-1">
+          <p className="font-medium">HashDit:</p>
+          <p>Risk Score: {hashDitData.riskScore ?? 'N/A'}</p>
+          {hashDitData.labels?.length > 0 && (
+            <div className="flex flex-wrap gap-1">
+              {hashDitData.labels.map((l: string, i: number) => (
+                <Badge key={i} variant="outline" className="text-[10px]">{l}</Badge>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {chainalysisData && (
+        <div className="text-xs space-y-1">
+          <p className="font-medium">Chainalysis:</p>
+          <p>Risk: {chainalysisData.risk ?? 'N/A'}</p>
+          {chainalysisData.categories?.length > 0 && (
+            <div className="flex flex-wrap gap-1">
+              {chainalysisData.categories.map((c: string, i: number) => (
+                <Badge key={i} variant="outline" className="text-[10px]">{c}</Badge>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function UserAnalyticsSection({ userId, userEmail }: UserAnalyticsSectionProps) {
   const [activeTab, setActiveTab] = useState('overview');
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
@@ -103,6 +185,7 @@ export function UserAnalyticsSection({ userId, userEmail }: UserAnalyticsSection
     transactions: true,
     social: true,
   });
+  const [checkingWallets, setCheckingWallets] = useState<Record<string, boolean>>({});
 
   const { data: analytics, isLoading, error, refetch } = useUserAnalytics(userId, { lang: 'ru' }) as {
     data: any;
@@ -111,6 +194,11 @@ export function UserAnalyticsSection({ userId, userEmail }: UserAnalyticsSection
     refetch: () => void
   };
   const refreshMutation = useRefreshUserAnalytics();
+
+  // Extract wallet addresses from connected accounts
+  const walletAddresses = analytics?.socialProfiles?.connectedAccounts?.filter(
+    (acc: any) => acc.provider === 'evm' || acc.provider === 'solana'
+  ) || [];
 
   const toggleSection = (section: string) => {
     setExpandedSections(prev => ({ ...prev, [section]: !prev[section] }));
@@ -235,7 +323,7 @@ export function UserAnalyticsSection({ userId, userEmail }: UserAnalyticsSection
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid grid-cols-5 w-full">
+        <TabsList className="grid grid-cols-6 w-full">
           <TabsTrigger value="overview" className="text-xs gap-1.5">
             <IconActivity className="h-3.5 w-3.5" />
             Overview
@@ -247,6 +335,10 @@ export function UserAnalyticsSection({ userId, userEmail }: UserAnalyticsSection
           <TabsTrigger value="social" className="text-xs gap-1.5">
             <IconUsers className="h-3.5 w-3.5" />
             Social
+          </TabsTrigger>
+          <TabsTrigger value="security" className="text-xs gap-1.5">
+            <IconShieldCheck className="h-3.5 w-3.5" />
+            Security
           </TabsTrigger>
           <TabsTrigger value="bot" className="text-xs gap-1.5">
             <IconMessage className="h-3.5 w-3.5" />
@@ -673,6 +765,140 @@ export function UserAnalyticsSection({ userId, userEmail }: UserAnalyticsSection
                     </div>
                   ))}
                 </div>
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
+
+        {/* Security Tab */}
+        <TabsContent value="security" className="space-y-6 mt-6">
+          {/* Wallet Security Checks */}
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base flex items-center gap-2">
+                <IconWallet className="h-5 w-5" />
+                Wallet Security Checks
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {walletAddresses.length > 0 ? (
+                <div className="space-y-4">
+                  {walletAddresses.map((acc: any, idx: number) => {
+                    const address = acc.authId || acc.authName;
+                    const chain = acc.provider;
+                    const isChecking = checkingWallets[address];
+
+                    return (
+                      <div key={idx} className="border rounded-lg p-4">
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center gap-3">
+                            <Badge variant="outline" className="capitalize font-medium">
+                              {chain === 'evm' ? 'EVM' : 'Solana'}
+                            </Badge>
+                            <span className="text-sm font-mono truncate max-w-[300px]">
+                              {address}
+                            </span>
+                            <a
+                              href={chain === 'evm'
+                                ? `https://etherscan.io/address/${address}`
+                                : `https://solscan.io/account/${address}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-muted-foreground hover:text-primary"
+                            >
+                              <IconExternalLink className="h-4 w-4" />
+                            </a>
+                          </div>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setCheckingWallets(prev => ({ ...prev, [address]: true }))}
+                            disabled={isChecking}
+                          >
+                            {isChecking ? (
+                              <>
+                                <IconLoader2 className="h-4 w-4 animate-spin mr-1" />
+                                Checking
+                              </>
+                            ) : (
+                              <>
+                                <IconSearch className="h-4 w-4 mr-1" />
+                                Check
+                              </>
+                            )}
+                          </Button>
+                        </div>
+                        <WalletCheckResult
+                          address={address}
+                          chain={chain}
+                          enabled={isChecking}
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="py-8 text-center text-muted-foreground">
+                  <IconWallet className="h-12 w-12 mx-auto mb-3 opacity-30" />
+                  <p>No wallet addresses connected</p>
+                  <p className="text-xs mt-1">User hasn't linked EVM or Solana wallets</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Email & IP Checks */}
+          {(userEmail || analytics.basicInfo?.email) && (
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base flex items-center gap-2">
+                  <IconShield className="h-5 w-5" />
+                  Email Security
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="p-3 rounded-lg bg-muted/30 border">
+                  <p className="text-sm font-medium mb-1">Email</p>
+                  <p className="text-sm font-mono">{userEmail || analytics.basicInfo?.email}</p>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Use the backend API to check email reputation via StopForumSpam
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Deposit Address Analysis */}
+          {analytics.depositAnalysis && (
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base flex items-center gap-2">
+                  <IconCoin className="h-5 w-5" />
+                  Deposit Address Analysis
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 gap-4 mb-4">
+                  <div className="text-center p-3 rounded-lg bg-muted/50 border">
+                    <p className="text-2xl font-bold">{analytics.depositAnalysis.totalAddresses}</p>
+                    <p className="text-xs text-muted-foreground">Addresses</p>
+                  </div>
+                  <div className="text-center p-3 rounded-lg bg-muted/50 border">
+                    <p className="text-2xl font-bold">{analytics.depositAnalysis.riskyAddresses}</p>
+                    <p className="text-xs text-muted-foreground">Risky</p>
+                  </div>
+                </div>
+                {analytics.depositAnalysis.flaggedAddresses?.length > 0 && (
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium text-red-600">Flagged Addresses</p>
+                    {analytics.depositAnalysis.flaggedAddresses.map((addr: any, idx: number) => (
+                      <div key={idx} className="p-2 rounded bg-red-500/10 border border-red-500/30">
+                        <p className="text-sm font-mono truncate">{addr.address}</p>
+                        <p className="text-xs text-red-600">{addr.reason}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </CardContent>
             </Card>
           )}
