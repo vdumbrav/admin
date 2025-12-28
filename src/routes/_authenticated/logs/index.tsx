@@ -38,7 +38,8 @@ export function LogsPage() {
   });
   const auth = useAppAuth();
 
-  const kibanaUrl = import.meta.env.VITE_KIBANA_URL || 'https://admin.moliedev.xyz/kibana';
+  // Always use internal kibana path through admin proxy
+  const kibanaUrl = '/kibana';
   const apiUrl = import.meta.env.VITE_API_URL || 'https://api.moliedev.xyz';
 
 
