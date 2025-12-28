@@ -312,9 +312,9 @@ function SecurityCenterPage() {
           {/* Left: Queue & Tables */}
           <div className="lg:col-span-2">
             <Card className="h-full">
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <Tabs value={activeTab} onValueChange={setActiveTab}>
+              <Tabs value={activeTab} onValueChange={setActiveTab}>
+                <CardHeader className="pb-3">
+                  <div className="flex items-center justify-between">
                     <TabsList className="h-8">
                       <TabsTrigger value="queue" className="text-xs px-3">
                         <IconUsers className="h-3 w-3 mr-1" />
@@ -325,34 +325,33 @@ function SecurityCenterPage() {
                         Cards
                       </TabsTrigger>
                     </TabsList>
-                  </Tabs>
-                  <div className="flex gap-2">
-                    <div className="relative">
-                      <IconSearch className="absolute left-2 top-1/2 -translate-y-1/2 h-3 w-3 text-muted-foreground" />
-                      <Input
-                        placeholder="Search..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="pl-7 h-8 w-[150px] text-xs"
-                      />
+                    <div className="flex gap-2">
+                      <div className="relative">
+                        <IconSearch className="absolute left-2 top-1/2 -translate-y-1/2 h-3 w-3 text-muted-foreground" />
+                        <Input
+                          placeholder="Search..."
+                          value={searchQuery}
+                          onChange={(e) => setSearchQuery(e.target.value)}
+                          className="pl-7 h-8 w-[150px] text-xs"
+                        />
+                      </div>
+                      <Select value={minRiskScore.toString()} onValueChange={(v) => setMinRiskScore(parseInt(v))}>
+                        <SelectTrigger className="w-[100px] h-8 text-xs">
+                          <IconFilter className="h-3 w-3 mr-1" />
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="0">All</SelectItem>
+                          <SelectItem value="40">40+</SelectItem>
+                          <SelectItem value="60">60+</SelectItem>
+                          <SelectItem value="80">80+</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
-                    <Select value={minRiskScore.toString()} onValueChange={(v) => setMinRiskScore(parseInt(v))}>
-                      <SelectTrigger className="w-[100px] h-8 text-xs">
-                        <IconFilter className="h-3 w-3 mr-1" />
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="0">All</SelectItem>
-                        <SelectItem value="40">40+</SelectItem>
-                        <SelectItem value="60">60+</SelectItem>
-                        <SelectItem value="80">80+</SelectItem>
-                      </SelectContent>
-                    </Select>
                   </div>
-                </div>
-              </CardHeader>
-              <CardContent className="p-0">
-                <TabsContent value="queue" className="m-0">
+                </CardHeader>
+                <CardContent className="p-0">
+                  <TabsContent value="queue" className="m-0">
                   <ScrollArea className="h-[500px]">
                     {suspiciousLoading ? (
                       <div className="p-4 space-y-2">
@@ -474,7 +473,8 @@ function SecurityCenterPage() {
                     )}
                   </ScrollArea>
                 </TabsContent>
-              </CardContent>
+                </CardContent>
+              </Tabs>
             </Card>
           </div>
 
