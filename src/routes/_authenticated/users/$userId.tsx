@@ -1006,6 +1006,26 @@ function UserDetailsPage() {
                       </div>
                     </>
                   )}
+
+                  {user.authIdentities && user.authIdentities.length > 0 && (
+                    <>
+                      <Separator />
+                      <div className="space-y-2">
+                        <p className="text-sm font-medium">Connected Accounts</p>
+                        <div className="flex flex-wrap gap-2">
+                          {user.authIdentities.map((identity, idx) => (
+                            <Badge
+                              key={idx}
+                              variant="secondary"
+                              className="font-mono text-xs"
+                            >
+                              {identity.provider}: {identity.authName || identity.authId}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    </>
+                  )}
                 </div>
               </CardContent>
             </Card>
