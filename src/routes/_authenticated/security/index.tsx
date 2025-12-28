@@ -1076,11 +1076,11 @@ function SecurityCenterPage() {
                       <CardHeader className="pb-2">
                         <CardTitle className="text-sm font-medium flex items-center justify-between">
                           <span>Search Results</span>
-                          {tagSearchResult.data && (
+                          {tagSearchResult.data ? (
                             <Badge variant="secondary">
-                              {(tagSearchResult.data as any).users?.length ?? 0} users
+                              {String((tagSearchResult.data as any).users?.length ?? 0)} users
                             </Badge>
-                          )}
+                          ) : null}
                         </CardTitle>
                       </CardHeader>
                       <CardContent>
