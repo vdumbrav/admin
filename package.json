@@ -73,6 +73,7 @@
     "react-dom": "^19.2.0",
     "react-dropzone": "^14.3.8",
     "react-hook-form": "^7.64.0",
+    "react-markdown": "^10.1.0",
     "react-number-format": "^5.4.4",
     "react-oidc-context": "^3.3.0",
     "react-top-loading-bar": "^3.0.2",
