@@ -4,8 +4,12 @@ import { useBotStats } from '../api/admin-bot';
 import { Users, MessageSquare, Globe, Send, Link2 } from 'lucide-react';
 import type { BotStats } from '../types';
 
-export function BotStatsOverview() {
-  const { data, isLoading, error } = useBotStats();
+interface BotStatsOverviewProps {
+  period?: string;
+}
+
+export function BotStatsOverview({ period = '7' }: BotStatsOverviewProps) {
+  const { data, isLoading, error } = useBotStats(period);
 
   if (isLoading) {
     return (
@@ -39,32 +43,34 @@ export function BotStatsOverview() {
   // Cast to correct type
   const stats = data as BotStats | undefined;
 
+  const periodLabel = period === '7' ? '7 days' : period === '30' ? '30 days' : '90 days';
+
   const statCards = [
     {
-      title: 'Requests Today',
+      title: 'Requests',
       value: stats?.today?.totalRequests ?? 0,
-      description: 'Total API requests',
+      description: `Total API requests (${periodLabel})`,
       icon: MessageSquare,
       color: 'text-green-500',
     },
     {
       title: 'Active Users',
       value: stats?.today?.uniqueUsers ?? 0,
-      description: 'Unique users today',
+      description: `Unique users (${periodLabel})`,
       icon: Users,
       color: 'text-blue-500',
     },
     {
       title: 'Matrix Users',
       value: stats?.today?.matrixUsers ?? 0,
-      description: 'Active Matrix users',
+      description: `Active Matrix users (${periodLabel})`,
       icon: Globe,
       color: 'text-purple-500',
     },
     {
       title: 'Telegram Users',
       value: stats?.today?.telegramUsers ?? 0,
-      description: 'Active Telegram users',
+      description: `Active Telegram users (${periodLabel})`,
       icon: Send,
       color: 'text-cyan-500',
     },

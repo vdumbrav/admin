@@ -19,15 +19,15 @@ import type {
 
 // ==================== Stats ====================
 
-export const useBotStats = () => {
+export const useBotStats = (period: string = '7') => {
   const auth = useAppAuth();
 
   return useQuery({
-    queryKey: ['admin', 'bot', 'stats'],
+    queryKey: ['admin', 'bot', 'stats', period],
     queryFn: async (): Promise<BotStats> => {
       const token = await auth.getAccessToken();
       return orvalMutator<BotStats>({
-        url: '/admin/bot/stats',
+        url: `/admin/bot/stats?period=${period}`,
         method: 'GET',
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -38,15 +38,15 @@ export const useBotStats = () => {
 
 // ==================== Users ====================
 
-export const useBotUsers = (page = 1, limit = 50) => {
+export const useBotUsers = (page = 1, limit = 50, period: string = '7') => {
   const auth = useAppAuth();
 
   return useQuery({
-    queryKey: ['admin', 'bot', 'users', page, limit],
+    queryKey: ['admin', 'bot', 'users', page, limit, period],
     queryFn: async (): Promise<BotUsersResponse> => {
       const token = await auth.getAccessToken();
       return orvalMutator({
-        url: `/admin/bot/users?page=${page}&limit=${limit}`,
+        url: `/admin/bot/users?page=${page}&limit=${limit}&period=${period}`,
         method: 'GET',
         headers: { Authorization: `Bearer ${token}` },
       });

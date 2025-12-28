@@ -1,4 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
+import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { BotStatsOverview } from '@/features/bot/components/bot-stats-overview';
@@ -17,17 +18,44 @@ export const Route = createFileRoute('/_authenticated/bot/')({
   component: BotAdminPage,
 });
 
+type PeriodOption = '7' | '30' | '90';
+
+const PERIOD_OPTIONS = [
+  { value: '7' as PeriodOption, label: '7 days' },
+  { value: '30' as PeriodOption, label: '30 days' },
+  { value: '90' as PeriodOption, label: '90 days' },
+];
+
 function BotAdminPage() {
+  const [period, setPeriod] = useState<PeriodOption>('7');
+
   return (
     <div className="flex flex-col gap-6 p-6">
-      <div>
-        <h1 className="text-3xl font-bold">Walme AI Bot Management</h1>
-        <p className="text-muted-foreground">
-          Manage bot configuration, training, and user interactions
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold">Walme AI Bot Management</h1>
+          <p className="text-muted-foreground">
+            Manage bot configuration, training, and user interactions
+          </p>
+        </div>
+        <div className="flex gap-2">
+          {PERIOD_OPTIONS.map((option) => (
+            <button
+              key={option.value}
+              onClick={() => setPeriod(option.value)}
+              className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                period === option.value
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
+              }`}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
       </div>
 
-      <BotStatsOverview />
+      <BotStatsOverview period={period} />
 
       <Tabs defaultValue="users" className="w-full">
         <TabsList className="grid w-full grid-cols-10">
@@ -52,7 +80,7 @@ function BotAdminPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <BotUsersTable />
+              <BotUsersTable period={period} />
             </CardContent>
           </Card>
         </TabsContent>

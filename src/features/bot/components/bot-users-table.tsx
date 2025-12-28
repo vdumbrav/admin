@@ -492,7 +492,11 @@ function UserRow({
   );
 }
 
-export function BotUsersTable() {
+interface BotUsersTableProps {
+  period?: string;
+}
+
+export function BotUsersTable({ period = '7' }: BotUsersTableProps) {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(25);
   const [searchQuery, setSearchQuery] = useState('');
@@ -500,7 +504,7 @@ export function BotUsersTable() {
   const [bulkLang, setBulkLang] = useState('ru');
   const [bulkProgress, setBulkProgress] = useState<{ current: number; total: number; results: UserSummary[] } | null>(null);
   const [selectedUserIds, setSelectedUserIds] = useState<Set<string>>(new Set());
-  const { data, isLoading, refetch } = useBotUsers(page, limit);
+  const { data, isLoading, refetch } = useBotUsers(page, limit, period);
   const resetLimit = useResetUserLimit();
   const summarize = useSummarizeUser();
   const saveProfile = useSaveUserProfile();
