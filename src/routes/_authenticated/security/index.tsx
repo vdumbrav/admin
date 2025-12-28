@@ -223,7 +223,7 @@ function SecurityCenterPage() {
                 </div>
               ) : suspiciousUsers.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
-                  No suspicious users found with risk score >= {minRiskScore}
+                  No suspicious users found with risk score {minRiskScore}+
                 </div>
               ) : (
                 <div className="space-y-3">
