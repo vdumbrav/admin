@@ -91,46 +91,14 @@ export const Route = createFileRoute('/_authenticated/users/$userId')({
   component: UserDetailsPage,
 });
 
-// Auth identity type
-interface AuthIdentity {
-  provider: string;
-  authId: string;
-  authName?: string;
-}
-
 // Bot Interactions Section Component
-function BotInteractionsSection({ matrixId, telegramId, authIdentities }: {
-  matrixId?: string;
-  telegramId?: string;
-  authIdentities?: AuthIdentity[];
-}) {
+function BotInteractionsSection({ matrixId }: { matrixId?: string }) {
   const [language, setLanguage] = useState('ru');
   const [newSummary, setNewSummary] = useState<UserSummary | null>(null);
   const [autoSave, setAutoSave] = useState(false);
   const [showSaveDialog, setShowSaveDialog] = useState(false);
-  const [selectedIdentity, setSelectedIdentity] = useState<string>('');
 
-  // Get all bot-related identities
-  const botIdentities = (authIdentities || []).filter(
-    i => i.provider === 'matrix' || i.provider === 'telegram'
-  );
-
-  // Also add from direct props if not in authIdentities
-  if (matrixId && !botIdentities.find(i => i.authId === matrixId)) {
-    botIdentities.unshift({ provider: 'matrix', authId: matrixId });
-  }
-  if (telegramId && !botIdentities.find(i => i.authId === telegramId)) {
-    botIdentities.unshift({ provider: 'telegram', authId: telegramId });
-  }
-
-  // Select first identity by default
-  const currentIdentity = selectedIdentity || botIdentities[0]?.authId || '';
-  const currentProvider = botIdentities.find(i => i.authId === currentIdentity)?.provider || 'matrix';
-
-  // Format user ID for API based on provider
-  const botUserId = currentIdentity
-    ? (currentProvider === 'telegram' ? `telegram:${currentIdentity}` : currentIdentity)
-    : null;
+  const botUserId = matrixId || null;
 
   const { data: userContext, isLoading: contextLoading } = useUserContext(botUserId || '');
   const { data: savedProfile, isLoading: profileLoading } = useUserProfile(botUserId || '');
@@ -168,7 +136,7 @@ function BotInteractionsSection({ matrixId, telegramId, authIdentities }: {
     }
   };
 
-  if (botIdentities.length === 0) {
+  if (!botUserId) {
     return (
       <Card>
         <CardContent className="py-12 text-center">
@@ -177,7 +145,7 @@ function BotInteractionsSection({ matrixId, telegramId, authIdentities }: {
           </div>
           <p className="text-sm font-medium mb-1">No bot account linked</p>
           <p className="text-xs text-muted-foreground">
-            This user doesn't have a Matrix or Telegram ID linked to their account
+            This user doesn't have a Matrix ID linked to their account
           </p>
         </CardContent>
       </Card>
@@ -193,26 +161,9 @@ function BotInteractionsSection({ matrixId, telegramId, authIdentities }: {
             <IconMessageCircle className="h-5 w-5 text-blue-500" />
             Bot Conversations
           </CardTitle>
-          {/* Identity selector */}
-          {botIdentities.length > 1 && (
-            <div className="flex flex-wrap gap-2 mt-2">
-              {botIdentities.map((identity) => (
-                <Badge
-                  key={identity.authId}
-                  variant={currentIdentity === identity.authId ? 'default' : 'outline'}
-                  className="cursor-pointer font-mono text-xs"
-                  onClick={() => setSelectedIdentity(identity.authId)}
-                >
-                  {identity.provider === 'telegram' ? '📱' : '💬'} {identity.authName || identity.authId}
-                </Badge>
-              ))}
-            </div>
-          )}
-          {botIdentities.length === 1 && (
-            <Badge variant="outline" className="font-mono text-xs w-fit">
-              {currentProvider === 'telegram' ? '📱' : '💬'} {currentIdentity}
-            </Badge>
-          )}
+          <Badge variant="outline" className="font-mono text-xs w-fit">
+            {botUserId}
+          </Badge>
         </CardHeader>
         <CardContent>
           {contextLoading ? (
@@ -1191,11 +1142,7 @@ function UserDetailsPage() {
 
         {/* Bot Tab */}
         <TabsContent value="bot" className="space-y-6">
-          <BotInteractionsSection
-                    matrixId={user.matrixId}
-                    telegramId={user.telegramId}
-                    authIdentities={user.authIdentities}
-                  />
+          <BotInteractionsSection matrixId={user.matrixId} />
         </TabsContent>
 
         {/* Cards Tab */}
