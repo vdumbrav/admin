@@ -67,6 +67,7 @@ import {
 import { cn } from '@/lib/utils';
 import { formatDistanceToNow, format } from 'date-fns';
 import { ru } from 'date-fns/locale';
+import ReactMarkdown from 'react-markdown';
 
 // Check result types
 interface HashDitResult { riskScore?: number; riskLevel?: string; }
@@ -232,7 +233,9 @@ function SecurityCenterPage() {
               </div>
             </CardHeader>
             <CardContent>
-              <p className="text-sm whitespace-pre-wrap">{securitySummaryMutation.data.summary}</p>
+              <div className="prose prose-sm dark:prose-invert max-w-none">
+                <ReactMarkdown>{securitySummaryMutation.data.summary}</ReactMarkdown>
+              </div>
               {securitySummaryMutation.data.recommendations.length > 0 && (
                 <div className="mt-3 pt-3 border-t">
                   <p className="text-xs font-medium text-muted-foreground mb-2">Recommendations:</p>
