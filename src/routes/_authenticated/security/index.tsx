@@ -7,7 +7,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
-import { Progress } from '@/components/ui/progress';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   Select,
@@ -46,15 +45,10 @@ import {
   IconCurrencyBitcoin,
   IconAlertCircle,
   IconCheck,
-  IconX,
-  IconEye,
   IconFilter,
-  IconWorld,
-  IconWallet,
   IconArrowRight,
   IconClockHour4,
   IconFlag,
-  IconUserX,
 } from '@tabler/icons-react';
 import { useFraudStats } from '@/features/fraud-detection/api/fraud';
 import {
@@ -68,7 +62,7 @@ import {
   useCheckSpam,
   useCheckAbuse,
   useCheckWebacy,
-  type SuspiciousUser,
+  useSecuritySummary,
 } from '@/features/security/api/user-analytics';
 import { cn } from '@/lib/utils';
 import { formatDistanceToNow, format } from 'date-fns';
@@ -103,7 +97,7 @@ function SecurityCenterPage() {
   const [activeEmail, setActiveEmail] = useState<string | null>(null);
 
   // Data queries
-  const { data: fraudStats, isLoading: statsLoading, refetch: refetchStats } = useFraudStats();
+  const { isLoading: statsLoading, refetch: refetchStats } = useFraudStats();
   const { data: suspiciousData, isLoading: suspiciousLoading, refetch: refetchSuspicious } = useSuspiciousUsers({
     minRiskScore,
     hasFraudFlags: false,
@@ -115,6 +109,7 @@ function SecurityCenterPage() {
   });
 
   const analyzeAllMutation = useAnalyzeAllUsers();
+  const securitySummaryMutation = useSecuritySummary();
 
   // External checks
   const hashditCheck = useCheckHashDit(activeAddress || '', chainInput);
@@ -162,6 +157,10 @@ function SecurityCenterPage() {
     });
   };
 
+  const handleGenerateSummary = () => {
+    securitySummaryMutation.mutate(analysisLang);
+  };
+
   const getRiskBadge = (score: number, compact = false) => {
     if (score >= 80) {
       return <Badge variant="destructive" className={cn("font-mono", compact && "text-xs px-1.5")}>{compact ? score : `CRITICAL ${score}`}</Badge>;
@@ -174,9 +173,6 @@ function SecurityCenterPage() {
     }
     return <Badge variant="outline" className={cn("font-mono", compact && "text-xs px-1.5")}>{compact ? score : `LOW ${score}`}</Badge>;
   };
-
-  const checkIsLoading = hashditCheck.isLoading || chainalysisCheck.isLoading ||
-    ipCheck.isLoading || emailCheck.isLoading || abuseCheck.isLoading || webacyCheck.isLoading;
 
   return (
     <TooltipProvider>
@@ -203,11 +199,56 @@ function SecurityCenterPage() {
                 <SelectItem value="uk">UK</SelectItem>
               </SelectContent>
             </Select>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleGenerateSummary}
+              disabled={securitySummaryMutation.isPending}
+            >
+              {securitySummaryMutation.isPending ? (
+                <IconLoader className="h-4 w-4 animate-spin" />
+              ) : (
+                <IconBrain className="h-4 w-4" />
+              )}
+            </Button>
             <Button variant="outline" size="sm" onClick={handleRefresh} disabled={statsLoading || suspiciousLoading}>
               <IconRefresh className={cn("h-4 w-4", (statsLoading || suspiciousLoading) && "animate-spin")} />
             </Button>
           </div>
         </div>
+
+        {/* AI Security Summary */}
+        {securitySummaryMutation.data && (
+          <Card className="border-primary/30 bg-gradient-to-r from-primary/5 to-transparent">
+            <CardHeader className="pb-2">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-sm flex items-center gap-2">
+                  <IconBrain className="h-4 w-4 text-primary" />
+                  AI Security Summary
+                </CardTitle>
+                <span className="text-xs text-muted-foreground">
+                  {format(new Date(securitySummaryMutation.data.generatedAt), 'dd.MM.yyyy HH:mm')}
+                </span>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm whitespace-pre-wrap">{securitySummaryMutation.data.summary}</p>
+              {securitySummaryMutation.data.recommendations.length > 0 && (
+                <div className="mt-3 pt-3 border-t">
+                  <p className="text-xs font-medium text-muted-foreground mb-2">Recommendations:</p>
+                  <ul className="text-xs space-y-1">
+                    {securitySummaryMutation.data.recommendations.map((rec, i) => (
+                      <li key={i} className="flex items-start gap-2">
+                        <IconAlertCircle className="h-3 w-3 mt-0.5 text-yellow-500 shrink-0" />
+                        {rec}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
 
         {/* KPI Cards */}
         <div className="grid gap-3 md:grid-cols-4">

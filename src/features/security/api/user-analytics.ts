@@ -506,3 +506,28 @@ export const useCachedAnalytics = (userId: number) => {
     enabled: !!userId,
   });
 };
+
+// Security Summary with AI
+export interface SecuritySummaryResponse {
+  summary: string;
+  stats: {
+    totalUsers: number;
+    criticalRisk: number;
+    highRisk: number;
+    mediumRisk: number;
+    cardIssues: number;
+  };
+  recommendations: string[];
+  generatedAt: string;
+}
+
+export const useSecuritySummary = () => {
+  return useMutation({
+    mutationFn: async (lang: string = 'ru'): Promise<SecuritySummaryResponse> => {
+      return orvalMutator({
+        url: `/admin/users/analytics/security-summary?lang=${lang}`,
+        method: 'POST',
+      });
+    },
+  });
+};
