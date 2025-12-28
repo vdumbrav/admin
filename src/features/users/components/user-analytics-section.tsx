@@ -39,6 +39,7 @@ import {
   useRefreshUserAnalytics,
   useCheckHashDit,
   useCheckChainalysis,
+  useCheckWebacy,
 } from '@/features/security/api/user-analytics';
 import { cn } from '@/lib/utils';
 import { format, formatDistanceToNow, isValid, parseISO } from 'date-fns';
@@ -103,12 +104,15 @@ const formatRelativeDate = (dateString: string | undefined | null): string => {
 
 // Wallet check result component
 function WalletCheckResult({ address, chain, enabled }: { address: string; chain: string; enabled: boolean }) {
+  const webacyChain = chain === 'evm' ? 'ethereum' : chain === 'solana' ? 'solana' : '';
   const hashDitQuery = useCheckHashDit(address, chain === 'solana' ? 'solana' : chain === 'evm' ? 'eth' : chain);
   const chainalysisQuery = useCheckChainalysis(address);
+  const webacyQuery = useCheckWebacy(address, webacyChain);
 
-  const isLoading = enabled && (hashDitQuery.isLoading || chainalysisQuery.isLoading);
+  const isLoading = enabled && (hashDitQuery.isLoading || chainalysisQuery.isLoading || webacyQuery.isLoading);
   const hashDitData = hashDitQuery.data as any;
   const chainalysisData = chainalysisQuery.data as any;
+  const webacyData = webacyQuery.data as any;
 
   if (!enabled) {
     return (
@@ -127,9 +131,10 @@ function WalletCheckResult({ address, chain, enabled }: { address: string; chain
     );
   }
 
-  const hasRisk = hashDitData?.isRisky || chainalysisData?.isRisky ||
+  const hasRisk = hashDitData?.isRisky || chainalysisData?.isRisky || webacyData?.isRisky ||
                   (hashDitData?.riskScore && hashDitData.riskScore > 50) ||
-                  (chainalysisData?.risk && chainalysisData.risk !== 'low');
+                  (chainalysisData?.risk && chainalysisData.risk !== 'low') ||
+                  (webacyData?.riskScore && webacyData.riskScore > 50);
 
   return (
     <div className={cn(
@@ -147,33 +152,46 @@ function WalletCheckResult({ address, chain, enabled }: { address: string; chain
         </span>
       </div>
 
-      {hashDitData && (
-        <div className="text-xs space-y-1">
-          <p className="font-medium">HashDit:</p>
-          <p>Risk Score: {hashDitData.riskScore ?? 'N/A'}</p>
-          {hashDitData.labels?.length > 0 && (
-            <div className="flex flex-wrap gap-1">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+        {/* HashDit */}
+        <div className="text-xs p-2 rounded bg-muted/50">
+          <p className="font-medium mb-1">HashDit</p>
+          <p>Score: <span className="font-mono">{hashDitData?.riskScore ?? '—'}</span></p>
+          {hashDitData?.labels?.length > 0 && (
+            <div className="flex flex-wrap gap-1 mt-1">
               {hashDitData.labels.map((l: string, i: number) => (
                 <Badge key={i} variant="outline" className="text-[10px]">{l}</Badge>
               ))}
             </div>
           )}
         </div>
-      )}
 
-      {chainalysisData && (
-        <div className="text-xs space-y-1">
-          <p className="font-medium">Chainalysis:</p>
-          <p>Risk: {chainalysisData.risk ?? 'N/A'}</p>
-          {chainalysisData.categories?.length > 0 && (
-            <div className="flex flex-wrap gap-1">
+        {/* Chainalysis */}
+        <div className="text-xs p-2 rounded bg-muted/50">
+          <p className="font-medium mb-1">Chainalysis</p>
+          <p>Risk: <span className="font-mono">{chainalysisData?.risk ?? '—'}</span></p>
+          {chainalysisData?.categories?.length > 0 && (
+            <div className="flex flex-wrap gap-1 mt-1">
               {chainalysisData.categories.map((c: string, i: number) => (
                 <Badge key={i} variant="outline" className="text-[10px]">{c}</Badge>
               ))}
             </div>
           )}
         </div>
-      )}
+
+        {/* Webacy */}
+        <div className="text-xs p-2 rounded bg-muted/50">
+          <p className="font-medium mb-1">Webacy <Badge variant="outline" className="text-[9px] ml-1">PAID</Badge></p>
+          <p>Score: <span className="font-mono">{webacyData?.riskScore ?? '—'}</span></p>
+          {webacyData?.labels?.length > 0 && (
+            <div className="flex flex-wrap gap-1 mt-1">
+              {webacyData.labels.map((l: string, i: number) => (
+                <Badge key={i} variant="outline" className="text-[10px]">{l}</Badge>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
