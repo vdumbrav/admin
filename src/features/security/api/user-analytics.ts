@@ -117,7 +117,7 @@ export const useSuspiciousUsers = (params: {
   return useQuery({
     queryKey: ['admin', 'users', 'suspicious', params],
     queryFn: async (): Promise<SuspiciousUsersResponse> => {
-      const data = await orvalMutator({
+      const data = await orvalMutator<SuspiciousUser[] | SuspiciousUsersResponse>({
         url: `/admin/users/analytics/suspicious?${queryParams.toString()}`,
         method: 'GET',
       });
@@ -125,7 +125,7 @@ export const useSuspiciousUsers = (params: {
       if (Array.isArray(data)) {
         return { users: data, total: data.length };
       }
-      return data;
+      return data as SuspiciousUsersResponse;
     },
   });
 };
