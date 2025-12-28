@@ -38,7 +38,7 @@ export function LogsPage() {
   });
   const auth = useAppAuth();
 
-  const kibanaUrl = import.meta.env.VITE_KIBANA_URL || 'https://kibana.moliedev.xyz';
+  const kibanaUrl = import.meta.env.VITE_KIBANA_URL || 'https://admin.moliedev.xyz/kibana';
   const apiUrl = import.meta.env.VITE_API_URL || 'https://api2.moliedev.xyz';
 
   const dataViewId = 'fd93d6b1-88b0-49de-ac7e-43bf04cf7095';
