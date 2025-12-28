@@ -252,43 +252,51 @@ export function UserAnalyticsModal({
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="flex items-center gap-4 mb-4">
-                      <div className="flex-1">
-                        <div className="flex justify-between mb-1">
-                          <span className="text-sm font-medium">Risk Score</span>
-                          <span className="text-sm font-bold">{analytics.riskAssessment.overallScore}/100</span>
+                    {analytics.riskAssessment ? (
+                      <>
+                        <div className="flex items-center gap-4 mb-4">
+                          <div className="flex-1">
+                            <div className="flex justify-between mb-1">
+                              <span className="text-sm font-medium">Risk Score</span>
+                              <span className="text-sm font-bold">{analytics.riskAssessment.overallScore ?? 0}/100</span>
+                            </div>
+                            <Progress value={analytics.riskAssessment.overallScore ?? 0} className="h-3" />
+                          </div>
+                          <Badge variant={getRiskBadgeVariant(analytics.riskAssessment.overallLevel ?? 'low')} className="text-lg px-4 py-1">
+                            {(analytics.riskAssessment.overallLevel ?? 'low').toUpperCase()}
+                          </Badge>
                         </div>
-                        <Progress value={analytics.riskAssessment.overallScore} className="h-3" />
-                      </div>
-                      <Badge variant={getRiskBadgeVariant(analytics.riskAssessment.overallLevel)} className="text-lg px-4 py-1">
-                        {analytics.riskAssessment.overallLevel.toUpperCase()}
-                      </Badge>
-                    </div>
 
-                    {analytics.riskAssessment.flags.length > 0 && (
-                      <div className="mt-4">
-                        <p className="text-sm font-medium mb-2">Fraud Flags:</p>
-                        <div className="flex flex-wrap gap-2">
-                          {analytics.riskAssessment.flags.map((flag, idx) => (
-                            <Badge key={idx} variant="destructive" className="gap-1">
-                              <IconAlertTriangle className="h-3 w-3" />
-                              {flag}
-                            </Badge>
+                        {analytics.riskAssessment.flags && analytics.riskAssessment.flags.length > 0 && (
+                          <div className="mt-4">
+                            <p className="text-sm font-medium mb-2">Fraud Flags:</p>
+                            <div className="flex flex-wrap gap-2">
+                              {analytics.riskAssessment.flags.map((flag, idx) => (
+                                <Badge key={idx} variant="destructive" className="gap-1">
+                                  <IconAlertTriangle className="h-3 w-3" />
+                                  {flag}
+                                </Badge>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        <Separator className="my-4" />
+
+                        <div className="grid grid-cols-2 gap-4">
+                          {(analytics.riskAssessment.factors ?? []).map((factor, idx) => (
+                            <div key={idx} className="flex items-center justify-between p-2 rounded-md bg-muted/50">
+                              <span className="text-sm">{factor.factor}</span>
+                              <Badge variant="outline">{factor.score}</Badge>
+                            </div>
                           ))}
                         </div>
+                      </>
+                    ) : (
+                      <div className="text-center text-muted-foreground py-4">
+                        Risk assessment data not available
                       </div>
                     )}
-
-                    <Separator className="my-4" />
-
-                    <div className="grid grid-cols-2 gap-4">
-                      {analytics.riskAssessment.factors.map((factor, idx) => (
-                        <div key={idx} className="flex items-center justify-between p-2 rounded-md bg-muted/50">
-                          <span className="text-sm">{factor.factor}</span>
-                          <Badge variant="outline">{factor.score}</Badge>
-                        </div>
-                      ))}
-                    </div>
                   </CardContent>
                 </Card>
 

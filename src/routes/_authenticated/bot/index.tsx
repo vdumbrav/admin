@@ -18,9 +18,10 @@ export const Route = createFileRoute('/_authenticated/bot/')({
   component: BotAdminPage,
 });
 
-type PeriodOption = '7' | '30' | '90';
+type PeriodOption = '1' | '7' | '30' | '90';
 
 const PERIOD_OPTIONS = [
+  { value: '1' as PeriodOption, label: '1 day' },
   { value: '7' as PeriodOption, label: '7 days' },
   { value: '30' as PeriodOption, label: '30 days' },
   { value: '90' as PeriodOption, label: '90 days' },
