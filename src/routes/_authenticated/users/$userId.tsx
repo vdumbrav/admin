@@ -81,7 +81,7 @@ import {
 import { usePrizeCards, useManuallyGiveCard, useAvailableCards, useAddCardToPool, useReturnCardToPool, useRemoveCardFromPool } from '@/features/camera-quest/api';
 import { EPrizeCardStatus } from '@/features/camera-quest/types';
 import { IconGift, IconArrowBack, IconCheck, IconRobot, IconMessageCircle, IconBrain } from '@tabler/icons-react';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Switch } from '@/components/ui/switch';
 import { cn } from '@/lib/utils';
 import { useUserContext, useSummarizeUser, useUserProfile, useSaveUserProfile } from '@/features/bot/api/admin-bot';
@@ -92,13 +92,44 @@ export const Route = createFileRoute('/_authenticated/users/$userId')({
 });
 
 // Bot Interactions Section Component
-function BotInteractionsSection({ matrixId }: { matrixId?: string }) {
+interface BotIdentity {
+  provider: string;
+  authId: string;
+  authName?: string;
+}
+
+function BotInteractionsSection({ matrixId, authIdentities }: { matrixId?: string; authIdentities?: BotIdentity[] }) {
   const [language, setLanguage] = useState('ru');
   const [newSummary, setNewSummary] = useState<UserSummary | null>(null);
   const [autoSave, setAutoSave] = useState(false);
   const [showSaveDialog, setShowSaveDialog] = useState(false);
 
-  const botUserId = matrixId || null;
+  // Build list of bot-capable identities (matrix, telegram)
+  const botIdentities = React.useMemo(() => {
+    const identities: { type: 'matrix' | 'telegram'; id: string; label: string }[] = [];
+
+    // Add Matrix ID if present
+    if (matrixId) {
+      identities.push({ type: 'matrix', id: matrixId, label: `Matrix: ${matrixId}` });
+    }
+
+    // Add from authIdentities
+    authIdentities?.forEach(identity => {
+      if (identity.provider === 'matrix' && identity.authId && identity.authId !== matrixId) {
+        identities.push({ type: 'matrix', id: identity.authId, label: `Matrix: ${identity.authId}` });
+      }
+      if (identity.provider === 'telegram') {
+        const tgId = identity.authName || identity.authId;
+        identities.push({ type: 'telegram', id: tgId, label: `Telegram: ${tgId}` });
+      }
+    });
+
+    return identities;
+  }, [matrixId, authIdentities]);
+
+  const [selectedIdentityIndex, setSelectedIdentityIndex] = useState(0);
+  const selectedIdentity = botIdentities[selectedIdentityIndex];
+  const botUserId = selectedIdentity?.id || null;
 
   const { data: userContext, isLoading: contextLoading } = useUserContext(botUserId || '');
   const { data: savedProfile, isLoading: profileLoading } = useUserProfile(botUserId || '');
@@ -136,7 +167,7 @@ function BotInteractionsSection({ matrixId }: { matrixId?: string }) {
     }
   };
 
-  if (!botUserId) {
+  if (botIdentities.length === 0) {
     return (
       <Card>
         <CardContent className="py-12 text-center">
@@ -145,7 +176,7 @@ function BotInteractionsSection({ matrixId }: { matrixId?: string }) {
           </div>
           <p className="text-sm font-medium mb-1">No bot account linked</p>
           <p className="text-xs text-muted-foreground">
-            This user doesn't have a Matrix ID linked to their account
+            This user doesn't have Matrix or Telegram linked
           </p>
         </CardContent>
       </Card>
@@ -161,9 +192,27 @@ function BotInteractionsSection({ matrixId }: { matrixId?: string }) {
             <IconMessageCircle className="h-5 w-5 text-blue-500" />
             Bot Conversations
           </CardTitle>
-          <Badge variant="outline" className="font-mono text-xs w-fit">
-            {botUserId}
-          </Badge>
+          {botIdentities.length > 1 ? (
+            <Select
+              value={String(selectedIdentityIndex)}
+              onValueChange={(v) => setSelectedIdentityIndex(Number(v))}
+            >
+              <SelectTrigger className="w-fit font-mono text-xs">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {botIdentities.map((identity, idx) => (
+                  <SelectItem key={idx} value={String(idx)}>
+                    {identity.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          ) : (
+            <Badge variant="outline" className="font-mono text-xs w-fit">
+              {selectedIdentity?.label}
+            </Badge>
+          )}
         </CardHeader>
         <CardContent>
           {contextLoading ? (
@@ -1162,7 +1211,7 @@ function UserDetailsPage() {
 
         {/* Bot Tab */}
         <TabsContent value="bot" className="space-y-6">
-          <BotInteractionsSection matrixId={user.matrixId} />
+          <BotInteractionsSection matrixId={user.matrixId} authIdentities={user.authIdentities} />
         </TabsContent>
 
         {/* Cards Tab */}
