@@ -22,6 +22,10 @@ export interface BotUser {
   date: string;
   linkedUserId?: string | null;
   messageCount?: number;
+  walmeUser?: {
+    id: number;
+    nickname?: string;
+  } | null;
 }
 
 export interface BotUsersResponse {

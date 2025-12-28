@@ -31,7 +31,8 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { useBotUsers, useUserContext, useResetUserLimit, useClearUserContext, useSummarizeUser, useSaveUserProfile } from '../api/admin-bot';
 import { toast } from 'sonner';
-import { Search, RotateCcw, Trash2, Users, MessageCircle, Link, Brain, Languages, Loader2 } from 'lucide-react';
+import { Search, RotateCcw, Trash2, Users, MessageCircle, Link, Brain, Languages, Loader2, ExternalLink } from 'lucide-react';
+import { Link as RouterLink } from '@tanstack/react-router';
 import type { BotUser, UserSummary } from '../types';
 
 function UserContextDialog({ userId }: { userId: string }) {
@@ -340,11 +341,28 @@ function UserRow({ user, onResetLimit }: { user: BotUser; onResetLimit: () => vo
   return (
     <TableRow>
       <TableCell className="font-mono text-xs max-w-[250px]">
-        <div className="truncate">{user.userId}</div>
+        <div className="flex items-center gap-2">
+          <span className="truncate">{user.userId}</span>
+          {user.walmeUser && (
+            <RouterLink
+              to="/users/$userId"
+              params={{ userId: String(user.walmeUser.id) }}
+              className="text-primary hover:underline flex items-center gap-1"
+              title={`View profile: ${user.walmeUser.nickname || `User #${user.walmeUser.id}`}`}
+            >
+              <ExternalLink className="h-3 w-3" />
+            </RouterLink>
+          )}
+        </div>
         {user.linkedUserId && (
           <div className="flex items-center gap-1 mt-1 text-muted-foreground">
             <Link className="h-3 w-3" />
             <span className="truncate text-xs">{user.linkedUserId}</span>
+          </div>
+        )}
+        {user.walmeUser?.nickname && (
+          <div className="text-muted-foreground text-xs mt-0.5">
+            @{user.walmeUser.nickname}
           </div>
         )}
       </TableCell>
