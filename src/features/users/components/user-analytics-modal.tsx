@@ -301,38 +301,40 @@ export function UserAnalyticsModal({
                 </Card>
 
                 {/* Financial Summary */}
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="flex items-center gap-2">
-                      <IconCreditCard className="h-5 w-5" />
-                      Financial Summary
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-5 gap-4">
-                      <div className="text-center p-3 rounded-md bg-muted/50">
-                        <p className="text-2xl font-bold">{analytics.financialSummary.totalCards}</p>
-                        <p className="text-xs text-muted-foreground">Cards</p>
+                {analytics.financialSummary && (
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="flex items-center gap-2">
+                        <IconCreditCard className="h-5 w-5" />
+                        Financial Summary
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid grid-cols-5 gap-4">
+                        <div className="text-center p-3 rounded-md bg-muted/50">
+                          <p className="text-2xl font-bold">{analytics.financialSummary.totalCards}</p>
+                          <p className="text-xs text-muted-foreground">Cards</p>
+                        </div>
+                        <div className="text-center p-3 rounded-md bg-muted/50">
+                          <p className="text-2xl font-bold">${analytics.financialSummary.totalBalance.toFixed(2)}</p>
+                          <p className="text-xs text-muted-foreground">Balance</p>
+                        </div>
+                        <div className="text-center p-3 rounded-md bg-muted/50">
+                          <p className="text-2xl font-bold">{analytics.financialSummary.totalTransactions}</p>
+                          <p className="text-xs text-muted-foreground">Transactions</p>
+                        </div>
+                        <div className="text-center p-3 rounded-md bg-muted/50">
+                          <p className="text-2xl font-bold">${analytics.financialSummary.totalSpent.toFixed(2)}</p>
+                          <p className="text-xs text-muted-foreground">Spent</p>
+                        </div>
+                        <div className="text-center p-3 rounded-md bg-muted/50">
+                          <p className="text-2xl font-bold">${analytics.financialSummary.totalDeposits.toFixed(2)}</p>
+                          <p className="text-xs text-muted-foreground">Deposits</p>
+                        </div>
                       </div>
-                      <div className="text-center p-3 rounded-md bg-muted/50">
-                        <p className="text-2xl font-bold">${analytics.financialSummary.totalBalance.toFixed(2)}</p>
-                        <p className="text-xs text-muted-foreground">Balance</p>
-                      </div>
-                      <div className="text-center p-3 rounded-md bg-muted/50">
-                        <p className="text-2xl font-bold">{analytics.financialSummary.totalTransactions}</p>
-                        <p className="text-xs text-muted-foreground">Transactions</p>
-                      </div>
-                      <div className="text-center p-3 rounded-md bg-muted/50">
-                        <p className="text-2xl font-bold">${analytics.financialSummary.totalSpent.toFixed(2)}</p>
-                        <p className="text-xs text-muted-foreground">Spent</p>
-                      </div>
-                      <div className="text-center p-3 rounded-md bg-muted/50">
-                        <p className="text-2xl font-bold">${analytics.financialSummary.totalDeposits.toFixed(2)}</p>
-                        <p className="text-xs text-muted-foreground">Deposits</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+                    </CardContent>
+                  </Card>
+                )}
 
                 {/* AI Summary */}
                 {analytics.aiSummary && (

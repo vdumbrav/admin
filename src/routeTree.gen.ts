@@ -18,6 +18,7 @@ import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedWalmecardBalanceIndexRouteImport } from './routes/_authenticated/walmecard-balance/index'
 import { Route as AuthenticatedUsersIndexRouteImport } from './routes/_authenticated/users/index'
 import { Route as AuthenticatedTransactionsIndexRouteImport } from './routes/_authenticated/transactions/index'
+import { Route as AuthenticatedSecurityIndexRouteImport } from './routes/_authenticated/security/index'
 import { Route as AuthenticatedReferralsIndexRouteImport } from './routes/_authenticated/referrals/index'
 import { Route as AuthenticatedQuestsIndexRouteImport } from './routes/_authenticated/quests/index'
 import { Route as AuthenticatedProfileIndexRouteImport } from './routes/_authenticated/profile/index'
@@ -90,6 +91,12 @@ const AuthenticatedTransactionsIndexRoute =
   AuthenticatedTransactionsIndexRouteImport.update({
     id: '/transactions/',
     path: '/transactions/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedSecurityIndexRoute =
+  AuthenticatedSecurityIndexRouteImport.update({
+    id: '/security/',
+    path: '/security/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedReferralsIndexRoute =
@@ -273,6 +280,7 @@ export interface FileRoutesByFullPath {
   '/profile/': typeof AuthenticatedProfileIndexRoute
   '/quests': typeof AuthenticatedQuestsIndexRoute
   '/referrals': typeof AuthenticatedReferralsIndexRoute
+  '/security': typeof AuthenticatedSecurityIndexRoute
   '/transactions': typeof AuthenticatedTransactionsIndexRoute
   '/users': typeof AuthenticatedUsersIndexRoute
   '/walmecard-balance': typeof AuthenticatedWalmecardBalanceIndexRoute
@@ -309,6 +317,7 @@ export interface FileRoutesByTo {
   '/profile': typeof AuthenticatedProfileIndexRoute
   '/quests': typeof AuthenticatedQuestsIndexRoute
   '/referrals': typeof AuthenticatedReferralsIndexRoute
+  '/security': typeof AuthenticatedSecurityIndexRoute
   '/transactions': typeof AuthenticatedTransactionsIndexRoute
   '/users': typeof AuthenticatedUsersIndexRoute
   '/walmecard-balance': typeof AuthenticatedWalmecardBalanceIndexRoute
@@ -348,6 +357,7 @@ export interface FileRoutesById {
   '/_authenticated/profile/': typeof AuthenticatedProfileIndexRoute
   '/_authenticated/quests/': typeof AuthenticatedQuestsIndexRoute
   '/_authenticated/referrals/': typeof AuthenticatedReferralsIndexRoute
+  '/_authenticated/security/': typeof AuthenticatedSecurityIndexRoute
   '/_authenticated/transactions/': typeof AuthenticatedTransactionsIndexRoute
   '/_authenticated/users/': typeof AuthenticatedUsersIndexRoute
   '/_authenticated/walmecard-balance/': typeof AuthenticatedWalmecardBalanceIndexRoute
@@ -387,6 +397,7 @@ export interface FileRouteTypes {
     | '/profile/'
     | '/quests'
     | '/referrals'
+    | '/security'
     | '/transactions'
     | '/users'
     | '/walmecard-balance'
@@ -423,6 +434,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/quests'
     | '/referrals'
+    | '/security'
     | '/transactions'
     | '/users'
     | '/walmecard-balance'
@@ -461,6 +473,7 @@ export interface FileRouteTypes {
     | '/_authenticated/profile/'
     | '/_authenticated/quests/'
     | '/_authenticated/referrals/'
+    | '/_authenticated/security/'
     | '/_authenticated/transactions/'
     | '/_authenticated/users/'
     | '/_authenticated/walmecard-balance/'
@@ -545,6 +558,13 @@ declare module '@tanstack/react-router' {
       path: '/transactions'
       fullPath: '/transactions'
       preLoaderRoute: typeof AuthenticatedTransactionsIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/security/': {
+      id: '/_authenticated/security/'
+      path: '/security'
+      fullPath: '/security'
+      preLoaderRoute: typeof AuthenticatedSecurityIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/referrals/': {
@@ -783,6 +803,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedPremiumIndexRoute: typeof AuthenticatedPremiumIndexRoute
   AuthenticatedQuestsIndexRoute: typeof AuthenticatedQuestsIndexRoute
   AuthenticatedReferralsIndexRoute: typeof AuthenticatedReferralsIndexRoute
+  AuthenticatedSecurityIndexRoute: typeof AuthenticatedSecurityIndexRoute
   AuthenticatedTransactionsIndexRoute: typeof AuthenticatedTransactionsIndexRoute
   AuthenticatedUsersIndexRoute: typeof AuthenticatedUsersIndexRoute
   AuthenticatedWalmecardBalanceIndexRoute: typeof AuthenticatedWalmecardBalanceIndexRoute
@@ -815,6 +836,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedPremiumIndexRoute: AuthenticatedPremiumIndexRoute,
   AuthenticatedQuestsIndexRoute: AuthenticatedQuestsIndexRoute,
   AuthenticatedReferralsIndexRoute: AuthenticatedReferralsIndexRoute,
+  AuthenticatedSecurityIndexRoute: AuthenticatedSecurityIndexRoute,
   AuthenticatedTransactionsIndexRoute: AuthenticatedTransactionsIndexRoute,
   AuthenticatedUsersIndexRoute: AuthenticatedUsersIndexRoute,
   AuthenticatedWalmecardBalanceIndexRoute:
