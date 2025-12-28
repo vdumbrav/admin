@@ -110,17 +110,22 @@ export const useSuspiciousUsers = (params: {
   limit?: number;
 }) => {
   const queryParams = new URLSearchParams();
-  if (params.minRiskScore) queryParams.set('minRiskScore', params.minRiskScore.toString());
+  if (params.minRiskScore !== undefined) queryParams.set('minRiskScore', params.minRiskScore.toString());
   if (params.hasFraudFlags) queryParams.set('hasFraudFlags', 'true');
   if (params.limit) queryParams.set('limit', params.limit.toString());
 
   return useQuery({
     queryKey: ['admin', 'users', 'suspicious', params],
     queryFn: async (): Promise<SuspiciousUsersResponse> => {
-      return orvalMutator({
+      const data = await orvalMutator({
         url: `/admin/users/analytics/suspicious?${queryParams.toString()}`,
         method: 'GET',
       });
+      // Handle both array response and object response
+      if (Array.isArray(data)) {
+        return { users: data, total: data.length };
+      }
+      return data;
     },
   });
 };
