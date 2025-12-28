@@ -55,6 +55,11 @@ import {
   IconEye,
   IconFilter,
   IconWorld,
+  IconWallet,
+  IconDevices,
+  IconUserCheck,
+  IconLink,
+  IconCoin,
 } from '@tabler/icons-react';
 import { useFraudStats } from '@/features/fraud-detection/api/fraud';
 import {
@@ -68,7 +73,16 @@ import {
   useCheckEmail,
   useCheckSpam,
   useCheckAbuse,
+  useCheckWebacy,
   useUsersByTags,
+  useUserAnalytics,
+  useMultiAccountDetection,
+  useCardFraudAnalysis,
+  useReferralFraudAnalysis,
+  useIPAnalysis,
+  useDepositWallets,
+  useKeycloakData,
+  useRefreshUserAnalytics,
   type SuspiciousUser,
 } from '@/features/security/api/user-analytics';
 import { cn } from '@/lib/utils';
@@ -113,6 +127,14 @@ interface EmailCheckResult {
   reputation?: string;
 }
 
+interface WebacyResult {
+  riskScore?: number;
+  riskLevel?: string;
+  isSanctioned?: boolean;
+  flags?: Array<{ type: string; severity: string; description: string }>;
+  labels?: string[];
+}
+
 export const Route = createFileRoute('/_authenticated/security/' as any)({
   component: SecurityCenterPage,
 });
@@ -136,8 +158,14 @@ function SecurityCenterPage() {
   const [activeEmailCheck, setActiveEmailCheck] = useState<string | null>(null);
   const [activeTagsSearch, setActiveTagsSearch] = useState<string[]>([]);
 
+  // Webacy state (paid API)
+  const [webacyAddress, setWebacyAddress] = useState('');
+  const [webacyChain, setWebacyChain] = useState('ethereum');
+  const [activeWebacyCheck, setActiveWebacyCheck] = useState<string | null>(null);
+
   // Selected user for details
   const [selectedUser, setSelectedUser] = useState<SuspiciousUser | null>(null);
+  const [detailsTab, setDetailsTab] = useState('overview');
 
   // Data queries
   const { data: fraudStats, isLoading: fraudLoading, refetch: refetchFraud } = useFraudStats();
@@ -162,6 +190,18 @@ function SecurityCenterPage() {
   const spamCheck = useCheckSpam({ email: activeEmailCheck || undefined, ip: activeIpCheck || undefined });
   const abuseCheck = useCheckAbuse(activeIpCheck || '');
   const tagSearchResult = useUsersByTags({ tags: activeTagsSearch, matchAll: false });
+  const webacyCheck = useCheckWebacy(activeWebacyCheck || '', webacyChain);
+
+  // User detail queries (only when user selected)
+  const selectedUserId = selectedUser?.id || 0;
+  const userAnalytics = useUserAnalytics(selectedUserId, { lang: analysisLang });
+  const multiAccountDetection = useMultiAccountDetection(selectedUserId);
+  const cardFraudAnalysis = useCardFraudAnalysis(selectedUserId);
+  const referralFraudAnalysis = useReferralFraudAnalysis(selectedUserId);
+  const ipAnalysis = useIPAnalysis(selectedUserId);
+  const depositWallets = useDepositWallets(selectedUserId);
+  const keycloakData = useKeycloakData(selectedUserId);
+  const refreshAnalytics = useRefreshUserAnalytics();
 
   // Derived data
   const suspiciousUsers = useMemo(() => {
@@ -215,6 +255,18 @@ function SecurityCenterPage() {
   const handleTagsSearch = () => {
     if (tagsToSearch) {
       setActiveTagsSearch(tagsToSearch.split(',').map(t => t.trim()).filter(Boolean));
+    }
+  };
+
+  const handleWebacyCheck = () => {
+    if (webacyAddress) {
+      setActiveWebacyCheck(webacyAddress);
+    }
+  };
+
+  const handleRefreshUserAnalytics = () => {
+    if (selectedUser) {
+      refreshAnalytics.mutate(selectedUser.id);
     }
   };
 
@@ -968,6 +1020,89 @@ function SecurityCenterPage() {
                     ) : (
                       <p className="text-sm text-muted-foreground">No results</p>
                     )}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Webacy Check (PAID) */}
+            <Card className="border-amber-500/30 bg-gradient-to-br from-amber-500/5 to-transparent">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <IconWallet className="h-5 w-5 text-amber-500" />
+                  Webacy Check
+                  <Badge variant="outline" className="text-xs text-amber-600">PAID</Badge>
+                </CardTitle>
+                <CardDescription>Deep wallet risk analysis (Ethereum, BSC, Polygon, etc.)</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex gap-2">
+                  <div className="flex-1">
+                    <Input
+                      placeholder="0x... (EVM address)"
+                      value={webacyAddress}
+                      onChange={(e) => setWebacyAddress(e.target.value)}
+                    />
+                  </div>
+                  <Select value={webacyChain} onValueChange={setWebacyChain}>
+                    <SelectTrigger className="w-[120px]">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="ethereum">Ethereum</SelectItem>
+                      <SelectItem value="bsc">BSC</SelectItem>
+                      <SelectItem value="polygon">Polygon</SelectItem>
+                      <SelectItem value="arbitrum">Arbitrum</SelectItem>
+                      <SelectItem value="optimism">Optimism</SelectItem>
+                      <SelectItem value="base">Base</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Button onClick={handleWebacyCheck} disabled={!webacyAddress} variant="outline" className="border-amber-500/50">
+                    <IconSearch className="h-4 w-4" />
+                  </Button>
+                </div>
+
+                {activeWebacyCheck && (
+                  <div className="space-y-3 pt-2">
+                    <Separator />
+                    <div className="p-3 rounded-lg border border-amber-500/30">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="font-medium text-sm">Webacy Analysis</span>
+                        {webacyCheck.isLoading ? (
+                          <IconLoader className="h-4 w-4 animate-spin" />
+                        ) : webacyCheck.data ? (
+                          <Badge variant={((webacyCheck.data as WebacyResult).riskScore ?? 0) > 50 ? 'destructive' : 'outline'}>
+                            Score: {(webacyCheck.data as WebacyResult).riskScore ?? 'N/A'}
+                          </Badge>
+                        ) : (
+                          <Badge variant="outline">N/A</Badge>
+                        )}
+                      </div>
+                      {webacyCheck.data && (
+                        <div className="space-y-2 text-xs">
+                          <p>Level: <span className="font-medium">{(webacyCheck.data as WebacyResult).riskLevel?.toUpperCase() || 'N/A'}</span></p>
+                          {(webacyCheck.data as WebacyResult).isSanctioned && (
+                            <Badge variant="destructive">SANCTIONED</Badge>
+                          )}
+                          {(webacyCheck.data as WebacyResult).labels && (webacyCheck.data as WebacyResult).labels!.length > 0 && (
+                            <div className="flex flex-wrap gap-1 mt-2">
+                              {(webacyCheck.data as WebacyResult).labels!.map((label, idx) => (
+                                <Badge key={idx} variant="secondary" className="text-xs">{label}</Badge>
+                              ))}
+                            </div>
+                          )}
+                          {(webacyCheck.data as WebacyResult).flags && (webacyCheck.data as WebacyResult).flags!.length > 0 && (
+                            <div className="mt-2 space-y-1">
+                              {(webacyCheck.data as WebacyResult).flags!.map((flag, idx) => (
+                                <div key={idx} className="p-2 rounded bg-red-500/10 text-red-600">
+                                  <span className="font-medium">{flag.type}</span>: {flag.description}
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 )}
               </CardContent>
