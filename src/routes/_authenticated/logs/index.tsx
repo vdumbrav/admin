@@ -289,22 +289,12 @@ export function LogsPage() {
         </div>
       )}
 
-      <Card className="flex-1 min-h-[600px]">
-        <CardHeader className="flex flex-row items-center justify-between">
-          <div>
-            <CardTitle>Kibana</CardTitle>
-          </div>
-          <Button asChild variant="outline" size="sm">
-            <a href={discoverUrl} target="_blank" rel="noopener noreferrer">
-              Open in new tab
-            </a>
-          </Button>
-        </CardHeader>
-        <CardContent className="p-0 h-[calc(100%-80px)]">
+      <Card className="flex-1 min-h-[700px]">
+        <CardContent className="p-0 h-full">
           <iframe
             src={kibanaUrl}
-            className="w-full h-full min-h-[500px] border-0"
-            title="Kibana Dashboard"
+            className="w-full h-full min-h-[700px] border-0 rounded-lg"
+            title="Kibana"
           />
         </CardContent>
       </Card>
