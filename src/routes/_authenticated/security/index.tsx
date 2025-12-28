@@ -53,9 +53,7 @@ import {
   IconX,
   IconChevronRight,
   IconEye,
-  IconDownload,
   IconFilter,
-  IconHash,
   IconWorld,
 } from '@tabler/icons-react';
 import { useFraudStats } from '@/features/fraud-detection/api/fraud';
@@ -76,6 +74,44 @@ import {
 import { cn } from '@/lib/utils';
 import { formatDistanceToNow } from 'date-fns';
 import { ru } from 'date-fns/locale';
+
+// Type definitions for check results
+interface HashDitResult {
+  riskScore?: number;
+  riskLevel?: string;
+}
+
+interface ChainalysisResult {
+  sanctioned?: boolean;
+  categories?: string[];
+}
+
+interface TronResult {
+  overallRisk?: string;
+}
+
+interface IPCheckResult {
+  proxy?: boolean;
+  hosting?: boolean;
+  country?: string;
+  city?: string;
+  isp?: string;
+}
+
+interface AbuseCheckResult {
+  abuseScore?: number;
+  reports?: number;
+}
+
+interface SpamCheckResult {
+  isSpammer?: boolean;
+}
+
+interface EmailCheckResult {
+  isDisposable?: boolean;
+  domain?: string;
+  reputation?: string;
+}
 
 export const Route = createFileRoute('/_authenticated/security/' as any)({
   component: SecurityCenterPage,
@@ -128,7 +164,6 @@ function SecurityCenterPage() {
   const tagSearchResult = useUsersByTags({ tags: activeTagsSearch, matchAll: false });
 
   // Derived data
-  const stats = fraudStats?.stats;
   const suspiciousUsers = useMemo(() => {
     const users = suspiciousData?.users || [];
     if (!searchQuery) return users;
@@ -680,15 +715,15 @@ function SecurityCenterPage() {
                         {hashditCheck.isLoading ? (
                           <IconLoader className="h-4 w-4 animate-spin" />
                         ) : hashditCheck.data ? (
-                          <Badge variant={hashditCheck.data.riskScore > 50 ? 'destructive' : 'outline'}>
-                            Score: {hashditCheck.data.riskScore}
+                          <Badge variant={((hashditCheck.data as HashDitResult).riskScore ?? 0) > 50 ? 'destructive' : 'outline'}>
+                            Score: {(hashditCheck.data as HashDitResult).riskScore ?? 'N/A'}
                           </Badge>
                         ) : (
                           <Badge variant="outline">N/A</Badge>
                         )}
                       </div>
-                      {hashditCheck.data?.riskLevel && (
-                        <p className="text-xs text-muted-foreground">Level: {hashditCheck.data.riskLevel}</p>
+                      {(hashditCheck.data as HashDitResult)?.riskLevel && (
+                        <p className="text-xs text-muted-foreground">Level: {(hashditCheck.data as HashDitResult).riskLevel}</p>
                       )}
                     </div>
 
@@ -699,16 +734,16 @@ function SecurityCenterPage() {
                         {chainalysisCheck.isLoading ? (
                           <IconLoader className="h-4 w-4 animate-spin" />
                         ) : chainalysisCheck.data ? (
-                          <Badge variant={chainalysisCheck.data.sanctioned ? 'destructive' : 'outline'}>
-                            {chainalysisCheck.data.sanctioned ? 'SANCTIONED' : 'Clean'}
+                          <Badge variant={(chainalysisCheck.data as ChainalysisResult).sanctioned ? 'destructive' : 'outline'}>
+                            {(chainalysisCheck.data as ChainalysisResult).sanctioned ? 'SANCTIONED' : 'Clean'}
                           </Badge>
                         ) : (
                           <Badge variant="outline">N/A</Badge>
                         )}
                       </div>
-                      {chainalysisCheck.data?.categories?.length > 0 && (
+                      {((chainalysisCheck.data as ChainalysisResult)?.categories?.length ?? 0) > 0 && (
                         <div className="flex flex-wrap gap-1">
-                          {chainalysisCheck.data.categories.map((cat: string, idx: number) => (
+                          {(chainalysisCheck.data as ChainalysisResult).categories!.map((cat: string, idx: number) => (
                             <Badge key={idx} variant="secondary" className="text-xs">{cat}</Badge>
                           ))}
                         </div>
@@ -723,8 +758,8 @@ function SecurityCenterPage() {
                           {tronCheck.isLoading ? (
                             <IconLoader className="h-4 w-4 animate-spin" />
                           ) : tronCheck.data ? (
-                            <Badge variant={tronCheck.data.overallRisk === 'high' ? 'destructive' : 'outline'}>
-                              {tronCheck.data.overallRisk?.toUpperCase() || 'CHECKED'}
+                            <Badge variant={(tronCheck.data as TronResult).overallRisk === 'high' ? 'destructive' : 'outline'}>
+                              {(tronCheck.data as TronResult).overallRisk?.toUpperCase() || 'CHECKED'}
                             </Badge>
                           ) : (
                             <Badge variant="outline">N/A</Badge>
@@ -771,9 +806,9 @@ function SecurityCenterPage() {
                           <IconLoader className="h-4 w-4 animate-spin" />
                         ) : ipCheck.data ? (
                           <div className="flex gap-1">
-                            {ipCheck.data.proxy && <Badge variant="destructive">Proxy</Badge>}
-                            {ipCheck.data.hosting && <Badge variant="secondary">Hosting</Badge>}
-                            {!ipCheck.data.proxy && !ipCheck.data.hosting && <Badge variant="outline">Clean</Badge>}
+                            {(ipCheck.data as IPCheckResult).proxy && <Badge variant="destructive">Proxy</Badge>}
+                            {(ipCheck.data as IPCheckResult).hosting && <Badge variant="secondary">Hosting</Badge>}
+                            {!(ipCheck.data as IPCheckResult).proxy && !(ipCheck.data as IPCheckResult).hosting && <Badge variant="outline">Clean</Badge>}
                           </div>
                         ) : (
                           <Badge variant="outline">N/A</Badge>
@@ -781,8 +816,8 @@ function SecurityCenterPage() {
                       </div>
                       {ipCheck.data && (
                         <div className="text-xs text-muted-foreground space-y-1">
-                          <p><IconWorld className="inline h-3 w-3 mr-1" />{ipCheck.data.country} / {ipCheck.data.city}</p>
-                          <p>ISP: {ipCheck.data.isp}</p>
+                          <p><IconWorld className="inline h-3 w-3 mr-1" />{(ipCheck.data as IPCheckResult).country} / {(ipCheck.data as IPCheckResult).city}</p>
+                          <p>ISP: {(ipCheck.data as IPCheckResult).isp}</p>
                         </div>
                       )}
                     </div>
@@ -794,15 +829,15 @@ function SecurityCenterPage() {
                         {abuseCheck.isLoading ? (
                           <IconLoader className="h-4 w-4 animate-spin" />
                         ) : abuseCheck.data ? (
-                          <Badge variant={abuseCheck.data.abuseScore > 50 ? 'destructive' : 'outline'}>
-                            Score: {abuseCheck.data.abuseScore}%
+                          <Badge variant={((abuseCheck.data as AbuseCheckResult).abuseScore ?? 0) > 50 ? 'destructive' : 'outline'}>
+                            Score: {(abuseCheck.data as AbuseCheckResult).abuseScore ?? 0}%
                           </Badge>
                         ) : (
                           <Badge variant="outline">N/A</Badge>
                         )}
                       </div>
                       {abuseCheck.data && (
-                        <p className="text-xs text-muted-foreground">Reports: {abuseCheck.data.reports}</p>
+                        <p className="text-xs text-muted-foreground">Reports: {(abuseCheck.data as AbuseCheckResult).reports ?? 0}</p>
                       )}
                     </div>
 
@@ -813,8 +848,8 @@ function SecurityCenterPage() {
                         {spamCheck.isLoading ? (
                           <IconLoader className="h-4 w-4 animate-spin" />
                         ) : spamCheck.data ? (
-                          <Badge variant={spamCheck.data.isSpammer ? 'destructive' : 'outline'}>
-                            {spamCheck.data.isSpammer ? 'SPAMMER' : 'Clean'}
+                          <Badge variant={(spamCheck.data as SpamCheckResult).isSpammer ? 'destructive' : 'outline'}>
+                            {(spamCheck.data as SpamCheckResult).isSpammer ? 'SPAMMER' : 'Clean'}
                           </Badge>
                         ) : (
                           <Badge variant="outline">N/A</Badge>
@@ -860,8 +895,8 @@ function SecurityCenterPage() {
                         {emailCheck.isLoading ? (
                           <IconLoader className="h-4 w-4 animate-spin" />
                         ) : emailCheck.data ? (
-                          <Badge variant={emailCheck.data.isDisposable ? 'destructive' : 'outline'}>
-                            {emailCheck.data.isDisposable ? 'DISPOSABLE' : 'Valid'}
+                          <Badge variant={(emailCheck.data as EmailCheckResult).isDisposable ? 'destructive' : 'outline'}>
+                            {(emailCheck.data as EmailCheckResult).isDisposable ? 'DISPOSABLE' : 'Valid'}
                           </Badge>
                         ) : (
                           <Badge variant="outline">N/A</Badge>
@@ -869,8 +904,8 @@ function SecurityCenterPage() {
                       </div>
                       {emailCheck.data && (
                         <div className="text-xs text-muted-foreground">
-                          <p>Domain: {emailCheck.data.domain}</p>
-                          <p>Reputation: {emailCheck.data.reputation}</p>
+                          <p>Domain: {(emailCheck.data as EmailCheckResult).domain ?? 'N/A'}</p>
+                          <p>Reputation: {(emailCheck.data as EmailCheckResult).reputation ?? 'N/A'}</p>
                         </div>
                       )}
                     </div>
@@ -990,7 +1025,7 @@ function SecurityCenterPage() {
                 <div className="p-4 rounded-lg border">
                   <div className="grid grid-cols-3 gap-4 mb-4">
                     <div className="text-center p-3 rounded bg-muted/50">
-                      <p className="text-2xl font-bold">{analyzeAllMutation.data.processed}</p>
+                      <p className="text-2xl font-bold">{analyzeAllMutation.data.totalProcessed}</p>
                       <p className="text-xs text-muted-foreground">Total Processed</p>
                     </div>
                     <div className="text-center p-3 rounded bg-green-500/10">
