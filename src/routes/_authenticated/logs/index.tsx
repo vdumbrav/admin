@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Loader2, Brain, AlertTriangle, TrendingUp, Lightbulb, X, ChevronDown, ChevronUp, Languages } from 'lucide-react';
@@ -41,8 +41,6 @@ export function LogsPage() {
   const kibanaUrl = import.meta.env.VITE_KIBANA_URL || 'https://admin.moliedev.xyz/kibana';
   const apiUrl = import.meta.env.VITE_API_URL || 'https://api.moliedev.xyz';
 
-  const dataViewId = 'fd93d6b1-88b0-49de-ac7e-43bf04cf7095';
-  const discoverUrl = `${kibanaUrl}/app/discover#/?_g=(filters:!(),refreshInterval:(pause:!t,value:60000),time:(from:now-7d,to:now))&_a=(columns:!(level,message,context,timestamp),filters:!(),index:'${dataViewId}',interval:auto,query:(language:kuery,query:''),sort:!(!(timestamp,desc)))`;
 
   const toggleSection = (section: keyof typeof expandedSections) => {
     setExpandedSections(prev => ({ ...prev, [section]: !prev[section] }));
