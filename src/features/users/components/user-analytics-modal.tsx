@@ -352,157 +352,165 @@ export function UserAnalyticsModal({
                 )}
 
                 {/* Spam Checks */}
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="flex items-center gap-2">
-                      <IconMail className="h-5 w-5" />
-                      External Checks
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-3 gap-4">
-                      {analytics.spamChecks.disposableEmail && (
-                        <div className={cn(
-                          "p-3 rounded-md",
-                          analytics.spamChecks.disposableEmail.isDisposable ? "bg-red-100 dark:bg-red-950" : "bg-green-100 dark:bg-green-950"
-                        )}>
-                          <p className="font-medium text-sm">Email Check</p>
-                          <p className="text-xs">Disposable: {analytics.spamChecks.disposableEmail.isDisposable ? 'Yes' : 'No'}</p>
-                          <p className="text-xs">Reputation: {analytics.spamChecks.disposableEmail.reputation}</p>
-                        </div>
-                      )}
-                      {analytics.spamChecks.stopForumSpam && (
-                        <div className={cn(
-                          "p-3 rounded-md",
-                          analytics.spamChecks.stopForumSpam.isSpammer ? "bg-red-100 dark:bg-red-950" : "bg-green-100 dark:bg-green-950"
-                        )}>
-                          <p className="font-medium text-sm">StopForumSpam</p>
-                          <p className="text-xs">Spammer: {analytics.spamChecks.stopForumSpam.isSpammer ? 'Yes' : 'No'}</p>
-                          <p className="text-xs">Reports: {analytics.spamChecks.stopForumSpam.reports}</p>
-                        </div>
-                      )}
-                      {analytics.spamChecks.abuseIpDb && (
-                        <div className={cn(
-                          "p-3 rounded-md",
-                          analytics.spamChecks.abuseIpDb.abuseScore > 50 ? "bg-red-100 dark:bg-red-950" : "bg-green-100 dark:bg-green-950"
-                        )}>
-                          <p className="font-medium text-sm">AbuseIPDB</p>
-                          <p className="text-xs">Score: {analytics.spamChecks.abuseIpDb.abuseScore}%</p>
-                          <p className="text-xs">Reports: {analytics.spamChecks.abuseIpDb.reports}</p>
-                        </div>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
+                {analytics.spamChecks && (
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="flex items-center gap-2">
+                        <IconMail className="h-5 w-5" />
+                        External Checks
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid grid-cols-3 gap-4">
+                        {analytics.spamChecks.disposableEmail && (
+                          <div className={cn(
+                            "p-3 rounded-md",
+                            analytics.spamChecks.disposableEmail.isDisposable ? "bg-red-100 dark:bg-red-950" : "bg-green-100 dark:bg-green-950"
+                          )}>
+                            <p className="font-medium text-sm">Email Check</p>
+                            <p className="text-xs">Disposable: {analytics.spamChecks.disposableEmail.isDisposable ? 'Yes' : 'No'}</p>
+                            <p className="text-xs">Reputation: {analytics.spamChecks.disposableEmail.reputation}</p>
+                          </div>
+                        )}
+                        {analytics.spamChecks.stopForumSpam && (
+                          <div className={cn(
+                            "p-3 rounded-md",
+                            analytics.spamChecks.stopForumSpam.isSpammer ? "bg-red-100 dark:bg-red-950" : "bg-green-100 dark:bg-green-950"
+                          )}>
+                            <p className="font-medium text-sm">StopForumSpam</p>
+                            <p className="text-xs">Spammer: {analytics.spamChecks.stopForumSpam.isSpammer ? 'Yes' : 'No'}</p>
+                            <p className="text-xs">Reports: {analytics.spamChecks.stopForumSpam.reports}</p>
+                          </div>
+                        )}
+                        {analytics.spamChecks.abuseIpDb && (
+                          <div className={cn(
+                            "p-3 rounded-md",
+                            analytics.spamChecks.abuseIpDb.abuseScore > 50 ? "bg-red-100 dark:bg-red-950" : "bg-green-100 dark:bg-green-950"
+                          )}>
+                            <p className="font-medium text-sm">AbuseIPDB</p>
+                            <p className="text-xs">Score: {analytics.spamChecks.abuseIpDb.abuseScore}%</p>
+                            <p className="text-xs">Reports: {analytics.spamChecks.abuseIpDb.reports}</p>
+                          </div>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
               </TabsContent>
 
               {/* Fraud Tab */}
               <TabsContent value="fraud" className="space-y-4">
                 {/* Multi-Account Detection */}
-                <Card>
-                  <CardHeader className="pb-2 cursor-pointer" onClick={() => toggleSection('multiAccount')}>
-                    <CardTitle className="flex items-center justify-between">
-                      <span className="flex items-center gap-2">
-                        <IconUsers className="h-5 w-5" />
-                        Multi-Account Detection
-                      </span>
-                      <div className="flex items-center gap-2">
-                        <Badge variant={getRiskBadgeVariant(analytics.multiAccountDetection.riskLevel)}>
-                          {analytics.multiAccountDetection.totalSuspiciousConnections} connections
-                        </Badge>
-                        {expandedSections['multiAccount'] ? <IconChevronUp /> : <IconChevronDown />}
-                      </div>
-                    </CardTitle>
-                  </CardHeader>
-                  {expandedSections['multiAccount'] && (
-                    <CardContent>
-                      <div className="space-y-4">
-                        {analytics.multiAccountDetection.sameIpUsers.length > 0 && (
-                          <div>
-                            <p className="text-sm font-medium mb-2">Same IP Users:</p>
-                            {analytics.multiAccountDetection.sameIpUsers.map((user, idx) => (
-                              <div key={idx} className="flex items-center justify-between p-2 rounded bg-muted/50 mb-1">
-                                <span>User #{user.userId} - {user.email || 'No email'}</span>
-                                <Badge>{user.overlapCount} shared IPs</Badge>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                        {analytics.multiAccountDetection.similarEmails.length > 0 && (
-                          <div>
-                            <p className="text-sm font-medium mb-2">Similar Emails:</p>
-                            {analytics.multiAccountDetection.similarEmails.map((user, idx) => (
-                              <div key={idx} className="flex items-center justify-between p-2 rounded bg-muted/50 mb-1">
-                                <span>{user.email}</span>
-                                <Badge>{(user.similarity * 100).toFixed(0)}% similar</Badge>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                        {analytics.multiAccountDetection.sharedWallets.length > 0 && (
-                          <div>
-                            <p className="text-sm font-medium mb-2">Shared Wallets:</p>
-                            {analytics.multiAccountDetection.sharedWallets.map((user, idx) => (
-                              <div key={idx} className="flex items-center justify-between p-2 rounded bg-muted/50 mb-1">
-                                <span>User #{user.userId}</span>
-                                <span className="text-xs font-mono">{user.walletAddress}</span>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    </CardContent>
-                  )}
-                </Card>
+                {analytics.multiAccountDetection && (
+                  <Card>
+                    <CardHeader className="pb-2 cursor-pointer" onClick={() => toggleSection('multiAccount')}>
+                      <CardTitle className="flex items-center justify-between">
+                        <span className="flex items-center gap-2">
+                          <IconUsers className="h-5 w-5" />
+                          Multi-Account Detection
+                        </span>
+                        <div className="flex items-center gap-2">
+                          <Badge variant={getRiskBadgeVariant(analytics.multiAccountDetection.riskLevel ?? 'low')}>
+                            {analytics.multiAccountDetection.totalSuspiciousConnections ?? 0} connections
+                          </Badge>
+                          {expandedSections['multiAccount'] ? <IconChevronUp /> : <IconChevronDown />}
+                        </div>
+                      </CardTitle>
+                    </CardHeader>
+                    {expandedSections['multiAccount'] && (
+                      <CardContent>
+                        <div className="space-y-4">
+                          {(analytics.multiAccountDetection.sameIpUsers?.length ?? 0) > 0 && (
+                            <div>
+                              <p className="text-sm font-medium mb-2">Same IP Users:</p>
+                              {analytics.multiAccountDetection.sameIpUsers?.map((user, idx) => (
+                                <div key={idx} className="flex items-center justify-between p-2 rounded bg-muted/50 mb-1">
+                                  <span>User #{user.userId} - {user.email || 'No email'}</span>
+                                  <Badge>{user.overlapCount} shared IPs</Badge>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                          {(analytics.multiAccountDetection.similarEmails?.length ?? 0) > 0 && (
+                            <div>
+                              <p className="text-sm font-medium mb-2">Similar Emails:</p>
+                              {analytics.multiAccountDetection.similarEmails?.map((user, idx) => (
+                                <div key={idx} className="flex items-center justify-between p-2 rounded bg-muted/50 mb-1">
+                                  <span>{user.email}</span>
+                                  <Badge>{(user.similarity * 100).toFixed(0)}% similar</Badge>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                          {(analytics.multiAccountDetection.sharedWallets?.length ?? 0) > 0 && (
+                            <div>
+                              <p className="text-sm font-medium mb-2">Shared Wallets:</p>
+                              {analytics.multiAccountDetection.sharedWallets?.map((user, idx) => (
+                                <div key={idx} className="flex items-center justify-between p-2 rounded bg-muted/50 mb-1">
+                                  <span>User #{user.userId}</span>
+                                  <span className="text-xs font-mono">{user.walletAddress}</span>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </CardContent>
+                    )}
+                  </Card>
+                )}
 
                 {/* Referral Fraud */}
-                <Card>
-                  <CardHeader className="pb-2 cursor-pointer" onClick={() => toggleSection('referralFraud')}>
-                    <CardTitle className="flex items-center justify-between">
-                      <span className="flex items-center gap-2">
-                        <IconUsers className="h-5 w-5" />
-                        Referral Fraud Analysis
-                      </span>
-                      <div className="flex items-center gap-2">
-                        <Badge variant={getRiskBadgeVariant(analytics.referralFraudAnalysis.riskLevel)}>
-                          Score: {analytics.referralFraudAnalysis.riskScore}
-                        </Badge>
-                        {expandedSections['referralFraud'] ? <IconChevronUp /> : <IconChevronDown />}
-                      </div>
-                    </CardTitle>
-                  </CardHeader>
-                  {expandedSections['referralFraud'] && (
-                    <CardContent>
-                      <div className="grid grid-cols-2 gap-4 mb-4">
-                        <div className="p-3 rounded bg-muted/50">
-                          <p className="text-2xl font-bold">{analytics.referralFraudAnalysis.totalReferrals}</p>
-                          <p className="text-xs text-muted-foreground">Total Referrals</p>
+                {analytics.referralFraudAnalysis && (
+                  <Card>
+                    <CardHeader className="pb-2 cursor-pointer" onClick={() => toggleSection('referralFraud')}>
+                      <CardTitle className="flex items-center justify-between">
+                        <span className="flex items-center gap-2">
+                          <IconUsers className="h-5 w-5" />
+                          Referral Fraud Analysis
+                        </span>
+                        <div className="flex items-center gap-2">
+                          <Badge variant={getRiskBadgeVariant(analytics.referralFraudAnalysis.riskLevel ?? 'low')}>
+                            Score: {analytics.referralFraudAnalysis.riskScore ?? 0}
+                          </Badge>
+                          {expandedSections['referralFraud'] ? <IconChevronUp /> : <IconChevronDown />}
                         </div>
-                        <div className={cn("p-3 rounded", analytics.referralFraudAnalysis.suspiciousReferrals > 0 ? "bg-red-100 dark:bg-red-950" : "bg-muted/50")}>
-                          <p className="text-2xl font-bold">{analytics.referralFraudAnalysis.suspiciousReferrals}</p>
-                          <p className="text-xs text-muted-foreground">Suspicious Referrals</p>
+                      </CardTitle>
+                    </CardHeader>
+                    {expandedSections['referralFraud'] && (
+                      <CardContent>
+                        <div className="grid grid-cols-2 gap-4 mb-4">
+                          <div className="p-3 rounded bg-muted/50">
+                            <p className="text-2xl font-bold">{analytics.referralFraudAnalysis.totalReferrals ?? 0}</p>
+                            <p className="text-xs text-muted-foreground">Total Referrals</p>
+                          </div>
+                          <div className={cn("p-3 rounded", (analytics.referralFraudAnalysis.suspiciousReferrals ?? 0) > 0 ? "bg-red-100 dark:bg-red-950" : "bg-muted/50")}>
+                            <p className="text-2xl font-bold">{analytics.referralFraudAnalysis.suspiciousReferrals ?? 0}</p>
+                            <p className="text-xs text-muted-foreground">Suspicious Referrals</p>
+                          </div>
                         </div>
-                      </div>
-                      <div className="space-y-2">
-                        <p className="text-sm font-medium">Patterns Detected:</p>
-                        <div className="flex flex-wrap gap-2">
-                          {analytics.referralFraudAnalysis.patterns.sameIpReferrals > 0 && (
-                            <Badge variant="destructive">Same IP: {analytics.referralFraudAnalysis.patterns.sameIpReferrals}</Badge>
-                          )}
-                          {analytics.referralFraudAnalysis.patterns.rapidReferrals > 0 && (
-                            <Badge variant="destructive">Rapid: {analytics.referralFraudAnalysis.patterns.rapidReferrals}</Badge>
-                          )}
-                          {analytics.referralFraudAnalysis.patterns.disposableEmailReferrals > 0 && (
-                            <Badge variant="destructive">Disposable Email: {analytics.referralFraudAnalysis.patterns.disposableEmailReferrals}</Badge>
-                          )}
-                          {analytics.referralFraudAnalysis.patterns.noActivityReferrals > 0 && (
-                            <Badge variant="secondary">No Activity: {analytics.referralFraudAnalysis.patterns.noActivityReferrals}</Badge>
-                          )}
-                        </div>
-                      </div>
-                    </CardContent>
-                  )}
-                </Card>
+                        {analytics.referralFraudAnalysis.patterns && (
+                          <div className="space-y-2">
+                            <p className="text-sm font-medium">Patterns Detected:</p>
+                            <div className="flex flex-wrap gap-2">
+                              {(analytics.referralFraudAnalysis.patterns.sameIpReferrals ?? 0) > 0 && (
+                                <Badge variant="destructive">Same IP: {analytics.referralFraudAnalysis.patterns.sameIpReferrals}</Badge>
+                              )}
+                              {(analytics.referralFraudAnalysis.patterns.rapidReferrals ?? 0) > 0 && (
+                                <Badge variant="destructive">Rapid: {analytics.referralFraudAnalysis.patterns.rapidReferrals}</Badge>
+                              )}
+                              {(analytics.referralFraudAnalysis.patterns.disposableEmailReferrals ?? 0) > 0 && (
+                                <Badge variant="destructive">Disposable Email: {analytics.referralFraudAnalysis.patterns.disposableEmailReferrals}</Badge>
+                              )}
+                              {(analytics.referralFraudAnalysis.patterns.noActivityReferrals ?? 0) > 0 && (
+                                <Badge variant="secondary">No Activity: {analytics.referralFraudAnalysis.patterns.noActivityReferrals}</Badge>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      </CardContent>
+                    )}
+                  </Card>
+                )}
               </TabsContent>
 
               {/* Cards Tab */}
@@ -698,73 +706,75 @@ export function UserAnalyticsModal({
 
               {/* IP/Geo Tab */}
               <TabsContent value="ip" className="space-y-4">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <IconWorld className="h-5 w-5" />
-                      IP & Geolocation Analysis
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex flex-wrap gap-2 mb-4">
-                      {analytics.ipAnalysis.hasVpn && <Badge variant="destructive">VPN Detected</Badge>}
-                      {analytics.ipAnalysis.hasProxy && <Badge variant="destructive">Proxy Detected</Badge>}
-                      {analytics.ipAnalysis.hasTor && <Badge variant="destructive">TOR Detected</Badge>}
-                      {!analytics.ipAnalysis.hasVpn && !analytics.ipAnalysis.hasProxy && !analytics.ipAnalysis.hasTor && (
-                        <Badge variant="default">No VPN/Proxy/TOR</Badge>
+                {analytics.ipAnalysis && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <IconWorld className="h-5 w-5" />
+                        IP & Geolocation Analysis
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex flex-wrap gap-2 mb-4">
+                        {analytics.ipAnalysis.hasVpn && <Badge variant="destructive">VPN Detected</Badge>}
+                        {analytics.ipAnalysis.hasProxy && <Badge variant="destructive">Proxy Detected</Badge>}
+                        {analytics.ipAnalysis.hasTor && <Badge variant="destructive">TOR Detected</Badge>}
+                        {!analytics.ipAnalysis.hasVpn && !analytics.ipAnalysis.hasProxy && !analytics.ipAnalysis.hasTor && (
+                          <Badge variant="default">No VPN/Proxy/TOR</Badge>
+                        )}
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4 mb-4">
+                        <div className="p-3 rounded bg-muted/50">
+                          <p className="text-sm font-medium mb-2">Countries:</p>
+                          <div className="flex flex-wrap gap-1">
+                            {(analytics.ipAnalysis.countries ?? []).map((country, idx) => (
+                              <Badge key={idx} variant="outline">{country}</Badge>
+                            ))}
+                          </div>
+                        </div>
+                        <div className="p-3 rounded bg-muted/50">
+                          <p className="text-sm font-medium mb-2">Unique IPs: {analytics.ipAnalysis.uniqueIps?.length ?? 0}</p>
+                          <div className="max-h-20 overflow-y-auto text-xs font-mono">
+                            {(analytics.ipAnalysis.uniqueIps ?? []).slice(0, 5).map((ip, idx) => (
+                              <div key={idx} className="flex items-center gap-1">
+                                {ip}
+                                <Button variant="ghost" size="sm" className="h-5 w-5 p-0" onClick={() => copyToClipboard(ip)}>
+                                  <IconCopy className="h-3 w-3" />
+                                </Button>
+                              </div>
+                            ))}
+                            {(analytics.ipAnalysis.uniqueIps?.length ?? 0) > 5 && (
+                              <span className="text-muted-foreground">+{(analytics.ipAnalysis.uniqueIps?.length ?? 0) - 5} more</span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      {(analytics.ipAnalysis.suspiciousIps?.length ?? 0) > 0 && (
+                        <div>
+                          <p className="text-sm font-medium mb-2">Suspicious IPs:</p>
+                          <div className="space-y-2 max-h-40 overflow-y-auto">
+                            {(analytics.ipAnalysis.suspiciousIps ?? []).map((ipData, idx) => (
+                              <div key={idx} className="flex items-center justify-between p-2 rounded bg-red-50 dark:bg-red-950">
+                                <div className="flex items-center gap-2">
+                                  <span className="font-mono text-sm">{ipData.ip}</span>
+                                  {ipData.country && <Badge variant="outline">{ipData.country}</Badge>}
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <Badge variant={ipData.threatLevel === 'high' ? 'destructive' : 'secondary'}>
+                                    {ipData.threatLevel}
+                                  </Badge>
+                                  <span className="text-xs text-muted-foreground">{ipData.reason}</span>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
                       )}
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4 mb-4">
-                      <div className="p-3 rounded bg-muted/50">
-                        <p className="text-sm font-medium mb-2">Countries:</p>
-                        <div className="flex flex-wrap gap-1">
-                          {analytics.ipAnalysis.countries.map((country, idx) => (
-                            <Badge key={idx} variant="outline">{country}</Badge>
-                          ))}
-                        </div>
-                      </div>
-                      <div className="p-3 rounded bg-muted/50">
-                        <p className="text-sm font-medium mb-2">Unique IPs: {analytics.ipAnalysis.uniqueIps.length}</p>
-                        <div className="max-h-20 overflow-y-auto text-xs font-mono">
-                          {analytics.ipAnalysis.uniqueIps.slice(0, 5).map((ip, idx) => (
-                            <div key={idx} className="flex items-center gap-1">
-                              {ip}
-                              <Button variant="ghost" size="sm" className="h-5 w-5 p-0" onClick={() => copyToClipboard(ip)}>
-                                <IconCopy className="h-3 w-3" />
-                              </Button>
-                            </div>
-                          ))}
-                          {analytics.ipAnalysis.uniqueIps.length > 5 && (
-                            <span className="text-muted-foreground">+{analytics.ipAnalysis.uniqueIps.length - 5} more</span>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-
-                    {analytics.ipAnalysis.suspiciousIps.length > 0 && (
-                      <div>
-                        <p className="text-sm font-medium mb-2">Suspicious IPs:</p>
-                        <div className="space-y-2 max-h-40 overflow-y-auto">
-                          {analytics.ipAnalysis.suspiciousIps.map((ipData, idx) => (
-                            <div key={idx} className="flex items-center justify-between p-2 rounded bg-red-50 dark:bg-red-950">
-                              <div className="flex items-center gap-2">
-                                <span className="font-mono text-sm">{ipData.ip}</span>
-                                {ipData.country && <Badge variant="outline">{ipData.country}</Badge>}
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <Badge variant={ipData.threatLevel === 'high' ? 'destructive' : 'secondary'}>
-                                  {ipData.threatLevel}
-                                </Badge>
-                                <span className="text-xs text-muted-foreground">{ipData.reason}</span>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
+                    </CardContent>
+                  </Card>
+                )}
 
                 {/* Keycloak Data */}
                 {analytics.keycloakData && (
@@ -776,10 +786,10 @@ export function UserAnalyticsModal({
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
-                      {analytics.keycloakData.sessions.length > 0 && (
+                      {(analytics.keycloakData.sessions?.length ?? 0) > 0 && (
                         <div className="mb-4">
                           <p className="text-sm font-medium mb-2">Active Sessions:</p>
-                          {analytics.keycloakData.sessions.map((session, idx) => (
+                          {(analytics.keycloakData.sessions ?? []).map((session, idx) => (
                             <div key={idx} className="flex items-center justify-between p-2 rounded bg-muted/50 mb-1">
                               <div className="flex items-center gap-2">
                                 <IconDeviceDesktop className="h-4 w-4" />
@@ -793,14 +803,14 @@ export function UserAnalyticsModal({
                         </div>
                       )}
 
-                      {analytics.keycloakData.loginHistory.length > 0 && (
+                      {(analytics.keycloakData.loginHistory?.length ?? 0) > 0 && (
                         <div>
                           <p className="text-sm font-medium mb-2">Login History:</p>
                           <div className="max-h-40 overflow-y-auto">
-                            {analytics.keycloakData.loginHistory.slice(0, 10).map((event, idx) => (
+                            {(analytics.keycloakData.loginHistory ?? []).slice(0, 10).map((event, idx) => (
                               <div key={idx} className="flex items-center justify-between p-2 rounded bg-muted/50 mb-1 text-sm">
                                 <div className="flex items-center gap-2">
-                                  <Badge variant={event.type.includes('ERROR') ? 'destructive' : 'default'} className="text-xs">
+                                  <Badge variant={event.type?.includes('ERROR') ? 'destructive' : 'default'} className="text-xs">
                                     {event.type}
                                   </Badge>
                                   <span className="font-mono text-xs">{event.ipAddress}</span>
@@ -832,7 +842,7 @@ export function UserAnalyticsModal({
                     <div className="mb-4">
                       <p className="text-sm font-medium mb-2">Current Tags:</p>
                       <div className="flex flex-wrap gap-2">
-                        {analytics.existingTags.map((tag, idx) => (
+                        {(analytics.existingTags ?? []).map((tag, idx) => (
                           <Badge key={idx} variant="secondary" className="gap-1">
                             {tag}
                             <Button
@@ -845,18 +855,18 @@ export function UserAnalyticsModal({
                             </Button>
                           </Badge>
                         ))}
-                        {analytics.existingTags.length === 0 && (
+                        {(analytics.existingTags?.length ?? 0) === 0 && (
                           <span className="text-sm text-muted-foreground">No tags</span>
                         )}
                       </div>
                     </div>
 
                     {/* Suggested Tags */}
-                    {analytics.suggestedTags.length > 0 && (
+                    {(analytics.suggestedTags?.length ?? 0) > 0 && (
                       <div className="mb-4">
                         <p className="text-sm font-medium mb-2">Suggested Tags:</p>
                         <div className="flex flex-wrap gap-2">
-                          {analytics.suggestedTags.filter(t => !analytics.existingTags.includes(t)).map((tag, idx) => (
+                          {(analytics.suggestedTags ?? []).filter(t => !(analytics.existingTags ?? []).includes(t)).map((tag, idx) => (
                             <Badge
                               key={idx}
                               variant="outline"
