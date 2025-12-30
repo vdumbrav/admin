@@ -1,0 +1,23 @@
+services:
+  admin:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        VITE_API_URL: ${VITE_API_URL:-https://api.moliedev.xyz}
+        VITE_SWAGGER_URL: ${VITE_SWAGGER_URL:-https://api.moliedev.xyz/docs-json}
+        VITE_APP_BASE_URL: ${VITE_APP_BASE_URL:-https://admin.moliedev.xyz}
+        VITE_KIBANA_URL: ${VITE_KIBANA_URL:-/kibana}
+        VITE_OIDC_AUTHORITY: ${VITE_OIDC_AUTHORITY:-https://auth.moliedev.xyz/realms/walme}
+        VITE_OIDC_CLIENT_ID: ${VITE_OIDC_CLIENT_ID:-waitlist-admin}
+        VITE_OIDC_SCOPE: ${VITE_OIDC_SCOPE:-openid profile email roles offline_access}
+    container_name: waitlist-admin
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8081:80"
+    networks:
+      - admin-network
+
+networks:
+  admin-network:
+    driver: bridge

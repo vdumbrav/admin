@@ -25,7 +25,7 @@ const GROUP_LABELS: Record<TaskResponseDtoGroup, string> = {
   [TaskResponseDtoGroup.daily]: 'Daily',
   [TaskResponseDtoGroup.referral]: 'Referral',
   [TaskResponseDtoGroup.partner]: 'Partner',
-  [TaskResponseDtoGroup.game]: 'Game Quests',
+  [TaskResponseDtoGroup.game]: 'Game',
 };
 
 /**
@@ -45,7 +45,7 @@ const TYPE_LABELS: Record<WaitlistTasksResponseDtoTypeItem, string> = {
   [WaitlistTasksResponseDtoTypeItem.dummy]: 'Dummy',
   [WaitlistTasksResponseDtoTypeItem['flappy-bird-wlm']]: 'Flappy Bird',
   [WaitlistTasksResponseDtoTypeItem['tap-card']]: 'Tap Card',
-  [WaitlistTasksResponseDtoTypeItem['snake-wlm']]: 'Snake Game',
+  [WaitlistTasksResponseDtoTypeItem['snake-wlm']]: 'Snake',
 };
 
 /**

@@ -18,7 +18,9 @@ export const getRolesFromUser = (user: User | null | undefined): string[] => {
       console.warn('[AuthUtils] Invalid token structure - no payload part');
       return [];
     }
-    const payload = JSON.parse(atob(tokenPart)) as {
+    // Convert base64url to base64 (JWT uses URL-safe base64 encoding)
+    const base64 = tokenPart.replace(/-/g, '+').replace(/_/g, '/');
+    const payload = JSON.parse(atob(base64)) as {
       realm_access?: { roles?: string[] };
       resource_access?: Record<string, { roles?: string[] }>;
     };

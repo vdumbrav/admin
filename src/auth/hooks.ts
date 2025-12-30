@@ -1,6 +1,5 @@
 import React from 'react';
 import { useAuth } from 'react-oidc-context';
-import { toast } from 'sonner';
 import { logError } from '@/utils/log';
 import { hasAdminRoleFromUser, hasAllowedRoleFromUser, hasSupportRoleFromUser } from './roles';
 import type { AuthResult } from './types';
@@ -43,9 +42,21 @@ export function useAppAuth(): AuthResult {
   }, [auth.signinRedirect]);
 
   const signoutRedirect = React.useCallback(() => {
+    // Clear localStorage first to ensure cleanup
+    const keysToRemove: string[] = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key?.startsWith('oidc.')) {
+        keysToRemove.push(key);
+      }
+    }
+    keysToRemove.forEach(key => localStorage.removeItem(key));
+
+    // Try OIDC signout
     Promise.resolve(auth.signoutRedirect()).catch((e: unknown) => {
       logError(e);
-      toast.error('Failed to sign out');
+      // Even if signout fails, redirect to home page to clear state
+      window.location.href = '/';
     });
   }, [auth.signoutRedirect]);
 

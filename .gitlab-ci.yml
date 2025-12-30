@@ -1,0 +1,56 @@
+stages:
+  - deploy
+
+variables:
+  LANG: 'C.UTF-8'
+  LC_ALL: 'C.UTF-8'
+
+# --------------------
+# DEPLOY DEV
+# --------------------
+deploy_dev:
+  stage: deploy
+  environment:
+    name: development
+    url: https://admin.moliedev.xyz/
+  tags:
+    - admin-dev
+  script:
+    - cd /opt/waitlist-admin
+    - docker system prune -f
+    - git remote set-url origin git@git.moliedev.xyz:main/waitlist-admin.git 2>/dev/null || git remote add origin git@git.moliedev.xyz:main/waitlist-admin.git
+    - git fetch origin dev
+    - git checkout dev 2>/dev/null || git checkout -b dev origin/dev
+    - git reset --hard origin/dev
+    - docker-compose build --build-arg VITE_API_URL=${VITE_API_URL} --build-arg VITE_SWAGGER_URL=${VITE_SWAGGER_URL} --build-arg VITE_APP_BASE_URL=${VITE_APP_BASE_URL} --build-arg VITE_KIBANA_URL=${VITE_KIBANA_URL} --build-arg VITE_OIDC_AUTHORITY=${VITE_OIDC_AUTHORITY} --build-arg VITE_OIDC_CLIENT_ID=${VITE_OIDC_CLIENT_ID} --build-arg VITE_OIDC_SCOPE="${VITE_OIDC_SCOPE}"
+    - docker rm -f waitlist-admin 2>/dev/null || true
+    - docker-compose up -d
+    - docker-compose ps
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "dev"'
+      when: on_success
+
+# --------------------
+# DEPLOY PROD (104)
+# --------------------
+deploy_prod:
+  stage: deploy
+  environment:
+    name: production
+    url: https://admin.walme.io/
+  tags:
+    - admin-prod
+  script:
+    - cd /opt/waitlist-admin
+    - docker system prune -f
+    - git remote set-url origin git@git.moliedev.xyz:main/waitlist-admin.git 2>/dev/null || git remote add origin git@git.moliedev.xyz:main/waitlist-admin.git
+    - git fetch origin main
+    - git checkout main 2>/dev/null || git checkout -b main origin/main
+    - git reset --hard origin/main
+    - docker-compose build --build-arg VITE_API_URL=${VITE_API_URL_PROD} --build-arg VITE_SWAGGER_URL=${VITE_SWAGGER_URL_PROD} --build-arg VITE_APP_BASE_URL=${VITE_APP_BASE_URL_PROD} --build-arg VITE_KIBANA_URL=${VITE_KIBANA_URL_PROD} --build-arg VITE_OIDC_AUTHORITY=${VITE_OIDC_AUTHORITY_PROD} --build-arg VITE_OIDC_CLIENT_ID=${VITE_OIDC_CLIENT_ID_PROD} --build-arg VITE_OIDC_SCOPE="${VITE_OIDC_SCOPE_PROD}"
+    - docker rm -f waitlist-admin 2>/dev/null || true
+    - docker-compose up -d
+    - docker-compose ps
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+      when: on_success

@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import {
   SidebarGroup,
+  SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
@@ -24,11 +25,12 @@ import {
 } from '../ui/dropdown-menu';
 import { type NavCollapsible, type NavGroup, type NavItem, type NavLink } from './types';
 
-export function NavGroup({ items }: NavGroup) {
+export function NavGroup({ title, items }: NavGroup) {
   const { state, isMobile } = useSidebar();
   const href = useLocation({ select: (location) => location.href });
   return (
     <SidebarGroup>
+      <SidebarGroupLabel>{title}</SidebarGroupLabel>
       <SidebarMenu>
         {items.map((item) => {
           const key = `${item.title}-${item.url}`;

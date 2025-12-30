@@ -1,6 +1,7 @@
 import { useAppAuth } from '@/auth/hooks';
-import { ChevronsUpDown, LogOut } from 'lucide-react';
+import { ChevronsUpDown, LogOut, Moon, Sun } from 'lucide-react';
 import { getUserDisplayData } from '@/utils/user';
+import { useTheme } from '@/context/theme-context';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   DropdownMenu,
@@ -9,6 +10,10 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuPortal,
 } from '@/components/ui/dropdown-menu';
 import {
   SidebarMenu,
@@ -16,10 +21,13 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from '@/components/ui/sidebar';
+import { IconCheck } from '@tabler/icons-react';
+import { cn } from '@/lib/utils';
 
 export function NavUser() {
   const { isMobile } = useSidebar();
   const auth = useAppAuth();
+  const { theme, setTheme } = useTheme();
   const { showName, userInitials, role } = getUserDisplayData(auth.user?.profile, auth.user);
 
   return (
@@ -61,6 +69,30 @@ export function NavUser() {
                 </div>
               </div>
             </DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuSub>
+              <DropdownMenuSubTrigger>
+                <Sun className='mr-2 h-4 w-4 dark:hidden' />
+                <Moon className='mr-2 h-4 w-4 hidden dark:block' />
+                Theme
+              </DropdownMenuSubTrigger>
+              <DropdownMenuPortal>
+                <DropdownMenuSubContent>
+                  <DropdownMenuItem onClick={() => setTheme('light')}>
+                    Light
+                    <IconCheck size={14} className={cn('ml-auto', theme !== 'light' && 'hidden')} />
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setTheme('dark')}>
+                    Dark
+                    <IconCheck size={14} className={cn('ml-auto', theme !== 'dark' && 'hidden')} />
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setTheme('system')}>
+                    System
+                    <IconCheck size={14} className={cn('ml-auto', theme !== 'system' && 'hidden')} />
+                  </DropdownMenuItem>
+                </DropdownMenuSubContent>
+              </DropdownMenuPortal>
+            </DropdownMenuSub>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => auth.signoutRedirect()}>
               <LogOut />

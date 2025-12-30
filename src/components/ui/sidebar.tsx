@@ -12,8 +12,6 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 
 const SIDEBAR_COOKIE_NAME = 'sidebar_state';
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
-const SIDEBAR_WIDTH = '16rem';
-const SIDEBAR_WIDTH_ICON = '3rem';
 const SIDEBAR_KEYBOARD_SHORTCUT = 'b';
 
 type SidebarContextProps = {
@@ -112,13 +110,7 @@ function SidebarProvider({
       <TooltipProvider delayDuration={0}>
         <div
           data-slot='sidebar-wrapper'
-          style={
-            {
-              '--sidebar-width': SIDEBAR_WIDTH,
-              '--sidebar-width-icon': SIDEBAR_WIDTH_ICON,
-              ...style,
-            } as React.CSSProperties
-          }
+          style={style}
           className={cn(
             'group/sidebar-wrapper has-data-[variant=inset]:bg-sidebar flex min-h-svh w-full',
             className,
@@ -151,7 +143,7 @@ function Sidebar({
       <div
         data-slot='sidebar'
         className={cn(
-          'bg-sidebar text-sidebar-foreground flex h-full w-(--sidebar-width) flex-col',
+          'bg-sidebar text-sidebar-foreground w-sidebar flex h-full flex-col',
           className,
         )}
         {...props}
@@ -175,10 +167,10 @@ function Sidebar({
         className={cn(
           'bg-sidebar fixed inset-y-0 left-0 flex h-svh transition-[width] duration-200 ease-linear',
           'hidden md:z-10 md:flex',
-          state === 'collapsed' ? 'w-12' : 'w-64',
+          state === 'collapsed' ? 'w-sidebar-icon' : 'w-sidebar',
         )}
       >
-        <div className='bg-sidebar m-2 flex h-[calc(100%-1rem)] flex-col rounded-[10px] border border-gray-200 dark:border-gray-800'>
+        <div className='bg-sidebar m-2 flex h-[calc(100%-1rem)] w-full flex-col rounded-[10px] border border-gray-200 dark:border-gray-800'>
           {children}
         </div>
       </div>
@@ -188,10 +180,10 @@ function Sidebar({
         className={cn(
           'fixed inset-y-0 left-0 z-50 flex h-svh bg-transparent transition-[width] duration-200 ease-linear',
           'md:hidden',
-          state === 'collapsed' ? 'w-12' : 'w-64',
+          state === 'collapsed' ? 'w-sidebar-icon' : 'w-sidebar',
         )}
       >
-        <div className='bg-sidebar m-2 flex h-[calc(100%-1rem)] flex-col rounded-[10px] border border-gray-200 dark:border-gray-800'>
+        <div className='bg-sidebar m-2 flex h-[calc(100%-1rem)] w-full flex-col rounded-[10px] border border-gray-200 dark:border-gray-800'>
           {children}
         </div>
       </div>

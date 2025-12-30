@@ -39,8 +39,8 @@ export function AuthenticatedLayout({ children }: Props) {
           className={cn(
             'w-full max-w-full',
             'md:ml-auto',
-            'md:peer-data-[state=collapsed]:w-[calc(100%-var(--sidebar-width-icon))]',
-            'md:peer-data-[state=expanded]:w-[calc(100%-var(--sidebar-width))]',
+            'md:peer-data-[state=collapsed]:w-[calc(100%-var(--sidebar-width-icon)-0.5rem)]',
+            'md:peer-data-[state=expanded]:w-[calc(100%-var(--sidebar-width)-0.5rem)]',
             'md:transition-[width] md:duration-200 md:ease-linear',
             'ml-12 w-[calc(100%-3rem)]',
             'flex h-svh flex-col',

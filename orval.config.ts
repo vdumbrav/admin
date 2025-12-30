@@ -7,7 +7,7 @@ config();
 export default defineConfig({
   waitlistApi: {
     input: {
-      target: process.env.VITE_SWAGGER_URL ?? 'http://localhost:3000/api-json',
+      target: './swagger.json',
       // Disable strict validation until API is fixed
       validation: false,
     },
