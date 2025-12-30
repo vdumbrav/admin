@@ -26,6 +26,7 @@ export const oidcConfig: AuthProviderProps = {
   silent_redirect_uri: `${baseUrl}/silent-callback.html`,
   response_type: 'code',
   scope,
+  prompt: 'login',
   automaticSilentRenew: true,
   includeIdTokenInSilentRenew: true,
   revokeTokensOnSignout: true,
