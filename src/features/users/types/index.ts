@@ -1,3 +1,9 @@
+export interface AuthIdentity {
+  provider: string;
+  authId: string;
+  authName?: string;
+}
+
 export interface User {
   id: number;
   uid: string;
@@ -15,6 +21,7 @@ export interface User {
   updatedAt: string | null;
   matrixId: string | null;
   cardEmail: string | null;
+  authIdentities?: AuthIdentity[];
   // Analytics fields
   admin_tags?: string[];
   risk_score?: number;

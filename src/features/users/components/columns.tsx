@@ -1,6 +1,6 @@
 import { type ColumnDef } from '@tanstack/react-table';
 import { Link, useNavigate } from '@tanstack/react-router';
-import { IconMail, IconMailCheck, IconShield, IconUser, IconDotsVertical, IconArrowsExchange, IconEye } from '@tabler/icons-react';
+import { IconMail, IconMailCheck, IconShield, IconUser, IconDotsVertical, IconArrowsExchange, IconEye, IconBrandGoogle, IconBrandTelegram, IconBrandTwitter, IconKey, IconWallet, IconCurrencySolana } from '@tabler/icons-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -12,8 +12,50 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { DataTableColumnHeader } from '@/components/table/data-table-column-header';
-import type { User } from '../types';
+import type { User, AuthIdentity } from '../types';
+
+// Provider icons and colors
+const providerConfig: Record<string, { icon: typeof IconBrandGoogle; label: string; className: string }> = {
+  'google-oauth2': { icon: IconBrandGoogle, label: 'Google', className: 'bg-red-100 text-red-700 hover:bg-red-200' },
+  'telegram': { icon: IconBrandTelegram, label: 'Telegram', className: 'bg-blue-100 text-blue-700 hover:bg-blue-200' },
+  'twitter': { icon: IconBrandTwitter, label: 'Twitter', className: 'bg-sky-100 text-sky-700 hover:bg-sky-200' },
+  'matrix': { icon: IconUser, label: 'Matrix', className: 'bg-green-100 text-green-700 hover:bg-green-200' },
+  'keycloak': { icon: IconKey, label: 'Keycloak', className: 'bg-orange-100 text-orange-700 hover:bg-orange-200' },
+  'evm': { icon: IconWallet, label: 'EVM', className: 'bg-purple-100 text-purple-700 hover:bg-purple-200' },
+  'solana': { icon: IconCurrencySolana, label: 'Solana', className: 'bg-violet-100 text-violet-700 hover:bg-violet-200' },
+};
+
+function ConnectedAccountBadge({ identity }: { identity: AuthIdentity }) {
+  const config = providerConfig[identity.provider] || { icon: IconUser, label: identity.provider, className: 'bg-gray-100 text-gray-700' };
+  const Icon = config.icon;
+  const displayValue = identity.authName || identity.authId;
+  // Truncate long values
+  const truncated = displayValue.length > 20 ? displayValue.slice(0, 8) + '...' + displayValue.slice(-6) : displayValue;
+
+  return (
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Badge variant="outline" className={`gap-1 text-xs cursor-default ${config.className}`}>
+            <Icon className="h-3 w-3" />
+            {truncated}
+          </Badge>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p className="font-medium">{config.label}</p>
+          <p className="text-xs text-muted-foreground">{displayValue}</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
+}
 
 const getRoleBadgeVariant = (role: string) => {
   switch (role) {
@@ -101,6 +143,23 @@ export const columns: ColumnDef<User>[] = [
     },
     filterFn: (row, id, value) => {
       return row.getValue(id) === value;
+    },
+  },
+  {
+    accessorKey: 'authIdentities',
+    header: 'Connected',
+    cell: ({ row }) => {
+      const identities = row.original.authIdentities || [];
+      if (identities.length === 0) {
+        return <span className="text-xs text-muted-foreground">None</span>;
+      }
+      return (
+        <div className="flex flex-wrap gap-1 max-w-[300px]">
+          {identities.map((identity, idx) => (
+            <ConnectedAccountBadge key={idx} identity={identity} />
+          ))}
+        </div>
+      );
     },
   },
   {
