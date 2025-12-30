@@ -5,7 +5,7 @@ import type { Components } from 'react-markdown';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Brain, AlertTriangle, TrendingUp, Lightbulb, X, ChevronDown, ChevronUp, Languages } from 'lucide-react';
+import { Loader2, Brain, AlertTriangle, TrendingUp, Lightbulb, X, ChevronDown, ChevronUp, Languages, Database, Server, Container } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import {
   Select,
@@ -40,8 +40,11 @@ interface LogAnalysisResult {
   }>;
 }
 
+type AnalysisType = 'app' | 'errors' | 'postgresql' | 'redis' | 'docker' | 'infrastructure';
+
 export function LogsPage() {
   const [analyzing, setAnalyzing] = useState(false);
+  const [analysisType, setAnalysisType] = useState<AnalysisType | null>(null);
   const [analysis, setAnalysis] = useState<LogAnalysisResult | null>(null);
   const [language, setLanguage] = useState('ru');
   const [expandedSections, setExpandedSections] = useState({
@@ -56,19 +59,36 @@ export function LogsPage() {
   const kibanaUrl = '/kibana';
   const apiUrl = import.meta.env.VITE_API_URL || 'https://api.moliedev.xyz';
 
+  const analysisLabels: Record<AnalysisType, string> = {
+    app: 'Application',
+    errors: 'Errors',
+    postgresql: 'PostgreSQL',
+    redis: 'Redis',
+    docker: 'Docker',
+    infrastructure: 'Full Infrastructure',
+  };
 
   const toggleSection = (section: keyof typeof expandedSections) => {
     setExpandedSections(prev => ({ ...prev, [section]: !prev[section] }));
   };
 
-  const analyzeLogs = async (errorsOnly = false) => {
+  const analyzeLogs = async (type: AnalysisType) => {
     if (analyzing) return;
 
     setAnalyzing(true);
+    setAnalysisType(type);
 
     try {
       const token = await auth.getAccessToken();
-      const endpoint = errorsOnly ? '/logs/analyze/errors' : '/logs/analyze';
+      const endpoints: Record<AnalysisType, string> = {
+        app: '/logs/analyze',
+        errors: '/logs/analyze/errors',
+        postgresql: '/logs/analyze/postgresql',
+        redis: '/logs/analyze/redis',
+        docker: '/logs/analyze/docker',
+        infrastructure: '/logs/analyze/infrastructure',
+      };
+      const endpoint = endpoints[type];
       const response = await fetch(`${apiUrl}${endpoint}?lang=${language}`, {
         method: 'POST',
         headers: {
@@ -92,6 +112,7 @@ export function LogsPage() {
 
   const closeAnalysis = () => {
     setAnalysis(null);
+    setAnalysisType(null);
     setExpandedSections({
       summary: true,
       patterns: true,
@@ -109,7 +130,7 @@ export function LogsPage() {
             View and analyze application logs using Kibana and AI
           </p>
         </div>
-        <div className="flex gap-2 items-center">
+        <div className="flex gap-2 items-center flex-wrap">
           <Select value={language} onValueChange={setLanguage}>
             <SelectTrigger className="w-[140px]">
               <Languages className="mr-2 h-4 w-4" />
@@ -122,55 +143,98 @@ export function LogsPage() {
             </SelectContent>
           </Select>
           <Button
-            onClick={() => analyzeLogs(false)}
+            onClick={() => analyzeLogs('app')}
             disabled={analyzing}
             variant="default"
           >
-            {analyzing ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Analyzing...
-              </>
+            {analyzing && analysisType === 'app' ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             ) : (
-              <>
-                <Brain className="mr-2 h-4 w-4" />
-                AI Analysis
-              </>
+              <Brain className="mr-2 h-4 w-4" />
             )}
+            App
           </Button>
           <Button
-            onClick={() => analyzeLogs(true)}
+            onClick={() => analyzeLogs('errors')}
             disabled={analyzing}
             variant="destructive"
           >
-            {analyzing ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Analyzing...
-              </>
+            {analyzing && analysisType === 'errors' ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             ) : (
-              <>
-                <AlertTriangle className="mr-2 h-4 w-4" />
-                Analyze Errors
-              </>
+              <AlertTriangle className="mr-2 h-4 w-4" />
             )}
+            Errors
+          </Button>
+          <Button
+            onClick={() => analyzeLogs('postgresql')}
+            disabled={analyzing}
+            variant="outline"
+          >
+            {analyzing && analysisType === 'postgresql' ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Database className="mr-2 h-4 w-4" />
+            )}
+            PostgreSQL
+          </Button>
+          <Button
+            onClick={() => analyzeLogs('redis')}
+            disabled={analyzing}
+            variant="outline"
+          >
+            {analyzing && analysisType === 'redis' ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Server className="mr-2 h-4 w-4" />
+            )}
+            Redis
+          </Button>
+          <Button
+            onClick={() => analyzeLogs('docker')}
+            disabled={analyzing}
+            variant="outline"
+          >
+            {analyzing && analysisType === 'docker' ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Container className="mr-2 h-4 w-4" />
+            )}
+            Docker
+          </Button>
+          <Button
+            onClick={() => analyzeLogs('infrastructure')}
+            disabled={analyzing}
+            variant="secondary"
+          >
+            {analyzing && analysisType === 'infrastructure' ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Brain className="mr-2 h-4 w-4" />
+            )}
+            Full Analysis
           </Button>
         </div>
       </div>
 
       {analysis && (
         <div className="relative">
-          <Button
-            onClick={closeAnalysis}
-            variant="ghost"
-            size="sm"
-            className="absolute -top-2 right-0 z-10"
-          >
-            <X className="h-4 w-4 mr-1" />
-            Close Analysis
-          </Button>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-semibold flex items-center gap-2">
+              <Brain className="h-5 w-5" />
+              {analysisType ? analysisLabels[analysisType] : 'Analysis'} Analysis
+            </h2>
+            <Button
+              onClick={closeAnalysis}
+              variant="ghost"
+              size="sm"
+            >
+              <X className="h-4 w-4 mr-1" />
+              Close
+            </Button>
+          </div>
 
-          <div className="grid gap-4 md:grid-cols-2 mt-6">
+          <div className="grid gap-4 md:grid-cols-2">
             <Collapsible open={expandedSections.summary} onOpenChange={() => toggleSection('summary')}>
               <Card>
                 <CardHeader>
