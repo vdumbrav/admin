@@ -426,3 +426,51 @@ export const useUpdateCameraQuestAccess = () => {
     },
   });
 };
+
+// Mutation for blocking a user
+export const useBlockUser = () => {
+  const auth = useAppAuth();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ userId }: { userId: number }) => {
+      const token = await auth.getAccessToken();
+
+      return orvalMutator({
+        url: `/admin/users/${userId}/block`,
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+    },
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'users', variables.userId.toString(), 'details'] });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
+    },
+  });
+};
+
+// Mutation for unblocking a user
+export const useUnblockUser = () => {
+  const auth = useAppAuth();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ userId }: { userId: number }) => {
+      const token = await auth.getAccessToken();
+
+      return orvalMutator({
+        url: `/admin/users/${userId}/unblock`,
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+    },
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'users', variables.userId.toString(), 'details'] });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
+    },
+  });
+};

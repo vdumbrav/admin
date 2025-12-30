@@ -23,8 +23,12 @@ import {
   IconStar,
   IconCopy,
   IconCheck,
+  IconBan,
+  IconLoader2,
 } from '@tabler/icons-react';
 import { useState } from 'react';
+import { toast } from 'sonner';
+import { useBlockUser } from '../api/admin-users';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -392,9 +396,27 @@ export const columns: ColumnDef<User>[] = [
   },
   {
     id: 'actions',
-    cell: ({ row }) => {
+    cell: function ActionsCell({ row }) {
       const user = row.original;
       const navigate = useNavigate();
+      const blockUser = useBlockUser();
+
+      const handleBlockUser = () => {
+        if (!confirm(`Are you sure you want to block user ${user.email || user.nickname || user.id}?`)) {
+          return;
+        }
+        blockUser.mutate(
+          { userId: user.id },
+          {
+            onSuccess: () => {
+              toast.success('User blocked successfully');
+            },
+            onError: (error: Error) => {
+              toast.error(`Failed to block user: ${error.message}`);
+            },
+          }
+        );
+      };
 
       return (
         <div className="flex justify-end gap-2">
@@ -424,6 +446,19 @@ export const columns: ColumnDef<User>[] = [
               >
                 <IconArrowsExchange className="mr-2 h-4 w-4" />
                 View Transactions
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                className="text-destructive focus:text-destructive"
+                onClick={handleBlockUser}
+                disabled={blockUser.isPending}
+              >
+                {blockUser.isPending ? (
+                  <IconLoader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <IconBan className="mr-2 h-4 w-4" />
+                )}
+                Block User
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

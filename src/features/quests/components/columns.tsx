@@ -92,6 +92,24 @@ export const getColumns = (isAdmin: boolean): ColumnDef<TaskResponseDto>[] => {
       minSize: 320,
       maxSize: 500,
     },
+    // 3.5 Description
+    {
+      accessorKey: 'description',
+      header: ({ column }) => <DataTableColumnHeader column={column} title='Description' />,
+      cell: ({ row }) => {
+        const desc = row.original.description;
+        return desc ? (
+          <span className='line-clamp-2 text-sm text-muted-foreground' title={desc}>
+            {desc}
+          </span>
+        ) : (
+          <span className='text-muted-foreground'>–</span>
+        );
+      },
+      size: 300,
+      minSize: 200,
+      maxSize: 400,
+    },
     // 4. Type
     {
       accessorKey: 'type',
