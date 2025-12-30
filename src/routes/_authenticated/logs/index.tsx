@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
+import type { Components } from 'react-markdown';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -14,6 +15,18 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useAppAuth } from '@/auth/hooks';
+
+const markdownComponents: Components = {
+  p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
+  strong: ({ children }) => <strong className="font-semibold">{children}</strong>,
+  ul: ({ children }) => <ul className="list-disc list-inside space-y-1 my-2">{children}</ul>,
+  ol: ({ children }) => <ol className="list-decimal list-inside space-y-1 my-2">{children}</ol>,
+  li: ({ children }) => <li>{children}</li>,
+  code: ({ children }) => <code className="bg-muted px-1 py-0.5 rounded text-xs font-mono">{children}</code>,
+  h1: ({ children }) => <h1 className="text-lg font-bold mb-2">{children}</h1>,
+  h2: ({ children }) => <h2 className="text-base font-bold mb-2">{children}</h2>,
+  h3: ({ children }) => <h3 className="text-sm font-bold mb-1">{children}</h3>,
+};
 
 interface LogAnalysisResult {
   summary: string;
@@ -171,8 +184,8 @@ export function LogsPage() {
                 </CardHeader>
                 <CollapsibleContent>
                   <CardContent>
-                    <div className="text-sm prose prose-sm dark:prose-invert max-w-none">
-                      <ReactMarkdown>{analysis.summary}</ReactMarkdown>
+                    <div className="text-sm">
+                      <ReactMarkdown components={markdownComponents}>{analysis.summary}</ReactMarkdown>
                     </div>
                   </CardContent>
                 </CollapsibleContent>
@@ -195,8 +208,8 @@ export function LogsPage() {
                     <div className="flex flex-col gap-2">
                       {analysis.patterns.length > 0 ? (
                         analysis.patterns.map((pattern, idx) => (
-                          <div key={idx} className="p-2 bg-secondary rounded-md text-sm prose prose-sm dark:prose-invert max-w-none">
-                            <ReactMarkdown>{pattern}</ReactMarkdown>
+                          <div key={idx} className="p-2 bg-secondary rounded-md text-sm">
+                            <ReactMarkdown components={markdownComponents}>{pattern}</ReactMarkdown>
                           </div>
                         ))
                       ) : (
@@ -224,8 +237,8 @@ export function LogsPage() {
                     <div className="flex flex-col gap-2">
                       {analysis.anomalies.length > 0 ? (
                         analysis.anomalies.map((anomaly, idx) => (
-                          <div key={idx} className="p-2 bg-destructive/10 border border-destructive/20 rounded-md text-sm prose prose-sm dark:prose-invert max-w-none">
-                            <ReactMarkdown>{anomaly}</ReactMarkdown>
+                          <div key={idx} className="p-2 bg-destructive/10 border border-destructive/20 rounded-md text-sm">
+                            <ReactMarkdown components={markdownComponents}>{anomaly}</ReactMarkdown>
                           </div>
                         ))
                       ) : (
@@ -253,8 +266,8 @@ export function LogsPage() {
                     <div className="flex flex-col gap-2">
                       {analysis.recommendations.length > 0 ? (
                         analysis.recommendations.map((rec, idx) => (
-                          <div key={idx} className="p-2 bg-yellow-500/10 border border-yellow-500/20 rounded-md text-sm prose prose-sm dark:prose-invert max-w-none">
-                            <ReactMarkdown>{rec}</ReactMarkdown>
+                          <div key={idx} className="p-2 bg-yellow-500/10 border border-yellow-500/20 rounded-md text-sm">
+                            <ReactMarkdown components={markdownComponents}>{rec}</ReactMarkdown>
                           </div>
                         ))
                       ) : (
@@ -279,13 +292,13 @@ export function LogsPage() {
                     {analysis.criticalIssues.map((issue, idx) => (
                       <div key={idx} className="p-3 border rounded-lg bg-red-50 dark:bg-red-950">
                         <div className="flex items-start justify-between mb-2">
-                          <div className="font-semibold text-sm break-words flex-1 mr-2 prose prose-sm dark:prose-invert max-w-none">
-                            <ReactMarkdown>{issue.message}</ReactMarkdown>
+                          <div className="font-semibold text-sm break-words flex-1 mr-2">
+                            <ReactMarkdown components={markdownComponents}>{issue.message}</ReactMarkdown>
                           </div>
                           <Badge variant="destructive" className="shrink-0">{issue.count}x</Badge>
                         </div>
-                        <div className="text-xs text-muted-foreground prose prose-sm dark:prose-invert max-w-none">
-                          <ReactMarkdown>{issue.context}</ReactMarkdown>
+                        <div className="text-xs text-muted-foreground">
+                          <ReactMarkdown components={markdownComponents}>{issue.context}</ReactMarkdown>
                         </div>
                       </div>
                     ))}
