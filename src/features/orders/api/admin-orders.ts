@@ -38,7 +38,7 @@ export const useAdminOrders = () => {
           updatedAt: order.createdAt,
           reference: order.reference,
           userEmail: order.user?.email || 'No email',
-          userName: order.user?.nickname || 'Anonymous',
+          userName: order.user?.name || order.user?.nickname || order.user?.email || 'Anonymous',
         };
       })
     : [];

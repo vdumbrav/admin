@@ -88,7 +88,8 @@ export function TransactionsTable({
         <TableBody>
           {transactions.map((tx) => {
             const statusInfo = statusConfig[tx.status] || statusConfig.pending;
-            const isIncoming = String(tx.direction) === 'incoming';
+            // Direction can be: accrual, retention, income, outgo
+            const isIncoming = tx.direction === 'income' || tx.direction === 'accrual';
 
             return (
               <TableRow key={tx.id}>
