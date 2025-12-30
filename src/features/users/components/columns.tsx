@@ -286,15 +286,19 @@ export const columns: ColumnDef<User>[] = [
     enableSorting: true,
   },
   {
-    accessorKey: 'uid',
+    accessorKey: 'referralCode',
     header: ({ column }) => <DataTableColumnHeader column={column} title="Ref Code" />,
     cell: function RefCodeCell({ row }) {
       const [copied, setCopied] = useState(false);
-      const uid = row.original.uid;
+      const refCode = row.original.referralCode;
+
+      if (!refCode) {
+        return <span className="text-xs text-muted-foreground">-</span>;
+      }
 
       const handleCopy = async () => {
         try {
-          await navigator.clipboard.writeText(uid);
+          await navigator.clipboard.writeText(refCode);
           setCopied(true);
           setTimeout(() => setCopied(false), 2000);
         } catch (err) {
@@ -310,7 +314,7 @@ export const columns: ColumnDef<User>[] = [
                 onClick={handleCopy}
                 className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-muted/50 hover:bg-muted transition-colors font-mono text-xs"
               >
-                {uid.slice(0, 8)}...
+                {refCode}
                 {copied ? (
                   <IconCheck className="h-3 w-3 text-green-500" />
                 ) : (
@@ -319,8 +323,8 @@ export const columns: ColumnDef<User>[] = [
               </button>
             </TooltipTrigger>
             <TooltipContent>
-              <p className="font-mono text-xs">{uid}</p>
-              <p className="text-xs text-muted-foreground">Click to copy</p>
+              <p className="font-mono text-xs">{refCode}</p>
+              <p className="text-xs text-muted-foreground">Click to copy referral code</p>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>

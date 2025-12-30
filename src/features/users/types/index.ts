@@ -34,6 +34,7 @@ export interface User {
   cardsCount?: number;
   referralsCount?: number;
   totalXp?: number;
+  referralCode?: string;
   // Analytics fields
   admin_tags?: string[];
   risk_score?: number;
