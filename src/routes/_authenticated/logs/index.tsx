@@ -1,5 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { useState } from 'react';
+import ReactMarkdown from 'react-markdown';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -170,7 +171,9 @@ export function LogsPage() {
                 </CardHeader>
                 <CollapsibleContent>
                   <CardContent>
-                    <p className="text-sm whitespace-pre-wrap break-words">{analysis.summary}</p>
+                    <div className="text-sm prose prose-sm dark:prose-invert max-w-none">
+                      <ReactMarkdown>{analysis.summary}</ReactMarkdown>
+                    </div>
                   </CardContent>
                 </CollapsibleContent>
               </Card>
@@ -192,9 +195,9 @@ export function LogsPage() {
                     <div className="flex flex-col gap-2">
                       {analysis.patterns.length > 0 ? (
                         analysis.patterns.map((pattern, idx) => (
-                          <Badge key={idx} variant="secondary" className="justify-start text-left whitespace-normal break-words">
-                            {pattern}
-                          </Badge>
+                          <div key={idx} className="p-2 bg-secondary rounded-md text-sm prose prose-sm dark:prose-invert max-w-none">
+                            <ReactMarkdown>{pattern}</ReactMarkdown>
+                          </div>
                         ))
                       ) : (
                         <p className="text-sm text-muted-foreground">No patterns detected</p>
@@ -221,9 +224,9 @@ export function LogsPage() {
                     <div className="flex flex-col gap-2">
                       {analysis.anomalies.length > 0 ? (
                         analysis.anomalies.map((anomaly, idx) => (
-                          <Badge key={idx} variant="destructive" className="justify-start text-left whitespace-normal break-words">
-                            {anomaly}
-                          </Badge>
+                          <div key={idx} className="p-2 bg-destructive/10 border border-destructive/20 rounded-md text-sm prose prose-sm dark:prose-invert max-w-none">
+                            <ReactMarkdown>{anomaly}</ReactMarkdown>
+                          </div>
                         ))
                       ) : (
                         <p className="text-sm text-muted-foreground">No anomalies detected</p>
@@ -247,15 +250,17 @@ export function LogsPage() {
                 </CardHeader>
                 <CollapsibleContent>
                   <CardContent>
-                    <ul className="list-disc list-inside space-y-1 text-sm">
+                    <div className="flex flex-col gap-2">
                       {analysis.recommendations.length > 0 ? (
                         analysis.recommendations.map((rec, idx) => (
-                          <li key={idx} className="break-words">{rec}</li>
+                          <div key={idx} className="p-2 bg-yellow-500/10 border border-yellow-500/20 rounded-md text-sm prose prose-sm dark:prose-invert max-w-none">
+                            <ReactMarkdown>{rec}</ReactMarkdown>
+                          </div>
                         ))
                       ) : (
                         <p className="text-muted-foreground">No recommendations</p>
                       )}
-                    </ul>
+                    </div>
                   </CardContent>
                 </CollapsibleContent>
               </Card>
@@ -274,10 +279,14 @@ export function LogsPage() {
                     {analysis.criticalIssues.map((issue, idx) => (
                       <div key={idx} className="p-3 border rounded-lg bg-red-50 dark:bg-red-950">
                         <div className="flex items-start justify-between mb-2">
-                          <p className="font-semibold text-sm break-words flex-1 mr-2">{issue.message}</p>
+                          <div className="font-semibold text-sm break-words flex-1 mr-2 prose prose-sm dark:prose-invert max-w-none">
+                            <ReactMarkdown>{issue.message}</ReactMarkdown>
+                          </div>
                           <Badge variant="destructive" className="shrink-0">{issue.count}x</Badge>
                         </div>
-                        <p className="text-xs text-muted-foreground break-words">{issue.context}</p>
+                        <div className="text-xs text-muted-foreground prose prose-sm dark:prose-invert max-w-none">
+                          <ReactMarkdown>{issue.context}</ReactMarkdown>
+                        </div>
                       </div>
                     ))}
                   </div>
