@@ -1,6 +1,22 @@
 import { type ColumnDef } from '@tanstack/react-table';
 import { Link, useNavigate } from '@tanstack/react-router';
-import { IconMail, IconMailCheck, IconShield, IconUser, IconDotsVertical, IconArrowsExchange, IconEye, IconBrandGoogle, IconBrandTelegram, IconBrandTwitter, IconKey, IconWallet, IconCurrencySolana } from '@tabler/icons-react';
+import {
+  IconMail,
+  IconMailCheck,
+  IconShield,
+  IconUser,
+  IconDotsVertical,
+  IconArrowsExchange,
+  IconEye,
+  IconBrandGoogle,
+  IconBrandTelegram,
+  IconBrandX,
+  IconBrandMatrix,
+  IconKey,
+  IconWallet,
+  IconCurrencySolana,
+  IconCurrencyEthereum,
+} from '@tabler/icons-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -21,36 +37,63 @@ import {
 import { DataTableColumnHeader } from '@/components/table/data-table-column-header';
 import type { User, AuthIdentity } from '../types';
 
-// Provider icons and colors
-const providerConfig: Record<string, { icon: typeof IconBrandGoogle; label: string; className: string }> = {
-  'google-oauth2': { icon: IconBrandGoogle, label: 'Google', className: 'bg-red-100 text-red-700 hover:bg-red-200' },
-  'telegram': { icon: IconBrandTelegram, label: 'Telegram', className: 'bg-blue-100 text-blue-700 hover:bg-blue-200' },
-  'twitter': { icon: IconBrandTwitter, label: 'Twitter', className: 'bg-sky-100 text-sky-700 hover:bg-sky-200' },
-  'matrix': { icon: IconUser, label: 'Matrix', className: 'bg-green-100 text-green-700 hover:bg-green-200' },
-  'keycloak': { icon: IconKey, label: 'Keycloak', className: 'bg-orange-100 text-orange-700 hover:bg-orange-200' },
-  'evm': { icon: IconWallet, label: 'EVM', className: 'bg-purple-100 text-purple-700 hover:bg-purple-200' },
-  'solana': { icon: IconCurrencySolana, label: 'Solana', className: 'bg-violet-100 text-violet-700 hover:bg-violet-200' },
+// Get provider icon component
+const getProviderIcon = (provider: string) => {
+  const iconClass = 'h-4 w-4 transition-colors';
+
+  switch (provider.toLowerCase()) {
+    case 'google-oauth2':
+    case 'google':
+      return <IconBrandGoogle className={`${iconClass} text-red-500`} />;
+    case 'telegram':
+      return <IconBrandTelegram className={`${iconClass} text-blue-500`} />;
+    case 'twitter':
+    case 'x':
+      return <IconBrandX className={`${iconClass} text-foreground`} />;
+    case 'matrix':
+      return <IconBrandMatrix className={`${iconClass} text-green-500`} />;
+    case 'keycloak':
+      return <IconKey className={`${iconClass} text-orange-500`} />;
+    case 'evm':
+      return <IconCurrencyEthereum className={`${iconClass} text-indigo-500`} />;
+    case 'solana':
+      return <IconCurrencySolana className={`${iconClass} text-purple-500`} />;
+    default:
+      return <IconWallet className={`${iconClass} text-muted-foreground`} />;
+  }
+};
+
+const getProviderLabel = (provider: string) => {
+  switch (provider.toLowerCase()) {
+    case 'google-oauth2': return 'Google';
+    case 'telegram': return 'Telegram';
+    case 'twitter':
+    case 'x': return 'X (Twitter)';
+    case 'matrix': return 'Matrix';
+    case 'keycloak': return 'Keycloak';
+    case 'evm': return 'EVM Wallet';
+    case 'solana': return 'Solana';
+    default: return provider;
+  }
 };
 
 function ConnectedAccountBadge({ identity }: { identity: AuthIdentity }) {
-  const config = providerConfig[identity.provider] || { icon: IconUser, label: identity.provider, className: 'bg-gray-100 text-gray-700' };
-  const Icon = config.icon;
   const displayValue = identity.authName || identity.authId;
-  // Truncate long values
-  const truncated = displayValue.length > 20 ? displayValue.slice(0, 8) + '...' + displayValue.slice(-6) : displayValue;
+  // Truncate long values (addresses)
+  const truncated = displayValue.length > 16 ? displayValue.slice(0, 6) + '...' + displayValue.slice(-4) : displayValue;
 
   return (
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger asChild>
-          <Badge variant="outline" className={`gap-1 text-xs cursor-default ${config.className}`}>
-            <Icon className="h-3 w-3" />
-            {truncated}
-          </Badge>
+          <div className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md border bg-muted/50 hover:bg-muted transition-colors cursor-default">
+            {getProviderIcon(identity.provider)}
+            <span className="text-xs font-medium text-muted-foreground">{truncated}</span>
+          </div>
         </TooltipTrigger>
-        <TooltipContent>
-          <p className="font-medium">{config.label}</p>
-          <p className="text-xs text-muted-foreground">{displayValue}</p>
+        <TooltipContent side="top">
+          <p className="font-semibold">{getProviderLabel(identity.provider)}</p>
+          <p className="text-xs text-muted-foreground font-mono">{displayValue}</p>
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>
