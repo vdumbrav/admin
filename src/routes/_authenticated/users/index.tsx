@@ -90,7 +90,7 @@ function UsersPage() {
             <div className="flex-1 relative">
               <IconSearch className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Search by email, nickname, name..."
+                placeholder="Search by email, name, ref code, card number, connected accounts..."
                 value={searchInput}
                 onChange={(e) => handleSearchChange(e.target.value)}
                 className="pl-9"

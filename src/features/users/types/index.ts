@@ -4,6 +4,13 @@ export interface AuthIdentity {
   authName?: string;
 }
 
+export interface PremiumInfo {
+  isActive: boolean;
+  level?: number;
+  bundleTitle?: string;
+  expiresAt?: string;
+}
+
 export interface User {
   id: number;
   uid: string;
@@ -22,6 +29,11 @@ export interface User {
   matrixId: string | null;
   cardEmail: string | null;
   authIdentities?: AuthIdentity[];
+  // New fields
+  premium?: PremiumInfo;
+  cardsCount?: number;
+  referralsCount?: number;
+  totalXp?: number;
   // Analytics fields
   admin_tags?: string[];
   risk_score?: number;

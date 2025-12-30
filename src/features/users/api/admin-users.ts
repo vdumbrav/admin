@@ -158,7 +158,7 @@ export const useAdminUsers = (
       }
 
       if (filters?.roles && filters.roles.length > 0) {
-        filters.roles.forEach(role => params.append('roles[]', role));
+        filters.roles.forEach(role => params.append('roles', role));
       }
 
       if (filters?.emailVerified !== undefined) {

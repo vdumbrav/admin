@@ -12,11 +12,19 @@ import {
   IconBrandTelegram,
   IconBrandX,
   IconBrandMatrix,
+  IconBrandDiscord,
   IconKey,
   IconWallet,
   IconCurrencySolana,
   IconCurrencyEthereum,
+  IconCrown,
+  IconCreditCard,
+  IconUsers,
+  IconStar,
+  IconCopy,
+  IconCheck,
 } from '@tabler/icons-react';
+import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -52,6 +60,8 @@ const getProviderIcon = (provider: string) => {
       return <IconBrandX className={`${iconClass} text-foreground`} />;
     case 'matrix':
       return <IconBrandMatrix className={`${iconClass} text-green-500`} />;
+    case 'discord':
+      return <IconBrandDiscord className={`${iconClass} text-indigo-500`} />;
     case 'keycloak':
       return <IconKey className={`${iconClass} text-orange-500`} />;
     case 'evm':
@@ -70,6 +80,7 @@ const getProviderLabel = (provider: string) => {
     case 'twitter':
     case 'x': return 'X (Twitter)';
     case 'matrix': return 'Matrix';
+    case 'discord': return 'Discord';
     case 'keycloak': return 'Keycloak';
     case 'evm': return 'EVM Wallet';
     case 'solana': return 'Solana';
@@ -187,6 +198,131 @@ export const columns: ColumnDef<User>[] = [
     filterFn: (row, id, value) => {
       return row.getValue(id) === value;
     },
+  },
+  {
+    accessorKey: 'premium',
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Premium" />,
+    cell: ({ row }) => {
+      const premium = row.original.premium;
+      if (!premium?.isActive) {
+        return <span className="text-xs text-muted-foreground">-</span>;
+      }
+      return (
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Badge variant="default" className="gap-1 bg-amber-500 hover:bg-amber-600">
+                <IconCrown className="h-3 w-3" />
+                L{premium.level || 1}
+              </Badge>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p className="font-semibold">{premium.bundleTitle}</p>
+              {premium.expiresAt && (
+                <p className="text-xs text-muted-foreground">
+                  Expires: {new Date(premium.expiresAt).toLocaleDateString()}
+                </p>
+              )}
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      );
+    },
+    enableSorting: false,
+  },
+  {
+    accessorKey: 'cardsCount',
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Cards" />,
+    cell: ({ row }) => {
+      const count = row.original.cardsCount || 0;
+      if (count === 0) {
+        return <span className="text-xs text-muted-foreground">0</span>;
+      }
+      return (
+        <div className="flex items-center gap-1">
+          <IconCreditCard className="h-4 w-4 text-blue-500" />
+          <span className="text-sm font-medium">{count}</span>
+        </div>
+      );
+    },
+    enableSorting: true,
+  },
+  {
+    accessorKey: 'referralsCount',
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Referrals" />,
+    cell: ({ row }) => {
+      const count = row.original.referralsCount || 0;
+      if (count === 0) {
+        return <span className="text-xs text-muted-foreground">0</span>;
+      }
+      return (
+        <div className="flex items-center gap-1">
+          <IconUsers className="h-4 w-4 text-green-500" />
+          <span className="text-sm font-medium">{count}</span>
+        </div>
+      );
+    },
+    enableSorting: true,
+  },
+  {
+    accessorKey: 'totalXp',
+    header: ({ column }) => <DataTableColumnHeader column={column} title="XP" />,
+    cell: ({ row }) => {
+      const xp = row.original.totalXp || 0;
+      if (xp === 0) {
+        return <span className="text-xs text-muted-foreground">0</span>;
+      }
+      return (
+        <div className="flex items-center gap-1">
+          <IconStar className="h-4 w-4 text-yellow-500" />
+          <span className="text-sm font-medium">{xp.toLocaleString()}</span>
+        </div>
+      );
+    },
+    enableSorting: true,
+  },
+  {
+    accessorKey: 'uid',
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Ref Code" />,
+    cell: function RefCodeCell({ row }) {
+      const [copied, setCopied] = useState(false);
+      const uid = row.original.uid;
+
+      const handleCopy = async () => {
+        try {
+          await navigator.clipboard.writeText(uid);
+          setCopied(true);
+          setTimeout(() => setCopied(false), 2000);
+        } catch (err) {
+          console.error('Failed to copy:', err);
+        }
+      };
+
+      return (
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                onClick={handleCopy}
+                className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-muted/50 hover:bg-muted transition-colors font-mono text-xs"
+              >
+                {uid.slice(0, 8)}...
+                {copied ? (
+                  <IconCheck className="h-3 w-3 text-green-500" />
+                ) : (
+                  <IconCopy className="h-3 w-3 text-muted-foreground" />
+                )}
+              </button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p className="font-mono text-xs">{uid}</p>
+              <p className="text-xs text-muted-foreground">Click to copy</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      );
+    },
+    enableSorting: false,
   },
   {
     accessorKey: 'authIdentities',

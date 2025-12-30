@@ -2,6 +2,9 @@ export const LS_TABLE_VIS = 'WL/quests.table.visibility';
 export const LS_TABLE_SIZE = 'WL/quests.table.pageSize';
 export const LS_TABLE_SORT = 'WL/quests.table.sort';
 
+export const LS_USERS_TABLE_VIS = 'WL/users.table.visibility';
+export const LS_USERS_TABLE_SIZE = 'WL/users.table.pageSize';
+
 export const loadJSON = <T>(k: string, f: T): T => {
   try {
     const v = localStorage.getItem(k);

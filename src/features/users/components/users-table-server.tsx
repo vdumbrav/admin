@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   flexRender,
   getCoreRowModel,
   getSortedRowModel,
   useReactTable,
   type SortingState,
+  type VisibilityState,
 } from '@tanstack/react-table';
 import {
   Table,
@@ -16,6 +17,8 @@ import {
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { IconChevronLeft, IconChevronRight, IconChevronsLeft, IconChevronsRight } from '@tabler/icons-react';
+import { DataTableViewOptions } from '@/components/table/data-table-view-options';
+import { loadJSON, saveJSON, LS_USERS_TABLE_VIS } from '@/utils/persist';
 import type { User } from '../types';
 import { columns } from './columns';
 
@@ -27,16 +30,34 @@ interface UsersTableServerProps {
   onPageChange: (page: number) => void;
 }
 
+// Default hidden columns for cleaner initial view
+const defaultHiddenColumns: VisibilityState = {
+  emailVerified: false,
+  uid: false,
+  createdAt: false,
+  lastLogin: false,
+};
+
 export function UsersTableServer({ users, page, totalPages, total, onPageChange }: UsersTableServerProps) {
   const [sorting, setSorting] = useState<SortingState>([]);
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(() =>
+    loadJSON(LS_USERS_TABLE_VIS, defaultHiddenColumns)
+  );
+
+  // Persist column visibility
+  useEffect(() => {
+    saveJSON(LS_USERS_TABLE_VIS, columnVisibility);
+  }, [columnVisibility]);
 
   const table = useReactTable({
     data: users,
     columns,
     state: {
       sorting,
+      columnVisibility,
     },
     onSortingChange: setSorting,
+    onColumnVisibilityChange: setColumnVisibility,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     manualPagination: true,
@@ -45,6 +66,11 @@ export function UsersTableServer({ users, page, totalPages, total, onPageChange 
 
   return (
     <div className="space-y-4">
+      {/* Toolbar with View options */}
+      <div className="flex items-center justify-end">
+        <DataTableViewOptions table={table} />
+      </div>
+
       {/* Table */}
       <div className="rounded-md border">
         <Table>
