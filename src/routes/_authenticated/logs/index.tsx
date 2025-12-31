@@ -249,7 +249,7 @@ export function LogsPage() {
                 <CollapsibleContent>
                   <CardContent>
                     <div className="text-sm">
-                      <ReactMarkdown components={markdownComponents}>{analysis.summary}</ReactMarkdown>
+                      <ReactMarkdown components={markdownComponents}>{analysis.summary || 'No summary available'}</ReactMarkdown>
                     </div>
                   </CardContent>
                 </CollapsibleContent>
@@ -270,8 +270,8 @@ export function LogsPage() {
                 <CollapsibleContent>
                   <CardContent>
                     <div className="flex flex-col gap-2">
-                      {analysis.patterns.length > 0 ? (
-                        analysis.patterns.map((pattern, idx) => (
+                      {(analysis.patterns?.length ?? 0) > 0 ? (
+                        analysis.patterns?.map((pattern, idx) => (
                           <div key={idx} className="p-2 bg-secondary rounded-md text-sm">
                             <ReactMarkdown components={markdownComponents}>{pattern}</ReactMarkdown>
                           </div>
@@ -299,8 +299,8 @@ export function LogsPage() {
                 <CollapsibleContent>
                   <CardContent>
                     <div className="flex flex-col gap-2">
-                      {analysis.anomalies.length > 0 ? (
-                        analysis.anomalies.map((anomaly, idx) => (
+                      {(analysis.anomalies?.length ?? 0) > 0 ? (
+                        analysis.anomalies?.map((anomaly, idx) => (
                           <div key={idx} className="p-2 bg-destructive/10 border border-destructive/20 rounded-md text-sm">
                             <ReactMarkdown components={markdownComponents}>{anomaly}</ReactMarkdown>
                           </div>
@@ -328,8 +328,8 @@ export function LogsPage() {
                 <CollapsibleContent>
                   <CardContent>
                     <div className="flex flex-col gap-2">
-                      {analysis.recommendations.length > 0 ? (
-                        analysis.recommendations.map((rec, idx) => (
+                      {(analysis.recommendations?.length ?? 0) > 0 ? (
+                        analysis.recommendations?.map((rec, idx) => (
                           <div key={idx} className="p-2 bg-yellow-500/10 border border-yellow-500/20 rounded-md text-sm">
                             <ReactMarkdown components={markdownComponents}>{rec}</ReactMarkdown>
                           </div>
@@ -343,7 +343,7 @@ export function LogsPage() {
               </Card>
             </Collapsible>
 
-            {analysis.criticalIssues && analysis.criticalIssues.length > 0 && (
+            {(analysis.criticalIssues?.length ?? 0) > 0 && (
               <Card className="md:col-span-2 border-red-500">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-red-500">
@@ -353,7 +353,7 @@ export function LogsPage() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    {analysis.criticalIssues.map((issue, idx) => (
+                    {analysis.criticalIssues?.map((issue, idx) => (
                       <div key={idx} className="p-3 border rounded-lg bg-red-50 dark:bg-red-950">
                         <div className="flex items-start justify-between mb-2">
                           <div className="font-semibold text-sm break-words flex-1 mr-2">
