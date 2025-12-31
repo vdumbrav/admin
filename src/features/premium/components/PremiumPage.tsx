@@ -15,8 +15,12 @@ import { toast } from 'sonner';
 import {
   Plus, Pencil, Trash2, Sparkles, RefreshCw, Check, X, Loader2,
   DollarSign, Users, TrendingUp, TrendingDown, Percent,
-  GripVertical, Eye, EyeOff, Database, Crown
+  GripVertical, Eye, EyeOff, Database, Crown, Clock, CreditCard,
+  CheckCircle2, XCircle, Clock3, Mail, Globe, Smartphone, Star,
+  Filter, Hash
 } from 'lucide-react';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   useFeatures,
   useCreateFeature,
@@ -49,6 +53,47 @@ const TIER_LABELS = ['Free', 'Level 1', 'Level 2', 'Level 3'];
 const TIER_KEYS: (keyof FeatureValues)[] = ['free', 'level1', 'level2', 'level3'];
 const CHART_COLORS = ['#8884d8', '#82ca9d', '#ffc658', '#ff7300'];
 
+// Helper function to get relative time
+const getRelativeTime = (date: string) => {
+  const now = new Date();
+  const past = new Date(date);
+  const diffMs = now.getTime() - past.getTime();
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMs / 3600000);
+  const diffDays = Math.floor(diffMs / 86400000);
+
+  if (diffMins < 1) return 'Just now';
+  if (diffMins < 60) return `${diffMins}m ago`;
+  if (diffHours < 24) return `${diffHours}h ago`;
+  if (diffDays < 7) return `${diffDays}d ago`;
+  return past.toLocaleDateString();
+};
+
+// Get initials from name or email
+const getInitials = (nickname: string, email: string) => {
+  if (nickname && nickname !== 'Anonymous') {
+    return nickname.slice(0, 2).toUpperCase();
+  }
+  if (email) {
+    return email.slice(0, 2).toUpperCase();
+  }
+  return '??';
+};
+
+// Status config for badges
+const getStatusConfig = (status: string) => {
+  switch (status) {
+    case 'paid':
+      return { icon: CheckCircle2, color: 'text-green-500', bg: 'bg-green-500/10', label: 'Paid' };
+    case 'pending':
+      return { icon: Clock3, color: 'text-yellow-500', bg: 'bg-yellow-500/10', label: 'Pending' };
+    case 'expired':
+      return { icon: XCircle, color: 'text-red-500', bg: 'bg-red-500/10', label: 'Expired' };
+    default:
+      return { icon: Clock3, color: 'text-gray-500', bg: 'bg-gray-500/10', label: status };
+  }
+};
+
 const defaultTierValue: TierValue = { enabled: false, value: undefined, displayText: '' };
 
 const defaultFeatureValues: FeatureValues = {
@@ -62,6 +107,9 @@ export function PremiumPage() {
   const [activeTab, setActiveTab] = useState('features');
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editingFeature, setEditingFeature] = useState<Feature | null>(null);
+  // Subscription filters
+  const [sourceFilter, setSourceFilter] = useState<string>('all');
+  const [bundleFilter, setBundleFilter] = useState<string>('all');
   const [formData, setFormData] = useState<CreateFeatureDto>({
     key: '',
     name: '',
@@ -398,7 +446,7 @@ export function PremiumPage() {
               <div className="grid gap-4 md:grid-cols-4">
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between pb-2">
-                    <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
+                    <CardTitle className="text-sm font-medium">Paid Invoices Total</CardTitle>
                     <DollarSign className="h-4 w-4 text-muted-foreground" />
                   </CardHeader>
                   <CardContent>
@@ -538,52 +586,162 @@ export function PremiumPage() {
 
               {/* Recent Subscriptions */}
               <Card>
-                <CardHeader>
-                  <CardTitle>Recent Subscriptions</CardTitle>
-                  <CardDescription>Latest subscription purchases</CardDescription>
+                <CardHeader className="pb-3">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle className="flex items-center gap-2">
+                        <CreditCard className="h-5 w-5" />
+                        Recent Paid Subscriptions
+                      </CardTitle>
+                      <CardDescription>Latest paid subscription invoices</CardDescription>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {/* Source Filter */}
+                      <Select value={sourceFilter} onValueChange={setSourceFilter}>
+                        <SelectTrigger className="w-[120px] h-8 text-xs">
+                          <SelectValue placeholder="Source" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">All Sources</SelectItem>
+                          <SelectItem value="web">
+                            <span className="flex items-center gap-1"><Globe className="h-3 w-3" /> Web (USD)</span>
+                          </SelectItem>
+                          <SelectItem value="twa">
+                            <span className="flex items-center gap-1"><Star className="h-3 w-3" /> Stars</span>
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                      {/* Bundle Filter */}
+                      <Select value={bundleFilter} onValueChange={setBundleFilter}>
+                        <SelectTrigger className="w-[120px] h-8 text-xs">
+                          <SelectValue placeholder="Bundle" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">All Bundles</SelectItem>
+                          <SelectItem value="1">Level 1</SelectItem>
+                          <SelectItem value="2">Level 2</SelectItem>
+                          <SelectItem value="3">Level 3</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
                 </CardHeader>
-                <CardContent>
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>User</TableHead>
-                        <TableHead>Bundle</TableHead>
-                        <TableHead>Amount</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead>Date</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {stats.recentSubscriptions.length > 0 ? stats.recentSubscriptions.map(sub => (
-                        <TableRow key={sub.id}>
-                          <TableCell>
-                            <div>
-                              <p className="font-medium">{sub.userNickname}</p>
-                              <p className="text-xs text-muted-foreground">{sub.userEmail}</p>
+                <CardContent className="p-0">
+                  <ScrollArea className="h-[500px]">
+                    <div className="divide-y">
+                      {(() => {
+                        const filteredSubs = stats.recentSubscriptions.filter(sub => {
+                          if (sourceFilter !== 'all' && sub.source !== sourceFilter) return false;
+                          if (bundleFilter !== 'all' && sub.bundleLevel !== parseInt(bundleFilter)) return false;
+                          return true;
+                        });
+
+                        if (filteredSubs.length === 0) {
+                          return (
+                            <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
+                              <Filter className="h-12 w-12 mb-3 opacity-20" />
+                              <p className="font-medium">No subscriptions match filters</p>
+                              <p className="text-sm">Try adjusting your filter criteria</p>
                             </div>
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant="outline">{sub.bundleTitle}</Badge>
-                          </TableCell>
-                          <TableCell>${sub.amount} {sub.currency}</TableCell>
-                          <TableCell>
-                            <Badge variant={sub.status === 'paid' ? 'default' : 'secondary'}>
-                              {sub.status}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="text-sm text-muted-foreground">
-                            {new Date(sub.createdAt).toLocaleDateString()}
-                          </TableCell>
-                        </TableRow>
-                      )) : (
-                        <TableRow>
-                          <TableCell colSpan={5} className="text-center py-4 text-muted-foreground">
-                            No subscriptions yet
-                          </TableCell>
-                        </TableRow>
-                      )}
-                    </TableBody>
-                  </Table>
+                          );
+                        }
+
+                        return filteredSubs.map(sub => {
+                          const statusConfig = getStatusConfig(sub.status);
+                          const StatusIcon = statusConfig.icon;
+                          const isStars = sub.source === 'twa' || sub.currency === 'XTR';
+
+                          return (
+                            <div key={sub.id} className="flex items-center gap-4 px-6 py-4 hover:bg-muted/50 transition-colors">
+                              {/* Avatar */}
+                              <Avatar className="h-10 w-10 border">
+                                <AvatarFallback className={`text-white text-sm font-medium ${
+                                  sub.bundleLevel === 3 ? 'bg-gradient-to-br from-yellow-500 to-orange-500' :
+                                  sub.bundleLevel === 2 ? 'bg-gradient-to-br from-purple-500 to-pink-500' :
+                                  'bg-gradient-to-br from-blue-500 to-cyan-500'
+                                }`}>
+                                  {getInitials(sub.userNickname, sub.userEmail)}
+                                </AvatarFallback>
+                              </Avatar>
+
+                              {/* User Info */}
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2">
+                                  <p className="font-medium truncate">{sub.userNickname}</p>
+                                  <Badge
+                                    variant="outline"
+                                    className={`text-xs shrink-0 ${
+                                      sub.bundleLevel === 3 ? 'border-yellow-500 text-yellow-600 bg-yellow-500/10' :
+                                      sub.bundleLevel === 2 ? 'border-purple-500 text-purple-600 bg-purple-500/10' :
+                                      'border-blue-500 text-blue-600 bg-blue-500/10'
+                                    }`}
+                                  >
+                                    {sub.bundleTitle}
+                                  </Badge>
+                                </div>
+                                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                  <span className="flex items-center gap-1">
+                                    <Hash className="h-3 w-3" />
+                                    <span className="truncate max-w-[140px]" title={sub.invoiceNumber}>{sub.invoiceNumber?.split('-').pop() || sub.id}</span>
+                                  </span>
+                                  <span className="text-muted-foreground/40">•</span>
+                                  <span className="flex items-center gap-1">
+                                    <Mail className="h-3 w-3" />
+                                    <span className="truncate">{sub.userEmail || 'No email'}</span>
+                                  </span>
+                                </div>
+                              </div>
+
+                              {/* Source */}
+                              <div className="flex items-center gap-1.5">
+                                {isStars ? (
+                                  <Badge variant="outline" className="bg-purple-500/10 border-purple-500 text-purple-600 text-xs">
+                                    <Star className="h-3 w-3 mr-1 fill-purple-500" />
+                                    Stars
+                                  </Badge>
+                                ) : (
+                                  <Badge variant="outline" className="bg-green-500/10 border-green-500 text-green-600 text-xs">
+                                    <Globe className="h-3 w-3 mr-1" />
+                                    Web
+                                  </Badge>
+                                )}
+                              </div>
+
+                              {/* Amount */}
+                              <div className="text-right min-w-[80px]">
+                                {isStars ? (
+                                  <>
+                                    <p className="font-semibold text-purple-600 flex items-center justify-end gap-1">
+                                      <Star className="h-3.5 w-3.5 fill-purple-500" />
+                                      {sub.amount.toFixed(0)}
+                                    </p>
+                                    <p className="text-xs text-muted-foreground">Stars</p>
+                                  </>
+                                ) : (
+                                  <>
+                                    <p className="font-semibold text-green-600">${sub.amount.toFixed(2)}</p>
+                                    <p className="text-xs text-muted-foreground">{sub.currency}</p>
+                                  </>
+                                )}
+                              </div>
+
+                              {/* Status */}
+                              <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full ${statusConfig.bg}`}>
+                                <StatusIcon className={`h-3.5 w-3.5 ${statusConfig.color}`} />
+                                <span className={`text-xs font-medium ${statusConfig.color}`}>{statusConfig.label}</span>
+                              </div>
+
+                              {/* Time */}
+                              <div className="flex items-center gap-1 text-xs text-muted-foreground w-20 justify-end">
+                                <Clock className="h-3 w-3" />
+                                <span title={new Date(sub.createdAt).toLocaleString()}>{getRelativeTime(sub.createdAt)}</span>
+                              </div>
+                            </div>
+                          );
+                        });
+                      })()}
+                    </div>
+                  </ScrollArea>
                 </CardContent>
               </Card>
             </>
