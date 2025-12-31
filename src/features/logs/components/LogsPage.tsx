@@ -24,7 +24,7 @@ export function LogsPage() {
   const auth = useAppAuth();
 
   const kibanaUrl = import.meta.env.VITE_KIBANA_URL || 'http://167.233.7.108:5601';
-  const apiUrl = import.meta.env.VITE_API_URL || 'https://api2.moliedev.xyz';
+  const apiUrl = import.meta.env.VITE_API_URL || 'https://api.moliedev.xyz';
 
   // Data View ID созданный для walme-logs
   const dataViewId = 'fd93d6b1-88b0-49de-ac7e-43bf04cf7095';
