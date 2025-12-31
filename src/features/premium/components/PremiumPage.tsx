@@ -32,7 +32,7 @@ import {
   FeatureValues,
   TierValue,
 } from '../api/admin-features';
-import { useBundles } from '../api/admin-bundles';
+import { useBundles, Bundle } from '../api/admin-bundles';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, BarChart, Bar, Legend } from 'recharts';
 
 const VALUE_TYPE_OPTIONS = [
@@ -361,7 +361,7 @@ export function PremiumPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {bundles?.sort((a, b) => a.level - b.level).map(bundle => (
+                    {bundles?.sort((a: Bundle, b: Bundle) => a.level - b.level).map((bundle: Bundle) => (
                       <TableRow key={bundle.id}>
                         <TableCell>
                           <Badge variant={bundle.resource?.bestChoose ? 'default' : 'outline'}>
