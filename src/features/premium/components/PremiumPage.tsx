@@ -30,7 +30,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { IconCrown, IconEdit, IconTrash, IconPlus, IconSparkles, IconCheck, IconX, IconRefresh } from '@tabler/icons-react';
+import { IconCrown, IconEdit, IconTrash, IconPlus, IconSparkles, IconX, IconRefresh } from '@tabler/icons-react';
 import { toast } from 'sonner';
 import { useAppAuth } from '@/auth/hooks';
 
