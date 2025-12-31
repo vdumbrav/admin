@@ -16,8 +16,7 @@ import {
   Plus, Pencil, Trash2, Sparkles, RefreshCw, Check, X, Loader2,
   DollarSign, Users, TrendingUp, TrendingDown, Percent,
   GripVertical, Eye, EyeOff, Database, Crown, Clock, CreditCard,
-  CheckCircle2, XCircle, Clock3, Mail, Globe, Smartphone, Star,
-  Filter, Hash
+  CheckCircle2, XCircle, Clock3, Mail, Globe, Star, Filter, Hash
 } from 'lucide-react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { ScrollArea } from '@/components/ui/scroll-area';

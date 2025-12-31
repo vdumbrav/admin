@@ -96,10 +96,13 @@ export interface PremiumStats {
   }>;
   recentSubscriptions: Array<{
     id: number;
+    invoiceNumber?: string;
     userId: number;
     amount: number;
     currency: string;
     status: string;
+    source?: string;
+    paymentType?: string;
     createdAt: string;
     bundleTitle: string;
     bundleLevel: number;
