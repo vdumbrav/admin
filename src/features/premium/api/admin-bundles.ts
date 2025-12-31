@@ -28,11 +28,12 @@ export const useBundles = () => {
     queryKey: ['admin', 'bundles'],
     queryFn: async (): Promise<Bundle[]> => {
       const token = await auth.getAccessToken();
-      return orvalMutator<Bundle[]>({
+      const response = await orvalMutator<{ success: boolean; bundles: Bundle[] }>({
         url: '/admin/bundles',
         method: 'GET',
         headers: { Authorization: `Bearer ${token}` },
       });
+      return response.bundles || [];
     },
   });
 };
