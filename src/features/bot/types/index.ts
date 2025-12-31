@@ -53,7 +53,7 @@ export interface BotLimits {
   free: number;
   level1: number;
   level2: number;
-  level3: number | null;
+  level3: number;
 }
 
 // ==================== Mappings ====================

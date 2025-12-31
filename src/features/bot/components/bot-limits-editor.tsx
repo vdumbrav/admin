@@ -51,15 +51,22 @@ export function BotLimitsEditor() {
   const handleSave = async () => {
     if (!localLimits) return;
 
+    console.log('Saving limits:', localLimits);
     try {
       await updateLimits.mutateAsync(localLimits);
       toast.success('Limits updated successfully');
     } catch (error) {
+      console.error('Failed to save limits:', error);
       toast.error('Failed to update limits');
     }
   };
 
-  const hasChanges = JSON.stringify(limits) !== JSON.stringify(localLimits);
+  // Compare individual values to avoid JSON stringification issues
+  const hasChanges = !limits ||
+    limits.free !== localLimits?.free ||
+    limits.level1 !== localLimits?.level1 ||
+    limits.level2 !== localLimits?.level2 ||
+    limits.level3 !== localLimits?.level3;
 
   return (
     <div className="space-y-6">
