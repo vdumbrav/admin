@@ -69,6 +69,19 @@ export interface UpdateFeatureDto {
 // Premium Stats Types
 export interface PremiumStats {
   overview: {
+    // USD only
+    totalRevenueUsd: number;
+    revenueTodayUsd: number;
+    revenueLast7DaysUsd: number;
+    revenueLast30DaysUsd: number;
+    countUsd: number;
+    // Stars only
+    totalStars: number;
+    todayStars: number;
+    last7DaysStars: number;
+    last30DaysStars: number;
+    countStars: number;
+    // Combined (Stars converted to USD)
     totalRevenue: number;
     revenueToday: number;
     revenueLast7Days: number;

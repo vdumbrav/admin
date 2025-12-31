@@ -442,28 +442,83 @@ export function PremiumPage() {
           ) : stats ? (
             <>
               {/* Overview Cards */}
-              <div className="grid gap-4 md:grid-cols-4">
-                <Card>
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                {/* USD Revenue */}
+                <Card className="border-green-500/30 bg-green-500/5">
                   <CardHeader className="flex flex-row items-center justify-between pb-2">
-                    <CardTitle className="text-sm font-medium">Paid Invoices Total</CardTitle>
-                    <DollarSign className="h-4 w-4 text-muted-foreground" />
+                    <CardTitle className="text-sm font-medium flex items-center gap-1.5">
+                      <Globe className="h-4 w-4 text-green-500" />
+                      USD Revenue
+                    </CardTitle>
+                    <DollarSign className="h-4 w-4 text-green-500" />
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold">${stats.overview.totalRevenue.toFixed(2)}</div>
+                    <div className="text-2xl font-bold text-green-600">${(stats.overview.totalRevenueUsd || 0).toFixed(2)}</div>
                     <p className="text-xs text-muted-foreground">
-                      Last 30 days: ${stats.overview.revenueLast30Days.toFixed(2)}
+                      {stats.overview.countUsd || 0} invoices • Last 30d: ${(stats.overview.revenueLast30DaysUsd || 0).toFixed(2)}
                     </p>
                   </CardContent>
                 </Card>
 
+                {/* Stars Revenue */}
+                <Card className="border-purple-500/30 bg-purple-500/5">
+                  <CardHeader className="flex flex-row items-center justify-between pb-2">
+                    <CardTitle className="text-sm font-medium flex items-center gap-1.5">
+                      <Star className="h-4 w-4 text-purple-500 fill-purple-500" />
+                      Stars Revenue
+                    </CardTitle>
+                    <span className="text-xs text-purple-500 font-medium">≈ ${((stats.overview.totalStars || 0) * 0.01).toFixed(2)}</span>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold text-purple-600 flex items-center gap-1">
+                      <Star className="h-5 w-5 fill-purple-500" />
+                      {(stats.overview.totalStars || 0).toLocaleString()}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      {stats.overview.countStars || 0} invoices • 1000 ⭐ = $10
+                    </p>
+                  </CardContent>
+                </Card>
+
+                {/* Combined Total */}
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between pb-2">
-                    <CardTitle className="text-sm font-medium">Total Subscriptions</CardTitle>
+                    <CardTitle className="text-sm font-medium">Combined Total</CardTitle>
+                    <DollarSign className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">${(stats.overview.totalRevenue || 0).toFixed(2)}</div>
+                    <p className="text-xs text-muted-foreground">
+                      {stats.overview.totalSubscriptions} invoices • Stars → USD
+                    </p>
+                  </CardContent>
+                </Card>
+
+                {/* Total Subscriptions */}
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between pb-2">
+                    <CardTitle className="text-sm font-medium">Active Subscriptions</CardTitle>
                     <Users className="h-4 w-4 text-muted-foreground" />
                   </CardHeader>
                   <CardContent>
                     <div className="text-2xl font-bold">{stats.overview.totalSubscriptions}</div>
                     <p className="text-xs text-muted-foreground">All time purchases</p>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Secondary Stats Row */}
+              <div className="grid gap-4 md:grid-cols-3">
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between pb-2">
+                    <CardTitle className="text-sm font-medium">Today</CardTitle>
+                    <Clock className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-xl font-bold">${(stats.overview.revenueToday || 0).toFixed(2)}</div>
+                    <p className="text-xs text-muted-foreground">
+                      USD: ${(stats.overview.revenueTodayUsd || 0).toFixed(2)} • Stars: {(stats.overview.todayStars || 0).toLocaleString()}
+                    </p>
                   </CardContent>
                 </Card>
 
@@ -477,7 +532,7 @@ export function PremiumPage() {
                     )}
                   </CardHeader>
                   <CardContent>
-                    <div className={`text-2xl font-bold ${stats.overview.revenueChange >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                    <div className={`text-xl font-bold ${stats.overview.revenueChange >= 0 ? 'text-green-500' : 'text-red-500'}`}>
                       {stats.overview.revenueChange >= 0 ? '+' : ''}{stats.overview.revenueChange}%
                     </div>
                     <p className="text-xs text-muted-foreground">vs previous 30 days</p>
@@ -490,7 +545,7 @@ export function PremiumPage() {
                     <Percent className="h-4 w-4 text-muted-foreground" />
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold">{stats.overview.churnRate}%</div>
+                    <div className="text-xl font-bold">{stats.overview.churnRate}%</div>
                     <p className="text-xs text-muted-foreground">Last 90 days</p>
                   </CardContent>
                 </Card>
