@@ -77,6 +77,7 @@ import {
   useRevokePremium,
   useDeleteUser,
   useUpdateCameraQuestAccess,
+  useUnlinkIdentity,
 } from '@/features/users/api/admin-users';
 import { usePrizeCards, useManuallyGiveCard, useAvailableCards, useAddCardToPool, useReturnCardToPool, useRemoveCardFromPool } from '@/features/camera-quest/api';
 import { EPrizeCardStatus } from '@/features/camera-quest/types';
@@ -492,8 +493,13 @@ function UserDetailsPage() {
   const revokePremiumMutation = useRevokePremium();
   const deleteUserMutation = useDeleteUser();
   const updateCameraQuestAccessMutation = useUpdateCameraQuestAccess();
+  const unlinkIdentityMutation = useUnlinkIdentity();
 
   const [activeTab, setActiveTab] = useState('overview');
+
+  // Unlink identity dialog state
+  const [unlinkDialogOpen, setUnlinkDialogOpen] = useState(false);
+  const [identityToUnlink, setIdentityToUnlink] = useState<{ provider: string; authId: string; authName?: string } | null>(null);
   const [roleDialogOpen, setRoleDialogOpen] = useState(false);
   const [selectedRole, setSelectedRole] = useState<string>('');
 
@@ -1071,9 +1077,19 @@ function UserDetailsPage() {
                             <Badge
                               key={idx}
                               variant="secondary"
-                              className="font-mono text-xs"
+                              className="font-mono text-xs flex items-center gap-1 pr-1"
                             >
                               {identity.provider}: {identity.authName || identity.authId}
+                              <button
+                                onClick={() => {
+                                  setIdentityToUnlink(identity);
+                                  setUnlinkDialogOpen(true);
+                                }}
+                                className="ml-1 rounded-full hover:bg-destructive/20 p-0.5 transition-colors"
+                                title="Unlink account"
+                              >
+                                <IconX className="h-3 w-3 text-muted-foreground hover:text-destructive" />
+                              </button>
                             </Badge>
                           ))}
                         </div>
@@ -1853,6 +1869,52 @@ function UserDetailsPage() {
               className={cardActionDialog.action === 'block' ? 'bg-destructive hover:bg-destructive/90' : ''}
             >
               {(freezeCardMutation.isPending || unfreezeCardMutation.isPending || blockCardMutation.isPending) ? 'Processing...' : 'Confirm'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Unlink Identity Confirmation Dialog */}
+      <AlertDialog open={unlinkDialogOpen} onOpenChange={setUnlinkDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Unlink Connected Account</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to unlink <strong>{identityToUnlink?.provider}</strong> account
+              ({identityToUnlink?.authName || identityToUnlink?.authId}) from {displayName}?
+              This will remove the connection from the database and Keycloak (if applicable).
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => { setUnlinkDialogOpen(false); setIdentityToUnlink(null); }}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive hover:bg-destructive/90"
+              onClick={() => {
+                if (identityToUnlink) {
+                  unlinkIdentityMutation.mutate(
+                    {
+                      userId: user.id,
+                      provider: identityToUnlink.provider,
+                      authId: identityToUnlink.authId,
+                    },
+                    {
+                      onSuccess: () => {
+                        toast.success(`Successfully unlinked ${identityToUnlink.provider} account`);
+                        setUnlinkDialogOpen(false);
+                        setIdentityToUnlink(null);
+                      },
+                      onError: (error: any) => {
+                        toast.error(`Failed to unlink: ${error.message || 'Unknown error'}`);
+                      },
+                    }
+                  );
+                }
+              }}
+              disabled={unlinkIdentityMutation.isPending}
+            >
+              {unlinkIdentityMutation.isPending ? 'Unlinking...' : 'Unlink'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
