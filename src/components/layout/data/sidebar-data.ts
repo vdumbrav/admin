@@ -76,6 +76,17 @@ export const sidebarData: SidebarData = {
       ],
     },
     {
+      title: 'Crypto Wallets',
+      items: [
+        {
+          title: 'Custodial Wallets',
+          url: '/wallets',
+          icon: IconWallet,
+          isActive: (pathname: string) => pathname.startsWith('/wallets'),
+        },
+      ],
+    },
+    {
       title: 'Card Program',
       items: [
         {

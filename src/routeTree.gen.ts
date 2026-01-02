@@ -16,6 +16,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthCallbackRouteImport } from './routes/auth/callback'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
 import { Route as AuthenticatedWalmecardBalanceIndexRouteImport } from './routes/_authenticated/walmecard-balance/index'
+import { Route as AuthenticatedWalletsIndexRouteImport } from './routes/_authenticated/wallets/index'
 import { Route as AuthenticatedUsersIndexRouteImport } from './routes/_authenticated/users/index'
 import { Route as AuthenticatedTransactionsIndexRouteImport } from './routes/_authenticated/transactions/index'
 import { Route as AuthenticatedSecurityIndexRouteImport } from './routes/_authenticated/security/index'
@@ -32,6 +33,7 @@ import { Route as AuthenticatedDashboardIndexRouteImport } from './routes/_authe
 import { Route as AuthenticatedCardsIndexRouteImport } from './routes/_authenticated/cards/index'
 import { Route as AuthenticatedBotIndexRouteImport } from './routes/_authenticated/bot/index'
 import { Route as AuthenticatedAnalyticsIndexRouteImport } from './routes/_authenticated/analytics/index'
+import { Route as AuthenticatedWalletsPartnerIdRouteImport } from './routes/_authenticated/wallets/$partnerId'
 import { Route as AuthenticatedUsersUserIdRouteImport } from './routes/_authenticated/users/$userId'
 import { Route as AuthenticatedQuestsNewRouteImport } from './routes/_authenticated/quests/new'
 import { Route as AuthenticatedQuestsIdRouteImport } from './routes/_authenticated/quests/$id'
@@ -80,6 +82,12 @@ const AuthenticatedWalmecardBalanceIndexRoute =
   AuthenticatedWalmecardBalanceIndexRouteImport.update({
     id: '/walmecard-balance/',
     path: '/walmecard-balance/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedWalletsIndexRoute =
+  AuthenticatedWalletsIndexRouteImport.update({
+    id: '/wallets/',
+    path: '/wallets/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedUsersIndexRoute = AuthenticatedUsersIndexRouteImport.update({
@@ -171,6 +179,12 @@ const AuthenticatedAnalyticsIndexRoute =
   AuthenticatedAnalyticsIndexRouteImport.update({
     id: '/analytics/',
     path: '/analytics/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedWalletsPartnerIdRoute =
+  AuthenticatedWalletsPartnerIdRouteImport.update({
+    id: '/wallets/$partnerId',
+    path: '/wallets/$partnerId',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedUsersUserIdRoute =
@@ -267,6 +281,7 @@ export interface FileRoutesByFullPath {
   '/quests/$id': typeof AuthenticatedQuestsIdRoute
   '/quests/new': typeof AuthenticatedQuestsNewRouteWithChildren
   '/users/$userId': typeof AuthenticatedUsersUserIdRoute
+  '/wallets/$partnerId': typeof AuthenticatedWalletsPartnerIdRoute
   '/analytics': typeof AuthenticatedAnalyticsIndexRoute
   '/bot': typeof AuthenticatedBotIndexRoute
   '/cards': typeof AuthenticatedCardsIndexRoute
@@ -283,6 +298,7 @@ export interface FileRoutesByFullPath {
   '/security': typeof AuthenticatedSecurityIndexRoute
   '/transactions': typeof AuthenticatedTransactionsIndexRoute
   '/users': typeof AuthenticatedUsersIndexRoute
+  '/wallets': typeof AuthenticatedWalletsIndexRoute
   '/walmecard-balance': typeof AuthenticatedWalmecardBalanceIndexRoute
   '/quests/new/$preset': typeof AuthenticatedQuestsNewPresetRoute
   '/markets/categories': typeof AuthenticatedMarketsCategoriesIndexRoute
@@ -304,6 +320,7 @@ export interface FileRoutesByTo {
   '/quests/$id': typeof AuthenticatedQuestsIdRoute
   '/quests/new': typeof AuthenticatedQuestsNewRouteWithChildren
   '/users/$userId': typeof AuthenticatedUsersUserIdRoute
+  '/wallets/$partnerId': typeof AuthenticatedWalletsPartnerIdRoute
   '/analytics': typeof AuthenticatedAnalyticsIndexRoute
   '/bot': typeof AuthenticatedBotIndexRoute
   '/cards': typeof AuthenticatedCardsIndexRoute
@@ -320,6 +337,7 @@ export interface FileRoutesByTo {
   '/security': typeof AuthenticatedSecurityIndexRoute
   '/transactions': typeof AuthenticatedTransactionsIndexRoute
   '/users': typeof AuthenticatedUsersIndexRoute
+  '/wallets': typeof AuthenticatedWalletsIndexRoute
   '/walmecard-balance': typeof AuthenticatedWalmecardBalanceIndexRoute
   '/quests/new/$preset': typeof AuthenticatedQuestsNewPresetRoute
   '/markets/categories': typeof AuthenticatedMarketsCategoriesIndexRoute
@@ -344,6 +362,7 @@ export interface FileRoutesById {
   '/_authenticated/quests/$id': typeof AuthenticatedQuestsIdRoute
   '/_authenticated/quests/new': typeof AuthenticatedQuestsNewRouteWithChildren
   '/_authenticated/users/$userId': typeof AuthenticatedUsersUserIdRoute
+  '/_authenticated/wallets/$partnerId': typeof AuthenticatedWalletsPartnerIdRoute
   '/_authenticated/analytics/': typeof AuthenticatedAnalyticsIndexRoute
   '/_authenticated/bot/': typeof AuthenticatedBotIndexRoute
   '/_authenticated/cards/': typeof AuthenticatedCardsIndexRoute
@@ -360,6 +379,7 @@ export interface FileRoutesById {
   '/_authenticated/security/': typeof AuthenticatedSecurityIndexRoute
   '/_authenticated/transactions/': typeof AuthenticatedTransactionsIndexRoute
   '/_authenticated/users/': typeof AuthenticatedUsersIndexRoute
+  '/_authenticated/wallets/': typeof AuthenticatedWalletsIndexRoute
   '/_authenticated/walmecard-balance/': typeof AuthenticatedWalmecardBalanceIndexRoute
   '/_authenticated/quests/new/$preset': typeof AuthenticatedQuestsNewPresetRoute
   '/_authenticated/markets/categories/': typeof AuthenticatedMarketsCategoriesIndexRoute
@@ -384,6 +404,7 @@ export interface FileRouteTypes {
     | '/quests/$id'
     | '/quests/new'
     | '/users/$userId'
+    | '/wallets/$partnerId'
     | '/analytics'
     | '/bot'
     | '/cards'
@@ -400,6 +421,7 @@ export interface FileRouteTypes {
     | '/security'
     | '/transactions'
     | '/users'
+    | '/wallets'
     | '/walmecard-balance'
     | '/quests/new/$preset'
     | '/markets/categories'
@@ -421,6 +443,7 @@ export interface FileRouteTypes {
     | '/quests/$id'
     | '/quests/new'
     | '/users/$userId'
+    | '/wallets/$partnerId'
     | '/analytics'
     | '/bot'
     | '/cards'
@@ -437,6 +460,7 @@ export interface FileRouteTypes {
     | '/security'
     | '/transactions'
     | '/users'
+    | '/wallets'
     | '/walmecard-balance'
     | '/quests/new/$preset'
     | '/markets/categories'
@@ -460,6 +484,7 @@ export interface FileRouteTypes {
     | '/_authenticated/quests/$id'
     | '/_authenticated/quests/new'
     | '/_authenticated/users/$userId'
+    | '/_authenticated/wallets/$partnerId'
     | '/_authenticated/analytics/'
     | '/_authenticated/bot/'
     | '/_authenticated/cards/'
@@ -476,6 +501,7 @@ export interface FileRouteTypes {
     | '/_authenticated/security/'
     | '/_authenticated/transactions/'
     | '/_authenticated/users/'
+    | '/_authenticated/wallets/'
     | '/_authenticated/walmecard-balance/'
     | '/_authenticated/quests/new/$preset'
     | '/_authenticated/markets/categories/'
@@ -544,6 +570,13 @@ declare module '@tanstack/react-router' {
       path: '/walmecard-balance'
       fullPath: '/walmecard-balance'
       preLoaderRoute: typeof AuthenticatedWalmecardBalanceIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/wallets/': {
+      id: '/_authenticated/wallets/'
+      path: '/wallets'
+      fullPath: '/wallets'
+      preLoaderRoute: typeof AuthenticatedWalletsIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/users/': {
@@ -656,6 +689,13 @@ declare module '@tanstack/react-router' {
       path: '/analytics'
       fullPath: '/analytics'
       preLoaderRoute: typeof AuthenticatedAnalyticsIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/wallets/$partnerId': {
+      id: '/_authenticated/wallets/$partnerId'
+      path: '/wallets/$partnerId'
+      fullPath: '/wallets/$partnerId'
+      preLoaderRoute: typeof AuthenticatedWalletsPartnerIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/users/$userId': {
@@ -791,6 +831,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedQuestsIdRoute: typeof AuthenticatedQuestsIdRoute
   AuthenticatedQuestsNewRoute: typeof AuthenticatedQuestsNewRouteWithChildren
   AuthenticatedUsersUserIdRoute: typeof AuthenticatedUsersUserIdRoute
+  AuthenticatedWalletsPartnerIdRoute: typeof AuthenticatedWalletsPartnerIdRoute
   AuthenticatedAnalyticsIndexRoute: typeof AuthenticatedAnalyticsIndexRoute
   AuthenticatedBotIndexRoute: typeof AuthenticatedBotIndexRoute
   AuthenticatedCardsIndexRoute: typeof AuthenticatedCardsIndexRoute
@@ -806,6 +847,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedSecurityIndexRoute: typeof AuthenticatedSecurityIndexRoute
   AuthenticatedTransactionsIndexRoute: typeof AuthenticatedTransactionsIndexRoute
   AuthenticatedUsersIndexRoute: typeof AuthenticatedUsersIndexRoute
+  AuthenticatedWalletsIndexRoute: typeof AuthenticatedWalletsIndexRoute
   AuthenticatedWalmecardBalanceIndexRoute: typeof AuthenticatedWalmecardBalanceIndexRoute
   AuthenticatedMarketsCategoriesIndexRoute: typeof AuthenticatedMarketsCategoriesIndexRoute
   AuthenticatedMarketsChainsIndexRoute: typeof AuthenticatedMarketsChainsIndexRoute
@@ -824,6 +866,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedQuestsIdRoute: AuthenticatedQuestsIdRoute,
   AuthenticatedQuestsNewRoute: AuthenticatedQuestsNewRouteWithChildren,
   AuthenticatedUsersUserIdRoute: AuthenticatedUsersUserIdRoute,
+  AuthenticatedWalletsPartnerIdRoute: AuthenticatedWalletsPartnerIdRoute,
   AuthenticatedAnalyticsIndexRoute: AuthenticatedAnalyticsIndexRoute,
   AuthenticatedBotIndexRoute: AuthenticatedBotIndexRoute,
   AuthenticatedCardsIndexRoute: AuthenticatedCardsIndexRoute,
@@ -839,6 +882,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedSecurityIndexRoute: AuthenticatedSecurityIndexRoute,
   AuthenticatedTransactionsIndexRoute: AuthenticatedTransactionsIndexRoute,
   AuthenticatedUsersIndexRoute: AuthenticatedUsersIndexRoute,
+  AuthenticatedWalletsIndexRoute: AuthenticatedWalletsIndexRoute,
   AuthenticatedWalmecardBalanceIndexRoute:
     AuthenticatedWalmecardBalanceIndexRoute,
   AuthenticatedMarketsCategoriesIndexRoute:
