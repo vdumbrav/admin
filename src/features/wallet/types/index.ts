@@ -3,7 +3,6 @@ export interface WalletStatistics {
   totalWallets: number;
   activeWallets: number;
   totalDepositAddresses: number;
-  totalTransactions: number;
   createdToday: number;
   createdThisWeek: number;
   createdThisMonth: number;
@@ -18,7 +17,7 @@ export interface WalletListItem {
   createdAt: string;
   user: {
     id: number;
-    username?: string;
+    nickname?: string;
     email?: string;
   };
 }
@@ -42,7 +41,7 @@ export interface WalletDetails {
   updatedAt: string;
   user: {
     id: number;
-    username?: string;
+    nickname?: string;
     email?: string;
   };
   depositAddressCount: number;

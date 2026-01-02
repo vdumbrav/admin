@@ -3,8 +3,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import {
   IconWallet,
   IconMapPin,
-  IconArrowsExchange,
   IconCalendarPlus,
+  IconCalendarWeek,
 } from '@tabler/icons-react';
 import type { WalletStatistics } from '../types';
 
@@ -49,16 +49,16 @@ export function WalletStatisticsCards({ statistics, isLoading }: WalletStatistic
       color: 'text-green-600',
     },
     {
-      title: 'Total Transactions',
-      value: statistics?.totalTransactions ?? 0,
-      description: 'All time',
-      icon: IconArrowsExchange,
+      title: 'Created This Week',
+      value: statistics?.createdThisWeek ?? 0,
+      description: `${statistics?.createdThisMonth ?? 0} this month`,
+      icon: IconCalendarWeek,
       color: 'text-purple-600',
     },
     {
       title: 'Created Today',
       value: statistics?.createdToday ?? 0,
-      description: `${statistics?.createdThisWeek ?? 0} this week`,
+      description: 'New wallets today',
       icon: IconCalendarPlus,
       color: 'text-orange-600',
     },
