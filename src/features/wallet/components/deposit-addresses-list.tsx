@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { IconCopy, IconMapPin } from '@tabler/icons-react';
+import { IconCopy, IconMapPin, IconCurrencyBitcoin, IconCurrencyEthereum, IconCoin } from '@tabler/icons-react';
 import { toast } from 'sonner';
 import type { DepositAddress } from '../types';
 
@@ -11,10 +11,45 @@ interface DepositAddressesListProps {
   isLoading?: boolean;
 }
 
-const shortenAddress = (address: string) => {
-  if (!address) return '-';
-  if (address.length <= 20) return address;
-  return `${address.slice(0, 12)}...${address.slice(-12)}`;
+// Get icon for currency/network
+const getCurrencyIcon = (currency: string) => {
+  const iconClass = 'h-5 w-5';
+  const upper = currency?.toUpperCase() || '';
+
+  if (upper === 'BTC' || upper === 'BITCOIN') {
+    return <IconCurrencyBitcoin className={`${iconClass} text-orange-500`} />;
+  }
+  if (upper === 'ETH' || upper.includes('ERC20') || upper === 'ETHEREUM') {
+    return <IconCurrencyEthereum className={`${iconClass} text-blue-500`} />;
+  }
+  if (upper === 'LTC' || upper === 'LITECOIN') {
+    return <IconCoin className={`${iconClass} text-gray-400`} />;
+  }
+  if (upper === 'TRX' || upper.includes('TRC20') || upper === 'TRON') {
+    return <IconCoin className={`${iconClass} text-red-500`} />;
+  }
+  if (upper === 'TON' || upper === 'TONCOIN') {
+    return <IconCoin className={`${iconClass} text-blue-400`} />;
+  }
+  if (upper.includes('USDT')) {
+    return <IconCoin className={`${iconClass} text-green-500`} />;
+  }
+  if (upper.includes('USDC')) {
+    return <IconCoin className={`${iconClass} text-blue-600`} />;
+  }
+  return <IconCoin className={`${iconClass} text-muted-foreground`} />;
+};
+
+// Get network name from currency
+const getNetworkName = (currency: string) => {
+  const upper = currency?.toUpperCase() || '';
+  if (upper.includes('TRC20') || upper === 'TRX') return 'Tron';
+  if (upper.includes('ERC20') || upper === 'ETH') return 'Ethereum';
+  if (upper === 'BTC') return 'Bitcoin';
+  if (upper === 'LTC') return 'Litecoin';
+  if (upper === 'TON') return 'TON';
+  if (upper.includes('BSC') || upper.includes('BEP20')) return 'BSC';
+  return '';
 };
 
 const formatDate = (dateString: string) => {
@@ -66,29 +101,43 @@ export function DepositAddressesList({ addresses, isLoading }: DepositAddressesL
           </div>
         ) : (
           <div className="space-y-3">
-            {addresses.map((addr) => (
-              <div
-                key={addr.id}
-                className="flex items-center justify-between p-3 rounded-lg bg-muted/50"
-              >
-                <div className="flex items-center gap-3">
-                  <Badge variant="outline">{addr.currency.toUpperCase()}</Badge>
-                  <div>
-                    <div className="font-mono text-sm">{shortenAddress(addr.address)}</div>
-                    <div className="text-xs text-muted-foreground">
-                      Created {formatDate(addr.createdAt)}
+            {addresses.map((addr) => {
+              const network = getNetworkName(addr.currency);
+              return (
+                <div
+                  key={addr.id}
+                  className="flex items-start justify-between p-3 rounded-lg bg-muted/50 gap-3"
+                >
+                  <div className="flex items-start gap-3 min-w-0 flex-1">
+                    <div className="flex-shrink-0 mt-0.5">
+                      {getCurrencyIcon(addr.currency)}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <Badge variant="outline">{addr.currency?.toUpperCase() || 'N/A'}</Badge>
+                        {network && (
+                          <span className="text-xs text-muted-foreground">{network}</span>
+                        )}
+                      </div>
+                      <div className="font-mono text-xs break-all select-all bg-background/50 p-2 rounded border">
+                        {addr.address}
+                      </div>
+                      <div className="text-xs text-muted-foreground mt-1">
+                        Created {formatDate(addr.createdAt)}
+                      </div>
                     </div>
                   </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="flex-shrink-0"
+                    onClick={() => copyToClipboard(addr.address)}
+                  >
+                    <IconCopy className="h-4 w-4" />
+                  </Button>
                 </div>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => copyToClipboard(addr.address)}
-                >
-                  <IconCopy className="h-4 w-4" />
-                </Button>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </CardContent>
