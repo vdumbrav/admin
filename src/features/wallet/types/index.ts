@@ -8,6 +8,78 @@ export interface WalletStatistics {
   createdThisMonth: number;
 }
 
+// Volume Item
+export interface VolumeItem {
+  currency: string;
+  amount: number;
+  usdValue?: number;
+}
+
+// Recent Transaction
+export interface RecentTransaction {
+  id: string;
+  currency: string;
+  amount: string;
+  direction: 'Income' | 'Outgo';
+  group: string;
+  status: string;
+  txHash?: string;
+  createdAt: string;
+  user: {
+    id: number;
+    nickname?: string;
+  };
+}
+
+// Extended Wallet Statistics
+export interface ExtendedWalletStatistics extends WalletStatistics {
+  // Transaction stats
+  totalTransactions: number;
+  transactionsToday: number;
+  transactionsThisWeek: number;
+  // Volume stats
+  depositVolume24h: VolumeItem[];
+  withdrawalVolume24h: VolumeItem[];
+  // Exchange stats
+  totalExchanges: number;
+  exchangesToday: number;
+  // Recent activity
+  recentTransactions: RecentTransaction[];
+}
+
+// Global Transaction Item (with user info)
+export interface GlobalTransactionItem {
+  id: string;
+  currency: string;
+  amount: string;
+  direction: 'Income' | 'Outgo';
+  group: string;
+  status: string;
+  txHash?: string;
+  createdAt: string;
+  user: {
+    id: number;
+    nickname?: string;
+    email?: string;
+  };
+}
+
+// Paginated Global Transactions
+export interface PaginatedGlobalTransactions {
+  items: GlobalTransactionItem[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+// Transaction Filter Params
+export interface TransactionFilterParams {
+  direction?: 'Income' | 'Outgo';
+  group?: string;
+  currency?: string;
+}
+
 // Wallet List Item
 export interface WalletListItem {
   id: number;

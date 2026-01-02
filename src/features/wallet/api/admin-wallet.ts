@@ -3,7 +3,10 @@ import { orvalMutator } from '@/lib/api/client/orvalMutator';
 import { useAppAuth } from '@/auth/hooks';
 import type {
   WalletStatistics,
+  ExtendedWalletStatistics,
   PaginatedWalletsResponse,
+  PaginatedGlobalTransactions,
+  TransactionFilterParams,
   WalletDetails,
   WalletBalanceResponse,
   WalletTransactionsResponse,
@@ -384,6 +387,71 @@ export const useAdminWithdraw = () => {
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'users', variables.userId, 'wallet'] });
       queryClient.invalidateQueries({ queryKey: ['admin', 'wallet'] });
+    },
+  });
+};
+
+// ==================== Extended Statistics ====================
+
+export const useExtendedWalletStatistics = () => {
+  const auth = useAppAuth();
+
+  return useQuery({
+    queryKey: ['admin', 'wallet', 'extended-statistics'],
+    queryFn: async (): Promise<ExtendedWalletStatistics> => {
+      const token = await auth.getAccessToken();
+
+      const response = await orvalMutator<{ success: boolean; data: ExtendedWalletStatistics }>({
+        url: '/admin/wallet/extended-statistics',
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      return response.data;
+    },
+  });
+};
+
+// ==================== Global Transactions ====================
+
+export const useGlobalTransactions = (
+  page: number = 1,
+  limit: number = 50,
+  filters?: TransactionFilterParams
+) => {
+  const auth = useAppAuth();
+
+  return useQuery({
+    queryKey: ['admin', 'wallet', 'transactions', page, limit, JSON.stringify(filters || {})],
+    queryFn: async (): Promise<PaginatedGlobalTransactions> => {
+      const params = new URLSearchParams({
+        page: page.toString(),
+        limit: limit.toString(),
+      });
+
+      if (filters?.direction) {
+        params.append('direction', filters.direction);
+      }
+      if (filters?.group) {
+        params.append('group', filters.group);
+      }
+      if (filters?.currency) {
+        params.append('currency', filters.currency);
+      }
+
+      const token = await auth.getAccessToken();
+
+      const response = await orvalMutator<{ success: boolean; data: PaginatedGlobalTransactions }>({
+        url: `/admin/wallet/transactions?${params.toString()}`,
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      return response.data;
     },
   });
 };
