@@ -34,31 +34,45 @@ interface TransactionsTableProps {
   isLoading?: boolean;
 }
 
+// Actual ETransactionStatuses: pending, success, failed
 const statusConfig: Record<
   string,
   { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }
 > = {
   pending: { label: 'Pending', variant: 'outline' },
-  completed: { label: 'Completed', variant: 'default' },
+  success: { label: 'Completed', variant: 'default' },
   failed: { label: 'Failed', variant: 'destructive' },
-  cancelled: { label: 'Cancelled', variant: 'secondary' },
 };
 
+// Actual ETransactionGroups enum values
 const typeLabels: Record<string, string> = {
-  deposit: 'Deposit',
-  withdrawal: 'Withdrawal',
+  premium: 'Premium',
+  referral: 'Referral',
+  on_ramp: 'Deposit',
+  off_ramp: 'Withdrawal',
+  send: 'Send',
+  receive: 'Receive',
+  withdraw: 'Withdraw',
   swap: 'Swap',
-  transfer: 'Transfer',
-  purchase: 'Purchase',
+  fee: 'Fee',
+  cards: 'Cards',
+  payment: 'Payment',
+  topup: 'Card Topup',
+  system: 'System',
   refund: 'Refund',
+  card_issue: 'Card Issue',
+  processing: 'Processing',
+  declined: 'Declined',
 };
 
+// Actual ETransactionSources enum values
 const sourceLabels: Record<string, string> = {
-  internal: 'Internal',
-  external: 'External',
-  card: 'Card',
-  crypto: 'Crypto',
-  fiat: 'Fiat',
+  system: 'System',
+  self: 'Self',
+  invoice: 'Invoice',
+  user: 'User',
+  paybis: 'Paybis',
+  blockchain: 'Blockchain',
 };
 
 // Truncate hash for display

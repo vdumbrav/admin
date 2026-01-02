@@ -89,7 +89,7 @@ export function TransactionsPage() {
               Completed
             </div>
             <div className="text-2xl font-bold text-green-600">
-              {data?.items?.filter((tx) => String(tx.status) === 'completed').length ||
+              {data?.items?.filter((tx) => String(tx.status) === 'success').length ||
                 0}
             </div>
           </CardContent>
