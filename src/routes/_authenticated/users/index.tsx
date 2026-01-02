@@ -137,8 +137,8 @@ function FacetedFilter({
 
 const roleOptions = [
   { value: 'Client', label: 'Client' },
-  { value: 'Admin', label: 'Admin' },
-  { value: 'Moderator', label: 'Moderator' },
+  { value: 'Administrator', label: 'Administrator' },
+  { value: 'Support', label: 'Support' },
 ];
 
 const emailVerifiedOptions = [
@@ -209,7 +209,7 @@ function UsersPage() {
                 placeholder="Search email, name, ref code..."
                 value={searchInput}
                 onChange={(e) => handleSearchChange(e.target.value)}
-                className="h-8 w-[250px] pl-8"
+                className="h-8 w-[300px] pl-8"
               />
             </div>
 

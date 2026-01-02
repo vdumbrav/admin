@@ -159,6 +159,7 @@ const statusOptions = [
   { value: 'completed', label: 'Completed' },
   { value: 'failed', label: 'Failed' },
   { value: 'cancelled', label: 'Cancelled' },
+  { value: 'expired', label: 'Expired' },
 ];
 
 const typeOptions = [
@@ -262,7 +263,7 @@ export function OrdersTable({ orders }: OrdersTableProps) {
               placeholder="Search orders..."
               value={globalFilter ?? ''}
               onChange={(event) => setGlobalFilter(String(event.target.value))}
-              className="h-8 w-[200px] pl-8"
+              className="h-8 w-[300px] pl-8"
             />
           </div>
 

@@ -255,7 +255,7 @@ export function CardsTable({ cards }: CardsTableProps) {
                 placeholder="Search cards..."
                 value={globalFilter ?? ''}
                 onChange={(event) => setGlobalFilter(String(event.target.value))}
-                className="h-8 w-[200px] pl-8"
+                className="h-8 w-[300px] pl-8"
               />
             </div>
 

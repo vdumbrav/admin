@@ -166,7 +166,7 @@ export function TransactionsFilters({
     selectedTypes.length > 0 ||
     selectedSources.length > 0 ||
     selectedStatuses.length > 0 ||
-    filters.walletId;
+    filters.search;
 
   const handleClearFilters = () => {
     onFiltersChange({
@@ -177,23 +177,20 @@ export function TransactionsFilters({
 
   return (
     <div className="flex flex-wrap items-center gap-2">
-      {/* Search by Wallet ID */}
+      {/* Search */}
       <div className="relative">
         <IconSearch className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
         <Input
-          placeholder="Wallet ID..."
-          type="number"
-          value={filters.walletId?.toString() || ''}
-          onChange={(e) => {
-            const value = e.target.value;
-            const numValue = parseInt(value);
+          placeholder="Search transactions..."
+          value={filters.search || ''}
+          onChange={(e) =>
             onFiltersChange({
               ...filters,
-              walletId: value && !isNaN(numValue) ? numValue : undefined,
+              search: e.target.value || undefined,
               page: 1,
-            });
-          }}
-          className="h-8 w-[130px] pl-8"
+            })
+          }
+          className="h-8 w-[300px] pl-8"
         />
       </div>
 

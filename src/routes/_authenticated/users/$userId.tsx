@@ -727,12 +727,13 @@ function UserDetailsPage() {
   const initials = displayName.substring(0, 2).toUpperCase();
 
   // Filter cards - not memoized to avoid array reference issues causing re-renders
+  const userCards = user.cards || [];
   const filteredCards = cardStatusFilter === 'all'
-    ? user.cards
-    : user.cards.filter(card => card.status === cardStatusFilter);
+    ? userCards
+    : userCards.filter(card => card.status === cardStatusFilter);
 
   // Filter transactions - not memoized to avoid array reference issues
-  let filteredTransactions = user.recentTransactions;
+  let filteredTransactions = user.recentTransactions || [];
 
   if (txTypeFilter !== 'all') {
     filteredTransactions = filteredTransactions.filter(tx => tx.type?.toLowerCase() === txTypeFilter.toLowerCase());
@@ -1336,9 +1337,9 @@ function UserDetailsPage() {
                 </div>
               </CardHeader>
               <CardContent>
-                {user.recentTransactions.length > 0 ? (
+                {(user.recentTransactions || []).length > 0 ? (
                   <div className="space-y-2">
-                    {user.recentTransactions.slice(0, 3).map((tx) => {
+                    {(user.recentTransactions || []).slice(0, 3).map((tx) => {
                       const Icon = getTransactionIcon(tx.type);
                       return (
                         <div key={tx.id} className="flex justify-between items-center p-2 rounded-lg border">

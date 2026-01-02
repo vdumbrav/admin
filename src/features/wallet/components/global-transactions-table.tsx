@@ -558,7 +558,7 @@ export function GlobalTransactionsTable({
                   search: e.target.value || undefined,
                 })
               }
-              className="h-8 w-[180px] pl-8"
+              className="h-8 w-[300px] pl-8"
             />
           </div>
           <FacetedFilter
