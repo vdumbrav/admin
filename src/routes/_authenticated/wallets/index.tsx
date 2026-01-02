@@ -5,14 +5,24 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
   IconSearch,
   IconX,
   IconRefresh,
   IconLayoutDashboard,
   IconWallet,
   IconActivity,
+  IconCoins,
+  IconCloudDownload,
 } from '@tabler/icons-react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { toast } from 'sonner';
 import { useDebouncedValue } from '@/hooks/use-debounced-value';
 import {
   useWalletStatistics,
@@ -28,12 +38,27 @@ import {
 } from '@/features/wallet/components';
 import type { WalletFilterParams, TransactionFilterParams } from '@/features/wallet/types';
 
+// Token imports
+import {
+  useTokenStatistics,
+  useTokenList,
+  useTokenNetworks,
+  useUpdateToken,
+  useBulkPlatformVisibility,
+  useBulkFeatureUpdate,
+  useSyncFromChangeNow,
+} from '@/features/tokens/api/admin-tokens';
+import { TokenStatsCards, TokensTable, TokenBulkActions } from '@/features/tokens/components';
+import type { TokenFilterParams, UpdateTokenRequest } from '@/features/tokens/types';
+
 export const Route = createFileRoute('/_authenticated/wallets/')({
   component: WalletsPage,
 });
 
 function WalletsPage() {
   const [activeTab, setActiveTab] = useState('dashboard');
+
+  // Wallet state
   const [page, setPage] = useState(1);
   const [txPage, setTxPage] = useState(1);
   const [searchInput, setSearchInput] = useState('');
@@ -41,21 +66,52 @@ function WalletsPage() {
   const limit = 20;
   const txLimit = 50;
 
-  // Debounce search input
-  const debouncedSearch = useDebouncedValue(searchInput, 300);
+  // Token state
+  const [tokenPage, setTokenPage] = useState(1);
+  const [tokenSearchInput, setTokenSearchInput] = useState('');
+  const [tokenNetwork, setTokenNetwork] = useState<string>('');
+  const [tokenPlatform, setTokenPlatform] = useState<string>('');
+  const [selectedTokenIds, setSelectedTokenIds] = useState<number[]>([]);
+  const tokenLimit = 50;
 
-  // Build filters object
+  // Debounce search inputs
+  const debouncedSearch = useDebouncedValue(searchInput, 300);
+  const debouncedTokenSearch = useDebouncedValue(tokenSearchInput, 300);
+
+  // Wallet filters
   const filters: WalletFilterParams = {};
   if (debouncedSearch) {
     filters.search = debouncedSearch;
   }
 
-  // API hooks
+  // Token filters
+  const tokenFilters: TokenFilterParams = {};
+  if (debouncedTokenSearch) {
+    tokenFilters.search = debouncedTokenSearch;
+  }
+  if (tokenNetwork) {
+    tokenFilters.network = tokenNetwork;
+  }
+  if (tokenPlatform) {
+    tokenFilters.platform = tokenPlatform as 'web' | 'mobile' | 'telegram';
+  }
+
+  // Wallet API hooks
   const { data: statistics, isLoading: statsLoading, refetch: refetchStats } = useWalletStatistics();
   const { data: extendedStats, isLoading: extendedStatsLoading, refetch: refetchExtendedStats } = useExtendedWalletStatistics();
   const { data: walletsData, isLoading: walletsLoading, refetch: refetchWallets } = useWalletList(page, limit, filters);
   const { data: transactionsData, isLoading: txLoading, refetch: refetchTransactions } = useGlobalTransactions(txPage, txLimit, txFilters);
 
+  // Token API hooks
+  const { data: tokenStats, isLoading: tokenStatsLoading, refetch: refetchTokenStats } = useTokenStatistics();
+  const { data: tokensData, isLoading: tokensLoading, refetch: refetchTokens } = useTokenList(tokenPage, tokenLimit, tokenFilters);
+  const { data: networks } = useTokenNetworks();
+  const updateTokenMutation = useUpdateToken();
+  const bulkPlatformMutation = useBulkPlatformVisibility();
+  const bulkFeatureMutation = useBulkFeatureUpdate();
+  const syncMutation = useSyncFromChangeNow();
+
+  // Wallet data
   const wallets = walletsData?.items || [];
   const total = walletsData?.total || 0;
   const totalPages = walletsData?.totalPages || 1;
@@ -64,6 +120,12 @@ function WalletsPage() {
   const txTotal = transactionsData?.total || 0;
   const txTotalPages = transactionsData?.totalPages || 1;
 
+  // Token data
+  const tokens = tokensData?.items || [];
+  const tokenTotal = tokensData?.total || 0;
+  const tokenTotalPages = tokensData?.totalPages || 1;
+
+  // Wallet handlers
   const handleSearchChange = useCallback((value: string) => {
     setSearchInput(value);
     setPage(1);
@@ -79,14 +141,104 @@ function WalletsPage() {
     refetchExtendedStats();
     refetchWallets();
     refetchTransactions();
-  }, [refetchStats, refetchExtendedStats, refetchWallets, refetchTransactions]);
+    refetchTokenStats();
+    refetchTokens();
+  }, [refetchStats, refetchExtendedStats, refetchWallets, refetchTransactions, refetchTokenStats, refetchTokens]);
 
   const handleTxFilterChange = useCallback((newFilters: TransactionFilterParams) => {
     setTxFilters(newFilters);
     setTxPage(1);
   }, []);
 
+  // Token handlers
+  const handleTokenSearchChange = useCallback((value: string) => {
+    setTokenSearchInput(value);
+    setTokenPage(1);
+  }, []);
+
+  const handleTokenReset = useCallback(() => {
+    setTokenSearchInput('');
+    setTokenNetwork('');
+    setTokenPlatform('');
+    setTokenPage(1);
+    setSelectedTokenIds([]);
+  }, []);
+
+  const handleSelectToken = useCallback((id: number, selected: boolean) => {
+    setSelectedTokenIds((prev) =>
+      selected ? [...prev, id] : prev.filter((i) => i !== id)
+    );
+  }, []);
+
+  const handleSelectAllTokens = useCallback(
+    (selected: boolean) => {
+      setSelectedTokenIds(selected ? tokens.map((t) => t.id) : []);
+    },
+    [tokens]
+  );
+
+  const handleUpdateToken = useCallback(
+    async (id: number, data: UpdateTokenRequest) => {
+      await updateTokenMutation.mutateAsync({ id, ...data });
+    },
+    [updateTokenMutation]
+  );
+
+  const handleBulkPlatformUpdate = useCallback(
+    async (platform: 'web' | 'mobile' | 'telegram', visible: boolean) => {
+      if (selectedTokenIds.length === 0) return;
+
+      try {
+        await bulkPlatformMutation.mutateAsync({
+          tokenIds: selectedTokenIds,
+          platform,
+          visible,
+        });
+        toast.success(
+          `${selectedTokenIds.length} tokens ${visible ? 'shown' : 'hidden'} on ${platform}`
+        );
+        setSelectedTokenIds([]);
+      } catch (error) {
+        toast.error('Failed to update tokens');
+      }
+    },
+    [selectedTokenIds, bulkPlatformMutation]
+  );
+
+  const handleBulkFeatureUpdate = useCallback(
+    async (feature: 'deposit' | 'withdraw' | 'exchange', enabled: boolean) => {
+      if (selectedTokenIds.length === 0) return;
+
+      try {
+        await bulkFeatureMutation.mutateAsync({
+          tokenIds: selectedTokenIds,
+          feature,
+          enabled,
+        });
+        toast.success(
+          `${feature} ${enabled ? 'enabled' : 'disabled'} for ${selectedTokenIds.length} tokens`
+        );
+        setSelectedTokenIds([]);
+      } catch (error) {
+        toast.error('Failed to update tokens');
+      }
+    },
+    [selectedTokenIds, bulkFeatureMutation]
+  );
+
+  const handleSyncTokens = useCallback(async () => {
+    try {
+      const result = await syncMutation.mutateAsync();
+      toast.success(
+        `Sync complete: ${result.data.added} added, ${result.data.updated} updated`
+      );
+    } catch (error) {
+      toast.error('Failed to sync tokens from ChangeNow');
+    }
+  }, [syncMutation]);
+
   const isFiltered = searchInput.length > 0;
+  const isTokenFiltered = tokenSearchInput.length > 0 || tokenNetwork || tokenPlatform;
 
   return (
     <div className="flex flex-col gap-6 p-6">
@@ -94,7 +246,7 @@ function WalletsPage() {
         <div>
           <h1 className="text-3xl font-bold">Custodial Wallets</h1>
           <p className="text-muted-foreground">
-            Manage ChangeNow custodial wallets, balances and transactions
+            Manage ChangeNow custodial wallets, balances, transactions and tokens
           </p>
         </div>
         <Button variant="outline" size="sm" onClick={handleRefresh}>
@@ -105,7 +257,7 @@ function WalletsPage() {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full max-w-md grid-cols-3">
+        <TabsList className="grid w-full max-w-lg grid-cols-4">
           <TabsTrigger value="dashboard" className="gap-2">
             <IconLayoutDashboard className="h-4 w-4" />
             Dashboard
@@ -117,6 +269,10 @@ function WalletsPage() {
           <TabsTrigger value="transactions" className="gap-2">
             <IconActivity className="h-4 w-4" />
             Transactions
+          </TabsTrigger>
+          <TabsTrigger value="tokens" className="gap-2">
+            <IconCoins className="h-4 w-4" />
+            Tokens
           </TabsTrigger>
         </TabsList>
 
@@ -198,6 +354,110 @@ function WalletsPage() {
               />
             </CardContent>
           </Card>
+        </TabsContent>
+
+        {/* Tokens Tab */}
+        <TabsContent value="tokens" className="mt-6">
+          <div className="space-y-6">
+            {/* Token Statistics */}
+            <TokenStatsCards statistics={tokenStats} isLoading={tokenStatsLoading} />
+
+            {/* Tokens Table */}
+            <Card>
+              <CardContent className="pt-6">
+                {/* Filters and Actions */}
+                <div className="flex flex-wrap items-center gap-2 mb-4">
+                  <div className="flex-1 min-w-[200px] relative">
+                    <IconSearch className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      placeholder="Search by symbol or name..."
+                      value={tokenSearchInput}
+                      onChange={(e) => handleTokenSearchChange(e.target.value)}
+                      className="pl-9"
+                    />
+                  </div>
+
+                  <Select value={tokenNetwork} onValueChange={setTokenNetwork}>
+                    <SelectTrigger className="w-[160px]">
+                      <SelectValue placeholder="All Networks" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">All Networks</SelectItem>
+                      {networks?.map((network) => (
+                        <SelectItem key={network} value={network}>
+                          {network}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+
+                  <Select value={tokenPlatform} onValueChange={setTokenPlatform}>
+                    <SelectTrigger className="w-[140px]">
+                      <SelectValue placeholder="All Platforms" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">All Platforms</SelectItem>
+                      <SelectItem value="web">Web</SelectItem>
+                      <SelectItem value="mobile">Mobile</SelectItem>
+                      <SelectItem value="telegram">Telegram</SelectItem>
+                    </SelectContent>
+                  </Select>
+
+                  {isTokenFiltered && (
+                    <Button
+                      variant="ghost"
+                      onClick={handleTokenReset}
+                      className="h-9 px-2"
+                    >
+                      Reset
+                      <IconX className="ml-2 h-4 w-4" />
+                    </Button>
+                  )}
+
+                  <div className="flex-1" />
+
+                  <TokenBulkActions
+                    selectedCount={selectedTokenIds.length}
+                    onBulkPlatformUpdate={handleBulkPlatformUpdate}
+                    onBulkFeatureUpdate={handleBulkFeatureUpdate}
+                    disabled={bulkPlatformMutation.isPending || bulkFeatureMutation.isPending}
+                  />
+
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleSyncTokens}
+                    disabled={syncMutation.isPending}
+                  >
+                    <IconCloudDownload className="h-4 w-4 mr-2" />
+                    {syncMutation.isPending ? 'Syncing...' : 'Sync from CN'}
+                  </Button>
+                </div>
+
+                {/* Tokens Table */}
+                {tokensLoading ? (
+                  <div className="space-y-3">
+                    {[...Array(10)].map((_, i) => (
+                      <Skeleton key={i} className="h-14 w-full" />
+                    ))}
+                  </div>
+                ) : (
+                  <TokensTable
+                    tokens={tokens}
+                    page={tokenPage}
+                    totalPages={tokenTotalPages}
+                    total={tokenTotal}
+                    selectedIds={selectedTokenIds}
+                    onPageChange={setTokenPage}
+                    onSelectToken={handleSelectToken}
+                    onSelectAll={handleSelectAllTokens}
+                    onUpdateToken={handleUpdateToken}
+                    isUpdating={updateTokenMutation.isPending}
+                  />
+                )}
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
       </Tabs>
     </div>
