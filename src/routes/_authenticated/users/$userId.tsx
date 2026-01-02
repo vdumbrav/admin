@@ -39,6 +39,8 @@ import {
   IconArrowUp,
   IconArrowDown,
   IconRefresh,
+  IconWallet,
+  IconCopy,
 } from '@tabler/icons-react';
 import {
   Select,
@@ -88,10 +90,135 @@ import { cn } from '@/lib/utils';
 import { useUserContext, useSummarizeUser, useUserProfile, useSaveUserProfile } from '@/features/bot/api/admin-bot';
 import type { UserSummary } from '@/features/bot/types';
 import { UserAnalyticsSection } from '@/features/users/components/user-analytics-section';
+import { useUserWallet, useUserWalletBalance, useUserWalletTransactions, useUserDepositAddresses } from '@/features/wallet/api/admin-wallet';
+import { BalanceDisplay } from '@/features/wallet/components/balance-display';
+import { TransactionsTable } from '@/features/wallet/components/transactions-table';
+import { DepositAddressesList } from '@/features/wallet/components/deposit-addresses-list';
 
 export const Route = createFileRoute('/_authenticated/users/$userId')({
   component: UserDetailsPage,
 });
+
+// User Wallet Section Component
+function UserWalletSection({ userId }: { userId: number }) {
+  const { data: walletData, isLoading: isWalletLoading } = useUserWallet(userId);
+  const { data: balanceData, isLoading: isBalanceLoading } = useUserWalletBalance(userId);
+  const { data: transactionsData, isLoading: isTransactionsLoading } = useUserWalletTransactions(userId);
+  const { data: addressesData, isLoading: isAddressesLoading } = useUserDepositAddresses(userId);
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    toast.success('Copied to clipboard');
+  };
+
+  if (isWalletLoading) {
+    return (
+      <div className="space-y-4">
+        <Skeleton className="h-32 w-full" />
+        <Skeleton className="h-48 w-full" />
+      </div>
+    );
+  }
+
+  const wallet = walletData?.data;
+
+  if (!wallet?.hasWallet) {
+    return (
+      <Card>
+        <CardContent className="flex flex-col items-center justify-center py-12">
+          <IconWallet className="h-12 w-12 text-muted-foreground mb-4" />
+          <p className="text-muted-foreground">User does not have a custodial wallet</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Wallet Info Card */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <IconWallet className="h-5 w-5" />
+            Custodial Wallet
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid gap-4 md:grid-cols-2">
+            <div>
+              <Label className="text-muted-foreground">Partner ID</Label>
+              <div className="flex items-center gap-2 mt-1">
+                <code className="text-sm bg-muted px-2 py-1 rounded">{wallet.partnerId}</code>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-6 w-6"
+                  onClick={() => copyToClipboard(wallet.partnerId!)}
+                >
+                  <IconCopy className="h-3 w-3" />
+                </Button>
+              </div>
+            </div>
+            <div>
+              <Label className="text-muted-foreground">Partner Name</Label>
+              <p className="mt-1">{wallet.partnerName}</p>
+            </div>
+            <div>
+              <Label className="text-muted-foreground">Status</Label>
+              <div className="mt-1">
+                <Badge variant={wallet.isActive ? 'default' : 'secondary'}>
+                  {wallet.isActive ? 'Active' : 'Inactive'}
+                </Badge>
+              </div>
+            </div>
+            <div>
+              <Label className="text-muted-foreground">Created</Label>
+              <p className="mt-1 text-sm">
+                {wallet.createdAt ? new Date(wallet.createdAt).toLocaleDateString() : '-'}
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Balance Card */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Balance</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <BalanceDisplay balances={balanceData?.data?.balances} isLoading={isBalanceLoading} />
+        </CardContent>
+      </Card>
+
+      {/* Deposit Addresses */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Deposit Addresses</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <DepositAddressesList
+            addresses={addressesData?.data?.addresses}
+            isLoading={isAddressesLoading}
+          />
+        </CardContent>
+      </Card>
+
+      {/* Transactions */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Recent Transactions</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <TransactionsTable
+            transactions={transactionsData?.data?.transactions}
+            isLoading={isTransactionsLoading}
+          />
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
 
 // Bot Interactions Section Component
 interface BotIdentity {
@@ -935,6 +1062,10 @@ function UserDetailsPage() {
               Analytics
             </TabsTrigger>
             <TabsTrigger value="bot">Bot</TabsTrigger>
+            <TabsTrigger value="wallet" className="gap-1">
+              <IconWallet className="h-4 w-4" />
+              Wallet
+            </TabsTrigger>
             <TabsTrigger value="cards">Cards</TabsTrigger>
             <TabsTrigger value="transactions">Transactions</TabsTrigger>
             <TabsTrigger value="quests">Quests</TabsTrigger>
@@ -1238,6 +1369,11 @@ function UserDetailsPage() {
         {/* Bot Tab */}
         <TabsContent value="bot" className="space-y-6">
           <BotInteractionsSection matrixId={user.matrixId} authIdentities={user.authIdentities} />
+        </TabsContent>
+
+        {/* Wallet Tab */}
+        <TabsContent value="wallet" className="space-y-6">
+          <UserWalletSection userId={userId} />
         </TabsContent>
 
         {/* Cards Tab */}
