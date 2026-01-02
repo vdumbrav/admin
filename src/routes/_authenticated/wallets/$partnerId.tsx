@@ -154,25 +154,23 @@ function WalletDetailsPage() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex justify-between">
-                <span className="text-muted-foreground">User ID</span>
+                <span className="text-muted-foreground">User</span>
                 <Link
                   to="/users/$userId"
                   params={{ userId: wallet.user.id.toString() }}
                   className="text-blue-600 hover:underline"
                 >
-                  #{wallet.user.id}
+                  {wallet.user.nickname || wallet.user.email || `User #${wallet.user.id}`}
                 </Link>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">User ID</span>
+                <span className="font-mono text-sm">{wallet.user.id}</span>
               </div>
               {wallet.user.email && (
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Email</span>
                   <span className="truncate max-w-[150px]">{wallet.user.email}</span>
-                </div>
-              )}
-              {wallet.user.nickname && (
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Nickname</span>
-                  <span>{wallet.user.nickname}</span>
                 </div>
               )}
               <div className="flex justify-between">

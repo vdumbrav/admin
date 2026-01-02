@@ -101,13 +101,11 @@ export function WalletsTable({
                       className="text-blue-600 hover:underline flex items-center gap-1"
                     >
                       <IconUser className="h-3 w-3" />
-                      <span>#{wallet.user.id}</span>
+                      <span>{wallet.user.nickname || wallet.user.email || `User #${wallet.user.id}`}</span>
                     </Link>
-                    {wallet.user.email && (
-                      <span className="text-xs text-muted-foreground truncate max-w-[150px]">
-                        {wallet.user.email}
-                      </span>
-                    )}
+                    <span className="text-xs text-muted-foreground">
+                      ID: {wallet.user.id}
+                    </span>
                   </div>
                 </TableCell>
                 <TableCell>

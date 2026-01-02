@@ -604,7 +604,7 @@ function getTransactionIcon(type: string) {
     'fee': IconReceipt,
     'reward': IconTrophy,
   };
-  return typeMap[type.toLowerCase()] || IconReceipt;
+  return typeMap[type?.toLowerCase()] || IconReceipt;
 }
 
 function UserDetailsPage() {
@@ -735,17 +735,17 @@ function UserDetailsPage() {
   let filteredTransactions = user.recentTransactions;
 
   if (txTypeFilter !== 'all') {
-    filteredTransactions = filteredTransactions.filter(tx => tx.type.toLowerCase() === txTypeFilter.toLowerCase());
+    filteredTransactions = filteredTransactions.filter(tx => tx.type?.toLowerCase() === txTypeFilter.toLowerCase());
   }
 
   if (txStatusFilter !== 'all') {
-    filteredTransactions = filteredTransactions.filter(tx => tx.status.toLowerCase() === txStatusFilter.toLowerCase());
+    filteredTransactions = filteredTransactions.filter(tx => tx.status?.toLowerCase() === txStatusFilter.toLowerCase());
   }
 
   if (txSearchQuery.trim()) {
     const query = txSearchQuery.toLowerCase();
     filteredTransactions = filteredTransactions.filter(tx =>
-      tx.type.toLowerCase().includes(query) ||
+      tx.type?.toLowerCase().includes(query) ||
       tx.merchant?.toLowerCase().includes(query) ||
       tx.category?.toLowerCase().includes(query)
     );
