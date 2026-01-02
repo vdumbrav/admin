@@ -23,28 +23,37 @@ interface TransactionsFiltersProps {
   onFiltersChange: (filters: TransactionFilters) => void;
 }
 
+// Actual transaction groups from ETransactionGroups enum
 const typeOptions = [
-  { value: 'deposit', label: 'Deposit' },
-  { value: 'withdrawal', label: 'Withdrawal' },
+  { value: 'on_ramp', label: 'Deposit' },
+  { value: 'off_ramp', label: 'Withdrawal' },
   { value: 'swap', label: 'Swap' },
-  { value: 'transfer', label: 'Transfer' },
-  { value: 'purchase', label: 'Purchase' },
+  { value: 'send', label: 'Send' },
+  { value: 'receive', label: 'Receive' },
+  { value: 'payment', label: 'Payment' },
+  { value: 'topup', label: 'Card Topup' },
+  { value: 'cards', label: 'Card Operations' },
+  { value: 'premium', label: 'Premium' },
+  { value: 'referral', label: 'Referral' },
   { value: 'refund', label: 'Refund' },
+  { value: 'fee', label: 'Fee' },
 ];
 
+// Actual transaction sources from ETransactionSources enum
 const sourceOptions = [
-  { value: 'internal', label: 'Internal' },
-  { value: 'external', label: 'External' },
-  { value: 'card', label: 'Card' },
-  { value: 'crypto', label: 'Crypto' },
-  { value: 'fiat', label: 'Fiat' },
+  { value: 'system', label: 'System' },
+  { value: 'self', label: 'Self' },
+  { value: 'user', label: 'User' },
+  { value: 'invoice', label: 'Invoice' },
+  { value: 'paybis', label: 'Paybis' },
+  { value: 'blockchain', label: 'Blockchain' },
 ];
 
+// Actual transaction statuses from ETransactionStatuses enum: pending, success, failed
 const statusOptions = [
   { value: 'pending', label: 'Pending' },
-  { value: 'completed', label: 'Completed' },
+  { value: 'success', label: 'Completed' },
   { value: 'failed', label: 'Failed' },
-  { value: 'cancelled', label: 'Cancelled' },
 ];
 
 // Faceted Filter Component
