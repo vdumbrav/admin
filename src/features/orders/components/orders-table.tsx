@@ -154,12 +154,13 @@ function FacetedFilter({
 const statusOptions = [
   { value: 'draft', label: 'Draft' },
   { value: 'pending', label: 'Pending' },
-  { value: 'confirmed', label: 'Confirmed' },
   { value: 'processing', label: 'Processing' },
+  { value: 'partially_paid', label: 'Partially Paid' },
+  { value: 'confirmed', label: 'Confirmed' },
   { value: 'completed', label: 'Completed' },
   { value: 'failed', label: 'Failed' },
-  { value: 'cancelled', label: 'Cancelled' },
   { value: 'expired', label: 'Expired' },
+  { value: 'cancelled', label: 'Cancelled' },
 ];
 
 const typeOptions = [

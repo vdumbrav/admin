@@ -33,40 +33,50 @@ const orderTypeConfig = {
   },
 };
 
-const statusConfig = {
+const statusConfig: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline'; color: string }> = {
   draft: {
     label: 'Draft',
-    variant: 'secondary' as const,
+    variant: 'secondary',
     color: 'text-gray-500',
   },
   pending: {
     label: 'Pending',
-    variant: 'secondary' as const,
+    variant: 'secondary',
     color: 'text-gray-600',
-  },
-  confirmed: {
-    label: 'Confirmed',
-    variant: 'default' as const,
-    color: 'text-blue-500',
   },
   processing: {
     label: 'Processing',
-    variant: 'default' as const,
+    variant: 'default',
     color: 'text-blue-600',
+  },
+  partially_paid: {
+    label: 'Partially Paid',
+    variant: 'secondary',
+    color: 'text-yellow-600',
+  },
+  confirmed: {
+    label: 'Confirmed',
+    variant: 'default',
+    color: 'text-blue-500',
   },
   completed: {
     label: 'Completed',
-    variant: 'default' as const,
+    variant: 'default',
     color: 'text-green-600',
   },
   failed: {
     label: 'Failed',
-    variant: 'destructive' as const,
+    variant: 'destructive',
     color: 'text-red-600',
+  },
+  expired: {
+    label: 'Expired',
+    variant: 'outline',
+    color: 'text-gray-500',
   },
   cancelled: {
     label: 'Cancelled',
-    variant: 'outline' as const,
+    variant: 'outline',
     color: 'text-orange-600',
   },
 };

@@ -1,44 +1,83 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useAdminStatisticsControllerGetRecentOrders } from '@/lib/api/generated/admin-statistics/admin-statistics';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { orvalMutator } from '@/lib/api/client/orvalMutator';
 import { useAppAuth } from '@/auth/hooks';
 import { toast } from 'sonner';
 import type { CardOrder } from '../types';
 
+interface OrdersFilterParams {
+  page?: number;
+  limit?: number;
+  status?: string[];
+  type?: string[];
+  search?: string;
+}
+
+interface OrdersResponse {
+  orders: any[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
 /**
- * Hook to get orders for admin management
- * Currently uses the recent-orders endpoint which returns the latest 10 orders
- * TODO: Replace with dedicated admin orders endpoint with pagination when available
+ * Hook to get all orders with pagination and filters
  */
-export const useAdminOrders = () => {
-  const { data, isLoading, error } = useAdminStatisticsControllerGetRecentOrders();
+export const useAdminOrders = (filters: OrdersFilterParams = {}) => {
+  const { getAccessToken } = useAppAuth();
+  const { page = 1, limit = 50, status, type, search } = filters;
+
+  const { data, isLoading, error, refetch } = useQuery({
+    queryKey: ['admin', 'orders', 'all', { page, limit, status, type, search }],
+    queryFn: async () => {
+      const token = await getAccessToken();
+      const params = new URLSearchParams();
+      params.set('page', String(page));
+      params.set('limit', String(limit));
+      if (status && status.length > 0) {
+        params.set('status', status.join(','));
+      }
+      if (type && type.length > 0) {
+        params.set('type', type.join(','));
+      }
+      if (search) {
+        params.set('search', search);
+      }
+
+      const response = await orvalMutator<OrdersResponse>({
+        url: `/admin/statistics/all-orders?${params.toString()}`,
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      return response;
+    },
+    staleTime: 30000,
+  });
 
   // Transform the API response to match CardOrder type
-  const orders: CardOrder[] = Array.isArray(data)
-    ? (data as any[]).map((order) => {
+  const orders: CardOrder[] = data?.orders
+    ? data.orders.map((order) => {
         // Map backend payment_type to frontend orderType
         const orderType = order.paymentType === 'purchase'
           ? 'card_creation'
           : 'card_topup';
 
-        // Map backend status to frontend status
-        let status = order.status;
-        if (status === 'confirmed') status = 'processing';
-
         return {
           id: order.id,
           userId: order.user?.id,
           orderType,
-          status,
-          amount: parseFloat(order.amount || 0),
+          status: order.status,
+          amount: order.amount,
           currency: order.currency || 'USD',
           cardId: order.cardIds?.[0] || undefined,
-          cardNumber: undefined, // Not included in API response
+          cardNumber: undefined,
           createdAt: order.createdAt,
           updatedAt: order.createdAt,
           reference: order.reference,
           userEmail: order.user?.email || 'No email',
-          userName: order.user?.name || order.user?.nickname || order.user?.email || 'Anonymous',
+          userName: order.user?.name || 'Anonymous',
         };
       })
     : [];
@@ -47,7 +86,10 @@ export const useAdminOrders = () => {
     data: orders,
     isLoading,
     error,
-    total: orders.length,
+    refetch,
+    total: data?.total || 0,
+    page: data?.page || 1,
+    totalPages: data?.totalPages || 1,
   };
 };
 
@@ -75,7 +117,7 @@ export const useCancelOrder = () => {
       return response;
     },
     onSuccess: (data) => {
-      void queryClient.invalidateQueries({ queryKey: ['admin', 'statistics', 'recent-orders'] });
+      void queryClient.invalidateQueries({ queryKey: ['admin', 'orders'] });
       toast.success(data.message || 'Order cancelled successfully');
     },
     onError: (error: any) => {
