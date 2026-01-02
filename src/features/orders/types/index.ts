@@ -1,4 +1,5 @@
-export type OrderType = 'card_creation' | 'card_topup';
+// EPaymentType enum values from backend
+export type OrderType = 'card_purchase' | 'card_topup';
 export type OrderStatus =
   | 'draft'
   | 'pending'
