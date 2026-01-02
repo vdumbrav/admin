@@ -79,8 +79,12 @@ export interface PaginatedGlobalTransactions {
 // Transaction Filter Params
 export interface TransactionFilterParams {
   direction?: 'Income' | 'Outgo';
-  group?: string;
-  currency?: string;
+  group?: string;           // Single group (legacy)
+  groups?: string[];        // Multi-select groups
+  currency?: string;        // Single currency (legacy)
+  currencies?: string[];    // Multi-select currencies
+  status?: string;          // Single status (legacy)
+  statuses?: string[];      // Multi-select statuses
 }
 
 // Wallet List Item

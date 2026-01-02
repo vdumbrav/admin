@@ -434,11 +434,23 @@ export const useGlobalTransactions = (
       if (filters?.direction) {
         params.append('direction', filters.direction);
       }
-      if (filters?.group) {
+      // Support multi-select groups (comma-separated)
+      if (filters?.groups && filters.groups.length > 0) {
+        params.append('group', filters.groups.join(','));
+      } else if (filters?.group) {
         params.append('group', filters.group);
       }
-      if (filters?.currency) {
+      // Support multi-select currencies (comma-separated)
+      if (filters?.currencies && filters.currencies.length > 0) {
+        params.append('currency', filters.currencies.join(','));
+      } else if (filters?.currency) {
         params.append('currency', filters.currency);
+      }
+      // Support multi-select statuses (comma-separated)
+      if (filters?.statuses && filters.statuses.length > 0) {
+        params.append('status', filters.statuses.join(','));
+      } else if (filters?.status) {
+        params.append('status', filters.status);
       }
 
       const token = await auth.getAccessToken();
