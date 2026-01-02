@@ -18,7 +18,8 @@ interface TransactionsTableProps {
   isLoading?: boolean;
 }
 
-const getStatusBadgeVariant = (status: string): 'default' | 'secondary' | 'destructive' | 'outline' => {
+const getStatusBadgeVariant = (status?: string): 'default' | 'secondary' | 'destructive' | 'outline' => {
+  if (!status) return 'outline';
   const lowerStatus = status.toLowerCase();
   if (lowerStatus === 'completed' || lowerStatus === 'success' || lowerStatus === 'confirmed') {
     return 'default';
@@ -129,12 +130,12 @@ export function TransactionsTable({ transactions, isLoading }: TransactionsTable
             <TableCell className="font-mono">
               <span className={tx.direction === 'Income' ? 'text-green-600' : 'text-red-600'}>
                 {tx.direction === 'Income' ? '+' : '-'}
-                {formatAmount(tx.amount)} {tx.currency.toUpperCase()}
+                {formatAmount(tx.amount)} {tx.currency?.toUpperCase() || 'N/A'}
               </span>
             </TableCell>
             <TableCell>
               <Badge variant={getStatusBadgeVariant(tx.status)}>
-                {tx.status}
+                {tx.status || 'Unknown'}
               </Badge>
             </TableCell>
             <TableCell>
