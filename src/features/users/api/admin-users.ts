@@ -133,6 +133,7 @@ export interface UsersFilterParams {
   emailVerified?: boolean;
   premiumActive?: boolean;
   hasCards?: boolean;
+  providers?: string[];
 }
 
 export const useAdminUsers = (
@@ -171,6 +172,10 @@ export const useAdminUsers = (
 
       if (filters?.hasCards !== undefined) {
         params.append('hasCards', filters.hasCards.toString());
+      }
+
+      if (filters?.providers && filters.providers.length > 0) {
+        filters.providers.forEach(provider => params.append('providers', provider));
       }
 
       const token = await auth.getAccessToken();

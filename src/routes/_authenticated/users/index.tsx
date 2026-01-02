@@ -146,11 +146,32 @@ const emailVerifiedOptions = [
   { value: 'not-verified', label: 'Not Verified' },
 ];
 
+const premiumOptions = [
+  { value: 'active', label: 'Premium Active' },
+  { value: 'inactive', label: 'No Premium' },
+];
+
+// Auth providers from EUserAuthIdentityProviders enum
+const providerOptions = [
+  { value: 'telegram', label: 'Telegram' },
+  { value: 'google-oauth2', label: 'Google' },
+  { value: 'apple', label: 'Apple' },
+  { value: 'discord', label: 'Discord' },
+  { value: 'twitter', label: 'Twitter' },
+  { value: 'matrix', label: 'Matrix' },
+  { value: 'email', label: 'Email' },
+  { value: 'keycloak', label: 'Keycloak' },
+  { value: 'solana', label: 'Solana Wallet' },
+  { value: 'evm', label: 'EVM Wallet' },
+];
+
 function UsersPage() {
   const [page, setPage] = useState(1);
   const [searchInput, setSearchInput] = useState('');
   const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
   const [selectedEmailStatus, setSelectedEmailStatus] = useState<string[]>([]);
+  const [selectedPremium, setSelectedPremium] = useState<string[]>([]);
+  const [selectedProviders, setSelectedProviders] = useState<string[]>([]);
   const limit = 20;
 
   // Debounce search input to avoid too many API calls
@@ -169,6 +190,14 @@ function UsersPage() {
   } else if (selectedEmailStatus.includes('not-verified')) {
     filters.emailVerified = false;
   }
+  if (selectedPremium.includes('active')) {
+    filters.premiumActive = true;
+  } else if (selectedPremium.includes('inactive')) {
+    filters.premiumActive = false;
+  }
+  if (selectedProviders.length > 0) {
+    filters.providers = selectedProviders;
+  }
 
   const { data, isLoading, error } = useAdminUsers(page, limit, filters);
 
@@ -185,10 +214,12 @@ function UsersPage() {
     setSearchInput('');
     setSelectedRoles([]);
     setSelectedEmailStatus([]);
+    setSelectedPremium([]);
+    setSelectedProviders([]);
     setPage(1);
   }, []);
 
-  const isFiltered = searchInput || selectedRoles.length > 0 || selectedEmailStatus.length > 0;
+  const isFiltered = searchInput || selectedRoles.length > 0 || selectedEmailStatus.length > 0 || selectedPremium.length > 0 || selectedProviders.length > 0;
 
   return (
     <div className="flex flex-col gap-6 p-6">
@@ -232,6 +263,27 @@ function UsersPage() {
                 setPage(1);
               }}
               multiple={false}
+            />
+
+            <FacetedFilter
+              title="Premium"
+              options={premiumOptions}
+              selectedValues={selectedPremium}
+              onSelect={(values) => {
+                setSelectedPremium(values);
+                setPage(1);
+              }}
+              multiple={false}
+            />
+
+            <FacetedFilter
+              title="Connected"
+              options={providerOptions}
+              selectedValues={selectedProviders}
+              onSelect={(values) => {
+                setSelectedProviders(values);
+                setPage(1);
+              }}
             />
 
             {isFiltered && (
