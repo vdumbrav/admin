@@ -120,7 +120,7 @@ function UserWalletSection({ userId }: { userId: number }) {
     );
   }
 
-  const wallet = walletData?.data;
+  const wallet = walletData;
 
   if (!wallet?.hasWallet) {
     return (
@@ -187,7 +187,7 @@ function UserWalletSection({ userId }: { userId: number }) {
           <CardTitle>Balance</CardTitle>
         </CardHeader>
         <CardContent>
-          <BalanceDisplay balances={balanceData?.data?.balances} isLoading={isBalanceLoading} />
+          <BalanceDisplay balances={balanceData?.balances} isLoading={isBalanceLoading} />
         </CardContent>
       </Card>
 
@@ -198,7 +198,7 @@ function UserWalletSection({ userId }: { userId: number }) {
         </CardHeader>
         <CardContent>
           <DepositAddressesList
-            addresses={addressesData?.data?.addresses}
+            addresses={addressesData?.addresses}
             isLoading={isAddressesLoading}
           />
         </CardContent>
@@ -211,7 +211,7 @@ function UserWalletSection({ userId }: { userId: number }) {
         </CardHeader>
         <CardContent>
           <TransactionsTable
-            transactions={transactionsData?.data?.transactions}
+            transactions={transactionsData?.transactions}
             isLoading={isTransactionsLoading}
           />
         </CardContent>
@@ -1373,7 +1373,7 @@ function UserDetailsPage() {
 
         {/* Wallet Tab */}
         <TabsContent value="wallet" className="space-y-6">
-          <UserWalletSection userId={userId} />
+          <UserWalletSection userId={parseInt(userId, 10)} />
         </TabsContent>
 
         {/* Cards Tab */}

@@ -169,10 +169,10 @@ function WalletDetailsPage() {
                   <span className="truncate max-w-[150px]">{wallet.user.email}</span>
                 </div>
               )}
-              {wallet.user.username && (
+              {wallet.user.nickname && (
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Username</span>
-                  <span>{wallet.user.username}</span>
+                  <span className="text-muted-foreground">Nickname</span>
+                  <span>{wallet.user.nickname}</span>
                 </div>
               )}
               <div className="flex justify-between">
