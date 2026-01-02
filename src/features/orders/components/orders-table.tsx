@@ -12,6 +12,19 @@ import {
 } from '@tanstack/react-table';
 import { loadJSON, saveJSON } from '@/utils/persist';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+  CommandSeparator,
+} from '@/components/ui/command';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import {
   Table,
   TableBody,
@@ -20,20 +33,138 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { DataTablePagination } from '@/components/table/data-table-pagination';
 import { DataTableViewOptions } from '@/components/table/data-table-view-options';
+import { IconSearch } from '@tabler/icons-react';
+import { CheckIcon, PlusCircledIcon, Cross2Icon } from '@radix-ui/react-icons';
+import { cn } from '@/lib/utils';
 import type { CardOrder } from '../types';
 import { createColumns } from './columns';
 import { useCancelOrder } from '../api/admin-orders';
 
 const LS_ORDERS_TABLE_VIS = 'orders-table-visibility';
+
+// Faceted Filter Component
+interface FacetedFilterProps {
+  title: string;
+  options: { value: string; label: string }[];
+  selectedValues: string[];
+  onSelect: (values: string[]) => void;
+  multiple?: boolean;
+}
+
+function FacetedFilter({
+  title,
+  options,
+  selectedValues,
+  onSelect,
+  multiple = true,
+}: FacetedFilterProps) {
+  const selected = new Set(selectedValues);
+
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        <Button variant="outline" size="sm" className="h-8 border-dashed">
+          <PlusCircledIcon className="mr-2 h-4 w-4" />
+          {title}
+          {selected.size > 0 && (
+            <>
+              <Separator orientation="vertical" className="mx-2 h-4" />
+              <Badge variant="secondary" className="rounded-sm px-1 font-normal lg:hidden">
+                {selected.size}
+              </Badge>
+              <div className="hidden space-x-1 lg:flex">
+                {selected.size > 2 ? (
+                  <Badge variant="secondary" className="rounded-sm px-1 font-normal">
+                    {selected.size} selected
+                  </Badge>
+                ) : (
+                  options
+                    .filter((option) => selected.has(option.value))
+                    .map((option) => (
+                      <Badge
+                        variant="secondary"
+                        key={option.value}
+                        className="rounded-sm px-1 font-normal"
+                      >
+                        {option.label}
+                      </Badge>
+                    ))
+                )}
+              </div>
+            </>
+          )}
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-[200px] p-0" align="start">
+        <Command>
+          <CommandInput placeholder={title} />
+          <CommandList>
+            <CommandEmpty>No results found.</CommandEmpty>
+            <CommandGroup>
+              {options.map((option) => {
+                const isSelected = selected.has(option.value);
+                return (
+                  <CommandItem
+                    key={option.value}
+                    onSelect={() => {
+                      if (multiple) {
+                        const newSet = new Set(selected);
+                        if (isSelected) newSet.delete(option.value);
+                        else newSet.add(option.value);
+                        onSelect(Array.from(newSet));
+                      } else {
+                        onSelect(isSelected ? [] : [option.value]);
+                      }
+                    }}
+                  >
+                    <div
+                      className={cn(
+                        'border-primary mr-2 flex h-4 w-4 items-center justify-center rounded-sm border',
+                        isSelected
+                          ? 'bg-primary text-primary-foreground'
+                          : 'opacity-50 [&_svg]:invisible'
+                      )}
+                    >
+                      <CheckIcon className="h-4 w-4" />
+                    </div>
+                    <span>{option.label}</span>
+                  </CommandItem>
+                );
+              })}
+            </CommandGroup>
+            {selected.size > 0 && (
+              <>
+                <CommandSeparator />
+                <CommandGroup>
+                  <CommandItem onSelect={() => onSelect([])} className="justify-center text-center">
+                    Clear filters
+                  </CommandItem>
+                </CommandGroup>
+              </>
+            )}
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
+  );
+}
+
+const statusOptions = [
+  { value: 'draft', label: 'Draft' },
+  { value: 'pending', label: 'Pending' },
+  { value: 'confirmed', label: 'Confirmed' },
+  { value: 'processing', label: 'Processing' },
+  { value: 'completed', label: 'Completed' },
+  { value: 'failed', label: 'Failed' },
+  { value: 'cancelled', label: 'Cancelled' },
+];
+
+const typeOptions = [
+  { value: 'card_creation', label: 'Card Creation' },
+  { value: 'card_topup', label: 'Card Topup' },
+];
 
 interface OrdersTableProps {
   orders: CardOrder[];
@@ -48,27 +179,38 @@ export function OrdersTable({ orders }: OrdersTableProps) {
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(() =>
     loadJSON(LS_ORDERS_TABLE_VIS, {})
   );
+  const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
+  const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
 
   useEffect(() => {
     saveJSON(LS_ORDERS_TABLE_VIS, columnVisibility);
   }, [columnVisibility]);
 
+  // Apply filters to column filters
+  useEffect(() => {
+    const newFilters: ColumnFiltersState = [];
+    if (selectedStatuses.length > 0) {
+      newFilters.push({ id: 'status', value: selectedStatuses });
+    }
+    if (selectedTypes.length > 0) {
+      newFilters.push({ id: 'orderType', value: selectedTypes });
+    }
+    setColumnFilters(newFilters);
+  }, [selectedStatuses, selectedTypes]);
+
   const cancelOrderMutation = useCancelOrder();
 
   const handleRetry = (order: CardOrder) => {
     console.log('Retry order:', order.id);
-    // TODO: Implement retry API call
   };
 
   const handleCancel = async (order: CardOrder) => {
     if (!window.confirm(`Are you sure you want to cancel order #${order.id}?`)) {
       return;
     }
-
     try {
       await cancelOrderMutation.mutateAsync(order.id);
     } catch (error) {
-      // Error already handled by mutation's onError
       console.error('Failed to cancel order:', error);
     }
   };
@@ -102,72 +244,52 @@ export function OrdersTable({ orders }: OrdersTableProps) {
     },
   });
 
-  const statusFilter = (columnFilters.find((f) => f.id === 'status')
-    ?.value as string[]) || [
-    'draft',
-    'pending',
-    'confirmed',
-    'processing',
-    'completed',
-    'failed',
-    'cancelled',
-  ];
+  const hasFilters = globalFilter || selectedStatuses.length > 0 || selectedTypes.length > 0;
 
-  const orderTypeFilter = (columnFilters.find((f) => f.id === 'orderType')
-    ?.value as string[]) || ['card_creation', 'card_topup'];
+  const handleReset = () => {
+    setGlobalFilter('');
+    setSelectedStatuses([]);
+    setSelectedTypes([]);
+  };
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between gap-2">
-        <div className="flex items-center gap-2">
-          <Input
-            placeholder="Search orders by ID, user ID, card..."
-            value={globalFilter ?? ''}
-            onChange={(event) => setGlobalFilter(String(event.target.value))}
-            className="max-w-sm"
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="relative">
+            <IconSearch className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search orders..."
+              value={globalFilter ?? ''}
+              onChange={(event) => setGlobalFilter(String(event.target.value))}
+              className="h-8 w-[200px] pl-8"
+            />
+          </div>
+
+          <FacetedFilter
+            title="Status"
+            options={statusOptions}
+            selectedValues={selectedStatuses}
+            onSelect={setSelectedStatuses}
           />
 
-          <Select
-            value={statusFilter.join(',')}
-            onValueChange={(value) => {
-              const values = value.split(',');
-              table.getColumn('status')?.setFilterValue(values);
-            }}
-          >
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Filter by status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="draft,pending,confirmed,processing,completed,failed,cancelled">
-                All Statuses
-              </SelectItem>
-              <SelectItem value="draft">Draft Only</SelectItem>
-              <SelectItem value="pending">Pending Only</SelectItem>
-              <SelectItem value="confirmed">Confirmed Only</SelectItem>
-              <SelectItem value="processing">Processing Only</SelectItem>
-              <SelectItem value="completed">Completed Only</SelectItem>
-              <SelectItem value="failed">Failed Only</SelectItem>
-              <SelectItem value="cancelled">Cancelled Only</SelectItem>
-              <SelectItem value="draft,pending,confirmed,processing">Active Orders</SelectItem>
-            </SelectContent>
-          </Select>
+          <FacetedFilter
+            title="Type"
+            options={typeOptions}
+            selectedValues={selectedTypes}
+            onSelect={setSelectedTypes}
+          />
 
-          <Select
-            value={orderTypeFilter.join(',')}
-            onValueChange={(value) => {
-              const values = value.split(',');
-              table.getColumn('orderType')?.setFilterValue(values);
-            }}
-          >
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Filter by type" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="card_creation,card_topup">All Types</SelectItem>
-              <SelectItem value="card_creation">Card Creation</SelectItem>
-              <SelectItem value="card_topup">Card Topup</SelectItem>
-            </SelectContent>
-          </Select>
+          {hasFilters && (
+            <Button
+              variant="ghost"
+              onClick={handleReset}
+              className="h-8 px-2 text-sm leading-5 font-medium lg:px-3"
+            >
+              Reset
+              <Cross2Icon className="ml-2 h-4 w-4" />
+            </Button>
+          )}
         </div>
         <DataTableViewOptions table={table} />
       </div>

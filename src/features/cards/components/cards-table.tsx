@@ -12,6 +12,19 @@ import {
 } from '@tanstack/react-table';
 import { loadJSON, saveJSON } from '@/utils/persist';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+  CommandSeparator,
+} from '@/components/ui/command';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import {
   Table,
   TableBody,
@@ -20,20 +33,129 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { DataTablePagination } from '@/components/table/data-table-pagination';
 import { DataTableViewOptions } from '@/components/table/data-table-view-options';
+import { IconSearch } from '@tabler/icons-react';
+import { CheckIcon, PlusCircledIcon, Cross2Icon } from '@radix-ui/react-icons';
+import { cn } from '@/lib/utils';
 import type { Card, TopupFormData } from '../types';
 import { createColumns } from './columns';
 import { TopupDialog } from './topup-dialog';
 
 const LS_CARDS_TABLE_VIS = 'cards-table-visibility';
+
+// Faceted Filter Component
+interface FacetedFilterProps {
+  title: string;
+  options: { value: string; label: string }[];
+  selectedValues: string[];
+  onSelect: (values: string[]) => void;
+  multiple?: boolean;
+}
+
+function FacetedFilter({
+  title,
+  options,
+  selectedValues,
+  onSelect,
+  multiple = true,
+}: FacetedFilterProps) {
+  const selected = new Set(selectedValues);
+
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        <Button variant="outline" size="sm" className="h-8 border-dashed">
+          <PlusCircledIcon className="mr-2 h-4 w-4" />
+          {title}
+          {selected.size > 0 && (
+            <>
+              <Separator orientation="vertical" className="mx-2 h-4" />
+              <Badge variant="secondary" className="rounded-sm px-1 font-normal lg:hidden">
+                {selected.size}
+              </Badge>
+              <div className="hidden space-x-1 lg:flex">
+                {selected.size > 2 ? (
+                  <Badge variant="secondary" className="rounded-sm px-1 font-normal">
+                    {selected.size} selected
+                  </Badge>
+                ) : (
+                  options
+                    .filter((option) => selected.has(option.value))
+                    .map((option) => (
+                      <Badge
+                        variant="secondary"
+                        key={option.value}
+                        className="rounded-sm px-1 font-normal"
+                      >
+                        {option.label}
+                      </Badge>
+                    ))
+                )}
+              </div>
+            </>
+          )}
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-[200px] p-0" align="start">
+        <Command>
+          <CommandInput placeholder={title} />
+          <CommandList>
+            <CommandEmpty>No results found.</CommandEmpty>
+            <CommandGroup>
+              {options.map((option) => {
+                const isSelected = selected.has(option.value);
+                return (
+                  <CommandItem
+                    key={option.value}
+                    onSelect={() => {
+                      if (multiple) {
+                        const newSet = new Set(selected);
+                        if (isSelected) newSet.delete(option.value);
+                        else newSet.add(option.value);
+                        onSelect(Array.from(newSet));
+                      } else {
+                        onSelect(isSelected ? [] : [option.value]);
+                      }
+                    }}
+                  >
+                    <div
+                      className={cn(
+                        'border-primary mr-2 flex h-4 w-4 items-center justify-center rounded-sm border',
+                        isSelected
+                          ? 'bg-primary text-primary-foreground'
+                          : 'opacity-50 [&_svg]:invisible'
+                      )}
+                    >
+                      <CheckIcon className="h-4 w-4" />
+                    </div>
+                    <span>{option.label}</span>
+                  </CommandItem>
+                );
+              })}
+            </CommandGroup>
+            {selected.size > 0 && (
+              <>
+                <CommandSeparator />
+                <CommandGroup>
+                  <CommandItem onSelect={() => onSelect([])} className="justify-center text-center">
+                    Clear filters
+                  </CommandItem>
+                </CommandGroup>
+              </>
+            )}
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
+  );
+}
+
+const statusOptions = [
+  { value: 'active', label: 'Active' },
+  { value: 'frozen', label: 'Frozen' },
+  { value: 'blocked', label: 'Blocked' },
+];
 
 interface CardsTableProps {
   cards: Card[];
@@ -46,12 +168,22 @@ export function CardsTable({ cards }: CardsTableProps) {
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(() =>
     loadJSON(LS_CARDS_TABLE_VIS, {})
   );
+  const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
   const [selectedCard, setSelectedCard] = useState<Card | null>(null);
   const [topupDialogOpen, setTopupDialogOpen] = useState(false);
 
   useEffect(() => {
     saveJSON(LS_CARDS_TABLE_VIS, columnVisibility);
   }, [columnVisibility]);
+
+  // Apply filters to column filters
+  useEffect(() => {
+    const newFilters: ColumnFiltersState = [];
+    if (selectedStatuses.length > 0) {
+      newFilters.push({ id: 'status', value: selectedStatuses });
+    }
+    setColumnFilters(newFilters);
+  }, [selectedStatuses]);
 
   const handleTopup = (card: Card) => {
     setSelectedCard(card);
@@ -60,22 +192,18 @@ export function CardsTable({ cards }: CardsTableProps) {
 
   const handleFreeze = (card: Card) => {
     console.log('Freeze card:', card.id);
-    // TODO: Implement freeze API call
   };
 
   const handleUnfreeze = (card: Card) => {
     console.log('Unfreeze card:', card.id);
-    // TODO: Implement unfreeze API call
   };
 
   const handleBlock = (card: Card) => {
     console.log('Block card:', card.id);
-    // TODO: Implement block API call
   };
 
   const handleTopupSubmit = async (data: TopupFormData) => {
     console.log('Topup data:', data);
-    // TODO: Implement topup API call
   };
 
   const columns = createColumns({
@@ -109,39 +237,45 @@ export function CardsTable({ cards }: CardsTableProps) {
     },
   });
 
-  const statusFilter = (columnFilters.find((f) => f.id === 'status')
-    ?.value as string[]) || ['active', 'frozen', 'blocked'];
+  const hasFilters = globalFilter || selectedStatuses.length > 0;
+
+  const handleReset = () => {
+    setGlobalFilter('');
+    setSelectedStatuses([]);
+  };
 
   return (
     <>
       <div className="space-y-4">
-        <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-2">
-            <Input
-              placeholder="Search cards by number, cardholder..."
-              value={globalFilter ?? ''}
-              onChange={(event) => setGlobalFilter(String(event.target.value))}
-              className="max-w-sm"
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="relative">
+              <IconSearch className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search cards..."
+                value={globalFilter ?? ''}
+                onChange={(event) => setGlobalFilter(String(event.target.value))}
+                className="h-8 w-[200px] pl-8"
+              />
+            </div>
+
+            <FacetedFilter
+              title="Status"
+              options={statusOptions}
+              selectedValues={selectedStatuses}
+              onSelect={setSelectedStatuses}
             />
 
-            <Select
-              value={statusFilter.join(',')}
-              onValueChange={(value) => {
-                const values = value.split(',');
-                table.getColumn('status')?.setFilterValue(values);
-              }}
-            >
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Filter by status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="active,frozen,blocked">All Statuses</SelectItem>
-                <SelectItem value="active">Active Only</SelectItem>
-                <SelectItem value="frozen">Frozen Only</SelectItem>
-                <SelectItem value="blocked">Blocked Only</SelectItem>
-                <SelectItem value="active,frozen">Active & Frozen</SelectItem>
-              </SelectContent>
-            </Select>
+            {hasFilters && (
+              <Button
+                variant="ghost"
+                onClick={handleReset}
+                className="h-8 px-2 text-sm leading-5 font-medium lg:px-3"
+              >
+                Reset
+                <Cross2Icon className="ml-2 h-4 w-4" />
+              </Button>
+            )}
           </div>
           <DataTableViewOptions table={table} />
         </div>

@@ -3,14 +3,22 @@ import { createFileRoute } from '@tanstack/react-router';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { IconSearch, IconX } from '@tabler/icons-react';
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+  CommandSeparator,
+} from '@/components/ui/command';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { IconSearch } from '@tabler/icons-react';
+import { CheckIcon, PlusCircledIcon } from '@radix-ui/react-icons';
+import { Cross2Icon } from '@radix-ui/react-icons';
+import { cn } from '@/lib/utils';
 import { useAdminUsers, type UsersFilterParams } from '@/features/users/api/admin-users';
 import { Skeleton } from '@/components/ui/skeleton';
 import { UsersTableServer } from '@/features/users/components/users-table-server';
@@ -20,11 +28,129 @@ export const Route = createFileRoute('/_authenticated/users/')({
   component: UsersPage,
 });
 
+// Faceted Filter Component
+interface FacetedFilterProps {
+  title: string;
+  options: { value: string; label: string }[];
+  selectedValues: string[];
+  onSelect: (values: string[]) => void;
+  multiple?: boolean;
+}
+
+function FacetedFilter({
+  title,
+  options,
+  selectedValues,
+  onSelect,
+  multiple = true,
+}: FacetedFilterProps) {
+  const selected = new Set(selectedValues);
+
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        <Button variant="outline" size="sm" className="h-8 border-dashed">
+          <PlusCircledIcon className="mr-2 h-4 w-4" />
+          {title}
+          {selected.size > 0 && (
+            <>
+              <Separator orientation="vertical" className="mx-2 h-4" />
+              <Badge variant="secondary" className="rounded-sm px-1 font-normal lg:hidden">
+                {selected.size}
+              </Badge>
+              <div className="hidden space-x-1 lg:flex">
+                {selected.size > 2 ? (
+                  <Badge variant="secondary" className="rounded-sm px-1 font-normal">
+                    {selected.size} selected
+                  </Badge>
+                ) : (
+                  options
+                    .filter((option) => selected.has(option.value))
+                    .map((option) => (
+                      <Badge
+                        variant="secondary"
+                        key={option.value}
+                        className="rounded-sm px-1 font-normal"
+                      >
+                        {option.label}
+                      </Badge>
+                    ))
+                )}
+              </div>
+            </>
+          )}
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-[200px] p-0" align="start">
+        <Command>
+          <CommandInput placeholder={title} />
+          <CommandList>
+            <CommandEmpty>No results found.</CommandEmpty>
+            <CommandGroup>
+              {options.map((option) => {
+                const isSelected = selected.has(option.value);
+                return (
+                  <CommandItem
+                    key={option.value}
+                    onSelect={() => {
+                      if (multiple) {
+                        const newSet = new Set(selected);
+                        if (isSelected) newSet.delete(option.value);
+                        else newSet.add(option.value);
+                        onSelect(Array.from(newSet));
+                      } else {
+                        onSelect(isSelected ? [] : [option.value]);
+                      }
+                    }}
+                  >
+                    <div
+                      className={cn(
+                        'border-primary mr-2 flex h-4 w-4 items-center justify-center rounded-sm border',
+                        isSelected
+                          ? 'bg-primary text-primary-foreground'
+                          : 'opacity-50 [&_svg]:invisible'
+                      )}
+                    >
+                      <CheckIcon className="h-4 w-4" />
+                    </div>
+                    <span>{option.label}</span>
+                  </CommandItem>
+                );
+              })}
+            </CommandGroup>
+            {selected.size > 0 && (
+              <>
+                <CommandSeparator />
+                <CommandGroup>
+                  <CommandItem onSelect={() => onSelect([])} className="justify-center text-center">
+                    Clear filters
+                  </CommandItem>
+                </CommandGroup>
+              </>
+            )}
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
+  );
+}
+
+const roleOptions = [
+  { value: 'Client', label: 'Client' },
+  { value: 'Admin', label: 'Admin' },
+  { value: 'Moderator', label: 'Moderator' },
+];
+
+const emailVerifiedOptions = [
+  { value: 'verified', label: 'Verified' },
+  { value: 'not-verified', label: 'Not Verified' },
+];
+
 function UsersPage() {
   const [page, setPage] = useState(1);
   const [searchInput, setSearchInput] = useState('');
-  const [roleFilter, setRoleFilter] = useState<string>('all');
-  const [emailVerifiedFilter, setEmailVerifiedFilter] = useState<string>('all');
+  const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
+  const [selectedEmailStatus, setSelectedEmailStatus] = useState<string[]>([]);
   const limit = 20;
 
   // Debounce search input to avoid too many API calls
@@ -35,12 +161,12 @@ function UsersPage() {
   if (debouncedSearch) {
     filters.search = debouncedSearch;
   }
-  if (roleFilter !== 'all') {
-    filters.roles = [roleFilter];
+  if (selectedRoles.length > 0) {
+    filters.roles = selectedRoles;
   }
-  if (emailVerifiedFilter === 'verified') {
+  if (selectedEmailStatus.includes('verified')) {
     filters.emailVerified = true;
-  } else if (emailVerifiedFilter === 'not-verified') {
+  } else if (selectedEmailStatus.includes('not-verified')) {
     filters.emailVerified = false;
   }
 
@@ -52,27 +178,17 @@ function UsersPage() {
 
   const handleSearchChange = useCallback((value: string) => {
     setSearchInput(value);
-    setPage(1); // Reset to first page on search
-  }, []);
-
-  const handleRoleChange = useCallback((value: string) => {
-    setRoleFilter(value);
-    setPage(1);
-  }, []);
-
-  const handleEmailVerifiedChange = useCallback((value: string) => {
-    setEmailVerifiedFilter(value);
     setPage(1);
   }, []);
 
   const handleReset = useCallback(() => {
     setSearchInput('');
-    setRoleFilter('all');
-    setEmailVerifiedFilter('all');
+    setSelectedRoles([]);
+    setSelectedEmailStatus([]);
     setPage(1);
   }, []);
 
-  const isFiltered = searchInput || roleFilter !== 'all' || emailVerifiedFilter !== 'all';
+  const isFiltered = searchInput || selectedRoles.length > 0 || selectedEmailStatus.length > 0;
 
   return (
     <div className="flex flex-col gap-6 p-6">
@@ -86,48 +202,46 @@ function UsersPage() {
       <Card>
         <CardContent className="pt-6">
           {/* Filters */}
-          <div className="flex items-center gap-2 mb-4">
-            <div className="flex-1 relative">
-              <IconSearch className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <div className="flex flex-wrap items-center gap-2 mb-4">
+            <div className="relative">
+              <IconSearch className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Search by email, name, ref code, card number, connected accounts..."
+                placeholder="Search email, name, ref code..."
                 value={searchInput}
                 onChange={(e) => handleSearchChange(e.target.value)}
-                className="pl-9"
+                className="h-8 w-[250px] pl-8"
               />
             </div>
 
-            <Select value={roleFilter} onValueChange={handleRoleChange}>
-              <SelectTrigger className="w-[150px]">
-                <SelectValue placeholder="Role" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Roles</SelectItem>
-                <SelectItem value="Client">Client</SelectItem>
-                <SelectItem value="Admin">Admin</SelectItem>
-                <SelectItem value="Moderator">Moderator</SelectItem>
-              </SelectContent>
-            </Select>
+            <FacetedFilter
+              title="Role"
+              options={roleOptions}
+              selectedValues={selectedRoles}
+              onSelect={(values) => {
+                setSelectedRoles(values);
+                setPage(1);
+              }}
+            />
 
-            <Select value={emailVerifiedFilter} onValueChange={handleEmailVerifiedChange}>
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Email Status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Users</SelectItem>
-                <SelectItem value="verified">Verified</SelectItem>
-                <SelectItem value="not-verified">Not Verified</SelectItem>
-              </SelectContent>
-            </Select>
+            <FacetedFilter
+              title="Email"
+              options={emailVerifiedOptions}
+              selectedValues={selectedEmailStatus}
+              onSelect={(values) => {
+                setSelectedEmailStatus(values);
+                setPage(1);
+              }}
+              multiple={false}
+            />
 
             {isFiltered && (
               <Button
                 variant="ghost"
                 onClick={handleReset}
-                className="h-9 px-2"
+                className="h-8 px-2 text-sm leading-5 font-medium lg:px-3"
               >
                 Reset
-                <IconX className="ml-2 h-4 w-4" />
+                <Cross2Icon className="ml-2 h-4 w-4" />
               </Button>
             )}
           </div>
