@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import {
   type ColumnDef,
   flexRender,
@@ -76,21 +76,24 @@ export function TokensTable({
     saveJSON(LS_TOKEN_TABLE_VIS, columnVisibility);
   }, [columnVisibility]);
 
-  const handleToggle = async (
-    token: TokenListItem,
-    field: keyof UpdateTokenRequest,
-    value: boolean
-  ) => {
-    setUpdatingField(`${token.id}-${field}`);
-    try {
-      await onUpdateToken(token.id, { [field]: value });
-      toast.success(`${token.symbol} ${field} updated`);
-    } catch (error) {
-      toast.error(`Failed to update ${token.symbol}`);
-    } finally {
-      setUpdatingField(null);
-    }
-  };
+  const handleToggle = useCallback(
+    async (
+      token: TokenListItem,
+      field: keyof UpdateTokenRequest,
+      value: boolean
+    ) => {
+      setUpdatingField(`${token.id}-${field}`);
+      try {
+        await onUpdateToken(token.id, { [field]: value });
+        toast.success(`${token.symbol} ${field} updated`);
+      } catch (error) {
+        toast.error(`Failed to update ${token.symbol}`);
+      } finally {
+        setUpdatingField(null);
+      }
+    },
+    [onUpdateToken]
+  );
 
   const allSelected = tokens.length > 0 && tokens.every((t) => selectedIds.includes(t.id));
   const someSelected = tokens.some((t) => selectedIds.includes(t.id)) && !allSelected;
@@ -313,7 +316,7 @@ export function TokensTable({
         },
       },
     ],
-    [allSelected, someSelected, selectedIds, isUpdating, updatingField, onSelectAll, onSelectToken]
+    [allSelected, someSelected, selectedIds, isUpdating, updatingField, onSelectAll, onSelectToken, handleToggle]
   );
 
   const table = useReactTable({
