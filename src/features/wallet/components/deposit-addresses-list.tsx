@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { IconCopy, IconMapPin, IconCurrencyBitcoin, IconCurrencyEthereum, IconCoin } from '@tabler/icons-react';
+import { IconCopy, IconMapPin, IconCoin } from '@tabler/icons-react';
 import { toast } from 'sonner';
 import type { DepositAddress } from '../types';
 
@@ -11,33 +11,45 @@ interface DepositAddressesListProps {
   isLoading?: boolean;
 }
 
-// Get icon for currency/network
-const getCurrencyIcon = (currency: string) => {
-  const iconClass = 'h-5 w-5';
-  const upper = currency?.toUpperCase() || '';
+// CDN base URL for coin icons
+const COIN_CDN_BASE = 'https://cdn.moliedev.xyz/coin-icons/32px';
 
-  if (upper === 'BTC' || upper === 'BITCOIN') {
-    return <IconCurrencyBitcoin className={`${iconClass} text-orange-500`} />;
-  }
-  if (upper === 'ETH' || upper.includes('ERC20') || upper === 'ETHEREUM') {
-    return <IconCurrencyEthereum className={`${iconClass} text-blue-500`} />;
-  }
-  if (upper === 'LTC' || upper === 'LITECOIN') {
-    return <IconCoin className={`${iconClass} text-gray-400`} />;
-  }
-  if (upper === 'TRX' || upper.includes('TRC20') || upper === 'TRON') {
-    return <IconCoin className={`${iconClass} text-red-500`} />;
-  }
-  if (upper === 'TON' || upper === 'TONCOIN') {
-    return <IconCoin className={`${iconClass} text-blue-400`} />;
-  }
-  if (upper.includes('USDT')) {
-    return <IconCoin className={`${iconClass} text-green-500`} />;
-  }
-  if (upper.includes('USDC')) {
-    return <IconCoin className={`${iconClass} text-blue-600`} />;
-  }
-  return <IconCoin className={`${iconClass} text-muted-foreground`} />;
+// Map currency symbols to CDN UIDs
+const CURRENCY_TO_UID: Record<string, string> = {
+  btc: 'bitcoin',
+  eth: 'ethereum',
+  ltc: 'litecoin',
+  trx: 'tron',
+  ton: 'the-open-network',
+  usdt: 'tether',
+  usdc: 'usd-coin',
+  sol: 'solana',
+  bnb: 'binancecoin',
+  matic: 'polygon-pos',
+  doge: 'dogecoin',
+};
+
+// Get CDN icon URL for currency
+const getCurrencyIconUrl = (currency: string) => {
+  const lower = currency?.toLowerCase().replace(/_.*$/, '') || ''; // Remove network suffix like _TRC20
+  const uid = CURRENCY_TO_UID[lower] || lower;
+  return `${COIN_CDN_BASE}/${uid}@3x.png`;
+};
+
+// Currency icon component with fallback
+const CurrencyIcon = ({ currency }: { currency: string }) => {
+  return (
+    <img
+      src={getCurrencyIconUrl(currency)}
+      alt={currency}
+      className="h-6 w-6 rounded-full"
+      onError={(e) => {
+        // Hide broken image and show fallback
+        e.currentTarget.style.display = 'none';
+        e.currentTarget.nextElementSibling?.classList.remove('hidden');
+      }}
+    />
+  );
 };
 
 // Get network name from currency
@@ -110,7 +122,8 @@ export function DepositAddressesList({ addresses, isLoading }: DepositAddressesL
                 >
                   <div className="flex items-start gap-3 min-w-0 flex-1">
                     <div className="flex-shrink-0 mt-0.5">
-                      {getCurrencyIcon(addr.currency)}
+                      <CurrencyIcon currency={addr.currency} />
+                      <IconCoin className="h-6 w-6 text-muted-foreground hidden" />
                     </div>
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2 mb-1">
