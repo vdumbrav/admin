@@ -40,7 +40,7 @@ const getCryptoEmoji = (currency: string): string => {
 };
 
 // Format amount with appropriate decimals
-const formatAmount = (amount: number | string, currency: string): string => {
+const formatAmount = (amount: number | string, _currency: string): string => {
   const num = typeof amount === 'string' ? parseFloat(amount) : amount;
   if (isNaN(num)) return '0';
 
@@ -73,7 +73,7 @@ const formatDate = (dateString: string): string => {
 
 // Get transaction type badge
 const getTransactionBadge = (group: string, direction: string) => {
-  const isIncome = direction === 'Income';
+  const _isIncome = direction === 'Income';
 
   const variants: Record<string, { variant: 'default' | 'secondary' | 'destructive' | 'outline'; icon: typeof IconArrowDown }> = {
     Deposit: { variant: 'default', icon: IconArrowDown },
@@ -108,7 +108,7 @@ export function WalletDashboard({ statistics, isLoading }: WalletDashboardProps)
     );
   }
 
-  const totalVolume24h = [
+  const _totalVolume24h = [
     ...statistics.depositVolume24h,
     ...statistics.withdrawalVolume24h,
   ].reduce((sum, v) => sum + v.amount, 0);
