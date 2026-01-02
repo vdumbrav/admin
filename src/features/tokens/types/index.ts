@@ -46,8 +46,13 @@ export interface PaginatedTokensResponse {
 export interface TokenFilterParams {
   search?: string;
   network?: string;
-  platform?: 'web' | 'mobile' | 'telegram';
   isActive?: boolean;
+  visibleOnWeb?: boolean;
+  visibleOnMobile?: boolean;
+  visibleOnTelegram?: boolean;
+  depositEnabled?: boolean;
+  withdrawEnabled?: boolean;
+  exchangeEnabled?: boolean;
 }
 
 // Update Token Request

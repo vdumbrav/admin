@@ -83,11 +83,26 @@ export const useTokenList = (
       if (filters?.network) {
         params.append('network', filters.network);
       }
-      if (filters?.platform) {
-        params.append('platform', filters.platform);
-      }
       if (filters?.isActive !== undefined) {
         params.append('isActive', filters.isActive.toString());
+      }
+      if (filters?.visibleOnWeb !== undefined) {
+        params.append('visibleOnWeb', filters.visibleOnWeb.toString());
+      }
+      if (filters?.visibleOnMobile !== undefined) {
+        params.append('visibleOnMobile', filters.visibleOnMobile.toString());
+      }
+      if (filters?.visibleOnTelegram !== undefined) {
+        params.append('visibleOnTelegram', filters.visibleOnTelegram.toString());
+      }
+      if (filters?.depositEnabled !== undefined) {
+        params.append('depositEnabled', filters.depositEnabled.toString());
+      }
+      if (filters?.withdrawEnabled !== undefined) {
+        params.append('withdrawEnabled', filters.withdrawEnabled.toString());
+      }
+      if (filters?.exchangeEnabled !== undefined) {
+        params.append('exchangeEnabled', filters.exchangeEnabled.toString());
       }
 
       const token = await auth.getAccessToken();

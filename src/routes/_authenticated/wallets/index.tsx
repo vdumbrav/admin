@@ -5,13 +5,6 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import {
   IconSearch,
   IconX,
   IconRefresh,
@@ -19,7 +12,6 @@ import {
   IconWallet,
   IconActivity,
   IconCoins,
-  IconCloudDownload,
 } from '@tabler/icons-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
@@ -48,7 +40,7 @@ import {
   useBulkFeatureUpdate,
   useSyncFromChangeNow,
 } from '@/features/tokens/api/admin-tokens';
-import { TokenStatsCards, TokensTable, TokenBulkActions } from '@/features/tokens/components';
+import { TokenStatsCards, TokensTable, TokenBulkActions, TokenFiltersToolbar } from '@/features/tokens/components';
 import type { TokenFilterParams, UpdateTokenRequest } from '@/features/tokens/types';
 
 export const Route = createFileRoute('/_authenticated/wallets/')({
@@ -68,15 +60,13 @@ function WalletsPage() {
 
   // Token state
   const [tokenPage, setTokenPage] = useState(1);
-  const [tokenSearchInput, setTokenSearchInput] = useState('');
-  const [tokenNetwork, setTokenNetwork] = useState<string>('');
-  const [tokenPlatform, setTokenPlatform] = useState<string>('');
+  const [tokenFilters, setTokenFilters] = useState<TokenFilterParams>({});
   const [selectedTokenIds, setSelectedTokenIds] = useState<number[]>([]);
   const tokenLimit = 50;
 
   // Debounce search inputs
   const debouncedSearch = useDebouncedValue(searchInput, 300);
-  const debouncedTokenSearch = useDebouncedValue(tokenSearchInput, 300);
+  const debouncedTokenSearch = useDebouncedValue(tokenFilters.search || '', 300);
 
   // Wallet filters
   const filters: WalletFilterParams = {};
@@ -84,17 +74,11 @@ function WalletsPage() {
     filters.search = debouncedSearch;
   }
 
-  // Token filters
-  const tokenFilters: TokenFilterParams = {};
-  if (debouncedTokenSearch) {
-    tokenFilters.search = debouncedTokenSearch;
-  }
-  if (tokenNetwork) {
-    tokenFilters.network = tokenNetwork;
-  }
-  if (tokenPlatform) {
-    tokenFilters.platform = tokenPlatform as 'web' | 'mobile' | 'telegram';
-  }
+  // Token filters with debounced search
+  const effectiveTokenFilters: TokenFilterParams = {
+    ...tokenFilters,
+    search: debouncedTokenSearch || undefined,
+  };
 
   // Wallet API hooks
   const { data: statistics, isLoading: statsLoading, refetch: refetchStats } = useWalletStatistics();
@@ -104,7 +88,7 @@ function WalletsPage() {
 
   // Token API hooks
   const { data: tokenStats, isLoading: tokenStatsLoading, refetch: refetchTokenStats } = useTokenStatistics();
-  const { data: tokensData, isLoading: tokensLoading, refetch: refetchTokens } = useTokenList(tokenPage, tokenLimit, tokenFilters);
+  const { data: tokensData, isLoading: tokensLoading, refetch: refetchTokens } = useTokenList(tokenPage, tokenLimit, effectiveTokenFilters);
   const { data: networks } = useTokenNetworks();
   const updateTokenMutation = useUpdateToken();
   const bulkPlatformMutation = useBulkPlatformVisibility();
@@ -151,15 +135,13 @@ function WalletsPage() {
   }, []);
 
   // Token handlers
-  const handleTokenSearchChange = useCallback((value: string) => {
-    setTokenSearchInput(value);
+  const handleTokenFiltersChange = useCallback((newFilters: TokenFilterParams) => {
+    setTokenFilters(newFilters);
     setTokenPage(1);
   }, []);
 
   const handleTokenReset = useCallback(() => {
-    setTokenSearchInput('');
-    setTokenNetwork('');
-    setTokenPlatform('');
+    setTokenFilters({});
     setTokenPage(1);
     setSelectedTokenIds([]);
   }, []);
@@ -238,7 +220,6 @@ function WalletsPage() {
   }, [syncMutation]);
 
   const isFiltered = searchInput.length > 0;
-  const isTokenFiltered = tokenSearchInput.length > 0 || tokenNetwork || tokenPlatform;
 
   return (
     <div className="flex flex-col gap-6 p-6">
@@ -365,74 +346,22 @@ function WalletsPage() {
             {/* Tokens Table */}
             <Card>
               <CardContent className="pt-6">
-                {/* Filters and Actions */}
-                <div className="flex flex-wrap items-center gap-2 mb-4">
-                  <div className="flex-1 min-w-[200px] relative">
-                    <IconSearch className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      placeholder="Search by symbol or name..."
-                      value={tokenSearchInput}
-                      onChange={(e) => handleTokenSearchChange(e.target.value)}
-                      className="pl-9"
-                    />
-                  </div>
-
-                  <Select value={tokenNetwork || 'all'} onValueChange={(v) => setTokenNetwork(v === 'all' ? '' : v)}>
-                    <SelectTrigger className="w-[160px]">
-                      <SelectValue placeholder="All Networks" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Networks</SelectItem>
-                      {networks?.map((network) => (
-                        <SelectItem key={network} value={network}>
-                          {network}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-
-                  <Select value={tokenPlatform || 'all'} onValueChange={(v) => setTokenPlatform(v === 'all' ? '' : v)}>
-                    <SelectTrigger className="w-[140px]">
-                      <SelectValue placeholder="All Platforms" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Platforms</SelectItem>
-                      <SelectItem value="web">Web</SelectItem>
-                      <SelectItem value="mobile">Mobile</SelectItem>
-                      <SelectItem value="telegram">Telegram</SelectItem>
-                    </SelectContent>
-                  </Select>
-
-                  {isTokenFiltered && (
-                    <Button
-                      variant="ghost"
-                      onClick={handleTokenReset}
-                      className="h-9 px-2"
-                    >
-                      Reset
-                      <IconX className="ml-2 h-4 w-4" />
-                    </Button>
-                  )}
-
-                  <div className="flex-1" />
-
+                {/* Filters Toolbar */}
+                <TokenFiltersToolbar
+                  filters={tokenFilters}
+                  networks={networks || []}
+                  onFiltersChange={handleTokenFiltersChange}
+                  onReset={handleTokenReset}
+                  onSync={handleSyncTokens}
+                  isSyncing={syncMutation.isPending}
+                >
                   <TokenBulkActions
                     selectedCount={selectedTokenIds.length}
                     onBulkPlatformUpdate={handleBulkPlatformUpdate}
                     onBulkFeatureUpdate={handleBulkFeatureUpdate}
                     disabled={bulkPlatformMutation.isPending || bulkFeatureMutation.isPending}
                   />
-
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleSyncTokens}
-                    disabled={syncMutation.isPending}
-                  >
-                    <IconCloudDownload className="h-4 w-4 mr-2" />
-                    {syncMutation.isPending ? 'Syncing...' : 'Sync from CN'}
-                  </Button>
-                </div>
+                </TokenFiltersToolbar>
 
                 {/* Tokens Table */}
                 {tokensLoading ? (

@@ -28,6 +28,7 @@ import {
 } from '@tabler/icons-react';
 import { toast } from 'sonner';
 import type { TokenListItem, UpdateTokenRequest } from '../types';
+import { getNetworkLabel, isCustodySupported } from '../data/data';
 
 interface TokensTableProps {
   tokens: TokenListItem[];
@@ -184,7 +185,12 @@ export function TokensTable({
                     </div>
                   </TableCell>
                   <TableCell>
-                    <Badge variant="outline">{token.network}</Badge>
+                    <Badge
+                      variant={isCustodySupported(token.network) ? 'default' : 'outline'}
+                      className={isCustodySupported(token.network) ? 'bg-green-600 hover:bg-green-700' : ''}
+                    >
+                      {getNetworkLabel(token.network)}
+                    </Badge>
                   </TableCell>
                   <TableCell className="text-center">
                     <Switch
