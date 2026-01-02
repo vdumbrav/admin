@@ -50,8 +50,9 @@ import { DataTableColumnHeader } from '@/components/table/data-table-column-head
 import type { User, AuthIdentity } from '../types';
 
 // Get provider icon component
-const getProviderIcon = (provider: string) => {
+const getProviderIcon = (provider?: string) => {
   const iconClass = 'h-4 w-4 transition-colors';
+  if (!provider) return <IconWallet className={`${iconClass} text-muted-foreground`} />;
 
   switch (provider.toLowerCase()) {
     case 'google-oauth2':
@@ -77,7 +78,8 @@ const getProviderIcon = (provider: string) => {
   }
 };
 
-const getProviderLabel = (provider: string) => {
+const getProviderLabel = (provider?: string) => {
+  if (!provider) return 'Unknown';
   switch (provider.toLowerCase()) {
     case 'google-oauth2': return 'Google';
     case 'telegram': return 'Telegram';
@@ -93,7 +95,7 @@ const getProviderLabel = (provider: string) => {
 };
 
 function ConnectedAccountBadge({ identity }: { identity: AuthIdentity }) {
-  const displayValue = identity.authName || identity.authId;
+  const displayValue = identity.authName || identity.authId || 'Unknown';
   // Truncate long values (addresses)
   const truncated = displayValue.length > 16 ? displayValue.slice(0, 6) + '...' + displayValue.slice(-4) : displayValue;
 

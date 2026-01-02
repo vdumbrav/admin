@@ -165,8 +165,8 @@ export const useUpdateToken = () => {
         data,
       });
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin', 'tokens'] });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['admin', 'tokens'] });
     },
   });
 };
@@ -191,8 +191,8 @@ export const useBulkPlatformVisibility = () => {
         data,
       });
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin', 'tokens'] });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['admin', 'tokens'] });
     },
   });
 };
@@ -217,8 +217,8 @@ export const useBulkFeatureUpdate = () => {
         data,
       });
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin', 'tokens'] });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['admin', 'tokens'] });
     },
   });
 };
@@ -241,8 +241,8 @@ export const useSyncFromChangeNow = () => {
         },
       });
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin', 'tokens'] });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['admin', 'tokens'] });
     },
   });
 };
