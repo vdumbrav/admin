@@ -452,6 +452,10 @@ export const useGlobalTransactions = (
       } else if (filters?.status) {
         params.append('status', filters.status);
       }
+      // Search by txHash, from/to address
+      if (filters?.search) {
+        params.append('search', filters.search);
+      }
 
       const token = await auth.getAccessToken();
 

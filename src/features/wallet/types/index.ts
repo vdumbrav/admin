@@ -59,6 +59,9 @@ export interface GlobalTransactionItem {
   group: string;
   status: string;
   txHash?: string;
+  fromAddress?: string;
+  toAddress?: string;
+  network?: string;
   createdAt: string;
   user: {
     id: number;
@@ -85,6 +88,7 @@ export interface TransactionFilterParams {
   currencies?: string[];    // Multi-select currencies
   status?: string;          // Single status (legacy)
   statuses?: string[];      // Multi-select statuses
+  search?: string;          // Search by txHash, fromAddress, toAddress
 }
 
 // Wallet List Item

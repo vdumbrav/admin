@@ -39,8 +39,11 @@ import {
   IconArrowUp,
   IconArrowsExchange,
   IconActivity,
+  IconSearch,
+  IconCopy,
 } from '@tabler/icons-react';
 import { Cross2Icon, CheckIcon, PlusCircledIcon } from '@radix-ui/react-icons';
+import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import { loadJSON, saveJSON } from '@/utils/persist';
 import { DataTableViewOptions } from '@/components/table/data-table-view-options';
@@ -131,6 +134,18 @@ const formatDate = (dateString: string): string => {
     hour: '2-digit',
     minute: '2-digit',
   });
+};
+
+// Truncate address for display
+const truncateAddress = (address?: string): string => {
+  if (!address) return '-';
+  if (address.length <= 16) return address;
+  return `${address.slice(0, 8)}...${address.slice(-6)}`;
+};
+
+// Copy to clipboard helper
+const copyToClipboard = (text: string) => {
+  navigator.clipboard.writeText(text);
 };
 
 // Map backend group values to display names
@@ -310,7 +325,8 @@ export function GlobalTransactionsTable({
     selectedDirections.length > 0 ||
     selectedGroups.length > 0 ||
     selectedCurrencies.length > 0 ||
-    selectedStatuses.length > 0;
+    selectedStatuses.length > 0 ||
+    !!filters?.search;
 
   const handleReset = () => {
     onFilterChange({});
@@ -384,6 +400,81 @@ export function GlobalTransactionsTable({
         },
       },
       {
+        id: 'txHash',
+        accessorKey: 'txHash',
+        header: 'TX Hash',
+        cell: ({ row }) => {
+          const txHash = row.original.txHash;
+          if (!txHash) return <span className="text-muted-foreground">-</span>;
+          return (
+            <div className="flex items-center gap-1">
+              <span className="font-mono text-xs" title={txHash}>
+                {truncateAddress(txHash)}
+              </span>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-6 w-6"
+                onClick={() => copyToClipboard(txHash)}
+                title="Copy hash"
+              >
+                <IconCopy className="h-3 w-3" />
+              </Button>
+            </div>
+          );
+        },
+      },
+      {
+        id: 'fromAddress',
+        accessorKey: 'fromAddress',
+        header: 'From',
+        cell: ({ row }) => {
+          const address = row.original.fromAddress;
+          if (!address) return <span className="text-muted-foreground">-</span>;
+          return (
+            <div className="flex items-center gap-1">
+              <span className="font-mono text-xs" title={address}>
+                {truncateAddress(address)}
+              </span>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-6 w-6"
+                onClick={() => copyToClipboard(address)}
+                title="Copy address"
+              >
+                <IconCopy className="h-3 w-3" />
+              </Button>
+            </div>
+          );
+        },
+      },
+      {
+        id: 'toAddress',
+        accessorKey: 'toAddress',
+        header: 'To',
+        cell: ({ row }) => {
+          const address = row.original.toAddress;
+          if (!address) return <span className="text-muted-foreground">-</span>;
+          return (
+            <div className="flex items-center gap-1">
+              <span className="font-mono text-xs" title={address}>
+                {truncateAddress(address)}
+              </span>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-6 w-6"
+                onClick={() => copyToClipboard(address)}
+                title="Copy address"
+              >
+                <IconCopy className="h-3 w-3" />
+              </Button>
+            </div>
+          );
+        },
+      },
+      {
         id: 'status',
         accessorKey: 'status',
         header: 'Status',
@@ -449,11 +540,27 @@ export function GlobalTransactionsTable({
     );
   }
 
+  const searchValue = filters?.search || '';
+
   return (
     <div className="space-y-4">
       {/* Filters Toolbar */}
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex flex-wrap items-center gap-2">
+          <div className="relative">
+            <IconSearch className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search hash, address..."
+              value={searchValue}
+              onChange={(e) =>
+                onFilterChange({
+                  ...filters,
+                  search: e.target.value || undefined,
+                })
+              }
+              className="h-8 w-[180px] pl-8"
+            />
+          </div>
           <FacetedFilter
             title="Direction"
             selectedValues={selectedDirections}
