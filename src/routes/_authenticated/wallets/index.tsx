@@ -377,12 +377,12 @@ function WalletsPage() {
                     />
                   </div>
 
-                  <Select value={tokenNetwork} onValueChange={setTokenNetwork}>
+                  <Select value={tokenNetwork || 'all'} onValueChange={(v) => setTokenNetwork(v === 'all' ? '' : v)}>
                     <SelectTrigger className="w-[160px]">
                       <SelectValue placeholder="All Networks" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">All Networks</SelectItem>
+                      <SelectItem value="all">All Networks</SelectItem>
                       {networks?.map((network) => (
                         <SelectItem key={network} value={network}>
                           {network}
@@ -391,12 +391,12 @@ function WalletsPage() {
                     </SelectContent>
                   </Select>
 
-                  <Select value={tokenPlatform} onValueChange={setTokenPlatform}>
+                  <Select value={tokenPlatform || 'all'} onValueChange={(v) => setTokenPlatform(v === 'all' ? '' : v)}>
                     <SelectTrigger className="w-[140px]">
                       <SelectValue placeholder="All Platforms" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">All Platforms</SelectItem>
+                      <SelectItem value="all">All Platforms</SelectItem>
                       <SelectItem value="web">Web</SelectItem>
                       <SelectItem value="mobile">Mobile</SelectItem>
                       <SelectItem value="telegram">Telegram</SelectItem>

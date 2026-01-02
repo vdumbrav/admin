@@ -71,9 +71,33 @@ const formatDate = (dateString: string): string => {
   });
 };
 
+// Map backend group values to display names
+const getGroupDisplayName = (group: string): string => {
+  const map: Record<string, string> = {
+    on_ramp: 'Deposit',
+    withdraw: 'Withdraw',
+    swap: 'Exchange',
+    send: 'Send',
+    receive: 'Receive',
+    // Legacy support
+    Deposit: 'Deposit',
+    Withdraw: 'Withdraw',
+    Exchange: 'Exchange',
+    Send: 'Send',
+    Receive: 'Receive',
+  };
+  return map[group] || group;
+};
+
 // Get transaction type badge
 const getTransactionBadge = (group: string) => {
   const variants: Record<string, { variant: 'default' | 'secondary' | 'destructive' | 'outline'; icon: typeof IconArrowDown }> = {
+    on_ramp: { variant: 'default', icon: IconArrowDown },
+    withdraw: { variant: 'destructive', icon: IconArrowUp },
+    swap: { variant: 'secondary', icon: IconArrowsExchange },
+    send: { variant: 'outline', icon: IconArrowUp },
+    receive: { variant: 'outline', icon: IconArrowDown },
+    // Legacy support
     Deposit: { variant: 'default', icon: IconArrowDown },
     Withdraw: { variant: 'destructive', icon: IconArrowUp },
     Exchange: { variant: 'secondary', icon: IconArrowsExchange },
@@ -82,11 +106,12 @@ const getTransactionBadge = (group: string) => {
   };
 
   const config = variants[group] || { variant: 'outline' as const, icon: IconActivity };
+  const displayName = getGroupDisplayName(group);
 
   return (
     <Badge variant={config.variant} className="gap-1">
       <config.icon className="h-3 w-3" />
-      {group}
+      {displayName}
     </Badge>
   );
 };
@@ -108,6 +133,43 @@ export function WalletDashboard({ statistics, isLoading }: WalletDashboardProps)
 
   return (
     <div className="space-y-6">
+      {/* Total Balance Card - Prominent display */}
+      <Card className="bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-lg font-medium text-white/90">Total Balance Across All Wallets</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-baseline gap-2 mb-4">
+            <span className="text-4xl font-bold">
+              ${(statistics.totalBalanceUsd || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </span>
+            <span className="text-white/70">USD</span>
+          </div>
+          {statistics.totalBalances && statistics.totalBalances.length > 0 ? (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+              {statistics.totalBalances.slice(0, 12).map((balance) => (
+                <div key={balance.currency} className="bg-white/10 rounded-lg px-3 py-2">
+                  <div className="flex items-center gap-2">
+                    <span>{getCryptoEmoji(balance.currency)}</span>
+                    <span className="font-semibold text-sm">{balance.currency}</span>
+                  </div>
+                  <div className="text-sm font-mono mt-1">
+                    {formatAmount(balance.amount, balance.currency)}
+                  </div>
+                  {balance.usdValue !== undefined && balance.usdValue > 0 && (
+                    <div className="text-xs text-white/60">
+                      ~${balance.usdValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-white/60 text-sm">No balances to display</p>
+          )}
+        </CardContent>
+      </Card>
+
       {/* Main Stats Row */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatsCard

@@ -77,17 +77,34 @@ const formatDate = (dateString: string): string => {
   });
 };
 
+// Map backend group values to display names
+const getGroupDisplayName = (group: string): string => {
+  const map: Record<string, string> = {
+    on_ramp: 'Deposit',
+    withdraw: 'Withdraw',
+    swap: 'Exchange',
+    send: 'Send',
+    receive: 'Receive',
+  };
+  return map[group] || group;
+};
+
 // Get transaction icon
 const getTransactionIcon = (group: string) => {
   switch (group) {
+    case 'on_ramp':
     case 'Deposit':
       return <IconArrowDown className="h-4 w-4 text-green-500" />;
+    case 'withdraw':
     case 'Withdraw':
       return <IconArrowUp className="h-4 w-4 text-red-500" />;
+    case 'swap':
     case 'Exchange':
       return <IconArrowsExchange className="h-4 w-4 text-purple-500" />;
+    case 'send':
     case 'Send':
       return <IconArrowUp className="h-4 w-4 text-orange-500" />;
+    case 'receive':
     case 'Receive':
       return <IconArrowDown className="h-4 w-4 text-blue-500" />;
     default:
@@ -174,11 +191,11 @@ export function GlobalTransactionsTable({
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Types</SelectItem>
-            <SelectItem value="Deposit">Deposits</SelectItem>
-            <SelectItem value="Withdraw">Withdrawals</SelectItem>
-            <SelectItem value="Exchange">Exchanges</SelectItem>
-            <SelectItem value="Send">Sends</SelectItem>
-            <SelectItem value="Receive">Receives</SelectItem>
+            <SelectItem value="on_ramp">Deposits</SelectItem>
+            <SelectItem value="withdraw">Withdrawals</SelectItem>
+            <SelectItem value="swap">Exchanges</SelectItem>
+            <SelectItem value="send">Sends</SelectItem>
+            <SelectItem value="receive">Receives</SelectItem>
           </SelectContent>
         </Select>
 
@@ -234,8 +251,11 @@ export function GlobalTransactionsTable({
               return (
                 <TableRow key={tx.id}>
                   <TableCell>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2" title={getGroupDisplayName(tx.group)}>
                       {getTransactionIcon(tx.group)}
+                      <span className="text-xs text-muted-foreground hidden sm:inline">
+                        {getGroupDisplayName(tx.group)}
+                      </span>
                     </div>
                   </TableCell>
                   <TableCell>

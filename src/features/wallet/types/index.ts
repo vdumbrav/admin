@@ -43,6 +43,9 @@ export interface ExtendedWalletStatistics extends WalletStatistics {
   // Exchange stats
   totalExchanges: number;
   exchangesToday: number;
+  // Aggregated balances across all wallets
+  totalBalances: VolumeItem[];
+  totalBalanceUsd: number;
   // Recent activity
   recentTransactions: RecentTransaction[];
 }
