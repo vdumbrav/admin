@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   flexRender,
   getCoreRowModel,
@@ -8,7 +8,9 @@ import {
   useReactTable,
   type ColumnFiltersState,
   type SortingState,
+  type VisibilityState,
 } from '@tanstack/react-table';
+import { loadJSON, saveJSON } from '@/utils/persist';
 import { Input } from '@/components/ui/input';
 import {
   Table,
@@ -26,9 +28,12 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { DataTablePagination } from '@/components/table/data-table-pagination';
+import { DataTableViewOptions } from '@/components/table/data-table-view-options';
 import type { CardOrder } from '../types';
 import { createColumns } from './columns';
 import { useCancelOrder } from '../api/admin-orders';
+
+const LS_ORDERS_TABLE_VIS = 'orders-table-visibility';
 
 interface OrdersTableProps {
   orders: CardOrder[];
@@ -40,6 +45,13 @@ export function OrdersTable({ orders }: OrdersTableProps) {
   ]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [globalFilter, setGlobalFilter] = useState('');
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(() =>
+    loadJSON(LS_ORDERS_TABLE_VIS, {})
+  );
+
+  useEffect(() => {
+    saveJSON(LS_ORDERS_TABLE_VIS, columnVisibility);
+  }, [columnVisibility]);
 
   const cancelOrderMutation = useCancelOrder();
 
@@ -73,10 +85,12 @@ export function OrdersTable({ orders }: OrdersTableProps) {
       sorting,
       columnFilters,
       globalFilter,
+      columnVisibility,
     },
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     onGlobalFilterChange: setGlobalFilter,
+    onColumnVisibilityChange: setColumnVisibility,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
@@ -104,55 +118,58 @@ export function OrdersTable({ orders }: OrdersTableProps) {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-2">
-        <Input
-          placeholder="Search orders by ID, user ID, card..."
-          value={globalFilter ?? ''}
-          onChange={(event) => setGlobalFilter(String(event.target.value))}
-          className="max-w-sm"
-        />
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
+          <Input
+            placeholder="Search orders by ID, user ID, card..."
+            value={globalFilter ?? ''}
+            onChange={(event) => setGlobalFilter(String(event.target.value))}
+            className="max-w-sm"
+          />
 
-        <Select
-          value={statusFilter.join(',')}
-          onValueChange={(value) => {
-            const values = value.split(',');
-            table.getColumn('status')?.setFilterValue(values);
-          }}
-        >
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Filter by status" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="draft,pending,confirmed,processing,completed,failed,cancelled">
-              All Statuses
-            </SelectItem>
-            <SelectItem value="draft">Draft Only</SelectItem>
-            <SelectItem value="pending">Pending Only</SelectItem>
-            <SelectItem value="confirmed">Confirmed Only</SelectItem>
-            <SelectItem value="processing">Processing Only</SelectItem>
-            <SelectItem value="completed">Completed Only</SelectItem>
-            <SelectItem value="failed">Failed Only</SelectItem>
-            <SelectItem value="cancelled">Cancelled Only</SelectItem>
-            <SelectItem value="draft,pending,confirmed,processing">Active Orders</SelectItem>
-          </SelectContent>
-        </Select>
+          <Select
+            value={statusFilter.join(',')}
+            onValueChange={(value) => {
+              const values = value.split(',');
+              table.getColumn('status')?.setFilterValue(values);
+            }}
+          >
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Filter by status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="draft,pending,confirmed,processing,completed,failed,cancelled">
+                All Statuses
+              </SelectItem>
+              <SelectItem value="draft">Draft Only</SelectItem>
+              <SelectItem value="pending">Pending Only</SelectItem>
+              <SelectItem value="confirmed">Confirmed Only</SelectItem>
+              <SelectItem value="processing">Processing Only</SelectItem>
+              <SelectItem value="completed">Completed Only</SelectItem>
+              <SelectItem value="failed">Failed Only</SelectItem>
+              <SelectItem value="cancelled">Cancelled Only</SelectItem>
+              <SelectItem value="draft,pending,confirmed,processing">Active Orders</SelectItem>
+            </SelectContent>
+          </Select>
 
-        <Select
-          value={orderTypeFilter.join(',')}
-          onValueChange={(value) => {
-            const values = value.split(',');
-            table.getColumn('orderType')?.setFilterValue(values);
-          }}
-        >
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Filter by type" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="card_creation,card_topup">All Types</SelectItem>
-            <SelectItem value="card_creation">Card Creation</SelectItem>
-            <SelectItem value="card_topup">Card Topup</SelectItem>
-          </SelectContent>
-        </Select>
+          <Select
+            value={orderTypeFilter.join(',')}
+            onValueChange={(value) => {
+              const values = value.split(',');
+              table.getColumn('orderType')?.setFilterValue(values);
+            }}
+          >
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Filter by type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="card_creation,card_topup">All Types</SelectItem>
+              <SelectItem value="card_creation">Card Creation</SelectItem>
+              <SelectItem value="card_topup">Card Topup</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <DataTableViewOptions table={table} />
       </div>
 
       <div className="rounded-md border">

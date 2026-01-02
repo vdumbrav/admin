@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   flexRender,
   getCoreRowModel,
@@ -8,7 +8,9 @@ import {
   useReactTable,
   type ColumnFiltersState,
   type SortingState,
+  type VisibilityState,
 } from '@tanstack/react-table';
+import { loadJSON, saveJSON } from '@/utils/persist';
 import { Input } from '@/components/ui/input';
 import {
   Table,
@@ -26,9 +28,12 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { DataTablePagination } from '@/components/table/data-table-pagination';
+import { DataTableViewOptions } from '@/components/table/data-table-view-options';
 import type { Card, TopupFormData } from '../types';
 import { createColumns } from './columns';
 import { TopupDialog } from './topup-dialog';
+
+const LS_CARDS_TABLE_VIS = 'cards-table-visibility';
 
 interface CardsTableProps {
   cards: Card[];
@@ -38,8 +43,15 @@ export function CardsTable({ cards }: CardsTableProps) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [globalFilter, setGlobalFilter] = useState('');
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(() =>
+    loadJSON(LS_CARDS_TABLE_VIS, {})
+  );
   const [selectedCard, setSelectedCard] = useState<Card | null>(null);
   const [topupDialogOpen, setTopupDialogOpen] = useState(false);
+
+  useEffect(() => {
+    saveJSON(LS_CARDS_TABLE_VIS, columnVisibility);
+  }, [columnVisibility]);
 
   const handleTopup = (card: Card) => {
     setSelectedCard(card);
@@ -80,10 +92,12 @@ export function CardsTable({ cards }: CardsTableProps) {
       sorting,
       columnFilters,
       globalFilter,
+      columnVisibility,
     },
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     onGlobalFilterChange: setGlobalFilter,
+    onColumnVisibilityChange: setColumnVisibility,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
@@ -101,32 +115,35 @@ export function CardsTable({ cards }: CardsTableProps) {
   return (
     <>
       <div className="space-y-4">
-        <div className="flex items-center gap-2">
-          <Input
-            placeholder="Search cards by number, cardholder..."
-            value={globalFilter ?? ''}
-            onChange={(event) => setGlobalFilter(String(event.target.value))}
-            className="max-w-sm"
-          />
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <Input
+              placeholder="Search cards by number, cardholder..."
+              value={globalFilter ?? ''}
+              onChange={(event) => setGlobalFilter(String(event.target.value))}
+              className="max-w-sm"
+            />
 
-          <Select
-            value={statusFilter.join(',')}
-            onValueChange={(value) => {
-              const values = value.split(',');
-              table.getColumn('status')?.setFilterValue(values);
-            }}
-          >
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Filter by status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="active,frozen,blocked">All Statuses</SelectItem>
-              <SelectItem value="active">Active Only</SelectItem>
-              <SelectItem value="frozen">Frozen Only</SelectItem>
-              <SelectItem value="blocked">Blocked Only</SelectItem>
-              <SelectItem value="active,frozen">Active & Frozen</SelectItem>
-            </SelectContent>
-          </Select>
+            <Select
+              value={statusFilter.join(',')}
+              onValueChange={(value) => {
+                const values = value.split(',');
+                table.getColumn('status')?.setFilterValue(values);
+              }}
+            >
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Filter by status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="active,frozen,blocked">All Statuses</SelectItem>
+                <SelectItem value="active">Active Only</SelectItem>
+                <SelectItem value="frozen">Frozen Only</SelectItem>
+                <SelectItem value="blocked">Blocked Only</SelectItem>
+                <SelectItem value="active,frozen">Active & Frozen</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <DataTableViewOptions table={table} />
         </div>
 
         <div className="rounded-md border">
