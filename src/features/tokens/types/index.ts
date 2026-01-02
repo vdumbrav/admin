@@ -45,7 +45,7 @@ export interface PaginatedTokensResponse {
 // Token Filter Params
 export interface TokenFilterParams {
   search?: string;
-  network?: string;
+  networks?: string[];  // Multi-select networks
   isActive?: boolean;
   visibleOnWeb?: boolean;
   visibleOnMobile?: boolean;

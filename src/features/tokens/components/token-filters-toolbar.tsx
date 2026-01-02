@@ -52,7 +52,7 @@ export function TokenFiltersToolbar({
 }: TokenFiltersToolbarProps) {
   const hasFilters =
     filters.search ||
-    filters.network ||
+    (filters.networks && filters.networks.length > 0) ||
     filters.isActive !== undefined ||
     filters.visibleOnWeb !== undefined ||
     filters.visibleOnMobile !== undefined ||
@@ -107,9 +107,9 @@ export function TokenFiltersToolbar({
         {/* Network Filter */}
         <NetworkFilter
           networks={sortedNetworks}
-          selectedNetwork={filters.network}
-          onSelect={(network) =>
-            onFiltersChange({ ...filters, network: network || undefined })
+          selectedNetworks={filters.networks || []}
+          onSelect={(networks) =>
+            onFiltersChange({ ...filters, networks: networks.length > 0 ? networks : undefined })
           }
         />
 
@@ -228,26 +228,51 @@ export function TokenFiltersToolbar({
   );
 }
 
-// Network filter with search
+// Network filter with search and multi-select
 interface NetworkFilterProps {
   networks: string[];
-  selectedNetwork?: string;
-  onSelect: (network: string | undefined) => void;
+  selectedNetworks: string[];
+  onSelect: (networks: string[]) => void;
 }
 
-function NetworkFilter({ networks, selectedNetwork, onSelect }: NetworkFilterProps) {
+function NetworkFilter({ networks, selectedNetworks, onSelect }: NetworkFilterProps) {
+  const handleSelect = (network: string) => {
+    if (selectedNetworks.includes(network)) {
+      onSelect(selectedNetworks.filter((n) => n !== network));
+    } else {
+      onSelect([...selectedNetworks, network]);
+    }
+  };
+
+  const handleClear = () => {
+    onSelect([]);
+  };
+
   return (
     <Popover>
       <PopoverTrigger asChild>
         <Button variant="outline" size="sm" className="h-8 border-dashed">
           <PlusCircledIcon className="mr-2 h-4 w-4" />
           Network
-          {selectedNetwork && (
+          {selectedNetworks.length > 0 && (
             <>
               <Separator orientation="vertical" className="mx-2 h-4" />
-              <Badge variant="secondary" className="rounded-sm px-1 font-normal">
-                {getNetworkLabel(selectedNetwork)}
+              <Badge variant="secondary" className="rounded-sm px-1 font-normal lg:hidden">
+                {selectedNetworks.length}
               </Badge>
+              <div className="hidden space-x-1 lg:flex">
+                {selectedNetworks.length > 2 ? (
+                  <Badge variant="secondary" className="rounded-sm px-1 font-normal">
+                    {selectedNetworks.length} selected
+                  </Badge>
+                ) : (
+                  selectedNetworks.map((network) => (
+                    <Badge key={network} variant="secondary" className="rounded-sm px-1 font-normal">
+                      {getNetworkLabel(network)}
+                    </Badge>
+                  ))
+                )}
+              </div>
             </>
           )}
         </Button>
@@ -259,12 +284,12 @@ function NetworkFilter({ networks, selectedNetwork, onSelect }: NetworkFilterPro
             <CommandEmpty>No network found.</CommandEmpty>
             <CommandGroup>
               {networks.map((network) => {
-                const isSelected = selectedNetwork === network;
+                const isSelected = selectedNetworks.includes(network);
                 const isSupported = isCustodySupported(network);
                 return (
                   <CommandItem
                     key={network}
-                    onSelect={() => onSelect(isSelected ? undefined : network)}
+                    onSelect={() => handleSelect(network)}
                     className="flex items-center gap-2"
                   >
                     <div
@@ -285,6 +310,16 @@ function NetworkFilter({ networks, selectedNetwork, onSelect }: NetworkFilterPro
                 );
               })}
             </CommandGroup>
+            {selectedNetworks.length > 0 && (
+              <>
+                <Separator />
+                <CommandGroup>
+                  <CommandItem onSelect={handleClear} className="justify-center text-center">
+                    Clear filters
+                  </CommandItem>
+                </CommandGroup>
+              </>
+            )}
           </CommandList>
         </Command>
       </PopoverContent>

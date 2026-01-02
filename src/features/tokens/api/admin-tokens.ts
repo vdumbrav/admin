@@ -80,8 +80,9 @@ export const useTokenList = (
       if (filters?.search) {
         params.append('search', filters.search);
       }
-      if (filters?.network) {
-        params.append('network', filters.network);
+      // Support multi-select networks (comma-separated)
+      if (filters?.networks && filters.networks.length > 0) {
+        params.append('network', filters.networks.join(','));
       }
       if (filters?.isActive !== undefined) {
         params.append('isActive', filters.isActive.toString());
