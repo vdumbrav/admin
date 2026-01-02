@@ -72,9 +72,7 @@ const formatDate = (dateString: string): string => {
 };
 
 // Get transaction type badge
-const getTransactionBadge = (group: string, direction: string) => {
-  const _isIncome = direction === 'Income';
-
+const getTransactionBadge = (group: string) => {
   const variants: Record<string, { variant: 'default' | 'secondary' | 'destructive' | 'outline'; icon: typeof IconArrowDown }> = {
     Deposit: { variant: 'default', icon: IconArrowDown },
     Withdraw: { variant: 'destructive', icon: IconArrowUp },
@@ -107,11 +105,6 @@ export function WalletDashboard({ statistics, isLoading }: WalletDashboardProps)
       </Card>
     );
   }
-
-  const _totalVolume24h = [
-    ...statistics.depositVolume24h,
-    ...statistics.withdrawalVolume24h,
-  ].reduce((sum, v) => sum + v.amount, 0);
 
   return (
     <div className="space-y-6">
@@ -340,7 +333,7 @@ function RecentTransactionRow({ transaction }: RecentTransactionRowProps) {
         <span className="text-xl">{getCryptoEmoji(transaction.currency)}</span>
         <div>
           <div className="flex items-center gap-2">
-            {getTransactionBadge(transaction.group, transaction.direction)}
+            {getTransactionBadge(transaction.group)}
             <span className="text-sm font-medium">{transaction.currency}</span>
           </div>
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
