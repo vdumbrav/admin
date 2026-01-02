@@ -203,8 +203,10 @@ export interface DepositAddress {
   id: number;
   currency: string;
   address: string;
+  network?: string;
   subPartnerId: string;
   createdAt: string;
+  logoUrl?: string;
 }
 
 // Deposit Addresses Response

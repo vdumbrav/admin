@@ -11,49 +11,52 @@ interface DepositAddressesListProps {
   isLoading?: boolean;
 }
 
-// CDN base URL for coin icons
-const COIN_CDN_BASE = 'https://cdn.moliedev.xyz/coin-icons/32px';
-
-// Map currency symbols to CDN UIDs
-const CURRENCY_TO_UID: Record<string, string> = {
-  btc: 'bitcoin',
-  eth: 'ethereum',
-  ltc: 'litecoin',
-  trx: 'tron',
-  ton: 'the-open-network',
-  usdt: 'tether',
-  usdc: 'usd-coin',
-  sol: 'solana',
-  bnb: 'binancecoin',
-  matic: 'polygon-pos',
-  doge: 'dogecoin',
-};
-
-// Get CDN icon URL for currency
-const getCurrencyIconUrl = (currency: string) => {
-  const lower = currency?.toLowerCase().replace(/_.*$/, '') || ''; // Remove network suffix like _TRC20
-  const uid = CURRENCY_TO_UID[lower] || lower;
-  return `${COIN_CDN_BASE}/${uid}@3x.png`;
-};
-
 // Currency icon component with fallback
-const CurrencyIcon = ({ currency }: { currency: string }) => {
+const CurrencyIcon = ({ logoUrl, currency }: { logoUrl?: string; currency: string }) => {
+  if (!logoUrl) {
+    return <IconCoin className="h-6 w-6 text-muted-foreground" />;
+  }
+
   return (
-    <img
-      src={getCurrencyIconUrl(currency)}
-      alt={currency}
-      className="h-6 w-6 rounded-full"
-      onError={(e) => {
-        // Hide broken image and show fallback
-        e.currentTarget.style.display = 'none';
-        e.currentTarget.nextElementSibling?.classList.remove('hidden');
-      }}
-    />
+    <>
+      <img
+        src={logoUrl}
+        alt={currency}
+        className="h-6 w-6 rounded-full"
+        onError={(e) => {
+          // Hide broken image and show fallback
+          e.currentTarget.style.display = 'none';
+          e.currentTarget.nextElementSibling?.classList.remove('hidden');
+        }}
+      />
+      <IconCoin className="h-6 w-6 text-muted-foreground hidden" />
+    </>
   );
 };
 
-// Get network name from currency
-const getNetworkName = (currency: string) => {
+// Get network name from currency or network field
+const getNetworkName = (currency: string, network?: string) => {
+  // If network is provided from API, use it
+  if (network) {
+    const lower = network.toLowerCase();
+    const networkNames: Record<string, string> = {
+      btc: 'Bitcoin',
+      bitcoin: 'Bitcoin',
+      eth: 'Ethereum',
+      ethereum: 'Ethereum',
+      trx: 'Tron',
+      tron: 'Tron',
+      ltc: 'Litecoin',
+      litecoin: 'Litecoin',
+      ton: 'TON',
+      bsc: 'BSC',
+      sol: 'Solana',
+      solana: 'Solana',
+    };
+    return networkNames[lower] || network;
+  }
+
+  // Fallback: try to extract from currency name
   const upper = currency?.toUpperCase() || '';
   if (upper.includes('TRC20') || upper === 'TRX') return 'Tron';
   if (upper.includes('ERC20') || upper === 'ETH') return 'Ethereum';
@@ -114,7 +117,7 @@ export function DepositAddressesList({ addresses, isLoading }: DepositAddressesL
         ) : (
           <div className="space-y-3">
             {addresses.map((addr) => {
-              const network = getNetworkName(addr.currency);
+              const networkName = getNetworkName(addr.currency, addr.network);
               return (
                 <div
                   key={addr.id}
@@ -122,14 +125,13 @@ export function DepositAddressesList({ addresses, isLoading }: DepositAddressesL
                 >
                   <div className="flex items-start gap-3 min-w-0 flex-1">
                     <div className="flex-shrink-0 mt-0.5">
-                      <CurrencyIcon currency={addr.currency} />
-                      <IconCoin className="h-6 w-6 text-muted-foreground hidden" />
+                      <CurrencyIcon logoUrl={addr.logoUrl} currency={addr.currency} />
                     </div>
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2 mb-1">
                         <Badge variant="outline">{addr.currency?.toUpperCase() || 'N/A'}</Badge>
-                        {network && (
-                          <span className="text-xs text-muted-foreground">{network}</span>
+                        {networkName && (
+                          <span className="text-xs text-muted-foreground">{networkName}</span>
                         )}
                       </div>
                       <div className="font-mono text-xs break-all select-all bg-background/50 p-2 rounded border">
