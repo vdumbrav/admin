@@ -163,8 +163,9 @@ const statusOptions = [
   { value: 'cancelled', label: 'Cancelled' },
 ];
 
+// Actual EPaymentType enum values
 const typeOptions = [
-  { value: 'card_creation', label: 'Card Creation' },
+  { value: 'card_purchase', label: 'Card Creation' },
   { value: 'card_topup', label: 'Card Topup' },
 ];
 

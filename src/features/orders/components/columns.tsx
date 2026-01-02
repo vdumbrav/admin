@@ -20,8 +20,9 @@ import {
 } from '@tabler/icons-react';
 import type { CardOrder } from '../types';
 
+// Actual EPaymentType enum values: card_purchase, card_topup
 const orderTypeConfig = {
-  card_creation: {
+  card_purchase: {
     label: 'Card Creation',
     icon: IconCreditCard,
     color: 'text-blue-600',

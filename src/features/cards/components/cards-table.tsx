@@ -151,10 +151,13 @@ function FacetedFilter({
   );
 }
 
+// ECardStatus: active, frozen, blocked, expired, cancelled
 const statusOptions = [
   { value: 'active', label: 'Active' },
   { value: 'frozen', label: 'Frozen' },
   { value: 'blocked', label: 'Blocked' },
+  { value: 'expired', label: 'Expired' },
+  { value: 'cancelled', label: 'Cancelled' },
 ];
 
 interface CardsTableProps {

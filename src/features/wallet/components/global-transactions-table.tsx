@@ -62,18 +62,26 @@ interface GlobalTransactionsTableProps {
   onFilterChange: (filters: TransactionFilterParams) => void;
 }
 
-// Filter options
+// Filter options - ETransactionDirections: accrual, retention, income, outgo
 const directionOptions = [
-  { value: 'Income', label: 'Income' },
-  { value: 'Outgo', label: 'Outgo' },
+  { value: 'income', label: 'Income' },
+  { value: 'outgo', label: 'Outgo' },
+  { value: 'accrual', label: 'Accrual' },
+  { value: 'retention', label: 'Retention' },
 ];
 
+// ETransactionGroups enum values
 const groupOptions = [
   { value: 'on_ramp', label: 'Deposits' },
-  { value: 'withdraw', label: 'Withdrawals' },
-  { value: 'swap', label: 'Exchanges' },
-  { value: 'send', label: 'Sends' },
-  { value: 'receive', label: 'Receives' },
+  { value: 'off_ramp', label: 'Withdrawals' },
+  { value: 'withdraw', label: 'Withdraw' },
+  { value: 'swap', label: 'Swap' },
+  { value: 'send', label: 'Send' },
+  { value: 'receive', label: 'Receive' },
+  { value: 'payment', label: 'Payment' },
+  { value: 'topup', label: 'Card Topup' },
+  { value: 'cards', label: 'Cards' },
+  { value: 'fee', label: 'Fee' },
 ];
 
 const currencyOptions = [
@@ -88,10 +96,10 @@ const currencyOptions = [
   { value: 'BNB', label: 'BNB' },
 ];
 
+// ETransactionStatuses: pending, success, failed
 const statusOptions = [
-  { value: 'completed', label: 'Completed' },
+  { value: 'success', label: 'Completed' },
   { value: 'pending', label: 'Pending' },
-  { value: 'processing', label: 'Processing' },
   { value: 'failed', label: 'Failed' },
 ];
 

@@ -57,17 +57,13 @@ export const useAdminOrders = (filters: OrdersFilterParams = {}) => {
   });
 
   // Transform the API response to match CardOrder type
+  // Backend paymentType values: card_purchase, card_topup
   const orders: CardOrder[] = data?.orders
     ? data.orders.map((order) => {
-        // Map backend payment_type to frontend orderType
-        const orderType = order.paymentType === 'purchase'
-          ? 'card_creation'
-          : 'card_topup';
-
         return {
           id: order.id,
           userId: order.user?.id,
-          orderType,
+          orderType: order.paymentType, // Use backend value directly (card_purchase, card_topup)
           status: order.status,
           amount: order.amount,
           currency: order.currency || 'USD',
