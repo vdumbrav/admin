@@ -13,6 +13,10 @@ export interface TransactionFilters {
   cardId?: number;
   userId?: number;
   type?: string;
+  types?: string[];       // Multi-select types
   source?: string;
+  sources?: string[];     // Multi-select sources
+  status?: string;
+  statuses?: string[];    // Multi-select statuses
   search?: string;
 }

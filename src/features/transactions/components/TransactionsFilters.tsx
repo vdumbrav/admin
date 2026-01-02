@@ -1,15 +1,21 @@
-import { useState } from 'react';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { CheckIcon, PlusCircledIcon } from '@radix-ui/react-icons';
+import { Cross2Icon } from '@radix-ui/react-icons';
+import { cn } from '@/lib/utils';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { IconFilter, IconX } from '@tabler/icons-react';
+import { Input } from '@/components/ui/input';
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+  CommandSeparator,
+} from '@/components/ui/command';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Separator } from '@/components/ui/separator';
+import { IconSearch } from '@tabler/icons-react';
 import type { TransactionFilters } from '../types';
 
 interface TransactionsFiltersProps {
@@ -18,7 +24,6 @@ interface TransactionsFiltersProps {
 }
 
 const typeOptions = [
-  { value: 'all', label: 'All Types' },
   { value: 'deposit', label: 'Deposit' },
   { value: 'withdrawal', label: 'Withdrawal' },
   { value: 'swap', label: 'Swap' },
@@ -28,7 +33,6 @@ const typeOptions = [
 ];
 
 const sourceOptions = [
-  { value: 'all', label: 'All Sources' },
   { value: 'internal', label: 'Internal' },
   { value: 'external', label: 'External' },
   { value: 'card', label: 'Card' },
@@ -36,118 +40,219 @@ const sourceOptions = [
   { value: 'fiat', label: 'Fiat' },
 ];
 
+const statusOptions = [
+  { value: 'pending', label: 'Pending' },
+  { value: 'completed', label: 'Completed' },
+  { value: 'failed', label: 'Failed' },
+  { value: 'cancelled', label: 'Cancelled' },
+];
+
+// Faceted Filter Component
+interface FacetedFilterProps {
+  title: string;
+  options: { value: string; label: string }[];
+  selectedValues: string[];
+  onSelect: (values: string[]) => void;
+  multiple?: boolean;
+}
+
+function FacetedFilter({
+  title,
+  options,
+  selectedValues,
+  onSelect,
+  multiple = true,
+}: FacetedFilterProps) {
+  const selected = new Set(selectedValues);
+
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        <Button variant="outline" size="sm" className="h-8 border-dashed">
+          <PlusCircledIcon className="mr-2 h-4 w-4" />
+          {title}
+          {selected.size > 0 && (
+            <>
+              <Separator orientation="vertical" className="mx-2 h-4" />
+              <Badge variant="secondary" className="rounded-sm px-1 font-normal lg:hidden">
+                {selected.size}
+              </Badge>
+              <div className="hidden space-x-1 lg:flex">
+                {selected.size > 2 ? (
+                  <Badge variant="secondary" className="rounded-sm px-1 font-normal">
+                    {selected.size} selected
+                  </Badge>
+                ) : (
+                  options
+                    .filter((option) => selected.has(option.value))
+                    .map((option) => (
+                      <Badge
+                        variant="secondary"
+                        key={option.value}
+                        className="rounded-sm px-1 font-normal"
+                      >
+                        {option.label}
+                      </Badge>
+                    ))
+                )}
+              </div>
+            </>
+          )}
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-[200px] p-0" align="start">
+        <Command>
+          <CommandInput placeholder={title} />
+          <CommandList>
+            <CommandEmpty>No results found.</CommandEmpty>
+            <CommandGroup>
+              {options.map((option) => {
+                const isSelected = selected.has(option.value);
+                return (
+                  <CommandItem
+                    key={option.value}
+                    onSelect={() => {
+                      if (multiple) {
+                        const newSet = new Set(selected);
+                        if (isSelected) newSet.delete(option.value);
+                        else newSet.add(option.value);
+                        onSelect(Array.from(newSet));
+                      } else {
+                        onSelect(isSelected ? [] : [option.value]);
+                      }
+                    }}
+                  >
+                    <div
+                      className={cn(
+                        'border-primary mr-2 flex h-4 w-4 items-center justify-center rounded-sm border',
+                        isSelected
+                          ? 'bg-primary text-primary-foreground'
+                          : 'opacity-50 [&_svg]:invisible'
+                      )}
+                    >
+                      <CheckIcon className="h-4 w-4" />
+                    </div>
+                    <span>{option.label}</span>
+                  </CommandItem>
+                );
+              })}
+            </CommandGroup>
+            {selected.size > 0 && (
+              <>
+                <CommandSeparator />
+                <CommandGroup>
+                  <CommandItem onSelect={() => onSelect([])} className="justify-center text-center">
+                    Clear filters
+                  </CommandItem>
+                </CommandGroup>
+              </>
+            )}
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
+  );
+}
+
 export function TransactionsFilters({
   filters,
   onFiltersChange,
 }: TransactionsFiltersProps) {
-  const [walletId, setWalletId] = useState(filters.walletId?.toString() || '');
+  const selectedTypes = filters.types || (filters.type ? [filters.type] : []);
+  const selectedSources = filters.sources || (filters.source ? [filters.source] : []);
+  const selectedStatuses = filters.statuses || (filters.status ? [filters.status] : []);
 
-  const handleTypeChange = (value: string) => {
-    onFiltersChange({
-      ...filters,
-      type: value === 'all' ? undefined : value,
-      page: 1,
-    });
-  };
-
-  const handleSourceChange = (value: string) => {
-    onFiltersChange({
-      ...filters,
-      source: value === 'all' ? undefined : value,
-      page: 1,
-    });
-  };
-
-  const handleWalletIdChange = (value: string) => {
-    setWalletId(value);
-    const numValue = parseInt(value);
-    onFiltersChange({
-      ...filters,
-      walletId: value && !isNaN(numValue) ? numValue : undefined,
-      page: 1,
-    });
-  };
+  const hasFilters =
+    selectedTypes.length > 0 ||
+    selectedSources.length > 0 ||
+    selectedStatuses.length > 0 ||
+    filters.walletId;
 
   const handleClearFilters = () => {
-    setWalletId('');
     onFiltersChange({
       page: 1,
       itemsPerPage: filters.itemsPerPage,
     });
   };
 
-  const hasActiveFilters = filters.type || filters.source || filters.walletId;
-
   return (
-    <div className="rounded-lg border bg-card p-4">
-      <div className="mb-4 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <IconFilter className="h-5 w-5 text-muted-foreground" />
-          <h3 className="font-semibold">Filters</h3>
-        </div>
-        {hasActiveFilters && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleClearFilters}
-            className="h-8"
-          >
-            <IconX className="mr-1 h-4 w-4" />
-            Clear All
-          </Button>
-        )}
+    <div className="flex flex-wrap items-center gap-2">
+      {/* Search by Wallet ID */}
+      <div className="relative">
+        <IconSearch className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+        <Input
+          placeholder="Wallet ID..."
+          type="number"
+          value={filters.walletId?.toString() || ''}
+          onChange={(e) => {
+            const value = e.target.value;
+            const numValue = parseInt(value);
+            onFiltersChange({
+              ...filters,
+              walletId: value && !isNaN(numValue) ? numValue : undefined,
+              page: 1,
+            });
+          }}
+          className="h-8 w-[130px] pl-8"
+        />
       </div>
 
-      <div className="grid gap-4 md:grid-cols-3">
-        <div className="grid gap-2">
-          <Label htmlFor="type">Transaction Type</Label>
-          <Select
-            value={filters.type || 'all'}
-            onValueChange={handleTypeChange}
-          >
-            <SelectTrigger id="type">
-              <SelectValue placeholder="Select type" />
-            </SelectTrigger>
-            <SelectContent>
-              {typeOptions.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+      {/* Type Filter */}
+      <FacetedFilter
+        title="Type"
+        options={typeOptions}
+        selectedValues={selectedTypes}
+        onSelect={(values) =>
+          onFiltersChange({
+            ...filters,
+            types: values.length > 0 ? values : undefined,
+            type: undefined,
+            page: 1,
+          })
+        }
+      />
 
-        <div className="grid gap-2">
-          <Label htmlFor="source">Source</Label>
-          <Select
-            value={filters.source || 'all'}
-            onValueChange={handleSourceChange}
-          >
-            <SelectTrigger id="source">
-              <SelectValue placeholder="Select source" />
-            </SelectTrigger>
-            <SelectContent>
-              {sourceOptions.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+      {/* Source Filter */}
+      <FacetedFilter
+        title="Source"
+        options={sourceOptions}
+        selectedValues={selectedSources}
+        onSelect={(values) =>
+          onFiltersChange({
+            ...filters,
+            sources: values.length > 0 ? values : undefined,
+            source: undefined,
+            page: 1,
+          })
+        }
+      />
 
-        <div className="grid gap-2">
-          <Label htmlFor="walletId">Wallet ID</Label>
-          <Input
-            id="walletId"
-            type="number"
-            placeholder="Enter wallet ID"
-            value={walletId}
-            onChange={(e) => handleWalletIdChange(e.target.value)}
-          />
-        </div>
-      </div>
+      {/* Status Filter */}
+      <FacetedFilter
+        title="Status"
+        options={statusOptions}
+        selectedValues={selectedStatuses}
+        onSelect={(values) =>
+          onFiltersChange({
+            ...filters,
+            statuses: values.length > 0 ? values : undefined,
+            status: undefined,
+            page: 1,
+          })
+        }
+      />
+
+      {/* Reset Button */}
+      {hasFilters && (
+        <Button
+          variant="ghost"
+          onClick={handleClearFilters}
+          className="h-8 px-2 text-sm leading-5 font-medium lg:px-3"
+        >
+          Reset
+          <Cross2Icon className="ml-2 h-4 w-4" />
+        </Button>
+      )}
     </div>
   );
 }
