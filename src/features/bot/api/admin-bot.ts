@@ -719,3 +719,50 @@ export const useUserProfiles = (page = 1, limit = 50) => {
     },
   });
 };
+
+// ==================== Bot Feature Toggles ====================
+
+export interface BotFeatures {
+  cards: boolean;
+  wallet: boolean;
+  updatedAt?: string;
+}
+
+export const useBotFeatures = () => {
+  const auth = useAppAuth();
+
+  return useQuery({
+    queryKey: ['admin', 'bot', 'features'],
+    queryFn: async (): Promise<BotFeatures> => {
+      const token = await auth.getAccessToken();
+      return orvalMutator<BotFeatures>({
+        url: '/admin/bot/features',
+        method: 'GET',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+    },
+  });
+};
+
+export const useUpdateBotFeature = () => {
+  const auth = useAppAuth();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ feature, enabled }: { feature: 'cards' | 'wallet'; enabled: boolean }): Promise<BotFeatures> => {
+      const token = await auth.getAccessToken();
+      return orvalMutator<BotFeatures>({
+        url: `/admin/bot/features/${feature}`,
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        data: { enabled },
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'bot', 'features'] });
+    },
+  });
+};

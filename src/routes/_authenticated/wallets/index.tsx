@@ -12,6 +12,7 @@ import {
   IconWallet,
   IconActivity,
   IconCoins,
+  IconSettings,
 } from '@tabler/icons-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
@@ -42,6 +43,9 @@ import {
 } from '@/features/tokens/api/admin-tokens';
 import { TokenStatsCards, TokensTable, TokenBulkActions, TokenFiltersToolbar } from '@/features/tokens/components';
 import type { TokenFilterParams, UpdateTokenRequest } from '@/features/tokens/types';
+import { useBotFeatures, useUpdateBotFeature } from '@/features/bot/api/admin-bot';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 
 export const Route = createFileRoute('/_authenticated/wallets/')({
   component: WalletsPage,
@@ -95,6 +99,10 @@ function WalletsPage() {
   const bulkFeatureMutation = useBulkFeatureUpdate();
   const syncMutation = useSyncFromChangeNow();
 
+  // Bot features
+  const { data: botFeatures, isLoading: botFeaturesLoading, refetch: refetchBotFeatures } = useBotFeatures();
+  const updateBotFeatureMutation = useUpdateBotFeature();
+
   // Wallet data
   const wallets = walletsData?.items || [];
   const total = walletsData?.total || 0;
@@ -127,7 +135,17 @@ function WalletsPage() {
     refetchTransactions();
     refetchTokenStats();
     refetchTokens();
-  }, [refetchStats, refetchExtendedStats, refetchWallets, refetchTransactions, refetchTokenStats, refetchTokens]);
+    refetchBotFeatures();
+  }, [refetchStats, refetchExtendedStats, refetchWallets, refetchTransactions, refetchTokenStats, refetchTokens, refetchBotFeatures]);
+
+  const handleToggleWalletFeature = useCallback(async (enabled: boolean) => {
+    try {
+      await updateBotFeatureMutation.mutateAsync({ feature: 'wallet', enabled });
+      toast.success(`Wallet feature ${enabled ? 'enabled' : 'disabled'} in bot`);
+    } catch (error) {
+      toast.error('Failed to update wallet feature');
+    }
+  }, [updateBotFeatureMutation]);
 
   const handleTxFilterChange = useCallback((newFilters: TransactionFilterParams) => {
     setTxFilters(newFilters);
@@ -238,7 +256,7 @@ function WalletsPage() {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full max-w-lg grid-cols-4">
+        <TabsList className="grid w-full max-w-xl grid-cols-5">
           <TabsTrigger value="dashboard" className="gap-2">
             <IconLayoutDashboard className="h-4 w-4" />
             Dashboard
@@ -254,6 +272,10 @@ function WalletsPage() {
           <TabsTrigger value="tokens" className="gap-2">
             <IconCoins className="h-4 w-4" />
             Tokens
+          </TabsTrigger>
+          <TabsTrigger value="settings" className="gap-2">
+            <IconSettings className="h-4 w-4" />
+            Settings
           </TabsTrigger>
         </TabsList>
 
@@ -387,6 +409,48 @@ function WalletsPage() {
               </CardContent>
             </Card>
           </div>
+        </TabsContent>
+
+        {/* Settings Tab */}
+        <TabsContent value="settings" className="mt-6">
+          <Card>
+            <CardContent className="pt-6">
+              <div className="space-y-6">
+                <div>
+                  <h3 className="text-lg font-semibold mb-4">Bot Feature Toggles</h3>
+                  <p className="text-sm text-muted-foreground mb-6">
+                    Enable or disable wallet features in the Telegram bot
+                  </p>
+                </div>
+
+                {botFeaturesLoading ? (
+                  <Skeleton className="h-12 w-full max-w-md" />
+                ) : (
+                  <div className="flex items-center justify-between max-w-md p-4 border rounded-lg">
+                    <div className="space-y-0.5">
+                      <Label htmlFor="wallet-toggle" className="text-base font-medium">
+                        Enable Wallet in Bot
+                      </Label>
+                      <p className="text-sm text-muted-foreground">
+                        Allow users to access custodial wallet features in the Telegram bot
+                      </p>
+                      {botFeatures?.updatedAt && (
+                        <p className="text-xs text-muted-foreground">
+                          Last updated: {new Date(botFeatures.updatedAt).toLocaleString()}
+                        </p>
+                      )}
+                    </div>
+                    <Switch
+                      id="wallet-toggle"
+                      checked={botFeatures?.wallet ?? false}
+                      onCheckedChange={handleToggleWalletFeature}
+                      disabled={updateBotFeatureMutation.isPending}
+                    />
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
     </div>
