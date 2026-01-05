@@ -147,6 +147,15 @@ function WalletsPage() {
     }
   }, [updateBotFeatureMutation]);
 
+  const handleToggleBuySellFeature = useCallback(async (enabled: boolean) => {
+    try {
+      await updateBotFeatureMutation.mutateAsync({ feature: 'buySell', enabled });
+      toast.success(`Buy/Sell feature ${enabled ? 'enabled' : 'disabled'} in bot`);
+    } catch (error) {
+      toast.error('Failed to update Buy/Sell feature');
+    }
+  }, [updateBotFeatureMutation]);
+
   const handleTxFilterChange = useCallback((newFilters: TransactionFilterParams) => {
     setTxFilters(newFilters);
     setTxPage(1);
@@ -426,26 +435,48 @@ function WalletsPage() {
                 {botFeaturesLoading ? (
                   <Skeleton className="h-12 w-full max-w-md" />
                 ) : (
-                  <div className="flex items-center justify-between max-w-md p-4 border rounded-lg">
-                    <div className="space-y-0.5">
-                      <Label htmlFor="wallet-toggle" className="text-base font-medium">
-                        Enable Wallet in Bot
-                      </Label>
-                      <p className="text-sm text-muted-foreground">
-                        Allow users to access custodial wallet features in the Telegram bot
-                      </p>
-                      {botFeatures?.updatedAt && (
-                        <p className="text-xs text-muted-foreground">
-                          Last updated: {new Date(botFeatures.updatedAt).toLocaleString()}
+                  <div className="space-y-4">
+                    {/* Wallet Toggle */}
+                    <div className="flex items-center justify-between max-w-md p-4 border rounded-lg">
+                      <div className="space-y-0.5">
+                        <Label htmlFor="wallet-toggle" className="text-base font-medium">
+                          Enable Wallet in Bot
+                        </Label>
+                        <p className="text-sm text-muted-foreground">
+                          Allow users to access custodial wallet features in the Telegram bot
                         </p>
-                      )}
+                      </div>
+                      <Switch
+                        id="wallet-toggle"
+                        checked={botFeatures?.wallet ?? false}
+                        onCheckedChange={handleToggleWalletFeature}
+                        disabled={updateBotFeatureMutation.isPending}
+                      />
                     </div>
-                    <Switch
-                      id="wallet-toggle"
-                      checked={botFeatures?.wallet ?? false}
-                      onCheckedChange={handleToggleWalletFeature}
-                      disabled={updateBotFeatureMutation.isPending}
-                    />
+
+                    {/* Buy/Sell Toggle */}
+                    <div className="flex items-center justify-between max-w-md p-4 border rounded-lg">
+                      <div className="space-y-0.5">
+                        <Label htmlFor="buysell-toggle" className="text-base font-medium">
+                          Enable Buy/Sell in Bot
+                        </Label>
+                        <p className="text-sm text-muted-foreground">
+                          Allow users to buy and sell crypto via Onramper in the Telegram bot
+                        </p>
+                      </div>
+                      <Switch
+                        id="buysell-toggle"
+                        checked={botFeatures?.buySell ?? false}
+                        onCheckedChange={handleToggleBuySellFeature}
+                        disabled={updateBotFeatureMutation.isPending}
+                      />
+                    </div>
+
+                    {botFeatures?.updatedAt && (
+                      <p className="text-xs text-muted-foreground">
+                        Last updated: {new Date(botFeatures.updatedAt).toLocaleString()}
+                      </p>
+                    )}
                   </div>
                 )}
               </div>

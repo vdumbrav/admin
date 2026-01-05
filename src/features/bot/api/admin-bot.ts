@@ -725,6 +725,7 @@ export const useUserProfiles = (page = 1, limit = 50) => {
 export interface BotFeatures {
   cards: boolean;
   wallet: boolean;
+  buySell: boolean;
   updatedAt?: string;
 }
 
@@ -749,7 +750,7 @@ export const useUpdateBotFeature = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ feature, enabled }: { feature: 'cards' | 'wallet'; enabled: boolean }): Promise<BotFeatures> => {
+    mutationFn: async ({ feature, enabled }: { feature: 'cards' | 'wallet' | 'buySell'; enabled: boolean }): Promise<BotFeatures> => {
       const token = await auth.getAccessToken();
       return orvalMutator<BotFeatures>({
         url: `/admin/bot/features/${feature}`,
