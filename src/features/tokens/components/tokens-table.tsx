@@ -126,18 +126,19 @@ export function TokensTable({
           const token = row.original;
           return (
             <div className="flex items-center gap-3">
-              <Avatar className="h-8 w-8">
+              <Avatar className="h-8 w-8 rounded-sm">
                 <AvatarImage
                   src={token.logoUrl || token.fallbackLogoUrl}
                   alt={token.symbol}
+                  className="rounded-sm"
                 />
-                <AvatarFallback className="text-xs">
+                <AvatarFallback className="text-xs rounded-sm">
                   {token.symbol.slice(0, 2).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
-              <div className="flex flex-col">
+              <div className="flex flex-col items-start">
                 <span className="font-medium">{token.symbol.toUpperCase()}</span>
-                <span className="text-xs text-muted-foreground truncate max-w-[200px]">
+                <span className="text-xs text-muted-foreground truncate max-w-[200px] text-left">
                   {token.name}
                 </span>
               </div>
