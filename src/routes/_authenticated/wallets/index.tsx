@@ -156,6 +156,16 @@ function WalletsPage() {
     }
   }, [updateBotFeatureMutation]);
 
+  const handleToggleIconSource = useCallback(async (useCdn: boolean) => {
+    try {
+      const newSource = useCdn ? 'cdn' : 'changenow';
+      await updateBotFeatureMutation.mutateAsync({ feature: 'iconSource', value: newSource });
+      toast.success(`Icon source changed to ${useCdn ? 'Walme CDN' : 'ChangeNow'}`);
+    } catch (error) {
+      toast.error('Failed to update icon source');
+    }
+  }, [updateBotFeatureMutation]);
+
   const handleTxFilterChange = useCallback((newFilters: TransactionFilterParams) => {
     setTxFilters(newFilters);
     setTxPage(1);
@@ -468,6 +478,27 @@ function WalletsPage() {
                         id="buysell-toggle"
                         checked={botFeatures?.buySell ?? false}
                         onCheckedChange={handleToggleBuySellFeature}
+                        disabled={updateBotFeatureMutation.isPending}
+                      />
+                    </div>
+
+                    {/* Icon Source Toggle */}
+                    <div className="flex items-center justify-between max-w-md p-4 border rounded-lg">
+                      <div className="space-y-0.5">
+                        <Label htmlFor="icon-source-toggle" className="text-base font-medium">
+                          Use Walme CDN for Icons
+                        </Label>
+                        <p className="text-sm text-muted-foreground">
+                          Toggle between Walme CDN (PNG with network) and ChangeNow (SVG)
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          Current: <span className="font-medium">{botFeatures?.iconSource === 'cdn' ? 'Walme CDN' : 'ChangeNow'}</span>
+                        </p>
+                      </div>
+                      <Switch
+                        id="icon-source-toggle"
+                        checked={botFeatures?.iconSource === 'cdn'}
+                        onCheckedChange={handleToggleIconSource}
                         disabled={updateBotFeatureMutation.isPending}
                       />
                     </div>
