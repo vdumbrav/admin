@@ -40,6 +40,16 @@ function CardsPage() {
     }
   }, [updateBotFeatureMutation]);
 
+  const handleToggleIconSource = useCallback(async (useCdn: boolean) => {
+    try {
+      const newSource = useCdn ? 'cdn' : 'changenow';
+      await updateBotFeatureMutation.mutateAsync({ feature: 'iconSource', value: newSource });
+      toast.success(`Icon source changed to ${useCdn ? 'Walme CDN' : 'ChangeNow'}`);
+    } catch (error) {
+      toast.error('Failed to update icon source');
+    }
+  }, [updateBotFeatureMutation]);
+
   return (
     <div className="flex flex-col gap-6 p-6">
       <div className="flex items-center justify-between">
@@ -101,26 +111,49 @@ function CardsPage() {
                 {botFeaturesLoading ? (
                   <Skeleton className="h-12 w-full max-w-md" />
                 ) : (
-                  <div className="flex items-center justify-between max-w-md p-4 border rounded-lg">
-                    <div className="space-y-0.5">
-                      <Label htmlFor="cards-toggle" className="text-base font-medium">
-                        Enable Cards in Bot
-                      </Label>
-                      <p className="text-sm text-muted-foreground">
-                        Allow users to access virtual card features in the Telegram bot
-                      </p>
-                      {botFeatures?.updatedAt && (
-                        <p className="text-xs text-muted-foreground">
-                          Last updated: {new Date(botFeatures.updatedAt).toLocaleString()}
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between max-w-md p-4 border rounded-lg">
+                      <div className="space-y-0.5">
+                        <Label htmlFor="cards-toggle" className="text-base font-medium">
+                          Enable Cards in Bot
+                        </Label>
+                        <p className="text-sm text-muted-foreground">
+                          Allow users to access virtual card features in the Telegram bot
                         </p>
-                      )}
+                      </div>
+                      <Switch
+                        id="cards-toggle"
+                        checked={botFeatures?.cards ?? false}
+                        onCheckedChange={handleToggleCardsFeature}
+                        disabled={updateBotFeatureMutation.isPending}
+                      />
                     </div>
-                    <Switch
-                      id="cards-toggle"
-                      checked={botFeatures?.cards ?? false}
-                      onCheckedChange={handleToggleCardsFeature}
-                      disabled={updateBotFeatureMutation.isPending}
-                    />
+
+                    <div className="flex items-center justify-between max-w-md p-4 border rounded-lg">
+                      <div className="space-y-0.5">
+                        <Label htmlFor="icon-source-toggle" className="text-base font-medium">
+                          Use Walme CDN for QR Icons
+                        </Label>
+                        <p className="text-sm text-muted-foreground">
+                          Toggle between Walme CDN (PNG with network) and ChangeNow (SVG)
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          Current: <span className="font-medium">{botFeatures?.iconSource === 'cdn' ? 'Walme CDN' : 'ChangeNow'}</span>
+                        </p>
+                      </div>
+                      <Switch
+                        id="icon-source-toggle"
+                        checked={botFeatures?.iconSource === 'cdn'}
+                        onCheckedChange={handleToggleIconSource}
+                        disabled={updateBotFeatureMutation.isPending}
+                      />
+                    </div>
+
+                    {botFeatures?.updatedAt && (
+                      <p className="text-xs text-muted-foreground">
+                        Last updated: {new Date(botFeatures.updatedAt).toLocaleString()}
+                      </p>
+                    )}
                   </div>
                 )}
               </div>
