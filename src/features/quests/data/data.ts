@@ -99,7 +99,7 @@ export const groups = [
 /**
  * Card quest types (manually added until API types are regenerated)
  */
-const CARD_QUEST_TYPES = [
+export const CARD_QUEST_TYPES = [
   'card-issue',
   'card-purchase-daily',
   'card-first-purchase',
@@ -132,6 +132,16 @@ export const types = [
  * Types for join preset only (limited set)
  */
 export const joinPresetTypes = getJoinPresetTypes().map(
+  (type): DropdownOption => ({
+    value: type,
+    label: TYPE_LABELS[type],
+  }),
+);
+
+/**
+ * Types for card preset only
+ */
+export const cardPresetTypes = CARD_QUEST_TYPES.map(
   (type): DropdownOption => ({
     value: type,
     label: TYPE_LABELS[type],

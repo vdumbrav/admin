@@ -32,7 +32,7 @@ import { DailyRewardsEditor } from '../components/daily-rewards-editor';
 import { IconUpload } from '../components/icon-upload';
 import { ManagedField } from '../components/managed-field';
 import { TwitterPreview } from '../components/twitter-preview';
-import { getCompatibleProviders, groups, joinPresetTypes, providers, types } from '../data/data';
+import { cardPresetTypes, getCompatibleProviders, groups, joinPresetTypes, providers, types } from '../data/data';
 import type { PresetConfig } from '../presets/types';
 import type { QuestFormValues } from '../types/form-types';
 import {
@@ -81,6 +81,10 @@ export function QuestFormFields({
     // For join preset, only allow join and dummy types
     if (presetConfig?.id === 'join') {
       return joinPresetTypes;
+    }
+    // For card preset, only allow card quest types
+    if (presetConfig?.id === 'card') {
+      return cardPresetTypes;
     }
     return types;
   }, [presetConfig?.id]);
