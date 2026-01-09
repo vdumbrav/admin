@@ -249,9 +249,13 @@ export const TYPE_PROVIDER_REQUIREMENTS: Partial<
  * Get compatible providers for a given type
  */
 export function getCompatibleProviders(
-  type: WaitlistTasksResponseDtoTypeItem,
+  type: WaitlistTasksResponseDtoTypeItem | string,
 ): TaskResponseDtoProvider[] {
-  return TYPE_PROVIDER_REQUIREMENTS[type] ?? getAvailableApiProviders();
+  // Card types don't have specific provider requirements
+  if (typeof type === 'string' && type.startsWith('card-')) {
+    return getAvailableApiProviders();
+  }
+  return TYPE_PROVIDER_REQUIREMENTS[type as WaitlistTasksResponseDtoTypeItem] ?? getAvailableApiProviders();
 }
 
 /**
