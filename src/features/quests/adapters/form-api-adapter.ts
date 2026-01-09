@@ -446,7 +446,7 @@ export function formToApi(formData: QuestFormValues): Omit<CreateTaskDto, 'paren
           const hasBlockingTask =
             formData.blocking_task?.id !== null &&
             formData.blocking_task?.id !== undefined &&
-            typeof formData.blocking_task.id === 'number';
+            typeof formData.blocking_task?.id === 'number';
 
           // Social providers (telegram, discord, twitter) require blocking_task (except connect type)
           if (isSocialProvider(formData.provider) && !isConnectType && !hasBlockingTask) {
