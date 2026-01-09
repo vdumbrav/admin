@@ -133,7 +133,7 @@ export const DEFAULT_FORM_VALUES: QuestFormValues = {
 
   // REQUIRED resources - empty strings for user input
   resources: {
-    isNew: false, // Default value for isNew field
+    isNew: true, // Default value for isNew field (new quests should show "New" badge)
     ui: {
       button: '',
       'pop-up': {
