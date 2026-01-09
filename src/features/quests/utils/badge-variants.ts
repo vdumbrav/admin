@@ -1,4 +1,4 @@
-export type BadgeVariant = 'social' | 'daily' | 'referral' | 'partner' | 'default';
+export type BadgeVariant = 'social' | 'daily' | 'referral' | 'partner' | 'card' | 'default';
 
 export const getBadgeVariant = (group: string): BadgeVariant => {
   switch (group.toLowerCase()) {
@@ -10,6 +10,8 @@ export const getBadgeVariant = (group: string): BadgeVariant => {
       return 'referral';
     case 'partner':
       return 'partner';
+    case 'card':
+      return 'card';
     default:
       return 'default';
   }
@@ -24,6 +26,7 @@ export const getBadgeClasses = (variant: BadgeVariant): string => {
     case 'daily':
     case 'referral':
     case 'partner':
+    case 'card':
       return `${baseClasses} badge-${variant}`;
     case 'default':
       return `${baseClasses} bg-secondary text-secondary-foreground border-border`;
@@ -55,6 +58,12 @@ export const getBadgeStyle = (variant: BadgeVariant): React.CSSProperties => {
         backgroundColor: 'var(--badge-partner)',
         color: 'var(--badge-partner-foreground)',
         borderColor: 'var(--badge-partner-border)',
+      };
+    case 'card':
+      return {
+        backgroundColor: 'var(--badge-card, #10b981)',
+        color: 'var(--badge-card-foreground, #ffffff)',
+        borderColor: 'var(--badge-card-border, #059669)',
       };
     case 'default':
       return {};

@@ -23,9 +23,16 @@ export const QUEST_TYPES = [
   'repeatable',
   'external',
   'dummy',
+  // Card quest types
+  'card-issue',
+  'card-purchase-daily',
+  'card-first-purchase',
+  'card-topup',
+  'card-spend-milestone',
+  'card-monthly-spend',
 ] as const;
 
-export const QUEST_GROUPS = ['all', 'social', 'daily', 'referral', 'partner', 'game'] as const;
+export const QUEST_GROUPS = ['all', 'social', 'daily', 'referral', 'partner', 'game', 'card'] as const;
 
 export const PROVIDERS = [
   'twitter',

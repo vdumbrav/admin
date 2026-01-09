@@ -19,20 +19,21 @@ import type { DropdownOption } from './types';
  * Human-readable labels for quest groups
  * Maps API enum values to user-friendly display names
  */
-const GROUP_LABELS: Record<TaskResponseDtoGroup, string> = {
+const GROUP_LABELS: Record<TaskResponseDtoGroup | 'card', string> = {
   [TaskResponseDtoGroup.all]: 'All Groups',
   [TaskResponseDtoGroup.social]: 'Social',
   [TaskResponseDtoGroup.daily]: 'Daily',
   [TaskResponseDtoGroup.referral]: 'Referral',
   [TaskResponseDtoGroup.partner]: 'Partner',
   [TaskResponseDtoGroup.game]: 'Game',
+  card: 'Card',
 };
 
 /**
  * Human-readable labels for quest types
  * Maps API enum values to user-friendly display names
  */
-const TYPE_LABELS: Record<WaitlistTasksResponseDtoTypeItem, string> = {
+const TYPE_LABELS: Record<WaitlistTasksResponseDtoTypeItem | string, string> = {
   [WaitlistTasksResponseDtoTypeItem.like]: 'Like',
   [WaitlistTasksResponseDtoTypeItem.comment]: 'Comment',
   [WaitlistTasksResponseDtoTypeItem.share]: 'Share',
@@ -46,6 +47,13 @@ const TYPE_LABELS: Record<WaitlistTasksResponseDtoTypeItem, string> = {
   [WaitlistTasksResponseDtoTypeItem['flappy-bird-wlm']]: 'Flappy Bird',
   [WaitlistTasksResponseDtoTypeItem['tap-card']]: 'Tap Card',
   [WaitlistTasksResponseDtoTypeItem['snake-wlm']]: 'Snake',
+  // Card quest types
+  'card-issue': 'Card Issue',
+  'card-purchase-daily': 'Daily Purchase',
+  'card-first-purchase': 'First Purchase',
+  'card-topup': 'Card Topup',
+  'card-spend-milestone': 'Spend Milestone',
+  'card-monthly-spend': 'Monthly Spender',
 };
 
 /**
@@ -70,30 +78,55 @@ const PROVIDER_LABELS: Record<TaskResponseDtoProvider, string> = {
 /**
  * Groups dropdown options (API-synced, filtered to allowed groups only)
  */
-export const groups = getAvailableApiGroups()
-  .filter(
-    (group) =>
-      group === TaskResponseDtoGroup.social ||
-      group === TaskResponseDtoGroup.daily ||
-      group === TaskResponseDtoGroup.partner,
-  )
-  .map(
-    (group): DropdownOption => ({
-      value: group,
-      label: GROUP_LABELS[group],
-    }),
-  );
+export const groups = [
+  ...getAvailableApiGroups()
+    .filter(
+      (group) =>
+        group === TaskResponseDtoGroup.social ||
+        group === TaskResponseDtoGroup.daily ||
+        group === TaskResponseDtoGroup.partner,
+    )
+    .map(
+      (group): DropdownOption => ({
+        value: group,
+        label: GROUP_LABELS[group],
+      }),
+    ),
+  // Add card group
+  { value: 'card', label: 'Card' },
+];
 
 /**
- * Types dropdown options (API-synced)
- * All available quest types from the API
+ * Card quest types (manually added until API types are regenerated)
  */
-export const types = getAvailableApiTypes().map(
-  (type): DropdownOption => ({
-    value: type,
-    label: TYPE_LABELS[type],
-  }),
-);
+const CARD_QUEST_TYPES = [
+  'card-issue',
+  'card-purchase-daily',
+  'card-first-purchase',
+  'card-topup',
+  'card-spend-milestone',
+  'card-monthly-spend',
+] as const;
+
+/**
+ * Types dropdown options (API-synced + card types)
+ * All available quest types from the API plus card quest types
+ */
+export const types = [
+  ...getAvailableApiTypes().map(
+    (type): DropdownOption => ({
+      value: type,
+      label: TYPE_LABELS[type],
+    }),
+  ),
+  // Add card quest types
+  ...CARD_QUEST_TYPES.map(
+    (type): DropdownOption => ({
+      value: type,
+      label: TYPE_LABELS[type],
+    }),
+  ),
+];
 
 /**
  * Types for join preset only (limited set)
