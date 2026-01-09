@@ -189,6 +189,8 @@ function applyExploreUIRules(values: QuestFormValues): void {
   const existingPopupDescription = values.resources?.ui?.['pop-up']?.description;
   const existingPopupName = values.resources?.ui?.['pop-up']?.name;
   const existingIcon = values.resources?.icon;
+  // Preserve isNew value before overwriting resources
+  const existingIsNew = values.resources?.isNew;
 
   // Only use strict builder if all required fields are present
   // This prevents errors during initial form setup when fields are empty
@@ -224,6 +226,11 @@ function applyExploreUIRules(values: QuestFormValues): void {
     if (existingIcon && values.resources) {
       values.resources.icon = existingIcon;
     }
+  }
+
+  // Restore isNew value
+  if (existingIsNew !== undefined && values.resources) {
+    values.resources.isNew = existingIsNew;
   }
 }
 
