@@ -247,9 +247,6 @@ export function apiToForm(apiData: Partial<TaskResponseDto>): QuestFormValues {
 
     // Iterator mapping for 7-day challenge (API → Form)
     iterator: apiData.iterator ? validateAndExtractIterator(apiData.iterator) : undefined,
-
-    // Repeatable mapping (API iterable → Form repeatable)
-    repeatable: apiData.iterable ?? false,
   };
 }
 
