@@ -473,16 +473,17 @@ export function formToApi(formData: QuestFormValues): Omit<CreateTaskDto, 'paren
     // Child tasks - NEVER include in API request, they are created separately
     // ...(formData.child && formData.child.length > 0 && { ... }),
 
-    // Iterator mapping for 7-day challenge (Form to API) - only if present
-    ...(formData.iterator && {
+    // Iterator mapping for 7-day challenge (Form to API)
+    // Include iterator if explicitly set OR if repeatable is checked
+    ...((formData.iterator || formData.repeatable) && {
       iterator: {
         day: 0, // Starting day for iterator
-        days: formData.iterator.days ?? 7,
-        reward_map: formData.iterator.reward_map,
-        iterator_reward: formData.iterator.reward_map, // Backend expects number[] array
+        days: formData.iterator?.days ?? 7,
+        reward_map: formData.iterator?.reward_map ?? [10, 20, 30, 40, 50, 70, 100],
+        iterator_reward: formData.iterator?.reward_map ?? [10, 20, 30, 40, 50, 70, 100], // Backend expects number[] array
         iterator_resource: {}, // Empty object as default
-        reward: formData.iterator.reward_map[0] ?? 0, // First day reward
-        reward_max: Math.max(...formData.iterator.reward_map),
+        reward: formData.iterator?.reward_map?.[0] ?? 10, // First day reward
+        reward_max: formData.iterator?.reward_map ? Math.max(...formData.iterator.reward_map) : 100,
       },
     }),
 
