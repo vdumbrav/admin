@@ -6,6 +6,7 @@ import { actionWithPostPresetConfig } from './configs/action-with-post';
 import { cardPresetConfig } from './configs/card';
 import { connectPresetConfig } from './configs/connect';
 import { explorePresetConfig } from './configs/explore';
+import { gamePresetConfig } from './configs/game';
 import { joinPresetConfig } from './configs/join';
 import { sevenDayChallengePresetConfig } from './configs/seven-day-challenge';
 import {
@@ -27,6 +28,7 @@ const PRESET_REGISTRY = new Map<PresetId, PresetConfig>([
   ['seven-day-challenge', sevenDayChallengePresetConfig],
   ['explore', explorePresetConfig],
   ['card', cardPresetConfig],
+  ['game', gamePresetConfig],
 ]);
 
 // Validate all presets at module load time

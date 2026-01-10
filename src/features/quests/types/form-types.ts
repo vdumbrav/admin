@@ -30,6 +30,10 @@ export const QUEST_TYPES = [
   'card-topup',
   'card-spend-milestone',
   'card-monthly-spend',
+  // Game quest types
+  'flappy-bird-wlm',
+  'tap-card',
+  'snake-wlm',
 ] as const;
 
 export const QUEST_GROUPS = ['all', 'social', 'daily', 'referral', 'partner', 'game', 'card'] as const;

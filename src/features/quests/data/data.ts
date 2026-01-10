@@ -84,7 +84,8 @@ export const groups = [
       (group) =>
         group === TaskResponseDtoGroup.social ||
         group === TaskResponseDtoGroup.daily ||
-        group === TaskResponseDtoGroup.partner,
+        group === TaskResponseDtoGroup.partner ||
+        group === TaskResponseDtoGroup.game,
     )
     .map(
       (group): DropdownOption => ({
@@ -106,6 +107,15 @@ export const CARD_QUEST_TYPES = [
   'card-topup',
   'card-spend-milestone',
   'card-monthly-spend',
+] as const;
+
+/**
+ * Game quest types
+ */
+export const GAME_QUEST_TYPES = [
+  'flappy-bird-wlm',
+  'tap-card',
+  'snake-wlm',
 ] as const;
 
 /**
@@ -142,6 +152,16 @@ export const joinPresetTypes = getJoinPresetTypes().map(
  * Types for card preset only
  */
 export const cardPresetTypes = CARD_QUEST_TYPES.map(
+  (type): DropdownOption => ({
+    value: type,
+    label: TYPE_LABELS[type],
+  }),
+);
+
+/**
+ * Types for game preset only
+ */
+export const gamePresetTypes = GAME_QUEST_TYPES.map(
   (type): DropdownOption => ({
     value: type,
     label: TYPE_LABELS[type],
@@ -263,6 +283,10 @@ export function getCompatibleProviders(
 ): TaskResponseDtoProvider[] {
   // Card types don't have specific provider requirements
   if (typeof type === 'string' && type.startsWith('card-')) {
+    return getAvailableApiProviders();
+  }
+  // Game types don't have specific provider requirements
+  if (typeof type === 'string' && GAME_QUEST_TYPES.includes(type as typeof GAME_QUEST_TYPES[number])) {
     return getAvailableApiProviders();
   }
   return TYPE_PROVIDER_REQUIREMENTS[type as WaitlistTasksResponseDtoTypeItem] ?? getAvailableApiProviders();

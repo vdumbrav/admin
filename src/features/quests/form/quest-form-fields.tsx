@@ -32,7 +32,7 @@ import { DailyRewardsEditor } from '../components/daily-rewards-editor';
 import { IconUpload } from '../components/icon-upload';
 import { ManagedField } from '../components/managed-field';
 import { TwitterPreview } from '../components/twitter-preview';
-import { cardPresetTypes, getCompatibleProviders, groups, joinPresetTypes, providers, types } from '../data/data';
+import { cardPresetTypes, gamePresetTypes, getCompatibleProviders, groups, joinPresetTypes, providers, types } from '../data/data';
 import type { PresetConfig } from '../presets/types';
 import type { QuestFormValues } from '../types/form-types';
 import {
@@ -85,6 +85,10 @@ export function QuestFormFields({
     // For card preset, only allow card quest types
     if (presetConfig?.id === 'card') {
       return cardPresetTypes;
+    }
+    // For game preset, only allow game quest types
+    if (presetConfig?.id === 'game') {
+      return gamePresetTypes;
     }
     return types;
   }, [presetConfig?.id]);
@@ -564,6 +568,82 @@ export function QuestFormFields({
               </FormItem>
             )}
           />
+        </div>
+      )}
+
+      {/* Ad Management Section - only for game quests */}
+      {(presetConfig?.id === 'game' || isFieldVisible('adsWebBlockId', fieldStates)) && (
+        <div className='space-y-4 rounded-lg border p-4'>
+          <h3 className='text-base font-medium'>Ad Configuration</h3>
+
+          {/* Ads Enabled Toggle */}
+          {isFieldVisible('adsEnabled', fieldStates) && (
+            <FormField
+              control={form.control}
+              name='resources.ads.enabled'
+              render={({ field }) => (
+                <FormItem className='flex flex-row items-center gap-3'>
+                  <FormControl>
+                    <Switch
+                      checked={field.value ?? true}
+                      onCheckedChange={field.onChange}
+                      className='scale-125'
+                    />
+                  </FormControl>
+                  <div className='space-y-1 leading-none'>
+                    <FormLabel>Enable Ads</FormLabel>
+                    <FormDescription>Enable or disable ads for this quest</FormDescription>
+                  </div>
+                </FormItem>
+              )}
+            />
+          )}
+
+          <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
+            {/* Web Ads Block ID */}
+            {isFieldVisible('adsWebBlockId', fieldStates) && (
+              <FormField
+                control={form.control}
+                name='resources.ads.web.block_id'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Web Ads Block ID</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder='Enter Adsgram block ID for web'
+                        disabled={isFieldDisabled('adsWebBlockId', fieldStates)}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormDescription>Block ID for web version ads</FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
+
+            {/* Telegram Ads Block ID */}
+            {isFieldVisible('adsTelegramBlockId', fieldStates) && (
+              <FormField
+                control={form.control}
+                name='resources.ads.telegram.block_id'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Telegram Ads Block ID</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder='Enter Adsgram block ID for Telegram'
+                        disabled={isFieldDisabled('adsTelegramBlockId', fieldStates)}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormDescription>Block ID for Telegram Mini App ads</FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
+          </div>
         </div>
       )}
 
