@@ -34,6 +34,31 @@ const formAdsgramResourcesSchema = z.object({
   subtype: z.string().optional(), // API uses string, validate at runtime
 });
 
+// Ads configuration for game quests (web and telegram)
+const formAdsConfigSchema = z.object({
+  enabled: z.boolean().optional(),
+  web: z
+    .object({
+      block_id: z.string().optional(),
+      type: z.string().optional(),
+    })
+    .optional(),
+  telegram: z
+    .object({
+      block_id: z.string().optional(),
+      type: z.string().optional(),
+    })
+    .optional(),
+});
+
+// Card quest limits configuration
+const formCardLimitsSchema = z.object({
+  min_amount: z.number().min(0).optional(),
+  target_amount: z.number().min(0).optional(),
+  currency: z.enum(['USD', 'EUR', 'GBP', 'USDT']).optional(),
+  period: z.enum(['one-time', 'daily', 'weekly', 'monthly']).optional(),
+});
+
 // Compatible with ResourcesDto from API
 const formResourcesSchema = z
   .object({
@@ -43,6 +68,8 @@ const formResourcesSchema = z
     isNew: z.boolean().optional(),
     ui: formUIResourcesSchema.optional(),
     adsgram: formAdsgramResourcesSchema.optional(),
+    ads: formAdsConfigSchema.optional(), // Game quest ads
+    limits: formCardLimitsSchema.optional(), // Card quest limits
   })
   .optional();
 

@@ -30,6 +30,11 @@ export interface FieldVisibilityConfig {
   adsEnabled?: FieldVisibility;
   adsWebBlockId?: FieldVisibility;
   adsTelegramBlockId?: FieldVisibility;
+  // Card quest limit fields
+  cardMinAmount?: FieldVisibility;
+  cardTargetAmount?: FieldVisibility;
+  cardCurrency?: FieldVisibility;
+  cardPeriod?: FieldVisibility;
 }
 
 export interface BusinessRule {

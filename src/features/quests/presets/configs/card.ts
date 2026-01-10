@@ -3,6 +3,7 @@ import type { PresetConfig } from '../types';
 /**
  * Card Quest Preset
  * For creating card-related quests (issue, purchase, topup, milestones)
+ * with configurable limits and amounts
  */
 export const cardPresetConfig: PresetConfig = {
   id: 'card',
@@ -27,6 +28,9 @@ export const cardPresetConfig: PresetConfig = {
     repeatable: 'visible', // Some card quests are repeatable (daily/monthly)
     badge: 'visible',
     visible: 'visible',
+    // Card limit fields
+    cardMinAmount: 'visible',
+    cardTargetAmount: 'visible',
   },
 
   defaults: {
@@ -44,6 +48,10 @@ export const cardPresetConfig: PresetConfig = {
           button: 'Complete',
           description: 'Complete card actions to earn XP',
         },
+      },
+      limits: {
+        min_amount: 0,
+        target_amount: 0,
       },
     },
   },

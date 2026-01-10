@@ -647,6 +647,59 @@ export function QuestFormFields({
         </div>
       )}
 
+      {/* Card Quest Limits - only for card quests */}
+      {(presetConfig?.id === 'card' || isFieldVisible('cardMinAmount', fieldStates)) && (
+        <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
+          {/* Minimum Amount */}
+          {isFieldVisible('cardMinAmount', fieldStates) && (
+            <FormField
+              control={form.control}
+              name='resources.limits.min_amount'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Minimum Amount, $</FormLabel>
+                  <FormControl>
+                    <NumberInput
+                      placeholder='0'
+                      disabled={isFieldDisabled('cardMinAmount', fieldStates)}
+                      value={field.value}
+                      onChange={field.onChange}
+                      min={0}
+                    />
+                  </FormControl>
+                  <FormDescription>Min transaction amount (topup, purchase)</FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
+
+          {/* Target Amount */}
+          {isFieldVisible('cardTargetAmount', fieldStates) && (
+            <FormField
+              control={form.control}
+              name='resources.limits.target_amount'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Target Amount, $</FormLabel>
+                  <FormControl>
+                    <NumberInput
+                      placeholder='0'
+                      disabled={isFieldDisabled('cardTargetAmount', fieldStates)}
+                      value={field.value}
+                      onChange={field.onChange}
+                      min={0}
+                    />
+                  </FormControl>
+                  <FormDescription>Target for milestone/monthly quests</FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
+        </div>
+      )}
+
       {/* Dates and Badge New in one row */}
       <div className='mb-2 grid grid-cols-10 items-center gap-4'>
         <div className='col-span-8'>
