@@ -60,6 +60,7 @@ const formCardLimitsSchema = z.object({
 });
 
 // Compatible with ResourcesDto from API
+// Using passthrough to allow additional fields like ads and limits
 const formResourcesSchema = z
   .object({
     icon: z.string().optional(),
@@ -68,9 +69,8 @@ const formResourcesSchema = z
     isNew: z.boolean().optional(),
     ui: formUIResourcesSchema.optional(),
     adsgram: formAdsgramResourcesSchema.optional(),
-    ads: formAdsConfigSchema.optional(), // Game quest ads
-    limits: formCardLimitsSchema.optional(), // Card quest limits
   })
+  .passthrough()
   .optional();
 
 // Child quest schema for multi-step quests
