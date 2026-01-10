@@ -19,7 +19,7 @@ import type { DropdownOption } from './types';
  * Human-readable labels for quest groups
  * Maps API enum values to user-friendly display names
  */
-const GROUP_LABELS: Record<TaskResponseDtoGroup | 'card', string> = {
+const GROUP_LABELS: Record<TaskResponseDtoGroup | 'card' | 'mobile', string> = {
   [TaskResponseDtoGroup.all]: 'All Groups',
   [TaskResponseDtoGroup.social]: 'Social',
   [TaskResponseDtoGroup.daily]: 'Daily',
@@ -27,6 +27,7 @@ const GROUP_LABELS: Record<TaskResponseDtoGroup | 'card', string> = {
   [TaskResponseDtoGroup.partner]: 'Partner',
   [TaskResponseDtoGroup.game]: 'Game',
   card: 'Card',
+  mobile: 'Mobile',
 };
 
 /**
@@ -54,6 +55,12 @@ const TYPE_LABELS: Record<WaitlistTasksResponseDtoTypeItem | string, string> = {
   'card-topup': 'Card Topup',
   'card-spend-milestone': 'Spend Milestone',
   'card-monthly-spend': 'Monthly Spender',
+  // Mobile quest types
+  'mobile-install': 'Install App',
+  'mobile-onramp': 'Buy Crypto (Onramp)',
+  'mobile-offramp': 'Sell Crypto (Offramp)',
+  'mobile-swap': 'Swap Tokens',
+  'mobile-send': 'Send Crypto',
 };
 
 /**
@@ -95,6 +102,8 @@ export const groups = [
     ),
   // Add card group
   { value: 'card', label: 'Card' },
+  // Add mobile group
+  { value: 'mobile', label: 'Mobile' },
 ];
 
 /**
@@ -119,6 +128,17 @@ export const GAME_QUEST_TYPES = [
 ] as const;
 
 /**
+ * Mobile quest types
+ */
+export const MOBILE_QUEST_TYPES = [
+  'mobile-install',
+  'mobile-onramp',
+  'mobile-offramp',
+  'mobile-swap',
+  'mobile-send',
+] as const;
+
+/**
  * Types dropdown options (API-synced + card types)
  * All available quest types from the API plus card quest types
  */
@@ -131,6 +151,13 @@ export const types = [
   ),
   // Add card quest types
   ...CARD_QUEST_TYPES.map(
+    (type): DropdownOption => ({
+      value: type,
+      label: TYPE_LABELS[type],
+    }),
+  ),
+  // Add mobile quest types
+  ...MOBILE_QUEST_TYPES.map(
     (type): DropdownOption => ({
       value: type,
       label: TYPE_LABELS[type],
@@ -162,6 +189,16 @@ export const cardPresetTypes = CARD_QUEST_TYPES.map(
  * Types for game preset only
  */
 export const gamePresetTypes = GAME_QUEST_TYPES.map(
+  (type): DropdownOption => ({
+    value: type,
+    label: TYPE_LABELS[type],
+  }),
+);
+
+/**
+ * Types for mobile preset only
+ */
+export const mobilePresetTypes = MOBILE_QUEST_TYPES.map(
   (type): DropdownOption => ({
     value: type,
     label: TYPE_LABELS[type],
@@ -287,6 +324,10 @@ export function getCompatibleProviders(
   }
   // Game types don't have specific provider requirements
   if (typeof type === 'string' && GAME_QUEST_TYPES.includes(type as typeof GAME_QUEST_TYPES[number])) {
+    return getAvailableApiProviders();
+  }
+  // Mobile types don't have specific provider requirements
+  if (typeof type === 'string' && MOBILE_QUEST_TYPES.includes(type as typeof MOBILE_QUEST_TYPES[number])) {
     return getAvailableApiProviders();
   }
   return TYPE_PROVIDER_REQUIREMENTS[type as WaitlistTasksResponseDtoTypeItem] ?? getAvailableApiProviders();

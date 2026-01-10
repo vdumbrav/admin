@@ -32,7 +32,7 @@ import { DailyRewardsEditor } from '../components/daily-rewards-editor';
 import { IconUpload } from '../components/icon-upload';
 import { ManagedField } from '../components/managed-field';
 import { TwitterPreview } from '../components/twitter-preview';
-import { cardPresetTypes, gamePresetTypes, getCompatibleProviders, groups, joinPresetTypes, providers, types } from '../data/data';
+import { cardPresetTypes, gamePresetTypes, getCompatibleProviders, groups, joinPresetTypes, mobilePresetTypes, providers, types } from '../data/data';
 import type { PresetConfig } from '../presets/types';
 import type { QuestFormValues } from '../types/form-types';
 import {
@@ -89,6 +89,10 @@ export function QuestFormFields({
     // For game preset, only allow game quest types
     if (presetConfig?.id === 'game') {
       return gamePresetTypes;
+    }
+    // For mobile preset, only allow mobile quest types
+    if (presetConfig?.id === 'mobile') {
+      return mobilePresetTypes;
     }
     return types;
   }, [presetConfig?.id]);
