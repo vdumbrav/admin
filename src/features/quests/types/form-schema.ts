@@ -35,7 +35,6 @@ const formAdsgramResourcesSchema = z.object({
 });
 
 // Compatible with ResourcesDto from API
-// Using passthrough to allow additional fields like ads and limits
 const formResourcesSchema = z
   .object({
     icon: z.string().optional(),
@@ -45,7 +44,6 @@ const formResourcesSchema = z
     ui: formUIResourcesSchema.optional(),
     adsgram: formAdsgramResourcesSchema.optional(),
   })
-  .passthrough()
   .optional();
 
 // Child quest schema for multi-step quests
@@ -142,7 +140,6 @@ export type { QuestFormValues } from './form-types';
 export const buildQuestFormSchema = (presetId?: string) =>
   z
     .object(baseQuestFormShape)
-    .passthrough()
     .superRefine((val, ctx) => {
       // start/end validation
       if (val.start && val.end) {

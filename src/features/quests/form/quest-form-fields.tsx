@@ -572,7 +572,7 @@ export function QuestFormFields({
       )}
 
       {/* Ad Management Section - only for game quests */}
-      {(presetConfig?.id === 'game' || isFieldVisible('adsWebBlockId', fieldStates)) && (
+      {presetConfig?.id === 'game' && (
         <div className='space-y-4 rounded-lg border p-4'>
           <h3 className='text-base font-medium'>Ad Configuration</h3>
 
