@@ -63,7 +63,7 @@ export interface RewardCalculationConfig {
 // ============================================================================
 
 export const presetConfigSchema = z.object({
-  id: z.enum(['connect', 'join', 'action-with-post', 'seven-day-challenge', 'explore', 'card', 'game']),
+  id: z.enum(['connect', 'join', 'action-with-post', 'seven-day-challenge', 'explore', 'card', 'game', 'mobile']),
   name: z.string().min(1),
 
   // Form behavior

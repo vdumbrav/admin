@@ -34,9 +34,15 @@ export const QUEST_TYPES = [
   'flappy-bird-wlm',
   'tap-card',
   'snake-wlm',
+  // Mobile app quest types
+  'mobile-install',
+  'mobile-onramp',
+  'mobile-offramp',
+  'mobile-swap',
+  'mobile-send',
 ] as const;
 
-export const QUEST_GROUPS = ['all', 'social', 'daily', 'referral', 'partner', 'game', 'card'] as const;
+export const QUEST_GROUPS = ['all', 'social', 'daily', 'referral', 'partner', 'game', 'card', 'mobile'] as const;
 
 export const PROVIDERS = [
   'twitter',

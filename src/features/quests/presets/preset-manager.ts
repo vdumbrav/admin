@@ -8,6 +8,7 @@ import { connectPresetConfig } from './configs/connect';
 import { explorePresetConfig } from './configs/explore';
 import { gamePresetConfig } from './configs/game';
 import { joinPresetConfig } from './configs/join';
+import { mobilePresetConfig } from './configs/mobile';
 import { sevenDayChallengePresetConfig } from './configs/seven-day-challenge';
 import {
   InvalidPresetConfigError,
@@ -29,6 +30,7 @@ const PRESET_REGISTRY = new Map<PresetId, PresetConfig>([
   ['explore', explorePresetConfig],
   ['card', cardPresetConfig],
   ['game', gamePresetConfig],
+  ['mobile', mobilePresetConfig],
 ]);
 
 // Validate all presets at module load time
