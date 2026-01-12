@@ -37,27 +37,36 @@ export const useCreateMultiTask = () => {
 
   const abortControllerRef = useRef<AbortController | null>(null);
 
-  // Helper function to build child resources with proper inheritance
+  /**
+   * Build child task resources with inheritance priority:
+   * 1. Child's own resources (if exists)
+   * 2. Parent's resources (fallback)
+   * 3. Empty structure (minimal)
+   */
   const buildChildResources = useCallback(
     (child: ChildFormValues, parentData?: QuestFormValues) => {
-      // Build base UI structure with child-specific buttons
-      const buildChildUI = (baseUI?: NonNullable<QuestFormValues['resources']>['ui']) => ({
-        button: getDefaultButtonText(child.type), // Always child-specific
-        'pop-up': {
-          name: baseUI?.['pop-up']?.name ?? '',
-          button: getDefaultButtonText(child.type), // Always child-specific
-          description: baseUI?.['pop-up']?.description ?? '',
-          // Include additional fields only if they exist in base
-          ...(baseUI?.['pop-up']?.['additional-title'] && {
-            'additional-title': baseUI['pop-up']['additional-title'],
-          }),
-          ...(baseUI?.['pop-up']?.['additional-description'] && {
-            'additional-description': baseUI['pop-up']['additional-description'],
-          }),
-        },
-      });
+      const buildChildUI = (baseUI?: NonNullable<QuestFormValues['resources']>['ui']) => {
+        // Static image priority: child first, then baseUI (for Task Image uploads)
+        const staticImage = child.resources?.ui?.['pop-up']?.static ?? baseUI?.['pop-up']?.static;
 
-      // Case 1: Child has its own resources - use them but adapt UI buttons
+        return {
+          button: getDefaultButtonText(child.type),
+          'pop-up': {
+            name: baseUI?.['pop-up']?.name ?? '',
+            button: getDefaultButtonText(child.type),
+            description: baseUI?.['pop-up']?.description ?? '',
+            ...(staticImage && { static: staticImage }),
+            ...(baseUI?.['pop-up']?.['additional-title'] && {
+              'additional-title': baseUI['pop-up']['additional-title'],
+            }),
+            ...(baseUI?.['pop-up']?.['additional-description'] && {
+              'additional-description': baseUI['pop-up']['additional-description'],
+            }),
+          },
+        };
+      };
+
+      // Priority 1: Child has own resources
       if (child.resources) {
         return {
           ...child.resources,
@@ -65,7 +74,7 @@ export const useCreateMultiTask = () => {
         };
       }
 
-      // Case 2: Inherit from parent resources
+      // Priority 2: Inherit from parent (exclude isNew flag)
       if (parentData?.resources) {
         const { isNew, ui, ...inheritedResources } = parentData.resources;
         return {
@@ -74,10 +83,8 @@ export const useCreateMultiTask = () => {
         };
       }
 
-      // Case 3: No resources available - create minimal structure
-      return {
-        ui: buildChildUI(),
-      };
+      // Priority 3: Minimal structure
+      return { ui: buildChildUI() };
     },
     [],
   );
