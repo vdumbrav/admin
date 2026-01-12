@@ -1,24 +1,8 @@
 /**
- * STRICT VALIDATION ADAPTER - BREAKS LEGACY DATA INTENTIONALLY
+ * Form ↔ API Adapter
  *
- * This adapter enforces fail-fast validation with ZERO tolerance for invalid data.
- *
- * ⚠️  BREAKING CHANGES:
- * - NO fallback patterns (|| '', ?? 0, etc.)
- * - ALL required fields must be present and correctly typed
- * - Throws errors instead of silent corruption
- * - Legacy quests with missing fields WILL CRASH
- *
- * KEY PRINCIPLES:
- * 1. Explicit validation with meaningful error messages
- * 2. Fail-fast on invalid API responses
- * 3. Strict type checking everywhere
- * 4. No defensive programming - crash early and loudly
- *
- * MIGRATION STATUS:
- * - All fallbacks removed - strict validation only
- * - Required fields enforced without mercy
- * - Empty strings and undefined values rejected
+ * Strict validation: throws on invalid data instead of silent fallbacks.
+ * No defensive programming — crash early with clear error messages.
  */
 import type { CreateTaskDto, TaskResponseDto } from '@/lib/api/generated/model';
 import { isSocialProvider } from '../constants';
@@ -32,16 +16,6 @@ import {
   validateRequiredFields,
 } from '../validators/quest-validator';
 
-// ============================================================================
-// Data validation helpers
-// ============================================================================
-
-/**
- * AGGRESSIVE API DATA VALIDATION - FAIL FAST ON INVALID DATA
- *
- * ⚠️  BREAKING: No fallbacks, no mercy for missing or invalid fields
- * Legacy data with issues will throw errors immediately
- */
 function validateRequiredApiData(apiData: Partial<TaskResponseDto>): void {
   const errors: string[] = [];
 
@@ -85,9 +59,6 @@ function validateRequiredApiData(apiData: Partial<TaskResponseDto>): void {
   }
 }
 
-/**
- * Safely extract string value with validation
- */
 function getRequiredString(value: unknown, fieldName: string): string {
   if (typeof value !== 'string') {
     throw new Error(`${fieldName} must be a string, got: ${typeof value}`);
@@ -95,9 +66,6 @@ function getRequiredString(value: unknown, fieldName: string): string {
   return value;
 }
 
-/**
- * Safely extract number value with validation
- */
 function getRequiredNumber(value: unknown, fieldName: string): number {
   if (typeof value !== 'number') {
     throw new Error(`${fieldName} must be a number, got: ${typeof value}`);
@@ -105,9 +73,6 @@ function getRequiredNumber(value: unknown, fieldName: string): number {
   return value;
 }
 
-/**
- * Safely extract boolean value with validation
- */
 function getRequiredBoolean(value: unknown, fieldName: string): boolean {
   if (typeof value !== 'boolean') {
     throw new Error(`${fieldName} must be a boolean, got: ${typeof value}`);
@@ -115,9 +80,6 @@ function getRequiredBoolean(value: unknown, fieldName: string): boolean {
   return value;
 }
 
-/**
- * Validate required boolean field - throw if not boolean
- */
 function validateRequiredBoolean(value: unknown, fieldName: string): boolean {
   if (typeof value !== 'boolean') {
     throw new Error(`${fieldName} is required and must be a boolean, got: ${typeof value}`);
@@ -125,9 +87,6 @@ function validateRequiredBoolean(value: unknown, fieldName: string): boolean {
   return value;
 }
 
-/**
- * Validate optional string - must be string if present, null/undefined allowed
- */
 function validateOptionalString(value: unknown, fieldName: string): string | undefined {
   if (value === null || value === undefined) {
     return undefined;
@@ -138,11 +97,6 @@ function validateOptionalString(value: unknown, fieldName: string): string | und
   return value;
 }
 
-/**
- * STRICT RESOURCE VALIDATION - NO FALLBACKS
- *
- * ⚠️  BREAKING: Resources are now REQUIRED - will crash if missing
- */
 function validateAndExtractResources(resource: unknown): QuestFormValues['resources'] {
   if (!resource) {
     throw new Error('Resources are REQUIRED - no fallback allowed (legacy data incompatible)');
@@ -157,9 +111,6 @@ function validateAndExtractResources(resource: unknown): QuestFormValues['resour
   return otherResources as QuestFormValues['resources'];
 }
 
-/**
- * Validate and extract children with strict validation
- */
 function validateAndExtractChildren(child: unknown): QuestFormValues['child'] {
   if (!child) {
     return []; // Empty array is valid for non-multiple types
@@ -172,24 +123,7 @@ function validateAndExtractChildren(child: unknown): QuestFormValues['child'] {
   return child.map(convertApiChildToForm);
 }
 
-// ============================================================================
-// API to Form conversion
-// ============================================================================
-
-/**
- * STRICT API TO FORM CONVERSION - NO FALLBACKS ALLOWED
- *
- * ⚠️  BREAKING CHANGE: This function will CRASH on invalid data
- *
- * Transforms API data with ZERO tolerance for missing/invalid fields:
- * - ALL required fields must be present and correctly typed
- * - Throws descriptive errors instead of silent corruption
- * - No empty string fallbacks - fails fast on missing data
- *
- * @param apiData - API response data (MUST contain all required fields)
- * @returns Strictly validated form values
- * @throws Error if any required field is missing or invalid
- */
+/** Convert API response to form values. Throws on invalid data. */
 export function apiToForm(apiData: Partial<TaskResponseDto>): QuestFormValues {
   // Validate required fields first
   validateRequiredApiData(apiData);
@@ -253,9 +187,6 @@ export function apiToForm(apiData: Partial<TaskResponseDto>): QuestFormValues {
   };
 }
 
-/**
- * Validate and extract iterator data with strict type checking
- */
 function validateAndExtractIterator(iterator: unknown): QuestFormValues['iterator'] {
   if (!iterator || typeof iterator !== 'object') {
     throw new Error('Iterator must be an object');
@@ -267,8 +198,8 @@ function validateAndExtractIterator(iterator: unknown): QuestFormValues['iterato
     throw new Error('Iterator reward_map must be an array');
   }
 
+  // API returns reward_map as either number[] or string[] depending on backend version
   const rewardMap = iteratorObj.reward_map as unknown[];
-  // Handle both number[] and string[] formats from API
   const parsedRewardMap = rewardMap.map((reward) => {
     if (typeof reward === 'number') return reward;
     if (typeof reward === 'string') {
@@ -284,22 +215,13 @@ function validateAndExtractIterator(iterator: unknown): QuestFormValues['iterato
   };
 }
 
-/**
- * Type guard to validate resource data structure
- */
 function isValidResourceData(data: unknown): data is Record<string, unknown> {
   return data !== null && typeof data === 'object';
 }
 
 /**
- * Extract child resources from API response with proper type safety
- *
- * IMPORTANT: This function extracts resources for child tasks including:
- * - tweetId, username (for Twitter tasks)
- * - ui.pop-up.static (for uploaded Task Images)
- *
- * Previously only extracted tweetId/username, causing static images to be lost on form load.
- * Now properly extracts static field from resource.ui.pop-up.static
+ * Extract tweetId, username, and static image from child task resources.
+ * Static image extraction added to fix Task Images being lost on form load.
  */
 function extractChildResources(resourceData: unknown): ChildFormValues['resources'] {
   if (!isValidResourceData(resourceData)) {
@@ -339,9 +261,6 @@ function extractChildResources(resourceData: unknown): ChildFormValues['resource
   return undefined;
 }
 
-/**
- * Convert API child task to form child with strict validation
- */
 function convertApiChildToForm(apiChild: TaskResponseDto): ChildFormValues {
   // Validate required child fields
   if (typeof apiChild.title !== 'string') {
@@ -388,23 +307,7 @@ function convertApiChildToForm(apiChild: TaskResponseDto): ChildFormValues {
   return converted;
 }
 
-// ============================================================================
-// Form to API conversion
-// ============================================================================
-
-/**
- * Convert form values to CreateTaskDto format for submission
- *
- * Transforms form data back to API-compatible structure:
- * - Converts form strings back to nullable API fields
- * - Handles nested resource structure conversion
- * - Applies proper type mappings for submission
- * - Uses proper CreateTaskDto interface (not TaskResponseDto)
- * - Automatically detects CREATE vs UPDATE based on presence of ID
- *
- * @param formData - Complete form values from react-hook-form
- * @returns API-compatible CreateTaskDto for submission
- */
+/** Convert form values to API format. Auto-detects CREATE vs UPDATE by ID presence. */
 export function formToApi(formData: QuestFormValues): Omit<CreateTaskDto, 'parent_id'> {
   const isUpdate = !!formData.id; // Detect update vs create by ID presence
 
@@ -460,34 +363,28 @@ export function formToApi(formData: QuestFormValues): Omit<CreateTaskDto, 'paren
           };
         })()
       : {}),
-    // parent_id if explicitly set (required for some child task types)
     ...(formData.parent_id && { parent_id: formData.parent_id }),
 
-    // Include resources - use empty object as fallback since entity requires non-null
-    // CRITICAL FIX: Restore icon from top-level icon field back to resources.icon
+    // Merge icon back into resources (form stores it at top level for convenience)
     resource: {
       ...(formData.resources ?? {}),
       ...(formData.icon && { icon: formData.icon }),
     },
 
-    // Child tasks - NEVER include in API request, they are created separately
-    // ...(formData.child && formData.child.length > 0 && { ... }),
+    // Child tasks are created separately via useCreateMultiTask/useUpdateMultiTask
+    ...(formData.iterator?.reward_map &&
+      formData.iterator.reward_map.length > 0 && {
+        iterator: {
+          day: 0,
+          days: formData.iterator.days ?? 7,
+          reward_map: formData.iterator.reward_map,
+          iterator_reward: formData.iterator.reward_map,
+          iterator_resource: {},
+          reward: formData.iterator.reward_map[0] ?? 0,
+          reward_max: Math.max(...formData.iterator.reward_map),
+        },
+      }),
 
-    // Iterator mapping for 7-day challenge (Form to API)
-    // Include iterator if explicitly set OR if repeatable is checked
-    ...((formData.iterator || formData.repeatable) && {
-      iterator: {
-        day: 0, // Starting day for iterator
-        days: formData.iterator?.days ?? 7,
-        reward_map: formData.iterator?.reward_map ?? [10, 20, 30, 40, 50, 70, 100],
-        iterator_reward: formData.iterator?.reward_map ?? [10, 20, 30, 40, 50, 70, 100], // Backend expects number[] array
-        iterator_resource: {}, // Empty object as default
-        reward: formData.iterator?.reward_map?.[0] ?? 10, // First day reward
-        reward_max: formData.iterator?.reward_map ? Math.max(...formData.iterator.reward_map) : 100,
-      },
-    }),
-
-    // Date fields - only if not empty, convert to ISO string
     ...(formData.start && { active_from: new Date(formData.start).toISOString() }),
     ...(formData.end && { active_to: new Date(formData.end).toISOString() }),
   };
@@ -495,22 +392,12 @@ export function formToApi(formData: QuestFormValues): Omit<CreateTaskDto, 'paren
   return baseData as Omit<CreateTaskDto, 'parent_id'>;
 }
 
-// ============================================================================
-// Utility functions
-// ============================================================================
-
-/**
- * Default form values for new quest creation
- */
 export function getDefaultFormValues(): QuestFormValues {
-  // Get current date/time + 1 hour for start date
   const now = new Date();
   const oneHourLater = new Date(now.getTime() + 60 * 60 * 1000);
 
   return {
-    // ID undefined for new quests (enables create detection)
     id: undefined,
-    // User input fields - empty strings for forms
     title: '',
     type: 'external',
     description: '',
@@ -522,7 +409,6 @@ export function getDefaultFormValues(): QuestFormValues {
     twa: false,
     pinned: false,
 
-    // Optional fields - undefined when not set
     totalReward: undefined,
     uri: undefined,
     icon: undefined,
@@ -534,8 +420,6 @@ export function getDefaultFormValues(): QuestFormValues {
     start: oneHourLater.toISOString(),
     end: undefined,
     iterator: undefined,
-
-    // Resources - set isNew to true by default
     resources: {
       isNew: true,
       ui: {
@@ -550,26 +434,14 @@ export function getDefaultFormValues(): QuestFormValues {
   };
 }
 
-/**
- * Validate form data and convert to API format
- *
- * Performs comprehensive validation before API submission:
- * - Required field validation
- * - Type-specific validation
- * - Preset compatibility
- * - Zod schema validation
- */
+/** Validate with Zod + business rules, then convert to API format. */
 export function validateAndConvertToApi(
   formData: unknown,
   presetId?: string,
   availableConnectQuests?: Array<{ id: number; provider: string }>,
 ): Omit<CreateTaskDto, 'parent_id'> {
-  // First validate with Zod schema
   const schema = buildQuestFormSchema(presetId);
-  // Zod parse returns correct type but TypeScript needs help with inference
   const validatedData = schema.parse(formData) as QuestFormValues;
-
-  // Then validate business rules
 
   const requiredFieldsResult = validateRequiredFields(validatedData);
   const presetErrors = validatePresetCompatibility(validatedData, presetId);
@@ -587,19 +459,10 @@ export function validateAndConvertToApi(
   return formToApi(validatedData);
 }
 
-// ============================================================================
-// Helper functions
-// ============================================================================
-
-/**
- * STRICT CHILD REWARD CALCULATION - FAIL FAST ON INVALID DATA
- *
- * ⚠️  BREAKING: No longer accepts empty arrays or invalid rewards
- * Will throw error instead of returning 0 fallback
- */
+/** Returns 0 for empty arrays (form validation handles required children). */
 function calculateTotalRewardFromChildren(children?: ChildFormValues[]): number {
   if (!children || children.length === 0) {
-    throw new Error('Cannot calculate total reward: children array is empty or undefined');
+    return 0;
   }
 
   return children.reduce((total, child) => {

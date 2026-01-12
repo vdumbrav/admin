@@ -1,13 +1,5 @@
 /**
- * Quest Form State Management Hook
- *
- * Features:
- * - Type-safe form validation with Zod (no type assertions)
- * - Real-time field visibility based on presets
- * - Automatic business rules application
- * - Connect-gate validation for provider dependencies
- * - Image upload with object URL management
- * - Preset field cleanup on preset/type changes
+ * Quest form state: validation, field visibility, business rules, Connect-gate.
  */
 import { useEffect, useMemo, useRef } from 'react';
 import { useForm } from 'react-hook-form';
@@ -27,10 +19,6 @@ import { cleanupIncompatibleFields, getFieldsToReset } from '../utils/preset-fie
 import { applyBusinessRules, applyLockedFields, getPresetFormValues } from './business-rules';
 import { computeFieldStates, type FieldStatesMatrix } from './field-state';
 import { useConnectGate } from './use-connect-gate';
-
-// ============================================================================
-// Hook Interface
-// ============================================================================
 
 export interface UseQuestFormProps {
   presetConfig?: PresetConfig;
@@ -56,10 +44,6 @@ export interface UseQuestFormReturn {
   availableQuests: { id: number; title: string; type: string[]; provider?: string }[];
 }
 
-// ============================================================================
-// Main Hook
-// ============================================================================
-
 export function useQuestForm({
   presetConfig,
   initial,
@@ -69,17 +53,10 @@ export function useQuestForm({
   const { user } = useAppAuth();
   const { isLoading: isLoadingExisting } = useExistingQuests();
 
-  // ============================================================================
-  // Form Setup
-  // ============================================================================
-
   const defaultValues = useMemo(() => {
     if (initial) {
-      // Apply UI rules to initial values to ensure button text is correct
       return applyBusinessRules(initial, presetConfig);
     }
-
-    // Use preset defaults
     return getPresetFormValues(presetConfig);
   }, [initial, presetConfig]);
 
@@ -87,53 +64,24 @@ export function useQuestForm({
   const form = useForm({
     resolver: zodResolver(zodSchema),
     defaultValues,
-    mode: 'onSubmit', // Only validate on submit
+    mode: 'onSubmit',
   }) as ReturnType<typeof useForm<QuestFormValues>>;
 
-  /**
-   * DISABLED: Auto-reset form when initial values change
-   *
-   * Why disabled:
-   * - React Query returns cached/stale data after mutations
-   * - This causes form to reset to old values, losing user changes
-   * - Example: User uploads image → saves → API returns cached data without image → form resets, image disappears
-   *
-   * Solution: Let user manually reload page or close/reopen form to see fresh data
-   * Alternative: Force refetch + wait for fresh data before reset (too complex)
-   */
-  // useEffect(() => {
-  //   if (initial) {
-  //     form.reset(initial);
-  //   }
-  // }, [initial, form]);
+  // Auto-reset on initial change disabled: React Query cache causes form to reset to stale data
 
-  // ============================================================================
-  // Watched Values & State
-  // ============================================================================
-
-  // form.watch() returns full QuestFormValues (not partial like useWatch)
   const watchedValues = form.watch();
   const isDirty = form.formState.isDirty;
   const isSubmitting = form.formState.isSubmitting;
-
-  // Block submission if validation data is still loading
   const isValidationReady = !isLoadingExisting;
 
-  // Store previous values for cleanup detection
   const prevPresetIdRef = useRef(presetConfig?.id);
   const prevTypeRef = useRef(watchedValues.type);
 
-  // Compute field visibility states
   const fieldStates = useMemo(() => {
     return computeFieldStates(presetConfig, watchedValues);
   }, [presetConfig, watchedValues]);
 
-  // ============================================================================
-  // Business Logic Effects
-  // ============================================================================
-
-  // Auto-apply business rules when form changes (e.g., set group=social for action-with-post)
-  // Watch specific fields that should trigger business rules
+  // Fields that trigger business rules recalculation
   const currentType = watchedValues.type;
   const currentGroup = watchedValues.group;
   const currentProvider = watchedValues.provider;
@@ -144,7 +92,6 @@ export function useQuestForm({
 
     const updatedValues = applyBusinessRules(watchedValues, presetConfig);
 
-    // Only update if values actually changed to avoid infinite loops
     const hasChanges = Object.keys(updatedValues).some((key) => {
       const newValue = updatedValues[key as keyof QuestFormValues];
       const currentValue = watchedValues[key as keyof typeof watchedValues];
@@ -152,7 +99,6 @@ export function useQuestForm({
     });
 
     if (hasChanges) {
-      // Use setTimeout to avoid updating during render
       setTimeout(() => {
         Object.entries(updatedValues).forEach(([key, value]) => {
           const currentValue = form.getValues(key);
@@ -164,26 +110,21 @@ export function useQuestForm({
     }
   }, [currentType, currentGroup, currentProvider, childTasksJson, presetConfig?.id, isDirty]);
 
-  // Cleanup incompatible fields when preset or type changes
+  // Reset incompatible fields when preset/type changes (e.g. clear Twitter fields when switching to Discord)
   useEffect(() => {
     const currentPresetId = presetConfig?.id;
     const currentType = watchedValues.type;
-
-    // Check if preset or type changed
     const presetChanged = prevPresetIdRef.current !== currentPresetId;
     const typeChanged = prevTypeRef.current !== currentType;
 
     if (presetChanged || typeChanged) {
-      // Find old preset config for cleanup comparison
       const oldPresetConfig = prevPresetIdRef.current
         ? ({ id: prevPresetIdRef.current } as PresetConfig)
         : undefined;
 
-      // Clean up incompatible fields
       const currentValues = form.getValues();
       const cleanedValues = cleanupIncompatibleFields(currentValues, presetConfig, oldPresetConfig);
 
-      // Apply cleaned values to form
       Object.entries(cleanedValues).forEach(([key, value]) => {
         const currentValue = form.getValues(key);
         if (JSON.stringify(value) !== JSON.stringify(currentValue)) {
@@ -191,7 +132,6 @@ export function useQuestForm({
         }
       });
 
-      // Apply preset defaults for required fields
       if (presetConfig) {
         const fieldsToReset = getFieldsToReset(presetConfig);
         fieldsToReset.forEach((field) => {
@@ -202,57 +142,46 @@ export function useQuestForm({
         });
       }
 
-      // Update refs
       prevPresetIdRef.current = currentPresetId;
       prevTypeRef.current = currentType;
     }
   }, [presetConfig, watchedValues.type, form]);
 
-  // Validate provider dependencies - Join/Action quests need Connect quest first
   const { hasRequiredConnect } = useConnectGate(watchedValues.provider);
 
-  // Get available quests for blocking_task selection
   const { data: allQuests } = useAdminWaitlistTasksControllerGetWaitlistTasks();
   const availableQuests = useMemo(() => {
     if (!allQuests) return [];
     return allQuests.map((quest) => ({
       id: quest.id,
       title: quest.title,
-      type: [quest.type], // Wrap single type in array for consistency
-      provider: quest.provider, // Include provider for dynamic blocking task text
+      type: [quest.type],
+      provider: quest.provider,
     }));
   }, [allQuests]);
 
-  // Auto-select blocking_task (Connect quest) when provider changes
+  // Auto-select Connect quest as blocking_task for social providers
   useEffect(() => {
     if (!isDirty || !currentProvider) return;
-
-    // Skip auto-select for connect type (connect quests don't need blocking_task)
     if (currentType === 'connect') return;
-
-    // Auto-select for all social providers (telegram, discord, twitter)
     if (!isSocialProvider(currentProvider)) return;
 
-    // Find Connect quest for this provider
     const connectQuest = availableQuests.find(
       (q) => q.type.includes('connect') && q.provider === currentProvider,
     );
 
     if (connectQuest) {
       const currentBlockingTask = form.getValues('blocking_task');
-
-      // Only update if different from current blocking_task
       if (currentBlockingTask?.id !== connectQuest.id) {
         form.setValue('blocking_task', { id: connectQuest.id }, { shouldDirty: true });
       }
     }
   }, [currentProvider, currentType, availableQuests, form, isDirty]);
 
-  // Additional validation beyond Zod - preset-specific business rules
+  // Preset-specific validation (Connect-gate, required fields)
   const validateForm = (values: QuestFormValues) => {
     const errors: Record<string, string> = {};
 
-    // Conditional required fields by preset
     if (presetConfig?.id === 'connect') {
       if (!values.provider) {
         errors.provider = 'Provider is required for Connect preset';
@@ -266,7 +195,6 @@ export function useQuestForm({
       if (!values.uri) {
         errors.uri = 'Join URL is required';
       }
-      // Connect-gate for Join
       if (values.provider && hasRequiredConnect === false) {
         errors.provider = `Requires Connect ${values.provider} quest`;
       }
@@ -292,6 +220,8 @@ export function useQuestForm({
       const map = values.iterator?.reward_map;
       if (!Array.isArray(map) || map.length < 1) {
         errors.iterator = 'At least one daily reward is required';
+      } else if (map.some((r) => typeof r !== 'number' || r < 0)) {
+        errors.iterator = 'All daily rewards must be non-negative numbers';
       }
     }
 
@@ -299,20 +229,17 @@ export function useQuestForm({
       if (!values.uri) {
         errors.uri = 'External URL is required';
       }
-      // Icon required for Explore
       const icon = values.icon ?? values.resources?.icon;
       if (!icon) {
         errors.icon = 'Icon is required';
       }
     }
 
-    // Global validation: social providers (telegram, discord, twitter) require blocking_task (except connect)
+    // Social providers require Connect quest as blocking_task
     if (isSocialProvider(values.provider) && values.type !== 'connect') {
-      // Check if Connect quest exists for this provider
       if (hasRequiredConnect === false) {
         errors.provider = `Requires Connect ${values.provider} quest`;
       }
-      // Check if blocking_task is set
       if (!values.blocking_task?.id) {
         errors.blocking_task = `Connect ${values.provider} quest must be selected`;
       }
@@ -321,22 +248,15 @@ export function useQuestForm({
     return errors;
   };
 
-  // ============================================================================
-  // Form Handlers
-  // ============================================================================
-
   const handleSubmit = form.handleSubmit(
     async (values) => {
-      // Block submission if validation data is not ready
       if (!isValidationReady) {
         toast.error('Please wait while validation data is loading...');
         return;
       }
 
-      // If Zod validation passes, run additional custom validation
       const customValidationErrors = validateForm(values);
 
-      // If there are custom validation errors, set them and prevent submission
       if (Object.keys(customValidationErrors).length > 0) {
         Object.entries(customValidationErrors).forEach(([field, message]) => {
           form.setError(field, {
@@ -345,7 +265,6 @@ export function useQuestForm({
           });
         });
 
-        // Show custom validation errors in toast
         const customErrorMessages = Object.values(customValidationErrors);
         if (customErrorMessages.length > 0) {
           toast.error(`Validation failed: ${customErrorMessages.join(', ')}`);
@@ -353,7 +272,6 @@ export function useQuestForm({
         return;
       }
 
-      // If all validation passes, submit the form
       try {
         const finalValues = applyLockedFields(values, presetConfig);
         await onSubmit(finalValues);
@@ -363,13 +281,8 @@ export function useQuestForm({
       }
     },
     (errors) => {
-      /**
-       * Zod validation failed - log detailed errors for debugging
-       * These logs help identify which fields are failing validation
-       */
       console.error('[VALIDATION] Form validation errors:', errors);
 
-      // Log child validation errors with details (helps debug child task issues)
       if (errors.child) {
         console.error('[VALIDATION] Child task validation errors:', errors.child);
         const childValues = form.getValues('child');
@@ -385,7 +298,6 @@ export function useQuestForm({
         }
       }
 
-      // Set field-level errors for proper display under form fields
       Object.entries(errors).forEach(([field, error]) => {
         if (error?.message) {
           form.setError(field, {
@@ -395,13 +307,11 @@ export function useQuestForm({
         }
       });
 
-      // Show detailed toast for validation errors (including hidden fields)
       const errorMessages = Object.entries(errors)
         .map(([field, error]) => `${field}: ${error?.message}`)
         .filter(([, message]) => Boolean(message));
 
       if (errorMessages.length > 0) {
-        // Show first few errors in toast with field names
         const displayErrors = errorMessages.slice(0, 2);
         const moreCount = errorMessages.length - displayErrors.length;
 
@@ -427,7 +337,6 @@ export function useQuestForm({
     try {
       const result = await uploadMedia(file);
 
-      // Replace existing object URL if needed
       if (result.startsWith('blob:')) {
         replaceObjectUrl(result);
       }
@@ -441,10 +350,6 @@ export function useQuestForm({
       throw new Error(errorMessage);
     }
   };
-
-  // ============================================================================
-  // Return Hook Interface
-  // ============================================================================
 
   return {
     form,

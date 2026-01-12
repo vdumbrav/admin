@@ -1,25 +1,14 @@
-/**
- * UI-specific business rules
- * Handles UI element generation, button text, popup content, etc.
- */
+/** UI rules: button text, popup content, resource structure. */
 import type { PresetConfig } from '../presets/types';
 import type { QuestFormValues } from '../types/form-types';
 import { getPopupNameForGroup, ResourcePresets, toApiResources } from '../types/resources-types';
 
-// ============================================================================
-// UI Rules Application
-// ============================================================================
-
-/**
- * Apply UI-specific business rules to form values
- */
 export function applyUIRules(
   values: QuestFormValues,
   presetConfig?: PresetConfig,
 ): QuestFormValues {
   const updatedValues = { ...values };
 
-  // Apply preset-specific UI rules
   if (presetConfig) {
     switch (presetConfig.id) {
       case 'action-with-post':
@@ -37,25 +26,14 @@ export function applyUIRules(
       case 'seven-day-challenge':
         applySevenDayChallengeUIRules(updatedValues);
         break;
-      default:
-        // Unknown preset, use generic rules only
-        break;
     }
   }
 
-  // Apply generic UI rules
   applyGenericUIRules(updatedValues);
 
   return updatedValues;
 }
 
-// ============================================================================
-// Preset-Specific UI Rules
-// ============================================================================
-
-/**
- * Apply UI rules for action-with-post preset
- */
 function applyActionWithPostUIRules(values: QuestFormValues): void {
   if (!values.resources) {
     values.resources = toApiResources(
@@ -67,7 +45,6 @@ function applyActionWithPostUIRules(values: QuestFormValues): void {
     return;
   }
 
-  // Auto-generate button text based on tasks
   if (values.child && values.child.length > 0) {
     const buttonText = generateTaskButtonText(values.child);
     if (buttonText && values.resources.ui) {
@@ -78,31 +55,21 @@ function applyActionWithPostUIRules(values: QuestFormValues): void {
     }
   }
 
-  // Update popup description for partner quests
   if (values.group === 'partner' && values.resources.ui?.['pop-up']) {
     values.resources.ui['pop-up'].description = "Engage with our partner's Tweet to earn XP";
     values.resources.ui['pop-up'].name = 'Partner Quests';
   }
 }
 
-/**
- * Apply UI rules for connect preset
- */
 function applyConnectUIRules(values: QuestFormValues): void {
   if (!values.provider) return;
 
-  // Preserve isNew value before overwriting resources
   const existingIsNew = values.resources?.isNew;
-
-  // Create proper resources from ResourcePresets (overwrite defaults)
   values.resources = toApiResources(ResourcePresets.connect(values.provider, values.group));
-
-  // Restore isNew value
   if (existingIsNew !== undefined) {
     values.resources.isNew = existingIsNew;
   }
 
-  // Auto-generate popup description based on provider
   const descriptionMapping: Record<string, string> = {
     telegram: 'Connect your Telegram account to earn XP',
     discord: 'Connect your Discord account to earn XP',
@@ -114,7 +81,6 @@ function applyConnectUIRules(values: QuestFormValues): void {
     values.resources.ui['pop-up'].description = description;
   }
 
-  // Auto-update button text for Matrix provider
   if (values.provider === 'matrix') {
     if (values.resources.ui) {
       values.resources.ui.button = 'Add';
@@ -125,23 +91,16 @@ function applyConnectUIRules(values: QuestFormValues): void {
   }
 }
 
-/**
- * Apply UI rules for join preset
- */
 function applyJoinUIRules(values: QuestFormValues): void {
   if (!values.provider) return;
 
-  // Create resources if missing
   if (!values.resources) {
     values.resources = toApiResources(ResourcePresets.join(values.provider, values.group));
     return;
   }
 
-  // Ensure UI structure exists
   if (!values.resources.ui) return;
 
-  // Set button text based on type and provider
-  // Only apply for 'join' type tasks
   if (values.type === 'join') {
     if (values.provider === 'twitter') {
       values.resources.ui.button = 'Follow';
@@ -150,13 +109,10 @@ function applyJoinUIRules(values: QuestFormValues): void {
     }
   }
 
-  // Handle popup configuration
   if (!values.resources.ui['pop-up']) return;
 
-  // Always sync popup button with main button
   values.resources.ui['pop-up'].button = values.resources.ui.button;
 
-  // Set additional-title only if missing
   if (!values.resources.ui['pop-up']['additional-title']) {
     if (values.provider === 'twitter') {
       values.resources.ui['pop-up']['additional-title'] = 'Connect your X';
@@ -166,7 +122,6 @@ function applyJoinUIRules(values: QuestFormValues): void {
     }
   }
 
-  // Set additional-description only if missing
   if (!values.resources.ui['pop-up']['additional-description']) {
     if (values.provider === 'twitter') {
       values.resources.ui['pop-up']['additional-description'] =
@@ -179,11 +134,7 @@ function applyJoinUIRules(values: QuestFormValues): void {
   }
 }
 
-/**
- * Apply UI rules for explore preset
- */
 function applyExploreUIRules(values: QuestFormValues): void {
-  // Extract existing values to preserve user input
   const existingButtonText = values.resources?.ui?.button;
   const existingPopupButton = values.resources?.ui?.['pop-up']?.button;
   const existingPopupDescription = values.resources?.ui?.['pop-up']?.description;
@@ -192,12 +143,10 @@ function applyExploreUIRules(values: QuestFormValues): void {
   // Preserve isNew value before overwriting resources
   const existingIsNew = values.resources?.isNew;
 
-  // Only use strict builder if all required fields are present
-  // This prevents errors during initial form setup when fields are empty
+  // Use strict builder only when required fields are filled (avoids errors during initial form setup)
   const hasRequiredFields = existingPopupDescription && (existingPopupButton ?? existingButtonText);
 
   if (hasRequiredFields) {
-    // Use strict builder for validation when fields are filled
     values.resources = toApiResources(
       ResourcePresets.explore({
         buttonText: existingButtonText ?? 'Visit',
@@ -207,14 +156,10 @@ function applyExploreUIRules(values: QuestFormValues): void {
       }),
     );
   } else {
-    // Manual construction without strict validation for initial form setup
     ensureResourcesStructure(values);
 
-    // Set button text
     if (values.resources?.ui) {
       values.resources.ui.button = existingButtonText ?? 'Visit';
-
-      // Set popup fields
       if (values.resources.ui['pop-up']) {
         values.resources.ui['pop-up'].name = existingPopupName ?? 'Explore Quests';
         values.resources.ui['pop-up'].description = existingPopupDescription ?? '';
@@ -222,7 +167,6 @@ function applyExploreUIRules(values: QuestFormValues): void {
       }
     }
 
-    // Set icon
     if (existingIcon && values.resources) {
       values.resources.icon = existingIcon;
     }
@@ -234,15 +178,7 @@ function applyExploreUIRules(values: QuestFormValues): void {
   }
 }
 
-// ============================================================================
-// Generic UI Rules
-// ============================================================================
-
-/**
- * Apply UI rules for seven-day-challenge preset
- */
 function applySevenDayChallengeUIRules(values: QuestFormValues): void {
-  // Ensure resources exist with Daily Quests popup name
   values.resources ??= {
     ui: {
       button: 'Boost XP',
@@ -255,11 +191,8 @@ function applySevenDayChallengeUIRules(values: QuestFormValues): void {
   };
 }
 
-/**
- * Apply generic UI rules that work across all presets
- */
 function applyGenericUIRules(values: QuestFormValues): void {
-  // Auto-generate popup name based on group
+  // Auto-set popup name from group (e.g. "Social Quests", "Partner Quests")
   if (!values.resources?.ui?.['pop-up']?.name) {
     const popupName = getPopupNameForGroup(values.group);
     if (popupName) {
@@ -270,7 +203,7 @@ function applyGenericUIRules(values: QuestFormValues): void {
     }
   }
 
-  // Auto-fill Connect gate additional fields for social providers
+  // Add "Connect your X" prompt for social providers (Connect gate UI)
   if (values.provider && (values.type === 'join' || values.type === 'multiple')) {
     const additionalTitle = PROVIDER_ADDITIONAL_TITLES[values.provider];
     if (additionalTitle) {
@@ -286,20 +219,10 @@ function applyGenericUIRules(values: QuestFormValues): void {
   }
 }
 
-// ============================================================================
-// Helper Functions
-// ============================================================================
-
-/**
- * Get default button text based on task type
- */
 export function getDefaultButtonText(type: string): string {
   return TASK_BUTTON_MAPPING[type] ?? 'Complete';
 }
 
-/**
- * Generate button text based on child tasks
- */
 function generateTaskButtonText(children: QuestFormValues['child']): string | null {
   if (!children || children.length === 0) return null;
 
@@ -311,9 +234,6 @@ function generateTaskButtonText(children: QuestFormValues['child']): string | nu
   return 'Engage';
 }
 
-/**
- * Ensure resources structure exists with proper defaults
- */
 function ensureResourcesStructure(values: QuestFormValues): void {
   values.resources ??= {
     ui: {
@@ -342,13 +262,6 @@ function ensureResourcesStructure(values: QuestFormValues): void {
   };
 }
 
-// ============================================================================
-// Constants
-// ============================================================================
-
-/**
- * Mapping of child task types to button text
- */
 export const TASK_BUTTON_MAPPING: Record<string, string> = {
   like: 'Like',
   comment: 'Comment',
@@ -357,16 +270,10 @@ export const TASK_BUTTON_MAPPING: Record<string, string> = {
   join: 'Join',
 };
 
-/**
- * Provider-specific additional-title messages for Connect gate
- */
 const PROVIDER_ADDITIONAL_TITLES: Record<string, string> = {
   twitter: 'Connect your X',
   discord: 'Connect your Discord',
   telegram: 'Connect your Telegram',
 };
 
-/**
- * Standard additional-description for Connect gate
- */
 const CONNECT_GATE_DESCRIPTION = 'Before starting the quest, ensure you connected X account';
