@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { IconX } from '@tabler/icons-react';
 import { useDropzone } from 'react-dropzone';
 import { cn } from '@/lib/utils';
@@ -26,11 +26,21 @@ export const IconUpload = ({
   const [error, setError] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
 
+  // Track object URLs to prevent memory leaks
+  const objectUrlRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (objectUrlRef.current) {
+        URL.revokeObjectURL(objectUrlRef.current);
+      }
+    };
+  }, []);
+
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop: (accepted) => {
       const file = accepted[0];
       if (file) {
-        // Validate type and size
         if (!ALLOWED_TYPES.includes(file.type)) {
           setError('Invalid file type. Use PNG/JPG/SVG.');
           return;
@@ -41,7 +51,6 @@ export const IconUpload = ({
         }
         setError(null);
 
-        // If onImageUpload is provided, use it for real upload
         if (onImageUpload) {
           setIsUploading(true);
           onImageUpload(file)
@@ -56,8 +65,12 @@ export const IconUpload = ({
               setIsUploading(false);
             });
         } else {
-          // Fallback to object URL for immediate preview
+          // Fallback to object URL for preview (revoke previous to prevent leak)
+          if (objectUrlRef.current) {
+            URL.revokeObjectURL(objectUrlRef.current);
+          }
           const url = URL.createObjectURL(file);
+          objectUrlRef.current = url;
           onChange(url);
         }
       }
@@ -78,7 +91,7 @@ export const IconUpload = ({
     multiple: false,
     disabled: disabled ?? isUploading,
     noClick: false,
-    noKeyboard: true,
+    noKeyboard: true, // Prevent spacebar/enter from opening file dialog (conflicts with form submit)
   });
 
   return (
@@ -109,8 +122,13 @@ export const IconUpload = ({
                   variant='destructive'
                   size='icon'
                   className='absolute -top-2 -right-2 h-6 w-6 rounded-full'
+                  aria-label='Remove image'
                   onClick={(e) => {
-                    e.stopPropagation();
+                    e.stopPropagation(); // Prevent triggering dropzone click
+                    if (objectUrlRef.current) {
+                      URL.revokeObjectURL(objectUrlRef.current);
+                      objectUrlRef.current = null;
+                    }
                     onClear();
                     setError(null);
                   }}

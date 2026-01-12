@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
 import { Plus, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -22,12 +22,17 @@ export const DailyRewardsEditor = () => {
 
   const rewardMap = useWatch({ control, name: 'iterator.reward_map' });
 
-  const addDay = () => {
+  // Prevent double-click by debouncing add action
+  const [isAdding, setIsAdding] = useState(false);
+  const addDay = useCallback(() => {
+    if (isAdding) return;
     const currentMap = rewardMap || [];
     if (currentMap.length < MAX_DAYS) {
+      setIsAdding(true);
       setValue('iterator.reward_map', [...currentMap, 0], { shouldDirty: true });
+      setTimeout(() => setIsAdding(false), 300);
     }
-  };
+  }, [isAdding, rewardMap, setValue]);
 
   const removeDay = (index: number) => {
     const currentMap = rewardMap || [];
@@ -86,6 +91,7 @@ export const DailyRewardsEditor = () => {
                     size='sm'
                     onClick={() => removeDay(index)}
                     className='text-muted-foreground hover:text-destructive h-8 w-8 p-0'
+                    aria-label={`Remove day ${index + 1}`}
                   >
                     <Trash2 className='h-4 w-4' />
                   </Button>
@@ -101,6 +107,7 @@ export const DailyRewardsEditor = () => {
             type='button'
             variant='secondary'
             onClick={addDay}
+            disabled={isAdding}
             className='flex h-10 w-[230px] items-center justify-center gap-2'
           >
             <Plus className='h-4 w-4' />
