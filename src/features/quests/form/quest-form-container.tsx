@@ -4,6 +4,7 @@ import { toast } from 'sonner';
 import { Form } from '@/components/ui/form';
 import { ConfirmDialog } from '@/components/confirm-dialog';
 import { MultiTaskProgress } from '../components/multi-task-progress';
+import { defaultQuestSearch } from '../default-search';
 import { useCreateMultiTask } from '../hooks/use-create-multi-task';
 import { useUpdateMultiTask } from '../hooks/use-update-multi-task';
 import type { PresetConfig } from '../presets/types';
@@ -62,12 +63,8 @@ export function QuestFormContainer({
       const result = await multiTask.mutateAsync(values);
 
       if (result.success) {
-        if (!isEdit && result.mainTask?.id) {
-          void navigate({ to: `/quests/${result.mainTask.id}` });
-        } else {
-          setShowProgress(false);
-          await onSubmit(values);
-        }
+        setShowProgress(false);
+        void navigate({ to: '/quests', search: defaultQuestSearch });
       }
     } catch (error) {
       setShowProgress(false);

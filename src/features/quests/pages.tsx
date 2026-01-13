@@ -44,8 +44,6 @@ export const QuestCreatePage = () => {
                   await create.mutateAsync(v);
                   void nav({ to: '/quests', search: defaultQuestSearch });
                 } catch (e) {
-                  // Error already handled by mutation onError hook in api.ts
-                  // Adding toast here would create duplicate error messages
                   console.error('Quest creation failed:', e);
                 }
               }}
@@ -150,7 +148,6 @@ export const QuestEditPage = () => {
               await update.mutateAsync(v);
               void nav({ to: '/quests', search: defaultQuestSearch });
             } catch (e) {
-              // Error toast already shown by mutation hook
               console.error('Quest update failed:', e);
             }
           }}
@@ -192,7 +189,6 @@ export const QuestCreateWithPresetPage = () => {
               await create.mutateAsync(v);
               void nav({ to: '/quests', search: defaultQuestSearch });
             } catch (e) {
-              // Error toast already shown by mutation hook
               console.error('Quest creation failed:', e);
             }
           }}
