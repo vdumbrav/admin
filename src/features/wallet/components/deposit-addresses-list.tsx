@@ -2,7 +2,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { IconCopy, IconMapPin, IconCoin } from '@tabler/icons-react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { IconCopy, IconMapPin } from '@tabler/icons-react';
 import { toast } from 'sonner';
 import type { DepositAddress } from '../types';
 
@@ -11,26 +12,34 @@ interface DepositAddressesListProps {
   isLoading?: boolean;
 }
 
-// Currency icon component with fallback
-const CurrencyIcon = ({ logoUrl, currency }: { logoUrl?: string; currency: string }) => {
-  if (!logoUrl) {
-    return <IconCoin className="h-6 w-6 text-muted-foreground" />;
-  }
+// Get token icon URL from CDN
+const getTokenIconUrl = (currency: string): string => {
+  // Normalize currency: remove network suffixes to get base symbol
+  const symbol = currency?.toUpperCase()
+    .replace('_TRC20', '').replace('_ERC20', '').replace('_BSC', '')
+    .replace('_TON', '').replace('TRC20', '').replace('ERC20', '')
+    .replace('BSC', '').replace('TON', '') || 'UNKNOWN';
+  return `https://cdn.walme.io/icons/coins/${symbol.toLowerCase()}@3x.png`;
+};
+
+// Square token icon component using CDN
+const TokenIcon = ({ currency }: { currency: string }) => {
+  const symbol = currency?.toUpperCase()
+    .replace('_TRC20', '').replace('_ERC20', '').replace('_BSC', '')
+    .replace('_TON', '').replace('TRC20', '').replace('ERC20', '')
+    .replace('BSC', '').replace('TON', '') || '?';
 
   return (
-    <>
-      <img
-        src={logoUrl}
-        alt={currency}
-        className="h-6 w-6 rounded-full"
-        onError={(e) => {
-          // Hide broken image and show fallback
-          e.currentTarget.style.display = 'none';
-          e.currentTarget.nextElementSibling?.classList.remove('hidden');
-        }}
+    <Avatar className="h-8 w-8 rounded-sm">
+      <AvatarImage
+        src={getTokenIconUrl(currency)}
+        alt={symbol}
+        className="rounded-sm object-cover"
       />
-      <IconCoin className="h-6 w-6 text-muted-foreground hidden" />
-    </>
+      <AvatarFallback className="text-xs rounded-sm bg-muted">
+        {symbol.slice(0, 2)}
+      </AvatarFallback>
+    </Avatar>
   );
 };
 
@@ -125,7 +134,7 @@ export function DepositAddressesList({ addresses, isLoading }: DepositAddressesL
                 >
                   <div className="flex items-start gap-3 min-w-0 flex-1">
                     <div className="flex-shrink-0 mt-0.5">
-                      <CurrencyIcon logoUrl={addr.logoUrl} currency={addr.currency} />
+                      <TokenIcon currency={addr.currency} />
                     </div>
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2 mb-1">
