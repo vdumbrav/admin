@@ -145,14 +145,13 @@ function applyJoinUIRules(values: QuestFormValues): void {
 }
 
 function applyExploreUIRules(values: QuestFormValues): void {
+  // Preserve isNew value before overwriting resources
   const existingIsNew = values.resources?.isNew;
   const existingButtonText = values.resources?.ui?.button;
   const existingPopupButton = values.resources?.ui?.['pop-up']?.button;
   const existingPopupDescription = values.resources?.ui?.['pop-up']?.description;
   const existingPopupName = values.resources?.ui?.['pop-up']?.name;
   const existingIcon = values.resources?.icon;
-  // Preserve isNew value before overwriting resources
-  const existingIsNew = values.resources?.isNew;
 
   // Use strict builder only when required fields are filled (avoids errors during initial form setup)
   const hasRequiredFields = existingPopupDescription && (existingPopupButton ?? existingButtonText);
