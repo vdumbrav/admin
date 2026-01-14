@@ -30,7 +30,7 @@ export function useAppAuth(): AuthResult {
 
     if (refreshAttempts >= MAX_REFRESH_ATTEMPTS) {
       console.warn('[Auth] Max refresh attempts reached, redirecting to login...');
-      auth.signinRedirect();
+      auth.signinRedirect().catch(logError);
       return undefined;
     }
 
@@ -56,7 +56,7 @@ export function useAppAuth(): AuthResult {
 
       if (refreshAttempts >= MAX_REFRESH_ATTEMPTS) {
         console.warn('[Auth] All refresh attempts failed, redirecting to login...');
-        auth.signinRedirect();
+        auth.signinRedirect().catch(logError);
       }
 
       return undefined;
