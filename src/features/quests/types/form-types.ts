@@ -23,9 +23,26 @@ export const QUEST_TYPES = [
   'repeatable',
   'external',
   'dummy',
+  // Card quest types
+  'card-issue',
+  'card-purchase-daily',
+  'card-first-purchase',
+  'card-topup',
+  'card-spend-milestone',
+  'card-monthly-spend',
+  // Game quest types
+  'flappy-bird-wlm',
+  'tap-card',
+  'snake-wlm',
+  // Mobile app quest types
+  'mobile-install',
+  'mobile-onramp',
+  'mobile-offramp',
+  'mobile-swap',
+  'mobile-send',
 ] as const;
 
-export const QUEST_GROUPS = ['all', 'social', 'daily', 'referral', 'partner', 'game'] as const;
+export const QUEST_GROUPS = ['all', 'social', 'daily', 'referral', 'partner', 'game', 'card', 'mobile'] as const;
 
 export const PROVIDERS = [
   'twitter',
@@ -133,7 +150,7 @@ export const DEFAULT_FORM_VALUES: QuestFormValues = {
 
   // REQUIRED resources - empty strings for user input
   resources: {
-    isNew: false, // Default value for isNew field
+    isNew: true, // Default value for isNew field (new quests should show "New" badge)
     ui: {
       button: '',
       'pop-up': {

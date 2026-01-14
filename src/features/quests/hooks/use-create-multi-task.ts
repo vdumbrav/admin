@@ -1,7 +1,3 @@
-/**
- * Multi-task creation hook with progress tracking
- * Handles sequential creation of main task + child tasks
- */
 import { useCallback, useRef, useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -32,102 +28,70 @@ export const useCreateMultiTask = () => {
     failedTasks: 0,
   }));
 
-  // Store parent data for retry operations
   const parentDataRef = useRef<QuestFormValues | null>(null);
-
   const abortControllerRef = useRef<AbortController | null>(null);
 
-  // Helper function to build child resources with proper inheritance
   const buildChildResources = useCallback(
     (child: ChildFormValues, parentData?: QuestFormValues) => {
-      // Build base UI structure with child-specific buttons
-      const buildChildUI = (baseUI?: NonNullable<QuestFormValues['resources']>['ui']) => ({
-        button: getDefaultButtonText(child.type), // Always child-specific
-        'pop-up': {
-          name: baseUI?.['pop-up']?.name ?? '',
-          button: getDefaultButtonText(child.type), // Always child-specific
-          description: baseUI?.['pop-up']?.description ?? '',
-          // Include additional fields only if they exist in base
-          ...(baseUI?.['pop-up']?.['additional-title'] && {
-            'additional-title': baseUI['pop-up']['additional-title'],
-          }),
-          ...(baseUI?.['pop-up']?.['additional-description'] && {
-            'additional-description': baseUI['pop-up']['additional-description'],
-          }),
-        },
-      });
+      const buildChildUI = (baseUI?: NonNullable<QuestFormValues['resources']>['ui']) => {
+        const staticImage = child.resources?.ui?.['pop-up']?.static ?? baseUI?.['pop-up']?.static;
 
-      // Case 1: Child has its own resources - use them but adapt UI buttons
-      if (child.resources) {
         return {
-          ...child.resources,
-          ui: buildChildUI(child.resources.ui),
+          button: getDefaultButtonText(child.type),
+          'pop-up': {
+            name: baseUI?.['pop-up']?.name ?? '',
+            button: getDefaultButtonText(child.type),
+            description: baseUI?.['pop-up']?.description ?? '',
+            ...(staticImage && { static: staticImage }),
+            ...(baseUI?.['pop-up']?.['additional-title'] && {
+              'additional-title': baseUI['pop-up']['additional-title'],
+            }),
+            ...(baseUI?.['pop-up']?.['additional-description'] && {
+              'additional-description': baseUI['pop-up']['additional-description'],
+            }),
+          },
         };
+      };
+
+      if (child.resources) {
+        return { ...child.resources, ui: buildChildUI(child.resources.ui) };
       }
 
-      // Case 2: Inherit from parent resources
       if (parentData?.resources) {
         const { isNew, ui, ...inheritedResources } = parentData.resources;
-        return {
-          ...inheritedResources,
-          ui: buildChildUI(ui),
-        };
+        return { ...inheritedResources, ui: buildChildUI(ui) };
       }
 
-      // Case 3: No resources available - create minimal structure
-      return {
-        ui: buildChildUI(),
-      };
+      return { ui: buildChildUI() };
     },
     [],
   );
 
-  // Helper to create child task data with parent_id and inheritance from parent
   const createChildTaskData = useCallback(
-    (child: ChildFormValues, parentId: number, parentData?: QuestFormValues) => {
-      const childApiData = {
-        // Core required fields for CreateTaskDto
-        type: child.type,
-        title: child.title ?? '',
-        description: child.description ?? '',
-        group: child.group ?? parentData?.group ?? 'all',
-        reward: child.reward ?? 0,
-        order_by: child.order_by ?? (parentData?.order_by ? parentData.order_by + 1 : 0),
-
-        // Platform settings - smart inheritance from parent
-        enabled: child.enabled ?? parentData?.enabled ?? false, // Inherit enabled state from parent
-        web: child.web ?? parentData?.web ?? true,
-        twa: child.twa ?? parentData?.twa ?? false,
-        pinned: child.pinned ?? false, // Child tasks rarely pinned
-        level: child.level ?? parentData?.level ?? 1,
-
-        // Parent relationship - required for like/comment/share types due to @ValidateIf()
-        parent_id: parentId,
-
-        // Provider inheritance - use child first, fallback to parent
-        provider: child.provider ?? parentData?.provider,
-
-        // Optional fields with proper inheritance
-        ...(child.uri && { uri: child.uri }),
-        ...(parentData?.blocking_task && { blocking_task: parentData.blocking_task }),
-
-        // Icon inheritance: use child icon if set, otherwise inherit from parent
-        ...((child.icon ?? parentData?.icon) && { icon: child.icon ?? parentData?.icon }),
-
-        // Schedule inheritance: inherit time frames from parent if not set on child
-        ...((child.start ?? parentData?.start) && { start: child.start ?? parentData?.start }),
-        ...((child.end ?? parentData?.end) && { end: child.end ?? parentData?.end }),
-
-        // Resource inheritance with smart merging
-        resource: buildChildResources(child, parentData),
-      };
-
-      return childApiData;
-    },
+    (child: ChildFormValues, parentId: number, parentData?: QuestFormValues) => ({
+      type: child.type,
+      title: child.title ?? '',
+      description: child.description ?? '',
+      group: child.group ?? parentData?.group ?? 'all',
+      reward: child.reward ?? 0,
+      order_by: child.order_by ?? (parentData?.order_by ? parentData.order_by + 1 : 0),
+      enabled: child.enabled ?? parentData?.enabled ?? false,
+      web: child.web ?? parentData?.web ?? true,
+      twa: child.twa ?? parentData?.twa ?? false,
+      pinned: child.pinned ?? false,
+      level: child.level ?? parentData?.level ?? 1,
+      parent_id: parentId,
+      provider: child.provider ?? parentData?.provider,
+      ...(child.uri && { uri: child.uri }),
+      // ...(parentData?.blocking_task && { blocking_task: parentData.blocking_task }),
+      ...((child.icon ?? parentData?.icon) && { icon: child.icon ?? parentData?.icon }),
+      ...((child.start ?? parentData?.start) && { start: child.start ?? parentData?.start }),
+      ...((child.end ?? parentData?.end) && { end: child.end ?? parentData?.end }),
+      resource: buildChildResources(child, parentData),
+    }),
     [buildChildResources],
   );
 
-  // Progress calculation
   const getProgressInfo = useCallback(
     (currentState: MultiTaskCreationState): MultiTaskProgressInfo => {
       const { main, children, completedTasks, totalTasks } = currentState;

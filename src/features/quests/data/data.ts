@@ -19,20 +19,22 @@ import type { DropdownOption } from './types';
  * Human-readable labels for quest groups
  * Maps API enum values to user-friendly display names
  */
-const GROUP_LABELS: Record<TaskResponseDtoGroup, string> = {
+const GROUP_LABELS: Record<TaskResponseDtoGroup | 'card' | 'mobile', string> = {
   [TaskResponseDtoGroup.all]: 'All Groups',
   [TaskResponseDtoGroup.social]: 'Social',
   [TaskResponseDtoGroup.daily]: 'Daily',
   [TaskResponseDtoGroup.referral]: 'Referral',
   [TaskResponseDtoGroup.partner]: 'Partner',
   [TaskResponseDtoGroup.game]: 'Game',
+  card: 'Card',
+  mobile: 'Mobile',
 };
 
 /**
  * Human-readable labels for quest types
  * Maps API enum values to user-friendly display names
  */
-const TYPE_LABELS: Record<WaitlistTasksResponseDtoTypeItem, string> = {
+const TYPE_LABELS: Record<WaitlistTasksResponseDtoTypeItem | string, string> = {
   [WaitlistTasksResponseDtoTypeItem.like]: 'Like',
   [WaitlistTasksResponseDtoTypeItem.comment]: 'Comment',
   [WaitlistTasksResponseDtoTypeItem.share]: 'Share',
@@ -46,6 +48,19 @@ const TYPE_LABELS: Record<WaitlistTasksResponseDtoTypeItem, string> = {
   [WaitlistTasksResponseDtoTypeItem['flappy-bird-wlm']]: 'Flappy Bird',
   [WaitlistTasksResponseDtoTypeItem['tap-card']]: 'Tap Card',
   [WaitlistTasksResponseDtoTypeItem['snake-wlm']]: 'Snake',
+  // Card quest types
+  'card-issue': 'Card Issue',
+  'card-purchase-daily': 'Daily Purchase',
+  'card-first-purchase': 'First Purchase',
+  'card-topup': 'Card Topup',
+  'card-spend-milestone': 'Spend Milestone',
+  'card-monthly-spend': 'Monthly Spender',
+  // Mobile quest types
+  'mobile-install': 'Install App',
+  'mobile-onramp': 'Buy Crypto (Onramp)',
+  'mobile-offramp': 'Sell Crypto (Offramp)',
+  'mobile-swap': 'Swap Tokens',
+  'mobile-send': 'Send Crypto',
 };
 
 /**
@@ -70,25 +85,90 @@ const PROVIDER_LABELS: Record<TaskResponseDtoProvider, string> = {
 /**
  * Groups dropdown options (API-synced, filtered to allowed groups only)
  */
-export const groups = getAvailableApiGroups()
-  .filter(
-    (group) =>
-      group === TaskResponseDtoGroup.social ||
-      group === TaskResponseDtoGroup.daily ||
-      group === TaskResponseDtoGroup.partner,
-  )
-  .map(
-    (group): DropdownOption => ({
-      value: group,
-      label: GROUP_LABELS[group],
-    }),
-  );
+export const groups = [
+  ...getAvailableApiGroups()
+    .filter(
+      (group) =>
+        group === TaskResponseDtoGroup.social ||
+        group === TaskResponseDtoGroup.daily ||
+        group === TaskResponseDtoGroup.partner ||
+        group === TaskResponseDtoGroup.game,
+    )
+    .map(
+      (group): DropdownOption => ({
+        value: group,
+        label: GROUP_LABELS[group],
+      }),
+    ),
+  // Add card group
+  { value: 'card', label: 'Card' },
+  // Add mobile group
+  { value: 'mobile', label: 'Mobile' },
+];
 
 /**
- * Types dropdown options (API-synced)
- * All available quest types from the API
+ * Card quest types (manually added until API types are regenerated)
  */
-export const types = getAvailableApiTypes().map(
+export const CARD_QUEST_TYPES = [
+  'card-issue',
+  'card-purchase-daily',
+  'card-first-purchase',
+  'card-topup',
+  'card-spend-milestone',
+  'card-monthly-spend',
+] as const;
+
+/**
+ * Game quest types
+ */
+export const GAME_QUEST_TYPES = [
+  'flappy-bird-wlm',
+  'tap-card',
+  'snake-wlm',
+] as const;
+
+/**
+ * Mobile quest types
+ */
+export const MOBILE_QUEST_TYPES = [
+  'mobile-install',
+  'mobile-onramp',
+  'mobile-offramp',
+  'mobile-swap',
+  'mobile-send',
+] as const;
+
+/**
+ * Types dropdown options (API-synced + card types)
+ * All available quest types from the API plus card quest types
+ */
+export const types = [
+  ...getAvailableApiTypes().map(
+    (type): DropdownOption => ({
+      value: type,
+      label: TYPE_LABELS[type],
+    }),
+  ),
+  // Add card quest types
+  ...CARD_QUEST_TYPES.map(
+    (type): DropdownOption => ({
+      value: type,
+      label: TYPE_LABELS[type],
+    }),
+  ),
+  // Add mobile quest types
+  ...MOBILE_QUEST_TYPES.map(
+    (type): DropdownOption => ({
+      value: type,
+      label: TYPE_LABELS[type],
+    }),
+  ),
+];
+
+/**
+ * Types for join preset only (limited set)
+ */
+export const joinPresetTypes = getJoinPresetTypes().map(
   (type): DropdownOption => ({
     value: type,
     label: TYPE_LABELS[type],
@@ -96,9 +176,29 @@ export const types = getAvailableApiTypes().map(
 );
 
 /**
- * Types for join preset only (limited set)
+ * Types for card preset only
  */
-export const joinPresetTypes = getJoinPresetTypes().map(
+export const cardPresetTypes = CARD_QUEST_TYPES.map(
+  (type): DropdownOption => ({
+    value: type,
+    label: TYPE_LABELS[type],
+  }),
+);
+
+/**
+ * Types for game preset only
+ */
+export const gamePresetTypes = GAME_QUEST_TYPES.map(
+  (type): DropdownOption => ({
+    value: type,
+    label: TYPE_LABELS[type],
+  }),
+);
+
+/**
+ * Types for mobile preset only
+ */
+export const mobilePresetTypes = MOBILE_QUEST_TYPES.map(
   (type): DropdownOption => ({
     value: type,
     label: TYPE_LABELS[type],
@@ -216,9 +316,21 @@ export const TYPE_PROVIDER_REQUIREMENTS: Partial<
  * Get compatible providers for a given type
  */
 export function getCompatibleProviders(
-  type: WaitlistTasksResponseDtoTypeItem,
+  type: WaitlistTasksResponseDtoTypeItem | string,
 ): TaskResponseDtoProvider[] {
-  return TYPE_PROVIDER_REQUIREMENTS[type] ?? getAvailableApiProviders();
+  // Card types don't have specific provider requirements
+  if (typeof type === 'string' && type.startsWith('card-')) {
+    return getAvailableApiProviders();
+  }
+  // Game types don't have specific provider requirements
+  if (typeof type === 'string' && GAME_QUEST_TYPES.includes(type as typeof GAME_QUEST_TYPES[number])) {
+    return getAvailableApiProviders();
+  }
+  // Mobile types don't have specific provider requirements
+  if (typeof type === 'string' && MOBILE_QUEST_TYPES.includes(type as typeof MOBILE_QUEST_TYPES[number])) {
+    return getAvailableApiProviders();
+  }
+  return TYPE_PROVIDER_REQUIREMENTS[type as WaitlistTasksResponseDtoTypeItem] ?? getAvailableApiProviders();
 }
 
 /**

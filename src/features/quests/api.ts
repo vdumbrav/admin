@@ -3,6 +3,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import {
   filesControllerUploadFile,
+  getAdminWaitlistTasksControllerGetTaskQueryKey,
   getAdminWaitlistTasksControllerGetWaitlistTasksQueryKey,
   useAdminWaitlistTasksControllerCreateTask,
   useAdminWaitlistTasksControllerDeleteTask,
@@ -171,8 +172,8 @@ export const useCreateQuest = () => {
       });
       return result;
     },
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey });
       toast.success('Quest created successfully');
     },
     onError: (error) => {
@@ -208,16 +209,18 @@ export const useCreateQuest = () => {
 export const useUpdateQuest = (id: number) => {
   const queryClient = useQueryClient();
   const updateTaskMutation = useAdminWaitlistTasksControllerUpdateTask();
-  const queryKey = getAdminWaitlistTasksControllerGetWaitlistTasksQueryKey();
+  const listQueryKey = getAdminWaitlistTasksControllerGetWaitlistTasksQueryKey();
+  const taskQueryKey = getAdminWaitlistTasksControllerGetTaskQueryKey(id);
 
   return useMutation({
     mutationFn: async (data: QuestFormValues): Promise<TaskResponseDto> => {
-      const apiData = validateAndConvertToApi(data, undefined, undefined) as UpdateTaskDto; // Client-side validation first
+      const apiData = validateAndConvertToApi(data, undefined, undefined) as UpdateTaskDto;
       const result = await updateTaskMutation.mutateAsync({ id, data: apiData });
       return result;
     },
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: listQueryKey });
+      await queryClient.invalidateQueries({ queryKey: taskQueryKey });
       toast.success('Quest updated successfully');
     },
     onError: (error) => {

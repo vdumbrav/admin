@@ -3,9 +3,12 @@
  * Runtime registry with validation and type safety
  */
 import { actionWithPostPresetConfig } from './configs/action-with-post';
+import { cardPresetConfig } from './configs/card';
 import { connectPresetConfig } from './configs/connect';
 import { explorePresetConfig } from './configs/explore';
+import { gamePresetConfig } from './configs/game';
 import { joinPresetConfig } from './configs/join';
+import { mobilePresetConfig } from './configs/mobile';
 import { sevenDayChallengePresetConfig } from './configs/seven-day-challenge';
 import {
   InvalidPresetConfigError,
@@ -25,6 +28,9 @@ const PRESET_REGISTRY = new Map<PresetId, PresetConfig>([
   ['action-with-post', actionWithPostPresetConfig],
   ['seven-day-challenge', sevenDayChallengePresetConfig],
   ['explore', explorePresetConfig],
+  ['card', cardPresetConfig],
+  ['game', gamePresetConfig],
+  ['mobile', mobilePresetConfig],
 ]);
 
 // Validate all presets at module load time

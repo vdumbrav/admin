@@ -26,6 +26,15 @@ export interface FieldVisibilityConfig {
   popupDescription?: FieldVisibility;
   popupButton?: FieldVisibility;
   repeatable?: FieldVisibility;
+  // Ad management fields
+  adsEnabled?: FieldVisibility;
+  adsWebBlockId?: FieldVisibility;
+  adsTelegramBlockId?: FieldVisibility;
+  // Card quest limit fields
+  cardMinAmount?: FieldVisibility;
+  cardTargetAmount?: FieldVisibility;
+  cardCurrency?: FieldVisibility;
+  cardPeriod?: FieldVisibility;
 }
 
 export interface BusinessRule {
@@ -54,7 +63,7 @@ export interface RewardCalculationConfig {
 // ============================================================================
 
 export const presetConfigSchema = z.object({
-  id: z.enum(['connect', 'join', 'action-with-post', 'seven-day-challenge', 'explore']),
+  id: z.enum(['connect', 'join', 'action-with-post', 'seven-day-challenge', 'explore', 'card', 'game', 'mobile']),
   name: z.string().min(1),
 
   // Form behavior

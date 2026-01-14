@@ -1,7 +1,3 @@
-/**
- * Multi-task update hook with progress tracking
- * Handles updating parent task + child tasks
- */
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -35,41 +31,24 @@ export const useUpdateMultiTask = (parentId: number, initialChildren?: ChildForm
   }));
 
   const parentDataRef = useRef<QuestFormValues | null>(null);
-
-  /**
-   * CRITICAL: Store initial children at hook creation time (before any UI deletions)
-   * This ref is used to track which child tasks were deleted in the UI.
-   *
-   * Example flow:
-   * 1. Form loads with 21 child tasks → originalChildrenRef = 21 tasks
-   * 2. User deletes 14 tasks in UI → form has 7 tasks
-   * 3. User saves → compare original 21 vs current 7 = delete 14 tasks via API
-   *
-   * IMPORTANT: This tracks ALL originally loaded children with IDs.
-   * Any child with an ID that's not in the current form will be deleted from API.
-   */
   const originalChildrenRef = useRef<ChildFormValues[]>(initialChildren ?? []);
   const abortControllerRef = useRef<AbortController | null>(null);
 
-  /**
-   * Update originalChildrenRef when initialChildren changes (e.g., after successful save)
-   * This keeps the baseline in sync with the latest saved state
-   */
   useEffect(() => {
     if (initialChildren && initialChildren.length > 0) {
       originalChildrenRef.current = initialChildren;
     }
   }, [initialChildren]);
 
-  // Helper function to build child resources with proper inheritance
+  /**
+   * Build child task resources with inheritance:
+   * 1. Child's own resources (highest priority)
+   * 2. Parent's resources (inherited if child has none)
+   * Static image (Task Image) is preserved from either source.
+   */
   const buildChildResources = useCallback(
     (child: ChildFormValues, parentData?: QuestFormValues) => {
       const buildChildUI = (baseUI?: NonNullable<QuestFormValues['resources']>['ui']) => {
-        /**
-         * IMPORTANT: Preserve static image field from child resources
-         * The static field contains the uploaded image URL for child tasks.
-         * Must check both child.resources and baseUI to avoid data loss.
-         */
         const staticImage = child.resources?.ui?.['pop-up']?.static ?? baseUI?.['pop-up']?.static;
 
         return {
@@ -93,28 +72,19 @@ export const useUpdateMultiTask = (parentId: number, initialChildren?: ChildForm
       };
 
       if (child.resources) {
-        return {
-          ...child.resources,
-          ui: buildChildUI(child.resources.ui),
-        };
+        return { ...child.resources, ui: buildChildUI(child.resources.ui) };
       }
 
       if (parentData?.resources) {
         const { isNew, ui, ...inheritedResources } = parentData.resources;
-        return {
-          ...inheritedResources,
-          ui: buildChildUI(ui),
-        };
+        return { ...inheritedResources, ui: buildChildUI(ui) };
       }
 
-      return {
-        ui: buildChildUI(),
-      };
+      return { ui: buildChildUI() };
     },
     [],
   );
 
-  // Helper to create/update child task data
   const createChildTaskData = useCallback(
     (child: ChildFormValues, parentTaskId: number, parentData?: QuestFormValues) => {
       const childApiData = {
@@ -136,6 +106,7 @@ export const useUpdateMultiTask = (parentId: number, initialChildren?: ChildForm
         provider: child.provider ?? parentData?.provider,
 
         ...(child.uri && { uri: child.uri }),
+        // ...(parentData?.blocking_task && { blocking_task: parentData.blocking_task }),
 
         ...((child.icon ?? parentData?.icon) && { icon: child.icon ?? parentData?.icon }),
 
@@ -238,8 +209,7 @@ export const useUpdateMultiTask = (parentId: number, initialChildren?: ChildForm
           completedTasks: 1,
         }));
 
-        // Step 2: Delete removed child tasks
-        // Use original children list to find what was deleted
+        // Delete children that were removed from the form (compare current vs original)
         const originalChildren = originalChildrenRef.current;
         const currentChildIds = children.map((c) => c.id).filter((id): id is number => !!id);
         const childrenToDelete = originalChildren.filter(
@@ -249,17 +219,15 @@ export const useUpdateMultiTask = (parentId: number, initialChildren?: ChildForm
         if (childrenToDelete.length > 0) {
           for (const childToDelete of childrenToDelete) {
             try {
-              // childToDelete.id is guaranteed to exist due to filter condition
               if (!childToDelete.id) continue;
               await adminWaitlistTasksControllerDeleteTask(childToDelete.id);
             } catch (error) {
               console.error(`Failed to delete child task #${childToDelete.id}:`, error);
-              // Continue with other deletions even if one fails
             }
           }
         }
 
-        // Step 3: Update/Create child tasks
+        // Update existing children or create new ones
         if (children.length > 0) {
           for (let i = 0; i < children.length; i++) {
             if (abortControllerRef.current?.signal?.aborted) {
@@ -277,8 +245,6 @@ export const useUpdateMultiTask = (parentId: number, initialChildren?: ChildForm
 
             try {
               const childTaskData = createChildTaskData(child, parentId, formData);
-
-              // If child has id, update it; otherwise create new
               const childTask = child.id
                 ? await adminWaitlistTasksControllerUpdateTask(
                     child.id,

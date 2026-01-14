@@ -1,13 +1,10 @@
-/**
- * Quest Form Container Component
- * Clean, focused form component using the new modular architecture
- * Now supports multi-task creation and update with progress tracking
- */
 import { useState } from 'react';
 import { useNavigate } from '@tanstack/react-router';
+import { toast } from 'sonner';
 import { Form } from '@/components/ui/form';
 import { ConfirmDialog } from '@/components/confirm-dialog';
 import { MultiTaskProgress } from '../components/multi-task-progress';
+import { defaultQuestSearch } from '../default-search';
 import { useCreateMultiTask } from '../hooks/use-create-multi-task';
 import { useUpdateMultiTask } from '../hooks/use-update-multi-task';
 import type { PresetConfig } from '../presets/types';
@@ -15,48 +12,28 @@ import type { QuestFormValues } from '../types/form-types';
 import { QuestFormFields } from './quest-form-fields';
 import { useQuestForm } from './use-quest-form';
 
-// ============================================================================
-// Component Props
-// ============================================================================
-
 export interface QuestFormContainerProps {
-  /** Preset configuration for the form */
   presetConfig?: PresetConfig;
-  /** Initial form values (for editing) */
   initial?: QuestFormValues;
-  /** Form submission handler */
   onSubmit: (values: QuestFormValues) => Promise<void>;
-  /** Cancel handler */
   onCancel: () => void;
-  /** Enable multi-task creation (default: true for create, false for edit) */
   enableMultiTask?: boolean;
 }
-
-// ============================================================================
-// Main Component
-// ============================================================================
 
 export function QuestFormContainer({
   presetConfig,
   initial,
   onSubmit,
   onCancel,
-  enableMultiTask = true, // Always enable for both create and edit
+  enableMultiTask = true,
 }: QuestFormContainerProps) {
-  // ============================================================================
-  // Multi-Task Creation/Update
-  // ============================================================================
-
   const isEdit = !!initial?.id;
   const createMultiTask = useCreateMultiTask();
   const updateMultiTask = useUpdateMultiTask(initial?.id ?? 0, initial?.child);
   const multiTask = isEdit ? updateMultiTask : createMultiTask;
   const [showProgress, setShowProgress] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
   const navigate = useNavigate();
-
-  // ============================================================================
-  // Form State Management
-  // ============================================================================
 
   const {
     form,
@@ -73,64 +50,32 @@ export function QuestFormContainer({
     onCancel,
   });
 
-  // ============================================================================
-  // Multi-Task Submit Handler
-  // ============================================================================
-
   async function handleMultiTaskSubmit(values: QuestFormValues) {
     const hasChildren = values.child && values.child.length > 0;
 
-    // If no children or multi-task disabled, use original flow
     if (!hasChildren || !enableMultiTask) {
       return onSubmit(values);
     }
 
-    // Use multi-task creation/update
     setShowProgress(true);
 
     try {
       const result = await multiTask.mutateAsync(values);
 
       if (result.success) {
-        // Success - for create, navigate to edit mode; for edit, reload to see changes
-        if (!isEdit && result.mainTask?.id) {
-          const mainTaskId = result.mainTask.id;
-          void navigate({ to: `/quests/${mainTaskId}` });
-        } else {
-          // For edit mode, close progress and let parent handle navigation
-          setShowProgress(false);
-          await onSubmit(values);
-        }
+        setShowProgress(false);
+        void navigate({ to: '/quests', search: defaultQuestSearch });
       }
-      // If partial errors, keep progress visible for user interaction
     } catch (error) {
-      // Main task creation/update failed, close progress and let error handling show
       setShowProgress(false);
       throw error;
     }
   }
 
-  // ============================================================================
-  // Handle Submit (chooses between flows)
-  // ============================================================================
-
-  const handleSubmit = async () => {
-    return originalHandleSubmit();
-  };
-
-  // ============================================================================
-  // Leave Confirmation (Modal)
-  // ============================================================================
-
-  const [confirmOpen, setConfirmOpen] = useState(false);
-
-  // ============================================================================
-  // Render
-  // ============================================================================
+  const handleSubmit = () => originalHandleSubmit();
 
   return (
     <div className='relative space-y-6'>
-      {/* Multi-Task Progress */}
       {enableMultiTask && showProgress && (
         <MultiTaskProgress
           state={multiTask.state}
@@ -145,12 +90,15 @@ export function QuestFormContainer({
         />
       )}
 
-      {/* Main Form */}
       <Form {...form}>
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            handleSubmit().catch(console.error);
+            handleSubmit().catch((error: unknown) => {
+              const message =
+                error instanceof Error ? error.message : 'An unexpected error occurred';
+              toast.error('Failed to save quest', { description: message });
+            });
           }}
           className='space-y-6'
         >
@@ -167,7 +115,6 @@ export function QuestFormContainer({
         </form>
       </Form>
 
-      {/* Confirmation Dialog */}
       <ConfirmDialog
         open={confirmOpen}
         onOpenChange={setConfirmOpen}

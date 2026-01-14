@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useFieldArray, useFormContext, useWatch } from 'react-hook-form';
 import { IconGripVertical } from '@tabler/icons-react';
 import { DndContext, type DragEndEvent } from '@dnd-kit/core';
@@ -41,12 +41,7 @@ export const ChildrenEditor = () => {
   });
   const listRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    fields.forEach((_f, i) => {
-      setValue(`child.${i}.order_by`, i, { shouldDirty: true });
-    });
-  }, [fields, setValue]);
-
+  // Auto-scroll to newly added task
   useEffect(() => {
     const el = listRef.current?.lastElementChild;
     if (el) el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -60,8 +55,42 @@ export const ChildrenEditor = () => {
     move(oldIndex, newIndex);
   };
 
+  // Sync order_by with array index after any reorder
+  useEffect(() => {
+    fields.forEach((_, i) => {
+      setValue(`child.${i}.order_by`, i, { shouldDirty: true });
+    });
+  }, [fields, setValue]);
+
   const canAddMore = fields.length < 10;
   const needsMinimum = fields.length === 0;
+
+  // Prevent double-click by debouncing add action
+  const [isAdding, setIsAdding] = useState(false);
+  const handleAddTask = useCallback(() => {
+    if (isAdding || !canAddMore) return;
+    setIsAdding(true);
+    append({
+      title: '',
+      description: '',
+      type: 'like',
+      group: 'social',
+      provider: 'twitter',
+      order_by: fields.length,
+      reward: 0,
+      uri: '',
+      resources: {
+        username: '',
+        tweetId: '',
+        ui: {
+          'pop-up': {
+            static: '',
+          },
+        },
+      },
+    });
+    setTimeout(() => setIsAdding(false), 300);
+  }, [isAdding, canAddMore, append, fields.length]);
 
   return (
     <div className='space-y-4'>
@@ -79,31 +108,7 @@ export const ChildrenEditor = () => {
             {fields.length}/10
           </span>
         </div>
-        <Button
-          type='button'
-          disabled={!canAddMore}
-          onClick={() => {
-            append({
-              title: '',
-              description: '',
-              type: 'like',
-              group: 'social',
-              provider: 'twitter',
-              order_by: fields.length,
-              reward: 0,
-              uri: '',
-              resources: {
-                username: '',
-                tweetId: '',
-                ui: {
-                  'pop-up': {
-                    static: '',
-                  },
-                },
-              },
-            });
-          }}
-        >
+        <Button type='button' disabled={!canAddMore || isAdding} onClick={handleAddTask}>
           Add Task
         </Button>
       </div>
@@ -163,13 +168,16 @@ const ChildRow = ({ id, index, remove, canRemove }: RowProps) => {
       className='space-y-4 rounded-md border p-4 transition-shadow data-[dragging=true]:shadow-lg'
     >
       <div className='flex justify-between'>
-        <span
+        <button
+          type='button'
           {...attributes}
           {...listeners}
           className='text-muted-foreground cursor-move select-none'
+          aria-label={`Drag to reorder task ${index + 1}`}
+          aria-roledescription='sortable'
         >
           <IconGripVertical size={16} />
-        </span>
+        </button>
         <Button
           type='button'
           variant='outline'
@@ -258,10 +266,8 @@ const ChildRow = ({ id, index, remove, canRemove }: RowProps) => {
         />
       </div>
 
-      {/* Task Image Upload */}
       <TaskImageUpload index={index} />
 
-      {/* URL Field for Twitter provider */}
       {provider === 'twitter' && (
         <FormField
           control={control}
@@ -277,7 +283,7 @@ const ChildRow = ({ id, index, remove, canRemove }: RowProps) => {
                     const url = e.target.value.trim();
                     field.onChange(url);
 
-                    // Parse tweet URL to extract username and tweetId
+                    // Extract username and tweetId from twitter.com/user/status/123 or x.com/user/status/123
                     const tweetUrlMatch =
                       /(?:https?:\/\/)?(?:www\.)?(?:twitter\.com|x\.com)\/([^/]+)\/status\/(\d{19,20})/.exec(
                         url,
@@ -299,17 +305,14 @@ const ChildRow = ({ id, index, remove, canRemove }: RowProps) => {
         />
       )}
 
-      {/* Tweet URL or ID field - hidden (data still available in form state) */}
-
-      {/* Preview Component */}
       <ChildPreview index={index} />
     </div>
   );
 };
 
-// Task Image Upload Component
 const TaskImageUpload = ({ index }: { index: number }) => {
   const { control, setValue } = useFormContext<FormValues>();
+  // Image stored in resources.ui.pop-up.static to match API structure
   const image = useWatch({ control, name: `child.${index}.resources.ui.pop-up.static` });
 
   return (
@@ -329,13 +332,10 @@ const TaskImageUpload = ({ index }: { index: number }) => {
   );
 };
 
-// Child Preview Component - shows Twitter card preview
 const ChildPreview = ({ index }: { index: number }) => {
   const { control } = useFormContext<FormValues>();
   const username = useWatch({ control, name: `child.${index}.resources.username` });
   const tweetId = useWatch({ control, name: `child.${index}.resources.tweetId` });
-
-  // Check if we have twitter data to preview
   const hasTwitterData = !!(username && tweetId);
 
   if (!hasTwitterData) return null;

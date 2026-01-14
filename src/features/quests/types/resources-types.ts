@@ -282,6 +282,7 @@ export const GROUP_POPUP_NAMES: Record<string, string> = {
   partner: 'Partner Quests',
   referral: 'Referral Quests',
   daily: 'Daily Quests',
+  card: 'Card Quests',
 };
 
 /**
