@@ -12,18 +12,8 @@ interface DepositAddressesListProps {
   isLoading?: boolean;
 }
 
-// Get token icon URL from CDN
-const getTokenIconUrl = (currency: string): string => {
-  // Normalize currency: remove network suffixes to get base symbol
-  const symbol = currency?.toUpperCase()
-    .replace('_TRC20', '').replace('_ERC20', '').replace('_BSC', '')
-    .replace('_TON', '').replace('TRC20', '').replace('ERC20', '')
-    .replace('BSC', '').replace('TON', '') || 'UNKNOWN';
-  return `https://cdn.walme.io/icons/coins/${symbol.toLowerCase()}@3x.png`;
-};
-
-// Square token icon component using CDN
-const TokenIcon = ({ currency }: { currency: string }) => {
+// Square token icon component - uses logoUrl from API
+const TokenIcon = ({ currency, logoUrl }: { currency: string; logoUrl?: string }) => {
   const symbol = currency?.toUpperCase()
     .replace('_TRC20', '').replace('_ERC20', '').replace('_BSC', '')
     .replace('_TON', '').replace('TRC20', '').replace('ERC20', '')
@@ -31,11 +21,13 @@ const TokenIcon = ({ currency }: { currency: string }) => {
 
   return (
     <Avatar className="h-8 w-8 rounded-sm">
-      <AvatarImage
-        src={getTokenIconUrl(currency)}
-        alt={symbol}
-        className="rounded-sm object-cover"
-      />
+      {logoUrl && (
+        <AvatarImage
+          src={logoUrl}
+          alt={symbol}
+          className="rounded-sm object-cover"
+        />
+      )}
       <AvatarFallback className="text-xs rounded-sm bg-muted">
         {symbol.slice(0, 2)}
       </AvatarFallback>
@@ -134,7 +126,7 @@ export function DepositAddressesList({ addresses, isLoading }: DepositAddressesL
                 >
                   <div className="flex items-start gap-3 min-w-0 flex-1">
                     <div className="flex-shrink-0 mt-0.5">
-                      <TokenIcon currency={addr.currency} />
+                      <TokenIcon currency={addr.currency} logoUrl={addr.logoUrl} />
                     </div>
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2 mb-1">

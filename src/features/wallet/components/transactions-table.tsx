@@ -9,34 +9,9 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { IconCopy, IconArrowUp, IconArrowDown } from '@tabler/icons-react';
 import { toast } from 'sonner';
 import type { WalletTransaction } from '../types';
-
-// Get token icon URL from CDN
-const getTokenIconUrl = (currency: string): string => {
-  const symbol = currency?.toUpperCase()
-    .replace('_TRC20', '').replace('_ERC20', '').replace('_BSC', '')
-    .replace('_TON', '').replace('TRC20', '').replace('ERC20', '')
-    .replace('BSC', '').replace('TON', '') || 'UNKNOWN';
-  return `https://cdn.walme.io/icons/coins/${symbol.toLowerCase()}@3x.png`;
-};
-
-// Square token icon component
-const TokenIcon = ({ currency }: { currency: string }) => {
-  const symbol = currency?.toUpperCase()
-    .replace('_TRC20', '').replace('_ERC20', '').replace('_BSC', '')
-    .replace('_TON', '').replace('TRC20', '').replace('ERC20', '')
-    .replace('BSC', '').replace('TON', '') || '?';
-
-  return (
-    <Avatar className="h-5 w-5 rounded-sm">
-      <AvatarImage src={getTokenIconUrl(currency)} alt={symbol} className="rounded-sm object-cover" />
-      <AvatarFallback className="text-[10px] rounded-sm bg-muted">{symbol.slice(0, 2)}</AvatarFallback>
-    </Avatar>
-  );
-};
 
 interface TransactionsTableProps {
   transactions?: WalletTransaction[];
@@ -153,13 +128,10 @@ export function TransactionsTable({ transactions, isLoading }: TransactionsTable
               </Badge>
             </TableCell>
             <TableCell className="font-mono">
-              <div className="flex items-center gap-2">
-                <TokenIcon currency={tx.currency} />
-                <span className={tx.direction === 'Income' ? 'text-green-600' : 'text-red-600'}>
-                  {tx.direction === 'Income' ? '+' : '-'}
-                  {formatAmount(tx.amount)} {tx.currency?.toUpperCase() || 'N/A'}
-                </span>
-              </div>
+              <span className={tx.direction === 'Income' ? 'text-green-600' : 'text-red-600'}>
+                {tx.direction === 'Income' ? '+' : '-'}
+                {formatAmount(tx.amount)} {tx.currency?.toUpperCase() || 'N/A'}
+              </span>
             </TableCell>
             <TableCell>
               <Badge variant={getStatusBadgeVariant(tx.status)}>

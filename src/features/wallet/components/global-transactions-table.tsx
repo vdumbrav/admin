@@ -47,47 +47,9 @@ import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import { loadJSON, saveJSON } from '@/utils/persist';
 import { DataTableViewOptions } from '@/components/table/data-table-view-options';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import type { GlobalTransactionItem, TransactionFilterParams } from '../types';
 
 const LS_TX_TABLE_VIS = 'tx-table-visibility';
-
-// Get token icon URL from CDN
-const getTokenIconUrl = (currency: string): string => {
-  const symbol = currency?.toUpperCase()
-    .replace('_TRC20', '')
-    .replace('_ERC20', '')
-    .replace('_BSC', '')
-    .replace('_TON', '')
-    .replace('TRC20', '')
-    .replace('ERC20', '')
-    .replace('BSC', '')
-    .replace('TON', '')
-    || 'UNKNOWN';
-  return `https://cdn.walme.io/icons/coins/${symbol.toLowerCase()}@3x.png`;
-};
-
-// Token icon component
-const TokenIcon = ({ currency, size = 'sm' }: { currency: string; size?: 'sm' | 'md' }) => {
-  const sizeClasses = {
-    sm: 'h-5 w-5',
-    md: 'h-6 w-6',
-  };
-  const symbol = currency?.toUpperCase() || 'UNKNOWN';
-
-  return (
-    <Avatar className={`${sizeClasses[size]} rounded-sm`}>
-      <AvatarImage
-        src={getTokenIconUrl(currency)}
-        alt={symbol}
-        className="rounded-sm object-cover"
-      />
-      <AvatarFallback className="text-xs rounded-sm bg-muted">
-        {symbol.slice(0, 2)}
-      </AvatarFallback>
-    </Avatar>
-  );
-};
 
 interface GlobalTransactionsTableProps {
   transactions: GlobalTransactionItem[];
@@ -385,12 +347,7 @@ export function GlobalTransactionsTable({
         header: 'Currency',
         cell: ({ row }) => {
           const currency = row.original.currency;
-          return (
-            <div className="flex items-center gap-2">
-              <TokenIcon currency={currency} size="sm" />
-              <span className="font-medium">{currency}</span>
-            </div>
-          );
+          return <span className="font-medium">{currency}</span>;
         },
       },
       {
