@@ -35,6 +35,8 @@ export function applyUIRules(
 }
 
 function applyActionWithPostUIRules(values: QuestFormValues): void {
+  const existingIsNew = values.resources?.isNew;
+
   if (!values.resources) {
     values.resources = toApiResources(
       ResourcePresets.actionWithPost({
@@ -42,6 +44,9 @@ function applyActionWithPostUIRules(values: QuestFormValues): void {
         group: values.group,
       }),
     );
+    if (existingIsNew !== undefined) {
+      values.resources.isNew = existingIsNew;
+    }
     return;
   }
 
@@ -94,8 +99,13 @@ function applyConnectUIRules(values: QuestFormValues): void {
 function applyJoinUIRules(values: QuestFormValues): void {
   if (!values.provider) return;
 
+  const existingIsNew = values.resources?.isNew;
+
   if (!values.resources) {
     values.resources = toApiResources(ResourcePresets.join(values.provider, values.group));
+    if (existingIsNew !== undefined) {
+      values.resources.isNew = existingIsNew;
+    }
     return;
   }
 
@@ -135,6 +145,7 @@ function applyJoinUIRules(values: QuestFormValues): void {
 }
 
 function applyExploreUIRules(values: QuestFormValues): void {
+  const existingIsNew = values.resources?.isNew;
   const existingButtonText = values.resources?.ui?.button;
   const existingPopupButton = values.resources?.ui?.['pop-up']?.button;
   const existingPopupDescription = values.resources?.ui?.['pop-up']?.description;
@@ -155,6 +166,9 @@ function applyExploreUIRules(values: QuestFormValues): void {
         icon: existingIcon,
       }),
     );
+    if (existingIsNew !== undefined) {
+      values.resources.isNew = existingIsNew;
+    }
   } else {
     ensureResourcesStructure(values);
 
@@ -170,6 +184,10 @@ function applyExploreUIRules(values: QuestFormValues): void {
     if (existingIcon && values.resources) {
       values.resources.icon = existingIcon;
     }
+
+    if (existingIsNew !== undefined && values.resources) {
+      values.resources.isNew = existingIsNew;
+    }
   }
 
   // Restore isNew value
@@ -179,6 +197,8 @@ function applyExploreUIRules(values: QuestFormValues): void {
 }
 
 function applySevenDayChallengeUIRules(values: QuestFormValues): void {
+  const existingIsNew = values.resources?.isNew;
+
   values.resources ??= {
     ui: {
       button: 'Boost XP',
@@ -189,6 +209,10 @@ function applySevenDayChallengeUIRules(values: QuestFormValues): void {
       },
     },
   };
+
+  if (existingIsNew !== undefined) {
+    values.resources.isNew = existingIsNew;
+  }
 }
 
 function applyGenericUIRules(values: QuestFormValues): void {
