@@ -106,6 +106,7 @@ export const useUpdateMultiTask = (parentId: number, initialChildren?: ChildForm
         provider: child.provider ?? parentData?.provider,
 
         ...(child.uri && { uri: child.uri }),
+        // ...(parentData?.blocking_task && { blocking_task: parentData.blocking_task }),
 
         ...((child.icon ?? parentData?.icon) && { icon: child.icon ?? parentData?.icon }),
 

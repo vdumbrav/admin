@@ -83,7 +83,7 @@ export const useCreateMultiTask = () => {
       parent_id: parentId,
       provider: child.provider ?? parentData?.provider,
       ...(child.uri && { uri: child.uri }),
-      ...(parentData?.blocking_task && { blocking_task: parentData.blocking_task }),
+      // ...(parentData?.blocking_task && { blocking_task: parentData.blocking_task }),
       ...((child.icon ?? parentData?.icon) && { icon: child.icon ?? parentData?.icon }),
       ...((child.start ?? parentData?.start) && { start: child.start ?? parentData?.start }),
       ...((child.end ?? parentData?.end) && { end: child.end ?? parentData?.end }),
