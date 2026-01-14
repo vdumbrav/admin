@@ -12,6 +12,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Switch } from '@/components/ui/switch';
 import {
   Select,
   SelectContent,
@@ -141,6 +142,7 @@ function WithdrawDialog({ userId }: { userId: number }) {
   const [address, setAddress] = useState('');
   const [memo, setMemo] = useState('');
   const [reason, setReason] = useState('');
+  const [useViaMaster, setUseViaMaster] = useState(false);
 
   const withdraw = useAdminWithdraw();
 
@@ -162,13 +164,15 @@ function WithdrawDialog({ userId }: { userId: number }) {
         address,
         memo: memo || undefined,
         reason: reason || undefined,
+        useViaMaster,
       });
-      toast.success(`Withdrawal of ${amount} ${currency.toUpperCase()} initiated`);
+      toast.success(`Withdrawal of ${amount} ${currency.toUpperCase()} initiated${useViaMaster ? ' via master' : ''}`);
       setOpen(false);
       setAmount('');
       setAddress('');
       setMemo('');
       setReason('');
+      setUseViaMaster(false);
     } catch (error) {
       toast.error(`Withdrawal failed: ${(error as Error).message}`);
     }
@@ -245,6 +249,19 @@ function WithdrawDialog({ userId }: { userId: number }) {
               placeholder="Explain the reason for this withdrawal..."
               value={reason}
               onChange={(e) => setReason(e.target.value)}
+            />
+          </div>
+          <div className="flex items-center justify-between rounded-lg border p-3 shadow-sm">
+            <div className="space-y-0.5">
+              <Label htmlFor="viaMaster">Withdraw via Master</Label>
+              <p className="text-xs text-muted-foreground">
+                Route withdrawal through master account (for sub-partners without direct permission)
+              </p>
+            </div>
+            <Switch
+              id="viaMaster"
+              checked={useViaMaster}
+              onCheckedChange={setUseViaMaster}
             />
           </div>
         </div>

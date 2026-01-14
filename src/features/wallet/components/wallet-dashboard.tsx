@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Progress } from '@/components/ui/progress';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   IconWallet,
   IconArrowsExchange,
@@ -23,20 +24,43 @@ interface WalletDashboardProps {
   isLoading?: boolean;
 }
 
-// Crypto icons mapping
-const getCryptoEmoji = (currency: string): string => {
-  const map: Record<string, string> = {
-    BTC: '🟠',
-    ETH: '🔷',
-    USDT: '🟢',
-    USDC: '🔵',
-    TRX: '🔴',
-    SOL: '🟣',
-    BNB: '🟡',
-    MATIC: '🟪',
-    DOGE: '🐕',
+// Get token icon URL from CDN
+const getTokenIconUrl = (currency: string): string => {
+  // Normalize currency to base symbol for icon lookup
+  const symbol = currency?.toUpperCase()
+    .replace('_TRC20', '')
+    .replace('_ERC20', '')
+    .replace('_BSC', '')
+    .replace('_TON', '')
+    .replace('TRC20', '')
+    .replace('ERC20', '')
+    .replace('BSC', '')
+    .replace('TON', '')
+    || 'UNKNOWN';
+  return `https://cdn.walme.io/icons/coins/${symbol.toLowerCase()}@3x.png`;
+};
+
+// Token icon component
+const TokenIcon = ({ currency, size = 'sm' }: { currency: string; size?: 'sm' | 'md' | 'lg' }) => {
+  const sizeClasses = {
+    sm: 'h-5 w-5',
+    md: 'h-6 w-6',
+    lg: 'h-8 w-8',
   };
-  return map[currency?.toUpperCase()] || '🪙';
+  const symbol = currency?.toUpperCase() || 'UNKNOWN';
+
+  return (
+    <Avatar className={`${sizeClasses[size]} rounded-sm`}>
+      <AvatarImage
+        src={getTokenIconUrl(currency)}
+        alt={symbol}
+        className="rounded-sm object-cover"
+      />
+      <AvatarFallback className="text-xs rounded-sm bg-muted">
+        {symbol.slice(0, 2)}
+      </AvatarFallback>
+    </Avatar>
+  );
 };
 
 // Format amount with appropriate decimals
@@ -150,7 +174,7 @@ export function WalletDashboard({ statistics, isLoading }: WalletDashboardProps)
               {statistics.totalBalances.slice(0, 12).map((balance) => (
                 <div key={balance.currency} className="bg-white/10 rounded-lg px-3 py-2">
                   <div className="flex items-center gap-2">
-                    <span>{getCryptoEmoji(balance.currency)}</span>
+                    <TokenIcon currency={balance.currency} size="sm" />
                     <span className="font-semibold text-sm">{balance.currency}</span>
                   </div>
                   <div className="text-sm font-mono mt-1">
@@ -224,7 +248,7 @@ export function WalletDashboard({ statistics, isLoading }: WalletDashboardProps)
                   {statistics.depositVolume24h.map((v) => (
                     <div key={`dep-${v.currency}`} className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <span>{getCryptoEmoji(v.currency)}</span>
+                        <TokenIcon currency={v.currency} size="sm" />
                         <span className="text-sm font-medium">{v.currency}</span>
                         <Badge variant="default" className="text-xs">Deposits</Badge>
                       </div>
@@ -237,7 +261,7 @@ export function WalletDashboard({ statistics, isLoading }: WalletDashboardProps)
                   {statistics.withdrawalVolume24h.map((v) => (
                     <div key={`wit-${v.currency}`} className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <span>{getCryptoEmoji(v.currency)}</span>
+                        <TokenIcon currency={v.currency} size="sm" />
                         <span className="text-sm font-medium">{v.currency}</span>
                         <Badge variant="destructive" className="text-xs">Withdrawals</Badge>
                       </div>
@@ -392,7 +416,7 @@ function RecentTransactionRow({ transaction }: RecentTransactionRowProps) {
   return (
     <div className="flex items-center justify-between py-2 border-b last:border-0">
       <div className="flex items-center gap-3">
-        <span className="text-xl">{getCryptoEmoji(transaction.currency)}</span>
+        <TokenIcon currency={transaction.currency} size="lg" />
         <div>
           <div className="flex items-center gap-2">
             {getTransactionBadge(transaction.group)}

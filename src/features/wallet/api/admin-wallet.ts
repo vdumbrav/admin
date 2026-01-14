@@ -375,7 +375,7 @@ export const useAdminWithdraw = () => {
       const token = await auth.getAccessToken();
 
       return orvalMutator<WalletOperationResponse>({
-        url: `/admin/users/${userId}/wallet/withdraw`,
+        url: `/admin/wallet/user/${userId}/withdraw`,
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`,

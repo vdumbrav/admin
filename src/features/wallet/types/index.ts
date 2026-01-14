@@ -246,6 +246,7 @@ export interface AdminWithdrawRequest {
   address: string;
   memo?: string;
   reason?: string;
+  useViaMaster?: boolean;
 }
 
 // Operation Response
