@@ -17,7 +17,7 @@ const childTypeSchema = z.enum(CHILD_TYPES);
 const formPopupResourcesSchema = z.object({
   name: z.string().optional(),
   button: z.string().max(50, 'Button text cannot exceed 50 characters').optional(),
-  description: z.string().max(100, 'Popup description cannot exceed 100 characters').optional(),
+  description: z.string().max(250, 'Popup description cannot exceed 250 characters').optional(),
   static: z.string().optional(),
   'additional-title': z.string().optional(),
   'additional-description': z.string().optional(),
