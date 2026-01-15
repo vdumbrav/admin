@@ -370,7 +370,7 @@ export function GlobalTransactionsTable({
         accessorKey: 'currency',
         header: 'Currency',
         cell: ({ row }) => {
-          const tx = row.original;
+f          const tx = row.original;
           return (
             <div className="flex items-center gap-2">
               <TokenIcon currency={tx.currency} logoUrl={tx.logoUrl} />
@@ -389,7 +389,7 @@ export function GlobalTransactionsTable({
           const amount = Math.abs(parseFloat(tx.amount));
           return (
             <span className={`font-mono ${isIncome ? 'text-green-600' : 'text-red-600'}`}>
-              {isIncome ? '+' : '-'}{formatAmount(amount, tx.currency)}
+              {formatAmount(amount, tx.currency)}
             </span>
           );
         },
