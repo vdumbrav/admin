@@ -166,6 +166,15 @@ function WalletsPage() {
     }
   }, [updateBotFeatureMutation]);
 
+  const handleToggleWithdrawViaMaster = useCallback(async (enabled: boolean) => {
+    try {
+      await updateBotFeatureMutation.mutateAsync({ feature: 'withdrawViaMaster', enabled });
+      toast.success(`Withdraw via Master Account ${enabled ? 'enabled' : 'disabled'}`);
+    } catch (error) {
+      toast.error('Failed to update withdraw via master setting');
+    }
+  }, [updateBotFeatureMutation]);
+
   const handleTxFilterChange = useCallback((newFilters: TransactionFilterParams) => {
     setTxFilters(newFilters);
     setTxPage(1);
@@ -499,6 +508,27 @@ function WalletsPage() {
                         id="icon-source-toggle"
                         checked={botFeatures?.iconSource === 'cdn'}
                         onCheckedChange={handleToggleIconSource}
+                        disabled={updateBotFeatureMutation.isPending}
+                      />
+                    </div>
+
+                    {/* Withdraw via Master Account Toggle */}
+                    <div className="flex items-center justify-between max-w-md p-4 border rounded-lg">
+                      <div className="space-y-0.5">
+                        <Label htmlFor="withdraw-master-toggle" className="text-base font-medium">
+                          Withdraw via Master Account
+                        </Label>
+                        <p className="text-sm text-muted-foreground">
+                          Route withdrawals through master account (for sub-partners without direct withdrawal permission)
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          Current: <span className="font-medium">{botFeatures?.withdrawViaMaster ? 'Enabled' : 'Disabled'}</span>
+                        </p>
+                      </div>
+                      <Switch
+                        id="withdraw-master-toggle"
+                        checked={botFeatures?.withdrawViaMaster ?? false}
+                        onCheckedChange={handleToggleWithdrawViaMaster}
                         disabled={updateBotFeatureMutation.isPending}
                       />
                     </div>

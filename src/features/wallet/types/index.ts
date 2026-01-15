@@ -13,6 +13,7 @@ export interface VolumeItem {
   currency: string;
   amount: number;
   usdValue?: number;
+  logoUrl?: string;
 }
 
 // Recent Transaction
@@ -25,6 +26,7 @@ export interface RecentTransaction {
   status: string;
   txHash?: string;
   createdAt: string;
+  logoUrl?: string;
   user: {
     id: number;
     nickname?: string;
@@ -63,6 +65,7 @@ export interface GlobalTransactionItem {
   toAddress?: string;
   network?: string;
   createdAt: string;
+  logoUrl?: string;
   user: {
     id: number;
     nickname?: string;
@@ -136,6 +139,8 @@ export interface BalanceItem {
   available: string;
   pending?: string;
   total?: string;
+  usdValue?: number;
+  logoUrl?: string;
 }
 
 // Balance Response
@@ -154,6 +159,7 @@ export interface WalletTransaction {
   status: string;
   txHash?: string;
   createdAt: string;
+  logoUrl?: string;
 }
 
 // Transactions Response

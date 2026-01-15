@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Progress } from '@/components/ui/progress';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   IconWallet,
   IconArrowsExchange,
@@ -17,6 +18,31 @@ import {
   IconExternalLink,
 } from '@tabler/icons-react';
 import type { ExtendedWalletStatistics, RecentTransaction } from '../types';
+
+// Token icon component (square like in Tokens tab)
+const TokenIcon = ({ currency, logoUrl, size = 'sm' }: { currency: string; logoUrl?: string; size?: 'sm' | 'md' }) => {
+  const symbol = currency?.toUpperCase()
+    .replace('_TRC20', '').replace('_ERC20', '').replace('_BSC', '')
+    .replace('_TON', '').replace('TRC20', '').replace('ERC20', '')
+    .replace('BSC', '').replace('TON', '') || '?';
+
+  const sizeClass = size === 'md' ? 'h-8 w-8' : 'h-5 w-5';
+
+  return (
+    <Avatar className={`${sizeClass} rounded-sm`}>
+      {logoUrl && (
+        <AvatarImage
+          src={logoUrl}
+          alt={symbol}
+          className="rounded-sm object-cover"
+        />
+      )}
+      <AvatarFallback className="text-xs rounded-sm bg-muted">
+        {symbol.slice(0, 2)}
+      </AvatarFallback>
+    </Avatar>
+  );
+};
 
 interface WalletDashboardProps {
   statistics?: ExtendedWalletStatistics;
@@ -134,7 +160,7 @@ export function WalletDashboard({ statistics, isLoading }: WalletDashboardProps)
               {statistics.totalBalances.slice(0, 12).map((balance) => (
                 <div key={balance.currency} className="bg-white/10 rounded-lg px-3 py-2">
                   <div className="flex items-center gap-2">
-                    <IconCoin className="h-5 w-5" />
+                    <TokenIcon currency={balance.currency} logoUrl={balance.logoUrl} />
                     <span className="font-semibold text-sm">{balance.currency}</span>
                   </div>
                   <div className="text-sm font-mono mt-1">
@@ -208,7 +234,7 @@ export function WalletDashboard({ statistics, isLoading }: WalletDashboardProps)
                   {statistics.depositVolume24h.map((v) => (
                     <div key={`dep-${v.currency}`} className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <IconCoin className="h-5 w-5" />
+                        <TokenIcon currency={v.currency} logoUrl={v.logoUrl} />
                         <span className="text-sm font-medium">{v.currency}</span>
                         <Badge variant="default" className="text-xs">Deposits</Badge>
                       </div>
@@ -221,7 +247,7 @@ export function WalletDashboard({ statistics, isLoading }: WalletDashboardProps)
                   {statistics.withdrawalVolume24h.map((v) => (
                     <div key={`wit-${v.currency}`} className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <IconCoin className="h-5 w-5" />
+                        <TokenIcon currency={v.currency} logoUrl={v.logoUrl} />
                         <span className="text-sm font-medium">{v.currency}</span>
                         <Badge variant="destructive" className="text-xs">Withdrawals</Badge>
                       </div>
@@ -376,7 +402,7 @@ function RecentTransactionRow({ transaction }: RecentTransactionRowProps) {
   return (
     <div className="flex items-center justify-between py-2 border-b last:border-0">
       <div className="flex items-center gap-3">
-        <IconCoin className="h-8 w-8" />
+        <TokenIcon currency={transaction.currency} logoUrl={transaction.logoUrl} size="md" />
         <div>
           <div className="flex items-center gap-2">
             {getTransactionBadge(transaction.group)}

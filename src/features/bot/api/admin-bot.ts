@@ -727,6 +727,7 @@ export interface BotFeatures {
   wallet: boolean;
   buySell: boolean;
   iconSource: 'cdn' | 'changenow';
+  withdrawViaMaster: boolean;
   updatedAt?: string;
 }
 
@@ -751,7 +752,7 @@ export const useUpdateBotFeature = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ feature, enabled, value }: { feature: 'cards' | 'wallet' | 'buySell' | 'iconSource'; enabled?: boolean; value?: string }): Promise<BotFeatures> => {
+    mutationFn: async ({ feature, enabled, value }: { feature: 'cards' | 'wallet' | 'buySell' | 'iconSource' | 'withdrawViaMaster'; enabled?: boolean; value?: string }): Promise<BotFeatures> => {
       const token = await auth.getAccessToken();
       return orvalMutator<BotFeatures>({
         url: `/admin/bot/features/${feature}`,

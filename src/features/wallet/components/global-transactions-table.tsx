@@ -19,6 +19,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Separator } from '@/components/ui/separator';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   Popover,
   PopoverContent,
@@ -48,6 +49,29 @@ import { cn } from '@/lib/utils';
 import { loadJSON, saveJSON } from '@/utils/persist';
 import { DataTableViewOptions } from '@/components/table/data-table-view-options';
 import type { GlobalTransactionItem, TransactionFilterParams } from '../types';
+
+// Token icon component (square like in Tokens tab)
+const TokenIcon = ({ currency, logoUrl }: { currency: string; logoUrl?: string }) => {
+  const symbol = currency?.toUpperCase()
+    .replace('_TRC20', '').replace('_ERC20', '').replace('_BSC', '')
+    .replace('_TON', '').replace('TRC20', '').replace('ERC20', '')
+    .replace('BSC', '').replace('TON', '') || '?';
+
+  return (
+    <Avatar className="h-6 w-6 rounded-sm">
+      {logoUrl && (
+        <AvatarImage
+          src={logoUrl}
+          alt={symbol}
+          className="rounded-sm object-cover"
+        />
+      )}
+      <AvatarFallback className="text-xs rounded-sm bg-muted">
+        {symbol.slice(0, 2)}
+      </AvatarFallback>
+    </Avatar>
+  );
+};
 
 const LS_TX_TABLE_VIS = 'tx-table-visibility';
 
@@ -346,8 +370,13 @@ export function GlobalTransactionsTable({
         accessorKey: 'currency',
         header: 'Currency',
         cell: ({ row }) => {
-          const currency = row.original.currency;
-          return <span className="font-medium">{currency}</span>;
+          const tx = row.original;
+          return (
+            <div className="flex items-center gap-2">
+              <TokenIcon currency={tx.currency} logoUrl={tx.logoUrl} />
+              <span className="font-medium">{tx.currency}</span>
+            </div>
+          );
         },
       },
       {

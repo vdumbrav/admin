@@ -9,9 +9,33 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { IconCopy, IconArrowUp, IconArrowDown } from '@tabler/icons-react';
 import { toast } from 'sonner';
 import type { WalletTransaction } from '../types';
+
+// Token icon component (square like in Tokens tab)
+const TokenIcon = ({ currency, logoUrl }: { currency: string; logoUrl?: string }) => {
+  const symbol = currency?.toUpperCase()
+    .replace('_TRC20', '').replace('_ERC20', '').replace('_BSC', '')
+    .replace('_TON', '').replace('TRC20', '').replace('ERC20', '')
+    .replace('BSC', '').replace('TON', '') || '?';
+
+  return (
+    <Avatar className="h-6 w-6 rounded-sm">
+      {logoUrl && (
+        <AvatarImage
+          src={logoUrl}
+          alt={symbol}
+          className="rounded-sm object-cover"
+        />
+      )}
+      <AvatarFallback className="text-xs rounded-sm bg-muted">
+        {symbol.slice(0, 2)}
+      </AvatarFallback>
+    </Avatar>
+  );
+};
 
 interface TransactionsTableProps {
   transactions?: WalletTransaction[];
@@ -127,11 +151,14 @@ export function TransactionsTable({ transactions, isLoading }: TransactionsTable
                 {tx.group}
               </Badge>
             </TableCell>
-            <TableCell className="font-mono">
-              <span className={tx.direction === 'Income' ? 'text-green-600' : 'text-red-600'}>
-                {tx.direction === 'Income' ? '+' : '-'}
-                {formatAmount(tx.amount)} {tx.currency?.toUpperCase() || 'N/A'}
-              </span>
+            <TableCell>
+              <div className="flex items-center gap-2">
+                <TokenIcon currency={tx.currency} logoUrl={tx.logoUrl} />
+                <span className={`font-mono ${tx.direction === 'Income' ? 'text-green-600' : 'text-red-600'}`}>
+                  {tx.direction === 'Income' ? '+' : '-'}
+                  {formatAmount(tx.amount)} {tx.currency?.toUpperCase() || 'N/A'}
+                </span>
+              </div>
             </TableCell>
             <TableCell>
               <Badge variant={getStatusBadgeVariant(tx.status)}>
