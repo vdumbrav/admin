@@ -370,7 +370,7 @@ export function GlobalTransactionsTable({
         accessorKey: 'currency',
         header: 'Currency',
         cell: ({ row }) => {
-f          const tx = row.original;
+          const tx = row.original;
           return (
             <div className="flex items-center gap-2">
               <TokenIcon currency={tx.currency} logoUrl={tx.logoUrl} />
