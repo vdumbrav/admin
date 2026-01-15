@@ -517,6 +517,19 @@ export function QuestFormFields({
                         form.setValue('resources.tweetId', tweetId, { shouldDirty: true });
                       }
                     }
+
+                    // Parse Telegram URL to extract username
+                    if (currentProvider === 'telegram') {
+                      // Pattern: https://t.me/username or https://telegram.me/username
+                      const telegramUrlMatch =
+                        /(?:https?:\/\/)?(?:www\.)?(?:t\.me|telegram\.me)\/([a-zA-Z0-9_]{5,32})/.exec(
+                          url,
+                        );
+                      if (telegramUrlMatch) {
+                        const [, username] = telegramUrlMatch;
+                        form.setValue('resources.username', username, { shouldDirty: true });
+                      }
+                    }
                   }}
                 />
               </FormControl>
